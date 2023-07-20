@@ -13,6 +13,47 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DefaultPatchBaselineInitParameters struct {
+
+	// ID of the patch baseline.
+	// Can be an ID or an ARN.
+	// When specifying an AWS-provided patch baseline, must be the ARN.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssm/v1beta1.PatchBaseline
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	BaselineID *string `json:"baselineId,omitempty" tf:"baseline_id,omitempty"`
+
+	BaselineIDRef *v1.Reference `json:"baselineIdRef,omitempty" tf:"-"`
+
+	BaselineIDSelector *v1.Selector `json:"baselineIdSelector,omitempty" tf:"-"`
+
+	// The operating system the patch baseline applies to.
+	// Valid values are
+	// AMAZON_LINUX,
+	// AMAZON_LINUX_2,
+	// AMAZON_LINUX_2022,
+	// CENTOS,
+	// DEBIAN,
+	// MACOS,
+	// ORACLE_LINUX,
+	// RASPBIAN,
+	// REDHAT_ENTERPRISE_LINUX,
+	// ROCKY_LINUX,
+	// SUSE,
+	// UBUNTU, and
+	// WINDOWS.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssm/v1beta1.PatchBaseline
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("operating_system",false)
+	OperatingSystem *string `json:"operatingSystem,omitempty" tf:"operating_system,omitempty"`
+
+	OperatingSystemRef *v1.Reference `json:"operatingSystemRef,omitempty" tf:"-"`
+
+	OperatingSystemSelector *v1.Selector `json:"operatingSystemSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type DefaultPatchBaselineObservation struct {
 
 	// ID of the patch baseline.
@@ -47,7 +88,6 @@ type DefaultPatchBaselineParameters struct {
 	// When specifying an AWS-provided patch baseline, must be the ARN.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssm/v1beta1.PatchBaseline
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	BaselineID *string `json:"baselineId,omitempty" tf:"baseline_id,omitempty"`
 
 	// Reference to a PatchBaseline in ssm to populate baselineId.
@@ -75,7 +115,6 @@ type DefaultPatchBaselineParameters struct {
 	// WINDOWS.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssm/v1beta1.PatchBaseline
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("operating_system",false)
-	// +kubebuilder:validation:Optional
 	OperatingSystem *string `json:"operatingSystem,omitempty" tf:"operating_system,omitempty"`
 
 	// Reference to a PatchBaseline in ssm to populate operatingSystem.
@@ -88,14 +127,17 @@ type DefaultPatchBaselineParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // DefaultPatchBaselineSpec defines the desired state of DefaultPatchBaseline
 type DefaultPatchBaselineSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DefaultPatchBaselineParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DefaultPatchBaselineInitParameters `json:"initProvider,omitempty"`
 }
 
 // DefaultPatchBaselineStatus defines the observed state of DefaultPatchBaseline.

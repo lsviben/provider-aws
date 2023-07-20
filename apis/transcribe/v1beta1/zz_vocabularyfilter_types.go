@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VocabularyFilterInitParameters struct {
+
+	// The language code you selected for your vocabulary filter. Refer to the supported languages page for accepted codes.
+	LanguageCode *string `json:"languageCode,omitempty" tf:"language_code,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The Amazon S3 location (URI) of the text file that contains your custom VocabularyFilter. Conflicts with words.
+	VocabularyFilterFileURI *string `json:"vocabularyFilterFileUri,omitempty" tf:"vocabulary_filter_file_uri,omitempty"`
+
+	// - A list of terms to include in the vocabulary. Conflicts with vocabulary_file_uri
+	Words []*string `json:"words,omitempty" tf:"words,omitempty"`
+}
+
 type VocabularyFilterObservation struct {
 
 	// ARN of the VocabularyFilter.
@@ -42,24 +61,19 @@ type VocabularyFilterObservation struct {
 type VocabularyFilterParameters struct {
 
 	// The language code you selected for your vocabulary filter. Refer to the supported languages page for accepted codes.
-	// +kubebuilder:validation:Optional
 	LanguageCode *string `json:"languageCode,omitempty" tf:"language_code,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The Amazon S3 location (URI) of the text file that contains your custom VocabularyFilter. Conflicts with words.
-	// +kubebuilder:validation:Optional
 	VocabularyFilterFileURI *string `json:"vocabularyFilterFileUri,omitempty" tf:"vocabulary_filter_file_uri,omitempty"`
 
 	// - A list of terms to include in the vocabulary. Conflicts with vocabulary_file_uri
-	// +kubebuilder:validation:Optional
 	Words []*string `json:"words,omitempty" tf:"words,omitempty"`
 }
 
@@ -67,6 +81,10 @@ type VocabularyFilterParameters struct {
 type VocabularyFilterSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VocabularyFilterParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VocabularyFilterInitParameters `json:"initProvider,omitempty"`
 }
 
 // VocabularyFilterStatus defines the observed state of VocabularyFilter.
@@ -87,7 +105,7 @@ type VocabularyFilterStatus struct {
 type VocabularyFilter struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.languageCode)",message="languageCode is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.languageCode) || has(self.initProvider.languageCode)",message="%!s(MISSING) is a required parameter"
 	Spec   VocabularyFilterSpec   `json:"spec"`
 	Status VocabularyFilterStatus `json:"status,omitempty"`
 }

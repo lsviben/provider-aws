@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BotAssociationInitParameters struct {
+
+	// The identifier of the Amazon Connect instance. You can find the instanceId in the ARN of the instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
+
+	InstanceIDRef *v1.Reference `json:"instanceIdRef,omitempty" tf:"-"`
+
+	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
+
+	// Configuration information of an Amazon Lex (V1) bot. Detailed below.
+	LexBot []LexBotInitParameters `json:"lexBot,omitempty" tf:"lex_bot,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type BotAssociationObservation struct {
 
 	// The Amazon Connect instance ID, Lex (V1) bot name, and Lex (V1) bot region separated by colons (:).
@@ -30,7 +49,6 @@ type BotAssociationParameters struct {
 	// The identifier of the Amazon Connect instance. You can find the instanceId in the ARN of the instance.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
 
 	// Reference to a Instance in connect to populate instanceId.
@@ -42,13 +60,25 @@ type BotAssociationParameters struct {
 	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
 
 	// Configuration information of an Amazon Lex (V1) bot. Detailed below.
-	// +kubebuilder:validation:Optional
 	LexBot []LexBotParameters `json:"lexBot,omitempty" tf:"lex_bot,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type LexBotInitParameters struct {
+
+	// The Region that the Amazon Lex (V1) bot was created in. Defaults to current region.
+	LexRegion *string `json:"lexRegion,omitempty" tf:"lex_region,omitempty"`
+
+	// The name of the Amazon Lex (V1) bot.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lexmodels/v1beta1.Bot
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	NameRef *v1.Reference `json:"nameRef,omitempty" tf:"-"`
+
+	NameSelector *v1.Selector `json:"nameSelector,omitempty" tf:"-"`
 }
 
 type LexBotObservation struct {
@@ -63,12 +93,10 @@ type LexBotObservation struct {
 type LexBotParameters struct {
 
 	// The Region that the Amazon Lex (V1) bot was created in. Defaults to current region.
-	// +kubebuilder:validation:Optional
 	LexRegion *string `json:"lexRegion,omitempty" tf:"lex_region,omitempty"`
 
 	// The name of the Amazon Lex (V1) bot.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lexmodels/v1beta1.Bot
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Reference to a Bot in lexmodels to populate name.
@@ -84,6 +112,10 @@ type LexBotParameters struct {
 type BotAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BotAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BotAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // BotAssociationStatus defines the observed state of BotAssociation.
@@ -104,7 +136,7 @@ type BotAssociationStatus struct {
 type BotAssociation struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.lexBot)",message="lexBot is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.lexBot) || has(self.initProvider.lexBot)",message="%!s(MISSING) is a required parameter"
 	Spec   BotAssociationSpec   `json:"spec"`
 	Status BotAssociationStatus `json:"status,omitempty"`
 }

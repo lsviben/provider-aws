@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type StandardsSubscriptionInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ARN of a standard - see below.
+	StandardsArn *string `json:"standardsArn,omitempty" tf:"standards_arn,omitempty"`
+}
+
 type StandardsSubscriptionObservation struct {
 
 	// The ARN of a resource that represents your subscription to a supported standard.
@@ -26,11 +36,9 @@ type StandardsSubscriptionParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ARN of a standard - see below.
-	// +kubebuilder:validation:Optional
 	StandardsArn *string `json:"standardsArn,omitempty" tf:"standards_arn,omitempty"`
 }
 
@@ -38,6 +46,10 @@ type StandardsSubscriptionParameters struct {
 type StandardsSubscriptionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     StandardsSubscriptionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider StandardsSubscriptionInitParameters `json:"initProvider,omitempty"`
 }
 
 // StandardsSubscriptionStatus defines the observed state of StandardsSubscription.
@@ -58,7 +70,7 @@ type StandardsSubscriptionStatus struct {
 type StandardsSubscription struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.standardsArn)",message="standardsArn is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.standardsArn) || has(self.initProvider.standardsArn)",message="%!s(MISSING) is a required parameter"
 	Spec   StandardsSubscriptionSpec   `json:"spec"`
 	Status StandardsSubscriptionStatus `json:"status,omitempty"`
 }

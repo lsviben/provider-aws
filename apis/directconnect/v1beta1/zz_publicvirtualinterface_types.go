@@ -13,6 +13,48 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PublicVirtualInterfaceInitParameters struct {
+
+	// The address family for the BGP peer. ipv4  or ipv6.
+	AddressFamily *string `json:"addressFamily,omitempty" tf:"address_family,omitempty"`
+
+	// The IPv4 CIDR address to use to send traffic to Amazon. Required for IPv4 BGP peers.
+	AmazonAddress *string `json:"amazonAddress,omitempty" tf:"amazon_address,omitempty"`
+
+	// The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration.
+	BGPAsn *float64 `json:"bgpAsn,omitempty" tf:"bgp_asn,omitempty"`
+
+	// The authentication key for BGP configuration.
+	BGPAuthKey *string `json:"bgpAuthKey,omitempty" tf:"bgp_auth_key,omitempty"`
+
+	// The ID of the Direct Connect connection (or LAG) on which to create the virtual interface.
+	// +crossplane:generate:reference:type=Connection
+	ConnectionID *string `json:"connectionId,omitempty" tf:"connection_id,omitempty"`
+
+	ConnectionIDRef *v1.Reference `json:"connectionIdRef,omitempty" tf:"-"`
+
+	ConnectionIDSelector *v1.Selector `json:"connectionIdSelector,omitempty" tf:"-"`
+
+	// The IPv4 CIDR destination address to which Amazon should send traffic. Required for IPv4 BGP peers.
+	CustomerAddress *string `json:"customerAddress,omitempty" tf:"customer_address,omitempty"`
+
+	// The name for the virtual interface.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A list of routes to be advertised to the AWS network in this region.
+	RouteFilterPrefixes []*string `json:"routeFilterPrefixes,omitempty" tf:"route_filter_prefixes,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The VLAN ID.
+	Vlan *float64 `json:"vlan,omitempty" tf:"vlan,omitempty"`
+}
+
 type PublicVirtualInterfaceObservation struct {
 
 	// The address family for the BGP peer. ipv4  or ipv6.
@@ -63,24 +105,19 @@ type PublicVirtualInterfaceObservation struct {
 type PublicVirtualInterfaceParameters struct {
 
 	// The address family for the BGP peer. ipv4  or ipv6.
-	// +kubebuilder:validation:Optional
 	AddressFamily *string `json:"addressFamily,omitempty" tf:"address_family,omitempty"`
 
 	// The IPv4 CIDR address to use to send traffic to Amazon. Required for IPv4 BGP peers.
-	// +kubebuilder:validation:Optional
 	AmazonAddress *string `json:"amazonAddress,omitempty" tf:"amazon_address,omitempty"`
 
 	// The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration.
-	// +kubebuilder:validation:Optional
 	BGPAsn *float64 `json:"bgpAsn,omitempty" tf:"bgp_asn,omitempty"`
 
 	// The authentication key for BGP configuration.
-	// +kubebuilder:validation:Optional
 	BGPAuthKey *string `json:"bgpAuthKey,omitempty" tf:"bgp_auth_key,omitempty"`
 
 	// The ID of the Direct Connect connection (or LAG) on which to create the virtual interface.
 	// +crossplane:generate:reference:type=Connection
-	// +kubebuilder:validation:Optional
 	ConnectionID *string `json:"connectionId,omitempty" tf:"connection_id,omitempty"`
 
 	// Reference to a Connection to populate connectionId.
@@ -92,28 +129,22 @@ type PublicVirtualInterfaceParameters struct {
 	ConnectionIDSelector *v1.Selector `json:"connectionIdSelector,omitempty" tf:"-"`
 
 	// The IPv4 CIDR destination address to which Amazon should send traffic. Required for IPv4 BGP peers.
-	// +kubebuilder:validation:Optional
 	CustomerAddress *string `json:"customerAddress,omitempty" tf:"customer_address,omitempty"`
 
 	// The name for the virtual interface.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A list of routes to be advertised to the AWS network in this region.
-	// +kubebuilder:validation:Optional
 	RouteFilterPrefixes []*string `json:"routeFilterPrefixes,omitempty" tf:"route_filter_prefixes,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The VLAN ID.
-	// +kubebuilder:validation:Optional
 	Vlan *float64 `json:"vlan,omitempty" tf:"vlan,omitempty"`
 }
 
@@ -121,6 +152,10 @@ type PublicVirtualInterfaceParameters struct {
 type PublicVirtualInterfaceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PublicVirtualInterfaceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PublicVirtualInterfaceInitParameters `json:"initProvider,omitempty"`
 }
 
 // PublicVirtualInterfaceStatus defines the observed state of PublicVirtualInterface.
@@ -141,11 +176,11 @@ type PublicVirtualInterfaceStatus struct {
 type PublicVirtualInterface struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.addressFamily)",message="addressFamily is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.bgpAsn)",message="bgpAsn is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.routeFilterPrefixes)",message="routeFilterPrefixes is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.vlan)",message="vlan is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.addressFamily) || has(self.initProvider.addressFamily)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.bgpAsn) || has(self.initProvider.bgpAsn)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.routeFilterPrefixes) || has(self.initProvider.routeFilterPrefixes)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.vlan) || has(self.initProvider.vlan)",message="%!s(MISSING) is a required parameter"
 	Spec   PublicVirtualInterfaceSpec   `json:"spec"`
 	Status PublicVirtualInterfaceStatus `json:"status,omitempty"`
 }

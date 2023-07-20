@@ -13,6 +13,22 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type TagInitParameters struct {
+
+	// The tag name.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ID of the EC2 resource to manage the tag for.
+	ResourceID *string `json:"resourceId,omitempty" tf:"resource_id,omitempty"`
+
+	// The value of the tag.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
 type TagObservation struct {
 
 	// EC2 resource identifier and key, separated by a comma (,)
@@ -31,20 +47,16 @@ type TagObservation struct {
 type TagParameters struct {
 
 	// The tag name.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ID of the EC2 resource to manage the tag for.
-	// +kubebuilder:validation:Required
-	ResourceID *string `json:"resourceId" tf:"resource_id,omitempty"`
+	ResourceID *string `json:"resourceId,omitempty" tf:"resource_id,omitempty"`
 
 	// The value of the tag.
-	// +kubebuilder:validation:Optional
 	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
@@ -52,6 +64,10 @@ type TagParameters struct {
 type TagSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     TagParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider TagInitParameters `json:"initProvider,omitempty"`
 }
 
 // TagStatus defines the observed state of Tag.
@@ -72,7 +88,7 @@ type TagStatus struct {
 type Tag struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.value)",message="value is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.value) || has(self.initProvider.value)",message="%!s(MISSING) is a required parameter"
 	Spec   TagSpec   `json:"spec"`
 	Status TagStatus `json:"status,omitempty"`
 }

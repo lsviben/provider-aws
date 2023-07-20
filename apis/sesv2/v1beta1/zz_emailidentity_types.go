@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DKIMSigningAttributesInitParameters struct {
+
+	// [Bring Your Own DKIM] A private key that's used to generate a DKIM signature. The private key must use 1024 or 2048-bit RSA encryption, and must be encoded using base64 encoding.
+	DomainSigningPrivateKey *string `json:"domainSigningPrivateKey,omitempty" tf:"domain_signing_private_key,omitempty"`
+
+	// [Bring Your Own DKIM] A string that's used to identify a public key in the DNS configuration for a domain.
+	DomainSigningSelector *string `json:"domainSigningSelector,omitempty" tf:"domain_signing_selector,omitempty"`
+
+	// [Easy DKIM] The key length of the future DKIM key pair to be generated. This can be changed at most once per day. Valid values: RSA_1024_BIT, RSA_2048_BIT.
+	NextSigningKeyLength *string `json:"nextSigningKeyLength,omitempty" tf:"next_signing_key_length,omitempty"`
+}
+
 type DKIMSigningAttributesObservation struct {
 
 	// [Easy DKIM] The key length of the DKIM key pair in use.
@@ -43,16 +55,34 @@ type DKIMSigningAttributesObservation struct {
 type DKIMSigningAttributesParameters struct {
 
 	// [Bring Your Own DKIM] A private key that's used to generate a DKIM signature. The private key must use 1024 or 2048-bit RSA encryption, and must be encoded using base64 encoding.
-	// +kubebuilder:validation:Optional
 	DomainSigningPrivateKey *string `json:"domainSigningPrivateKey,omitempty" tf:"domain_signing_private_key,omitempty"`
 
 	// [Bring Your Own DKIM] A string that's used to identify a public key in the DNS configuration for a domain.
-	// +kubebuilder:validation:Optional
 	DomainSigningSelector *string `json:"domainSigningSelector,omitempty" tf:"domain_signing_selector,omitempty"`
 
 	// [Easy DKIM] The key length of the future DKIM key pair to be generated. This can be changed at most once per day. Valid values: RSA_1024_BIT, RSA_2048_BIT.
-	// +kubebuilder:validation:Optional
 	NextSigningKeyLength *string `json:"nextSigningKeyLength,omitempty" tf:"next_signing_key_length,omitempty"`
+}
+
+type EmailIdentityInitParameters struct {
+
+	// The configuration set to use by default when sending from this identity. Note that any configuration set defined in the email sending request takes precedence.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sesv2/v1beta1.ConfigurationSet
+	ConfigurationSetName *string `json:"configurationSetName,omitempty" tf:"configuration_set_name,omitempty"`
+
+	ConfigurationSetNameRef *v1.Reference `json:"configurationSetNameRef,omitempty" tf:"-"`
+
+	ConfigurationSetNameSelector *v1.Selector `json:"configurationSetNameSelector,omitempty" tf:"-"`
+
+	// The configuration of the DKIM authentication settings for an email domain identity.
+	DKIMSigningAttributes []DKIMSigningAttributesInitParameters `json:"dkimSigningAttributes,omitempty" tf:"dkim_signing_attributes,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type EmailIdentityObservation struct {
@@ -84,7 +114,6 @@ type EmailIdentityParameters struct {
 
 	// The configuration set to use by default when sending from this identity. Note that any configuration set defined in the email sending request takes precedence.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sesv2/v1beta1.ConfigurationSet
-	// +kubebuilder:validation:Optional
 	ConfigurationSetName *string `json:"configurationSetName,omitempty" tf:"configuration_set_name,omitempty"`
 
 	// Reference to a ConfigurationSet in sesv2 to populate configurationSetName.
@@ -96,16 +125,13 @@ type EmailIdentityParameters struct {
 	ConfigurationSetNameSelector *v1.Selector `json:"configurationSetNameSelector,omitempty" tf:"-"`
 
 	// The configuration of the DKIM authentication settings for an email domain identity.
-	// +kubebuilder:validation:Optional
 	DKIMSigningAttributes []DKIMSigningAttributesParameters `json:"dkimSigningAttributes,omitempty" tf:"dkim_signing_attributes,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -113,6 +139,10 @@ type EmailIdentityParameters struct {
 type EmailIdentitySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EmailIdentityParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EmailIdentityInitParameters `json:"initProvider,omitempty"`
 }
 
 // EmailIdentityStatus defines the observed state of EmailIdentity.

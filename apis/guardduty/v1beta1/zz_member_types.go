@@ -13,6 +13,43 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type MemberInitParameters struct {
+
+	// AWS account ID for member account.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/guardduty/v1beta1.Detector
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("account_id",true)
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	AccountIDRef *v1.Reference `json:"accountIdRef,omitempty" tf:"-"`
+
+	AccountIDSelector *v1.Selector `json:"accountIdSelector,omitempty" tf:"-"`
+
+	// The detector ID of the GuardDuty account where you want to create member accounts.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/guardduty/v1beta1.Detector
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DetectorID *string `json:"detectorId,omitempty" tf:"detector_id,omitempty"`
+
+	DetectorIDRef *v1.Reference `json:"detectorIdRef,omitempty" tf:"-"`
+
+	DetectorIDSelector *v1.Selector `json:"detectorIdSelector,omitempty" tf:"-"`
+
+	// Boolean whether an email notification is sent to the accounts. Defaults to false.
+	DisableEmailNotification *bool `json:"disableEmailNotification,omitempty" tf:"disable_email_notification,omitempty"`
+
+	// Email address for member account.
+	Email *string `json:"email,omitempty" tf:"email,omitempty"`
+
+	// Message for invitation.
+	InvitationMessage *string `json:"invitationMessage,omitempty" tf:"invitation_message,omitempty"`
+
+	// Boolean whether to invite the account to GuardDuty as a member. Defaults to false.
+	Invite *bool `json:"invite,omitempty" tf:"invite,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type MemberObservation struct {
 
 	// AWS account ID for member account.
@@ -45,7 +82,6 @@ type MemberParameters struct {
 	// AWS account ID for member account.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/guardduty/v1beta1.Detector
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("account_id",true)
-	// +kubebuilder:validation:Optional
 	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// Reference to a Detector in guardduty to populate accountId.
@@ -59,7 +95,6 @@ type MemberParameters struct {
 	// The detector ID of the GuardDuty account where you want to create member accounts.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/guardduty/v1beta1.Detector
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DetectorID *string `json:"detectorId,omitempty" tf:"detector_id,omitempty"`
 
 	// Reference to a Detector in guardduty to populate detectorId.
@@ -71,31 +106,30 @@ type MemberParameters struct {
 	DetectorIDSelector *v1.Selector `json:"detectorIdSelector,omitempty" tf:"-"`
 
 	// Boolean whether an email notification is sent to the accounts. Defaults to false.
-	// +kubebuilder:validation:Optional
 	DisableEmailNotification *bool `json:"disableEmailNotification,omitempty" tf:"disable_email_notification,omitempty"`
 
 	// Email address for member account.
-	// +kubebuilder:validation:Optional
 	Email *string `json:"email,omitempty" tf:"email,omitempty"`
 
 	// Message for invitation.
-	// +kubebuilder:validation:Optional
 	InvitationMessage *string `json:"invitationMessage,omitempty" tf:"invitation_message,omitempty"`
 
 	// Boolean whether to invite the account to GuardDuty as a member. Defaults to false.
-	// +kubebuilder:validation:Optional
 	Invite *bool `json:"invite,omitempty" tf:"invite,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // MemberSpec defines the desired state of Member
 type MemberSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     MemberParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider MemberInitParameters `json:"initProvider,omitempty"`
 }
 
 // MemberStatus defines the observed state of Member.
@@ -116,7 +150,7 @@ type MemberStatus struct {
 type Member struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.email)",message="email is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.email) || has(self.initProvider.email)",message="%!s(MISSING) is a required parameter"
 	Spec   MemberSpec   `json:"spec"`
 	Status MemberStatus `json:"status,omitempty"`
 }

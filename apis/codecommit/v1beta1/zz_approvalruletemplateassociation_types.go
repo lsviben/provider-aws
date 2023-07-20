@@ -13,6 +13,29 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ApprovalRuleTemplateAssociationInitParameters struct {
+
+	// The name for the approval rule template.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/codecommit/v1beta1.ApprovalRuleTemplate
+	ApprovalRuleTemplateName *string `json:"approvalRuleTemplateName,omitempty" tf:"approval_rule_template_name,omitempty"`
+
+	ApprovalRuleTemplateNameRef *v1.Reference `json:"approvalRuleTemplateNameRef,omitempty" tf:"-"`
+
+	ApprovalRuleTemplateNameSelector *v1.Selector `json:"approvalRuleTemplateNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The name of the repository that you want to associate with the template.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/codecommit/v1beta1.Repository
+	RepositoryName *string `json:"repositoryName,omitempty" tf:"repository_name,omitempty"`
+
+	RepositoryNameRef *v1.Reference `json:"repositoryNameRef,omitempty" tf:"-"`
+
+	RepositoryNameSelector *v1.Selector `json:"repositoryNameSelector,omitempty" tf:"-"`
+}
+
 type ApprovalRuleTemplateAssociationObservation struct {
 
 	// The name for the approval rule template.
@@ -29,7 +52,6 @@ type ApprovalRuleTemplateAssociationParameters struct {
 
 	// The name for the approval rule template.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/codecommit/v1beta1.ApprovalRuleTemplate
-	// +kubebuilder:validation:Optional
 	ApprovalRuleTemplateName *string `json:"approvalRuleTemplateName,omitempty" tf:"approval_rule_template_name,omitempty"`
 
 	// Reference to a ApprovalRuleTemplate in codecommit to populate approvalRuleTemplateName.
@@ -42,12 +64,10 @@ type ApprovalRuleTemplateAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The name of the repository that you want to associate with the template.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/codecommit/v1beta1.Repository
-	// +kubebuilder:validation:Optional
 	RepositoryName *string `json:"repositoryName,omitempty" tf:"repository_name,omitempty"`
 
 	// Reference to a Repository in codecommit to populate repositoryName.
@@ -63,6 +83,10 @@ type ApprovalRuleTemplateAssociationParameters struct {
 type ApprovalRuleTemplateAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ApprovalRuleTemplateAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ApprovalRuleTemplateAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // ApprovalRuleTemplateAssociationStatus defines the observed state of ApprovalRuleTemplateAssociation.

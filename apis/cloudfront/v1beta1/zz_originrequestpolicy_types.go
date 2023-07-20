@@ -13,13 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CookiesConfigCookiesInitParameters struct {
+	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
+}
+
 type CookiesConfigCookiesObservation struct {
 	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
 }
 
 type CookiesConfigCookiesParameters struct {
+	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
+}
 
-	// +kubebuilder:validation:Optional
+type HeadersConfigHeadersInitParameters struct {
 	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
 }
 
@@ -28,9 +34,13 @@ type HeadersConfigHeadersObservation struct {
 }
 
 type HeadersConfigHeadersParameters struct {
-
-	// +kubebuilder:validation:Optional
 	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
+}
+
+type OriginRequestPolicyCookiesConfigInitParameters struct {
+	CookieBehavior *string `json:"cookieBehavior,omitempty" tf:"cookie_behavior,omitempty"`
+
+	Cookies []CookiesConfigCookiesInitParameters `json:"cookies,omitempty" tf:"cookies,omitempty"`
 }
 
 type OriginRequestPolicyCookiesConfigObservation struct {
@@ -40,12 +50,15 @@ type OriginRequestPolicyCookiesConfigObservation struct {
 }
 
 type OriginRequestPolicyCookiesConfigParameters struct {
+	CookieBehavior *string `json:"cookieBehavior,omitempty" tf:"cookie_behavior,omitempty"`
 
-	// +kubebuilder:validation:Required
-	CookieBehavior *string `json:"cookieBehavior" tf:"cookie_behavior,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	Cookies []CookiesConfigCookiesParameters `json:"cookies,omitempty" tf:"cookies,omitempty"`
+}
+
+type OriginRequestPolicyHeadersConfigInitParameters struct {
+	HeaderBehavior *string `json:"headerBehavior,omitempty" tf:"header_behavior,omitempty"`
+
+	Headers []HeadersConfigHeadersInitParameters `json:"headers,omitempty" tf:"headers,omitempty"`
 }
 
 type OriginRequestPolicyHeadersConfigObservation struct {
@@ -55,12 +68,28 @@ type OriginRequestPolicyHeadersConfigObservation struct {
 }
 
 type OriginRequestPolicyHeadersConfigParameters struct {
-
-	// +kubebuilder:validation:Optional
 	HeaderBehavior *string `json:"headerBehavior,omitempty" tf:"header_behavior,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Headers []HeadersConfigHeadersParameters `json:"headers,omitempty" tf:"headers,omitempty"`
+}
+
+type OriginRequestPolicyInitParameters struct {
+
+	// Comment to describe the origin request policy.
+	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
+
+	// Object that determines whether any cookies in viewer requests (and if so, which cookies) are included in the origin request key and automatically included in requests that CloudFront sends to the origin. See Cookies Config for more information.
+	CookiesConfig []OriginRequestPolicyCookiesConfigInitParameters `json:"cookiesConfig,omitempty" tf:"cookies_config,omitempty"`
+
+	// Object that determines whether any HTTP headers (and if so, which headers) are included in the origin request key and automatically included in requests that CloudFront sends to the origin. See Headers Config for more information.
+	HeadersConfig []OriginRequestPolicyHeadersConfigInitParameters `json:"headersConfig,omitempty" tf:"headers_config,omitempty"`
+
+	// Object that determines whether any URL query strings in viewer requests (and if so, which query strings) are included in the origin request key and automatically included in requests that CloudFront sends to the origin. See Query String Config for more information.
+	QueryStringsConfig []OriginRequestPolicyQueryStringsConfigInitParameters `json:"queryStringsConfig,omitempty" tf:"query_strings_config,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type OriginRequestPolicyObservation struct {
@@ -87,25 +116,26 @@ type OriginRequestPolicyObservation struct {
 type OriginRequestPolicyParameters struct {
 
 	// Comment to describe the origin request policy.
-	// +kubebuilder:validation:Optional
 	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
 
 	// Object that determines whether any cookies in viewer requests (and if so, which cookies) are included in the origin request key and automatically included in requests that CloudFront sends to the origin. See Cookies Config for more information.
-	// +kubebuilder:validation:Optional
 	CookiesConfig []OriginRequestPolicyCookiesConfigParameters `json:"cookiesConfig,omitempty" tf:"cookies_config,omitempty"`
 
 	// Object that determines whether any HTTP headers (and if so, which headers) are included in the origin request key and automatically included in requests that CloudFront sends to the origin. See Headers Config for more information.
-	// +kubebuilder:validation:Optional
 	HeadersConfig []OriginRequestPolicyHeadersConfigParameters `json:"headersConfig,omitempty" tf:"headers_config,omitempty"`
 
 	// Object that determines whether any URL query strings in viewer requests (and if so, which query strings) are included in the origin request key and automatically included in requests that CloudFront sends to the origin. See Query String Config for more information.
-	// +kubebuilder:validation:Optional
 	QueryStringsConfig []OriginRequestPolicyQueryStringsConfigParameters `json:"queryStringsConfig,omitempty" tf:"query_strings_config,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type OriginRequestPolicyQueryStringsConfigInitParameters struct {
+	QueryStringBehavior *string `json:"queryStringBehavior,omitempty" tf:"query_string_behavior,omitempty"`
+
+	QueryStrings []QueryStringsConfigQueryStringsInitParameters `json:"queryStrings,omitempty" tf:"query_strings,omitempty"`
 }
 
 type OriginRequestPolicyQueryStringsConfigObservation struct {
@@ -115,12 +145,13 @@ type OriginRequestPolicyQueryStringsConfigObservation struct {
 }
 
 type OriginRequestPolicyQueryStringsConfigParameters struct {
+	QueryStringBehavior *string `json:"queryStringBehavior,omitempty" tf:"query_string_behavior,omitempty"`
 
-	// +kubebuilder:validation:Required
-	QueryStringBehavior *string `json:"queryStringBehavior" tf:"query_string_behavior,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	QueryStrings []QueryStringsConfigQueryStringsParameters `json:"queryStrings,omitempty" tf:"query_strings,omitempty"`
+}
+
+type QueryStringsConfigQueryStringsInitParameters struct {
+	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
 }
 
 type QueryStringsConfigQueryStringsObservation struct {
@@ -128,8 +159,6 @@ type QueryStringsConfigQueryStringsObservation struct {
 }
 
 type QueryStringsConfigQueryStringsParameters struct {
-
-	// +kubebuilder:validation:Optional
 	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
 }
 
@@ -137,6 +166,10 @@ type QueryStringsConfigQueryStringsParameters struct {
 type OriginRequestPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     OriginRequestPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider OriginRequestPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // OriginRequestPolicyStatus defines the observed state of OriginRequestPolicy.
@@ -157,9 +190,9 @@ type OriginRequestPolicyStatus struct {
 type OriginRequestPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.cookiesConfig)",message="cookiesConfig is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.headersConfig)",message="headersConfig is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.queryStringsConfig)",message="queryStringsConfig is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.cookiesConfig) || has(self.initProvider.cookiesConfig)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.headersConfig) || has(self.initProvider.headersConfig)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.queryStringsConfig) || has(self.initProvider.queryStringsConfig)",message="%!s(MISSING) is a required parameter"
 	Spec   OriginRequestPolicySpec   `json:"spec"`
 	Status OriginRequestPolicyStatus `json:"status,omitempty"`
 }

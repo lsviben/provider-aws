@@ -13,6 +13,33 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CertificateInitParameters struct {
+
+	// Boolean flag to indicate if the certificate should be active
+	Active *bool `json:"active,omitempty" tf:"active,omitempty"`
+
+	// The CA certificate for the certificate to be registered. If this is set, the CA needs to be registered with AWS IoT beforehand.
+	CAPemSecretRef *v1.SecretKeySelector `json:"caPemSecretRef,omitempty" tf:"-"`
+
+	// The certificate to be registered. If ca_pem is unspecified, review
+	// RegisterCertificateWithoutCA.
+	// If ca_pem is specified, review
+	// RegisterCertificate
+	// for more information on registering a certificate.
+	CertificatePemSecretRef *v1.SecretKeySelector `json:"certificatePemSecretRef,omitempty" tf:"-"`
+
+	// The certificate signing request. Review
+	// CreateCertificateFromCsr
+	// for more information on generating a certificate from a certificate signing request (CSR).
+	// If none is specified both the certificate and keys will be generated, review CreateKeysAndCertificate
+	// for more information on generating keys and a certificate.
+	Csr *string `json:"csr,omitempty" tf:"csr,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type CertificateObservation struct {
 
 	// Boolean flag to indicate if the certificate should be active
@@ -35,11 +62,9 @@ type CertificateObservation struct {
 type CertificateParameters struct {
 
 	// Boolean flag to indicate if the certificate should be active
-	// +kubebuilder:validation:Optional
 	Active *bool `json:"active,omitempty" tf:"active,omitempty"`
 
 	// The CA certificate for the certificate to be registered. If this is set, the CA needs to be registered with AWS IoT beforehand.
-	// +kubebuilder:validation:Optional
 	CAPemSecretRef *v1.SecretKeySelector `json:"caPemSecretRef,omitempty" tf:"-"`
 
 	// The certificate to be registered. If ca_pem is unspecified, review
@@ -47,7 +72,6 @@ type CertificateParameters struct {
 	// If ca_pem is specified, review
 	// RegisterCertificate
 	// for more information on registering a certificate.
-	// +kubebuilder:validation:Optional
 	CertificatePemSecretRef *v1.SecretKeySelector `json:"certificatePemSecretRef,omitempty" tf:"-"`
 
 	// The certificate signing request. Review
@@ -55,19 +79,21 @@ type CertificateParameters struct {
 	// for more information on generating a certificate from a certificate signing request (CSR).
 	// If none is specified both the certificate and keys will be generated, review CreateKeysAndCertificate
 	// for more information on generating keys and a certificate.
-	// +kubebuilder:validation:Optional
 	Csr *string `json:"csr,omitempty" tf:"csr,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // CertificateSpec defines the desired state of Certificate
 type CertificateSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     CertificateParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider CertificateInitParameters `json:"initProvider,omitempty"`
 }
 
 // CertificateStatus defines the observed state of Certificate.
@@ -88,7 +114,7 @@ type CertificateStatus struct {
 type Certificate struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.active)",message="active is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.active) || has(self.initProvider.active)",message="%!s(MISSING) is a required parameter"
 	Spec   CertificateSpec   `json:"spec"`
 	Status CertificateStatus `json:"status,omitempty"`
 }

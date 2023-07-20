@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EnvironmentInitParameters struct {
+
+	// AppConfig application ID. Must be between 4 and 7 characters in length.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appconfig/v1beta1.Application
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	ApplicationID *string `json:"applicationId,omitempty" tf:"application_id,omitempty"`
+
+	ApplicationIDRef *v1.Reference `json:"applicationIdRef,omitempty" tf:"-"`
+
+	ApplicationIDSelector *v1.Selector `json:"applicationIdSelector,omitempty" tf:"-"`
+
+	// Description of the environment. Can be at most 1024 characters.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Set of Amazon CloudWatch alarms to monitor during the deployment process. Maximum of 5. See Monitor below for more details.
+	Monitor []MonitorInitParameters `json:"monitor,omitempty" tf:"monitor,omitempty"`
+
+	// Name for the environment. Must be between 1 and 64 characters in length.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type EnvironmentObservation struct {
 
 	// AppConfig application ID. Must be between 4 and 7 characters in length.
@@ -52,7 +80,6 @@ type EnvironmentParameters struct {
 	// AppConfig application ID. Must be between 4 and 7 characters in length.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appconfig/v1beta1.Application
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	ApplicationID *string `json:"applicationId,omitempty" tf:"application_id,omitempty"`
 
 	// Reference to a Application in appconfig to populate applicationId.
@@ -64,25 +91,41 @@ type EnvironmentParameters struct {
 	ApplicationIDSelector *v1.Selector `json:"applicationIdSelector,omitempty" tf:"-"`
 
 	// Description of the environment. Can be at most 1024 characters.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Set of Amazon CloudWatch alarms to monitor during the deployment process. Maximum of 5. See Monitor below for more details.
-	// +kubebuilder:validation:Optional
 	Monitor []MonitorParameters `json:"monitor,omitempty" tf:"monitor,omitempty"`
 
 	// Name for the environment. Must be between 1 and 64 characters in length.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type MonitorInitParameters struct {
+
+	// ARN of the Amazon CloudWatch alarm.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudwatch/v1beta1.MetricAlarm
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	AlarmArn *string `json:"alarmArn,omitempty" tf:"alarm_arn,omitempty"`
+
+	AlarmArnRef *v1.Reference `json:"alarmArnRef,omitempty" tf:"-"`
+
+	AlarmArnSelector *v1.Selector `json:"alarmArnSelector,omitempty" tf:"-"`
+
+	// ARN of an IAM role for AWS AppConfig to monitor alarm_arn.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	AlarmRoleArn *string `json:"alarmRoleArn,omitempty" tf:"alarm_role_arn,omitempty"`
+
+	AlarmRoleArnRef *v1.Reference `json:"alarmRoleArnRef,omitempty" tf:"-"`
+
+	AlarmRoleArnSelector *v1.Selector `json:"alarmRoleArnSelector,omitempty" tf:"-"`
 }
 
 type MonitorObservation struct {
@@ -99,7 +142,6 @@ type MonitorParameters struct {
 	// ARN of the Amazon CloudWatch alarm.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudwatch/v1beta1.MetricAlarm
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	AlarmArn *string `json:"alarmArn,omitempty" tf:"alarm_arn,omitempty"`
 
 	// Reference to a MetricAlarm in cloudwatch to populate alarmArn.
@@ -113,7 +155,6 @@ type MonitorParameters struct {
 	// ARN of an IAM role for AWS AppConfig to monitor alarm_arn.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	AlarmRoleArn *string `json:"alarmRoleArn,omitempty" tf:"alarm_role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate alarmRoleArn.
@@ -129,6 +170,10 @@ type MonitorParameters struct {
 type EnvironmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EnvironmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EnvironmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // EnvironmentStatus defines the observed state of Environment.
@@ -149,7 +194,7 @@ type EnvironmentStatus struct {
 type Environment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   EnvironmentSpec   `json:"spec"`
 	Status EnvironmentStatus `json:"status,omitempty"`
 }

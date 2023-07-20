@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ManagedPolicyAttachmentInitParameters struct {
+
+	// The Amazon Resource Name (ARN) of the SSO Instance under which the operation will be executed.
+	InstanceArn *string `json:"instanceArn,omitempty" tf:"instance_arn,omitempty"`
+
+	// The IAM managed policy Amazon Resource Name (ARN) to be attached to the Permission Set.
+	ManagedPolicyArn *string `json:"managedPolicyArn,omitempty" tf:"managed_policy_arn,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Permission Set.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssoadmin/v1beta1.PermissionSet
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	PermissionSetArn *string `json:"permissionSetArn,omitempty" tf:"permission_set_arn,omitempty"`
+
+	PermissionSetArnRef *v1.Reference `json:"permissionSetArnRef,omitempty" tf:"-"`
+
+	PermissionSetArnSelector *v1.Selector `json:"permissionSetArnSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type ManagedPolicyAttachmentObservation struct {
 
 	// The Amazon Resource Names (ARNs) of the Managed Policy, Permission Set, and SSO Instance, separated by a comma (,).
@@ -34,17 +56,14 @@ type ManagedPolicyAttachmentObservation struct {
 type ManagedPolicyAttachmentParameters struct {
 
 	// The Amazon Resource Name (ARN) of the SSO Instance under which the operation will be executed.
-	// +kubebuilder:validation:Required
-	InstanceArn *string `json:"instanceArn" tf:"instance_arn,omitempty"`
+	InstanceArn *string `json:"instanceArn,omitempty" tf:"instance_arn,omitempty"`
 
 	// The IAM managed policy Amazon Resource Name (ARN) to be attached to the Permission Set.
-	// +kubebuilder:validation:Required
-	ManagedPolicyArn *string `json:"managedPolicyArn" tf:"managed_policy_arn,omitempty"`
+	ManagedPolicyArn *string `json:"managedPolicyArn,omitempty" tf:"managed_policy_arn,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the Permission Set.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssoadmin/v1beta1.PermissionSet
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	PermissionSetArn *string `json:"permissionSetArn,omitempty" tf:"permission_set_arn,omitempty"`
 
 	// Reference to a PermissionSet in ssoadmin to populate permissionSetArn.
@@ -57,14 +76,17 @@ type ManagedPolicyAttachmentParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // ManagedPolicyAttachmentSpec defines the desired state of ManagedPolicyAttachment
 type ManagedPolicyAttachmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ManagedPolicyAttachmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ManagedPolicyAttachmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // ManagedPolicyAttachmentStatus defines the observed state of ManagedPolicyAttachment.

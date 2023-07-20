@@ -99,8 +99,44 @@ spec:
                       access to. Note: permissions only apply to a single version
                       of a layer.'
                     type: number
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  action:
+                    description: Action, which will be allowed. lambda:GetLayerVersion
+                      value is suggested by AWS documantation.
+                    type: string
+                  layerName:
+                    description: The name or ARN of the Lambda Layer, which you want
+                      to grant access to.
+                    type: string
+                  organizationId:
+                    description: An identifier of AWS Organization, which should be
+                      able to use your Lambda Layer. principal should be equal to
+                      * if organization_id provided.
+                    type: string
+                  principal:
+                    description: AWS account ID which should be able to use your Lambda
+                      Layer. * can be used here, if you want to share your Lambda
+                      Layer widely.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  statementId:
+                    description: The name of Lambda Layer Permission, for example
+                      dev-account - human readable note about what is this permission
+                      for.
+                    type: string
+                  versionNumber:
+                    description: 'Version of Lambda Layer, which you want to grant
+                      access to. Note: permissions only apply to a single version
+                      of a layer.'
+                    type: number
                 type: object
               managementPolicies:
                 default:
@@ -300,21 +336,26 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: action is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.action)'
-            - message: layerName is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.action)
+                || has(self.initProvider.action)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.layerName)'
-            - message: principal is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.layerName)
+                || has(self.initProvider.layerName)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.principal)'
-            - message: statementId is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.principal)
+                || has(self.initProvider.principal)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.statementId)'
-            - message: versionNumber is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.statementId)
+                || has(self.initProvider.statementId)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.versionNumber)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.versionNumber)
+                || has(self.initProvider.versionNumber)'
           status:
             description: LayerVersionPermissionStatus defines the observed state of
               LayerVersionPermission.

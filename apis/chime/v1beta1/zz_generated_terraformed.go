@@ -9,6 +9,8 @@ package v1beta1
 import (
 	"github.com/pkg/errors"
 
+	"github.com/imdario/mergo"
+
 	"github.com/upbound/upjet/pkg/resource"
 	"github.com/upbound/upjet/pkg/resource/json"
 )
@@ -57,7 +59,22 @@ func (tr *VoiceConnector) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this VoiceConnector
@@ -85,6 +102,31 @@ func (tr *VoiceConnector) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *VoiceConnector) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this VoiceConnector
+func (tr *VoiceConnector) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this VoiceConnectorGroup
@@ -131,7 +173,22 @@ func (tr *VoiceConnectorGroup) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this VoiceConnectorGroup
@@ -159,6 +216,31 @@ func (tr *VoiceConnectorGroup) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *VoiceConnectorGroup) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this VoiceConnectorGroup
+func (tr *VoiceConnectorGroup) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this VoiceConnectorLogging
@@ -205,7 +287,22 @@ func (tr *VoiceConnectorLogging) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this VoiceConnectorLogging
@@ -233,6 +330,31 @@ func (tr *VoiceConnectorLogging) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *VoiceConnectorLogging) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this VoiceConnectorLogging
+func (tr *VoiceConnectorLogging) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this VoiceConnectorOrigination
@@ -279,7 +401,22 @@ func (tr *VoiceConnectorOrigination) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this VoiceConnectorOrigination
@@ -307,6 +444,31 @@ func (tr *VoiceConnectorOrigination) LateInitialize(attrs []byte) (bool, error) 
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *VoiceConnectorOrigination) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this VoiceConnectorOrigination
+func (tr *VoiceConnectorOrigination) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this VoiceConnectorStreaming
@@ -353,7 +515,22 @@ func (tr *VoiceConnectorStreaming) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this VoiceConnectorStreaming
@@ -381,6 +558,31 @@ func (tr *VoiceConnectorStreaming) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *VoiceConnectorStreaming) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this VoiceConnectorStreaming
+func (tr *VoiceConnectorStreaming) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this VoiceConnectorTermination
@@ -427,7 +629,22 @@ func (tr *VoiceConnectorTermination) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this VoiceConnectorTermination
@@ -455,6 +672,31 @@ func (tr *VoiceConnectorTermination) LateInitialize(attrs []byte) (bool, error) 
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *VoiceConnectorTermination) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this VoiceConnectorTermination
+func (tr *VoiceConnectorTermination) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this VoiceConnectorTerminationCredentials
@@ -501,7 +743,22 @@ func (tr *VoiceConnectorTerminationCredentials) GetParameters() (map[string]any,
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this VoiceConnectorTerminationCredentials
@@ -529,4 +786,29 @@ func (tr *VoiceConnectorTerminationCredentials) LateInitialize(attrs []byte) (bo
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *VoiceConnectorTerminationCredentials) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this VoiceConnectorTerminationCredentials
+func (tr *VoiceConnectorTerminationCredentials) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }

@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type MediaConcurrenciesInitParameters struct {
+
+	// Specifies the channels that agents can handle in the Contact Control Panel (CCP). Valid values are VOICE, CHAT, TASK.
+	Channel *string `json:"channel,omitempty" tf:"channel,omitempty"`
+
+	// Specifies the number of contacts an agent can have on a channel simultaneously. Valid Range for VOICE: Minimum value of 1. Maximum value of 1. Valid Range for CHAT: Minimum value of 1. Maximum value of 10. Valid Range for TASK: Minimum value of 1. Maximum value of 10.
+	Concurrency *float64 `json:"concurrency,omitempty" tf:"concurrency,omitempty"`
+}
+
 type MediaConcurrenciesObservation struct {
 
 	// Specifies the channels that agents can handle in the Contact Control Panel (CCP). Valid values are VOICE, CHAT, TASK.
@@ -25,12 +34,13 @@ type MediaConcurrenciesObservation struct {
 type MediaConcurrenciesParameters struct {
 
 	// Specifies the channels that agents can handle in the Contact Control Panel (CCP). Valid values are VOICE, CHAT, TASK.
-	// +kubebuilder:validation:Required
-	Channel *string `json:"channel" tf:"channel,omitempty"`
+	Channel *string `json:"channel,omitempty" tf:"channel,omitempty"`
 
 	// Specifies the number of contacts an agent can have on a channel simultaneously. Valid Range for VOICE: Minimum value of 1. Maximum value of 1. Valid Range for CHAT: Minimum value of 1. Maximum value of 10. Valid Range for TASK: Minimum value of 1. Maximum value of 10.
-	// +kubebuilder:validation:Required
-	Concurrency *float64 `json:"concurrency" tf:"concurrency,omitempty"`
+	Concurrency *float64 `json:"concurrency,omitempty" tf:"concurrency,omitempty"`
+}
+
+type QueueConfigsAssociatedInitParameters struct {
 }
 
 type QueueConfigsAssociatedObservation struct {
@@ -57,6 +67,21 @@ type QueueConfigsAssociatedObservation struct {
 type QueueConfigsAssociatedParameters struct {
 }
 
+type QueueConfigsInitParameters struct {
+
+	// Specifies the channels agents can handle in the Contact Control Panel (CCP) for this routing profile. Valid values are VOICE, CHAT, TASK.
+	Channel *string `json:"channel,omitempty" tf:"channel,omitempty"`
+
+	// Specifies the delay, in seconds, that a contact should be in the queue before they are routed to an available agent
+	Delay *float64 `json:"delay,omitempty" tf:"delay,omitempty"`
+
+	// Specifies the order in which contacts are to be handled for the queue.
+	Priority *float64 `json:"priority,omitempty" tf:"priority,omitempty"`
+
+	// Specifies the identifier for the queue.
+	QueueID *string `json:"queueId,omitempty" tf:"queue_id,omitempty"`
+}
+
 type QueueConfigsObservation struct {
 
 	// Specifies the channels agents can handle in the Contact Control Panel (CCP) for this routing profile. Valid values are VOICE, CHAT, TASK.
@@ -81,20 +106,56 @@ type QueueConfigsObservation struct {
 type QueueConfigsParameters struct {
 
 	// Specifies the channels agents can handle in the Contact Control Panel (CCP) for this routing profile. Valid values are VOICE, CHAT, TASK.
-	// +kubebuilder:validation:Required
-	Channel *string `json:"channel" tf:"channel,omitempty"`
+	Channel *string `json:"channel,omitempty" tf:"channel,omitempty"`
 
 	// Specifies the delay, in seconds, that a contact should be in the queue before they are routed to an available agent
-	// +kubebuilder:validation:Required
-	Delay *float64 `json:"delay" tf:"delay,omitempty"`
+	Delay *float64 `json:"delay,omitempty" tf:"delay,omitempty"`
 
 	// Specifies the order in which contacts are to be handled for the queue.
-	// +kubebuilder:validation:Required
-	Priority *float64 `json:"priority" tf:"priority,omitempty"`
+	Priority *float64 `json:"priority,omitempty" tf:"priority,omitempty"`
 
 	// Specifies the identifier for the queue.
-	// +kubebuilder:validation:Required
-	QueueID *string `json:"queueId" tf:"queue_id,omitempty"`
+	QueueID *string `json:"queueId,omitempty" tf:"queue_id,omitempty"`
+}
+
+type RoutingProfileInitParameters struct {
+
+	// Specifies the default outbound queue for the Routing Profile.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Queue
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("queue_id",true)
+	DefaultOutboundQueueID *string `json:"defaultOutboundQueueId,omitempty" tf:"default_outbound_queue_id,omitempty"`
+
+	DefaultOutboundQueueIDRef *v1.Reference `json:"defaultOutboundQueueIdRef,omitempty" tf:"-"`
+
+	DefaultOutboundQueueIDSelector *v1.Selector `json:"defaultOutboundQueueIdSelector,omitempty" tf:"-"`
+
+	// Specifies the description of the Routing Profile.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Specifies the identifier of the hosting Amazon Connect Instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
+
+	InstanceIDRef *v1.Reference `json:"instanceIdRef,omitempty" tf:"-"`
+
+	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
+
+	// One or more media_concurrencies blocks that specify the channels that agents can handle in the Contact Control Panel (CCP) for this Routing Profile. The media_concurrencies block is documented below.
+	MediaConcurrencies []MediaConcurrenciesInitParameters `json:"mediaConcurrencies,omitempty" tf:"media_concurrencies,omitempty"`
+
+	// Specifies the name of the Routing Profile.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// One or more queue_configs blocks that specify the inbound queues associated with the routing profile. If no queue is added, the agent only can make outbound calls. The queue_configs block is documented below.
+	QueueConfigs []QueueConfigsInitParameters `json:"queueConfigs,omitempty" tf:"queue_configs,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type RoutingProfileObservation struct {
@@ -140,7 +201,6 @@ type RoutingProfileParameters struct {
 	// Specifies the default outbound queue for the Routing Profile.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Queue
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("queue_id",true)
-	// +kubebuilder:validation:Optional
 	DefaultOutboundQueueID *string `json:"defaultOutboundQueueId,omitempty" tf:"default_outbound_queue_id,omitempty"`
 
 	// Reference to a Queue in connect to populate defaultOutboundQueueId.
@@ -152,13 +212,11 @@ type RoutingProfileParameters struct {
 	DefaultOutboundQueueIDSelector *v1.Selector `json:"defaultOutboundQueueIdSelector,omitempty" tf:"-"`
 
 	// Specifies the description of the Routing Profile.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Specifies the identifier of the hosting Amazon Connect Instance.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
 
 	// Reference to a Instance in connect to populate instanceId.
@@ -170,24 +228,19 @@ type RoutingProfileParameters struct {
 	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
 
 	// One or more media_concurrencies blocks that specify the channels that agents can handle in the Contact Control Panel (CCP) for this Routing Profile. The media_concurrencies block is documented below.
-	// +kubebuilder:validation:Optional
 	MediaConcurrencies []MediaConcurrenciesParameters `json:"mediaConcurrencies,omitempty" tf:"media_concurrencies,omitempty"`
 
 	// Specifies the name of the Routing Profile.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// One or more queue_configs blocks that specify the inbound queues associated with the routing profile. If no queue is added, the agent only can make outbound calls. The queue_configs block is documented below.
-	// +kubebuilder:validation:Optional
 	QueueConfigs []QueueConfigsParameters `json:"queueConfigs,omitempty" tf:"queue_configs,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -195,6 +248,10 @@ type RoutingProfileParameters struct {
 type RoutingProfileSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RoutingProfileParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RoutingProfileInitParameters `json:"initProvider,omitempty"`
 }
 
 // RoutingProfileStatus defines the observed state of RoutingProfile.
@@ -215,9 +272,9 @@ type RoutingProfileStatus struct {
 type RoutingProfile struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.description)",message="description is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.mediaConcurrencies)",message="mediaConcurrencies is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.description) || has(self.initProvider.description)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.mediaConcurrencies) || has(self.initProvider.mediaConcurrencies)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   RoutingProfileSpec   `json:"spec"`
 	Status RoutingProfileStatus `json:"status,omitempty"`
 }

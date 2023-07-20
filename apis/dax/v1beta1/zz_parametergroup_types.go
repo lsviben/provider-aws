@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ParameterGroupInitParameters struct {
+
+	// A description of the parameter group.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// –  The parameters of the parameter group.
+	Parameters []ParametersInitParameters `json:"parameters,omitempty" tf:"parameters,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type ParameterGroupObservation struct {
 
 	// A description of the parameter group.
@@ -28,17 +41,23 @@ type ParameterGroupObservation struct {
 type ParameterGroupParameters struct {
 
 	// A description of the parameter group.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// –  The parameters of the parameter group.
-	// +kubebuilder:validation:Optional
 	Parameters []ParametersParameters `json:"parameters,omitempty" tf:"parameters,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type ParametersInitParameters struct {
+
+	// The name of the parameter.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The value for the parameter.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type ParametersObservation struct {
@@ -53,18 +72,20 @@ type ParametersObservation struct {
 type ParametersParameters struct {
 
 	// The name of the parameter.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The value for the parameter.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 // ParameterGroupSpec defines the desired state of ParameterGroup
 type ParameterGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ParameterGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ParameterGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // ParameterGroupStatus defines the observed state of ParameterGroup.

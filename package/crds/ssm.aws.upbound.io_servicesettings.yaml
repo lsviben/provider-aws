@@ -77,8 +77,22 @@ spec:
                   settingValue:
                     description: Value of the service setting.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  settingId:
+                    description: ID of the service setting.
+                    type: string
+                  settingValue:
+                    description: Value of the service setting.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -278,12 +292,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: settingId is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.settingId)'
-            - message: settingValue is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.settingId)
+                || has(self.initProvider.settingId)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.settingValue)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.settingValue)
+                || has(self.initProvider.settingValue)'
           status:
             description: ServiceSettingStatus defines the observed state of ServiceSetting.
             properties:

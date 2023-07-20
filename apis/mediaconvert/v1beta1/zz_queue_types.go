@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type QueueInitParameters struct {
+
+	// A description of the queue
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Specifies whether the pricing plan for the queue is on-demand or reserved. Valid values are ON_DEMAND or RESERVED. Default to ON_DEMAND.
+	PricingPlan *string `json:"pricingPlan,omitempty" tf:"pricing_plan,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A detail pricing plan of the  reserved queue. See below.
+	ReservationPlanSettings []ReservationPlanSettingsInitParameters `json:"reservationPlanSettings,omitempty" tf:"reservation_plan_settings,omitempty"`
+
+	// A status of the queue. Valid values are ACTIVE or RESERVED. Default to PAUSED.
+	Status *string `json:"status,omitempty" tf:"status,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type QueueObservation struct {
 
 	// The Arn of the queue
@@ -43,29 +65,35 @@ type QueueObservation struct {
 type QueueParameters struct {
 
 	// A description of the queue
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Specifies whether the pricing plan for the queue is on-demand or reserved. Valid values are ON_DEMAND or RESERVED. Default to ON_DEMAND.
-	// +kubebuilder:validation:Optional
 	PricingPlan *string `json:"pricingPlan,omitempty" tf:"pricing_plan,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A detail pricing plan of the  reserved queue. See below.
-	// +kubebuilder:validation:Optional
 	ReservationPlanSettings []ReservationPlanSettingsParameters `json:"reservationPlanSettings,omitempty" tf:"reservation_plan_settings,omitempty"`
 
 	// A status of the queue. Valid values are ACTIVE or RESERVED. Default to PAUSED.
-	// +kubebuilder:validation:Optional
 	Status *string `json:"status,omitempty" tf:"status,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type ReservationPlanSettingsInitParameters struct {
+
+	// The length of the term of your reserved queue pricing plan commitment. Valid value is ONE_YEAR.
+	Commitment *string `json:"commitment,omitempty" tf:"commitment,omitempty"`
+
+	// Specifies whether the term of your reserved queue pricing plan. Valid values are AUTO_RENEW or EXPIRE.
+	RenewalType *string `json:"renewalType,omitempty" tf:"renewal_type,omitempty"`
+
+	// Specifies the number of reserved transcode slots (RTS) for queue.
+	ReservedSlots *float64 `json:"reservedSlots,omitempty" tf:"reserved_slots,omitempty"`
 }
 
 type ReservationPlanSettingsObservation struct {
@@ -83,22 +111,23 @@ type ReservationPlanSettingsObservation struct {
 type ReservationPlanSettingsParameters struct {
 
 	// The length of the term of your reserved queue pricing plan commitment. Valid value is ONE_YEAR.
-	// +kubebuilder:validation:Required
-	Commitment *string `json:"commitment" tf:"commitment,omitempty"`
+	Commitment *string `json:"commitment,omitempty" tf:"commitment,omitempty"`
 
 	// Specifies whether the term of your reserved queue pricing plan. Valid values are AUTO_RENEW or EXPIRE.
-	// +kubebuilder:validation:Required
-	RenewalType *string `json:"renewalType" tf:"renewal_type,omitempty"`
+	RenewalType *string `json:"renewalType,omitempty" tf:"renewal_type,omitempty"`
 
 	// Specifies the number of reserved transcode slots (RTS) for queue.
-	// +kubebuilder:validation:Required
-	ReservedSlots *float64 `json:"reservedSlots" tf:"reserved_slots,omitempty"`
+	ReservedSlots *float64 `json:"reservedSlots,omitempty" tf:"reserved_slots,omitempty"`
 }
 
 // QueueSpec defines the desired state of Queue
 type QueueSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     QueueParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider QueueInitParameters `json:"initProvider,omitempty"`
 }
 
 // QueueStatus defines the observed state of Queue.

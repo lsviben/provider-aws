@@ -13,6 +13,41 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type APIMappingInitParameters struct {
+
+	// API identifier.
+	// +crossplane:generate:reference:type=API
+	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
+
+	APIIDRef *v1.Reference `json:"apiIdRef,omitempty" tf:"-"`
+
+	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
+
+	// The API mapping key.
+	APIMappingKey *string `json:"apiMappingKey,omitempty" tf:"api_mapping_key,omitempty"`
+
+	// Domain name. Use the aws_apigatewayv2_domain_name resource to configure a domain name.
+	// +crossplane:generate:reference:type=DomainName
+	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
+
+	DomainNameRef *v1.Reference `json:"domainNameRef,omitempty" tf:"-"`
+
+	DomainNameSelector *v1.Selector `json:"domainNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// API stage. Use the aws_apigatewayv2_stage resource to configure an API stage.
+	// +crossplane:generate:reference:type=Stage
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
+	Stage *string `json:"stage,omitempty" tf:"stage,omitempty"`
+
+	StageRef *v1.Reference `json:"stageRef,omitempty" tf:"-"`
+
+	StageSelector *v1.Selector `json:"stageSelector,omitempty" tf:"-"`
+}
+
 type APIMappingObservation struct {
 
 	// API identifier.
@@ -35,7 +70,6 @@ type APIMappingParameters struct {
 
 	// API identifier.
 	// +crossplane:generate:reference:type=API
-	// +kubebuilder:validation:Optional
 	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
 
 	// Reference to a API to populate apiId.
@@ -47,12 +81,10 @@ type APIMappingParameters struct {
 	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
 
 	// The API mapping key.
-	// +kubebuilder:validation:Optional
 	APIMappingKey *string `json:"apiMappingKey,omitempty" tf:"api_mapping_key,omitempty"`
 
 	// Domain name. Use the aws_apigatewayv2_domain_name resource to configure a domain name.
 	// +crossplane:generate:reference:type=DomainName
-	// +kubebuilder:validation:Optional
 	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
 
 	// Reference to a DomainName to populate domainName.
@@ -65,13 +97,11 @@ type APIMappingParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// API stage. Use the aws_apigatewayv2_stage resource to configure an API stage.
 	// +crossplane:generate:reference:type=Stage
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
-	// +kubebuilder:validation:Optional
 	Stage *string `json:"stage,omitempty" tf:"stage,omitempty"`
 
 	// Reference to a Stage to populate stage.
@@ -87,6 +117,10 @@ type APIMappingParameters struct {
 type APIMappingSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     APIMappingParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider APIMappingInitParameters `json:"initProvider,omitempty"`
 }
 
 // APIMappingStatus defines the observed state of APIMapping.

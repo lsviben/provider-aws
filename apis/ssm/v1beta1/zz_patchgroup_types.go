@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PatchGroupInitParameters struct {
+
+	// The ID of the patch baseline to register the patch group with.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssm/v1beta1.PatchBaseline
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	BaselineID *string `json:"baselineId,omitempty" tf:"baseline_id,omitempty"`
+
+	BaselineIDRef *v1.Reference `json:"baselineIdRef,omitempty" tf:"-"`
+
+	BaselineIDSelector *v1.Selector `json:"baselineIdSelector,omitempty" tf:"-"`
+
+	// The name of the patch group that should be registered with the patch baseline.
+	PatchGroup *string `json:"patchGroup,omitempty" tf:"patch_group,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type PatchGroupObservation struct {
 
 	// The ID of the patch baseline to register the patch group with.
@@ -30,7 +49,6 @@ type PatchGroupParameters struct {
 	// The ID of the patch baseline to register the patch group with.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssm/v1beta1.PatchBaseline
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	BaselineID *string `json:"baselineId,omitempty" tf:"baseline_id,omitempty"`
 
 	// Reference to a PatchBaseline in ssm to populate baselineId.
@@ -42,19 +60,21 @@ type PatchGroupParameters struct {
 	BaselineIDSelector *v1.Selector `json:"baselineIdSelector,omitempty" tf:"-"`
 
 	// The name of the patch group that should be registered with the patch baseline.
-	// +kubebuilder:validation:Optional
 	PatchGroup *string `json:"patchGroup,omitempty" tf:"patch_group,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // PatchGroupSpec defines the desired state of PatchGroup
 type PatchGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PatchGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PatchGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // PatchGroupStatus defines the observed state of PatchGroup.
@@ -75,7 +95,7 @@ type PatchGroupStatus struct {
 type PatchGroup struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.patchGroup)",message="patchGroup is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.patchGroup) || has(self.initProvider.patchGroup)",message="%!s(MISSING) is a required parameter"
 	Spec   PatchGroupSpec   `json:"spec"`
 	Status PatchGroupStatus `json:"status,omitempty"`
 }

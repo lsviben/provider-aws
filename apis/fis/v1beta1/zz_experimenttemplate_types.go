@@ -13,6 +13,27 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ActionInitParameters struct {
+
+	// ID of the action. To find out what actions are supported see AWS FIS actions reference.
+	ActionID *string `json:"actionId,omitempty" tf:"action_id,omitempty"`
+
+	// Description of the action.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Friendly name of the action.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Parameter(s) for the action, if applicable. See below.
+	Parameter []ParameterInitParameters `json:"parameter,omitempty" tf:"parameter,omitempty"`
+
+	// Set of action names that must complete before this action can be executed.
+	StartAfter []*string `json:"startAfter,omitempty" tf:"start_after,omitempty"`
+
+	// Action's target, if applicable. See below.
+	Target []TargetInitParameters `json:"target,omitempty" tf:"target,omitempty"`
+}
+
 type ActionObservation struct {
 
 	// ID of the action. To find out what actions are supported see AWS FIS actions reference.
@@ -37,28 +58,53 @@ type ActionObservation struct {
 type ActionParameters struct {
 
 	// ID of the action. To find out what actions are supported see AWS FIS actions reference.
-	// +kubebuilder:validation:Required
-	ActionID *string `json:"actionId" tf:"action_id,omitempty"`
+	ActionID *string `json:"actionId,omitempty" tf:"action_id,omitempty"`
 
 	// Description of the action.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Friendly name of the action.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Parameter(s) for the action, if applicable. See below.
-	// +kubebuilder:validation:Optional
 	Parameter []ParameterParameters `json:"parameter,omitempty" tf:"parameter,omitempty"`
 
 	// Set of action names that must complete before this action can be executed.
-	// +kubebuilder:validation:Optional
 	StartAfter []*string `json:"startAfter,omitempty" tf:"start_after,omitempty"`
 
 	// Action's target, if applicable. See below.
-	// +kubebuilder:validation:Optional
 	Target []TargetParameters `json:"target,omitempty" tf:"target,omitempty"`
+}
+
+type ExperimentTemplateInitParameters struct {
+
+	// Action to be performed during an experiment. See below.
+	Action []ActionInitParameters `json:"action,omitempty" tf:"action,omitempty"`
+
+	// Description for the experiment template.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// ARN of an IAM role that grants the AWS FIS service permission to perform service actions on your behalf.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
+
+	// When an ongoing experiment should be stopped. See below.
+	StopCondition []StopConditionInitParameters `json:"stopCondition,omitempty" tf:"stop_condition,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Target of an action. See below.
+	Target []ExperimentTemplateTargetInitParameters `json:"target,omitempty" tf:"target,omitempty"`
 }
 
 type ExperimentTemplateObservation struct {
@@ -90,22 +136,18 @@ type ExperimentTemplateObservation struct {
 type ExperimentTemplateParameters struct {
 
 	// Action to be performed during an experiment. See below.
-	// +kubebuilder:validation:Optional
 	Action []ActionParameters `json:"action,omitempty" tf:"action,omitempty"`
 
 	// Description for the experiment template.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// ARN of an IAM role that grants the AWS FIS service permission to perform service actions on your behalf.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -117,16 +159,34 @@ type ExperimentTemplateParameters struct {
 	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
 
 	// When an ongoing experiment should be stopped. See below.
-	// +kubebuilder:validation:Optional
 	StopCondition []StopConditionParameters `json:"stopCondition,omitempty" tf:"stop_condition,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Target of an action. See below.
-	// +kubebuilder:validation:Optional
 	Target []ExperimentTemplateTargetParameters `json:"target,omitempty" tf:"target,omitempty"`
+}
+
+type ExperimentTemplateTargetInitParameters struct {
+
+	// Filter(s) for the target. Filters can be used to select resources based on specific attributes returned by the respective describe action of the resource type. For more information, see Targets for AWS FIS. See below.
+	Filter []FilterInitParameters `json:"filter,omitempty" tf:"filter,omitempty"`
+
+	// Friendly name given to the target.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Set of ARNs of the resources to target with an action. Conflicts with resource_tag.
+	ResourceArns []*string `json:"resourceArns,omitempty" tf:"resource_arns,omitempty"`
+
+	// Tag(s) the resources need to have to be considered a valid target for an action. Conflicts with resource_arns. See below.
+	ResourceTag []ResourceTagInitParameters `json:"resourceTag,omitempty" tf:"resource_tag,omitempty"`
+
+	// AWS resource type. The resource type must be supported for the specified action. To find out what resource types are supported, see Targets for AWS FIS.
+	ResourceType *string `json:"resourceType,omitempty" tf:"resource_type,omitempty"`
+
+	// Scopes the identified resources. Valid values are ALL (all identified resources), COUNT(n) (randomly select n of the identified resources), PERCENT(n) (randomly select n percent of the identified resources).
+	SelectionMode *string `json:"selectionMode,omitempty" tf:"selection_mode,omitempty"`
 }
 
 type ExperimentTemplateTargetObservation struct {
@@ -153,28 +213,31 @@ type ExperimentTemplateTargetObservation struct {
 type ExperimentTemplateTargetParameters struct {
 
 	// Filter(s) for the target. Filters can be used to select resources based on specific attributes returned by the respective describe action of the resource type. For more information, see Targets for AWS FIS. See below.
-	// +kubebuilder:validation:Optional
 	Filter []FilterParameters `json:"filter,omitempty" tf:"filter,omitempty"`
 
 	// Friendly name given to the target.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Set of ARNs of the resources to target with an action. Conflicts with resource_tag.
-	// +kubebuilder:validation:Optional
 	ResourceArns []*string `json:"resourceArns,omitempty" tf:"resource_arns,omitempty"`
 
 	// Tag(s) the resources need to have to be considered a valid target for an action. Conflicts with resource_arns. See below.
-	// +kubebuilder:validation:Optional
 	ResourceTag []ResourceTagParameters `json:"resourceTag,omitempty" tf:"resource_tag,omitempty"`
 
 	// AWS resource type. The resource type must be supported for the specified action. To find out what resource types are supported, see Targets for AWS FIS.
-	// +kubebuilder:validation:Required
-	ResourceType *string `json:"resourceType" tf:"resource_type,omitempty"`
+	ResourceType *string `json:"resourceType,omitempty" tf:"resource_type,omitempty"`
 
 	// Scopes the identified resources. Valid values are ALL (all identified resources), COUNT(n) (randomly select n of the identified resources), PERCENT(n) (randomly select n percent of the identified resources).
-	// +kubebuilder:validation:Required
-	SelectionMode *string `json:"selectionMode" tf:"selection_mode,omitempty"`
+	SelectionMode *string `json:"selectionMode,omitempty" tf:"selection_mode,omitempty"`
+}
+
+type FilterInitParameters struct {
+
+	// Attribute path for the filter.
+	Path *string `json:"path,omitempty" tf:"path,omitempty"`
+
+	// Set of attribute values for the filter.
+	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
 }
 
 type FilterObservation struct {
@@ -189,12 +252,19 @@ type FilterObservation struct {
 type FilterParameters struct {
 
 	// Attribute path for the filter.
-	// +kubebuilder:validation:Required
-	Path *string `json:"path" tf:"path,omitempty"`
+	Path *string `json:"path,omitempty" tf:"path,omitempty"`
 
 	// Set of attribute values for the filter.
-	// +kubebuilder:validation:Required
-	Values []*string `json:"values" tf:"values,omitempty"`
+	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
+}
+
+type ParameterInitParameters struct {
+
+	// Parameter name.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Parameter value.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type ParameterObservation struct {
@@ -209,12 +279,19 @@ type ParameterObservation struct {
 type ParameterParameters struct {
 
 	// Parameter name.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Parameter value.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type ResourceTagInitParameters struct {
+
+	// Tag key.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Tag value.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type ResourceTagObservation struct {
@@ -229,12 +306,19 @@ type ResourceTagObservation struct {
 type ResourceTagParameters struct {
 
 	// Tag key.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Tag value.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type StopConditionInitParameters struct {
+
+	// Source of the condition. One of none, aws:cloudwatch:alarm.
+	Source *string `json:"source,omitempty" tf:"source,omitempty"`
+
+	// ARN of the CloudWatch alarm. Required if the source is a CloudWatch alarm.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type StopConditionObservation struct {
@@ -249,11 +333,18 @@ type StopConditionObservation struct {
 type StopConditionParameters struct {
 
 	// Source of the condition. One of none, aws:cloudwatch:alarm.
-	// +kubebuilder:validation:Required
-	Source *string `json:"source" tf:"source,omitempty"`
+	Source *string `json:"source,omitempty" tf:"source,omitempty"`
 
 	// ARN of the CloudWatch alarm. Required if the source is a CloudWatch alarm.
-	// +kubebuilder:validation:Optional
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type TargetInitParameters struct {
+
+	// Tag key.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Target name, referencing a corresponding target.
 	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
@@ -269,18 +360,20 @@ type TargetObservation struct {
 type TargetParameters struct {
 
 	// Tag key.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Target name, referencing a corresponding target.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 // ExperimentTemplateSpec defines the desired state of ExperimentTemplate
 type ExperimentTemplateSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ExperimentTemplateParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ExperimentTemplateInitParameters `json:"initProvider,omitempty"`
 }
 
 // ExperimentTemplateStatus defines the observed state of ExperimentTemplate.
@@ -301,9 +394,9 @@ type ExperimentTemplateStatus struct {
 type ExperimentTemplate struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.action)",message="action is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.description)",message="description is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.stopCondition)",message="stopCondition is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.action) || has(self.initProvider.action)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.description) || has(self.initProvider.description)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.stopCondition) || has(self.initProvider.stopCondition)",message="%!s(MISSING) is a required parameter"
 	Spec   ExperimentTemplateSpec   `json:"spec"`
 	Status ExperimentTemplateStatus `json:"status,omitempty"`
 }

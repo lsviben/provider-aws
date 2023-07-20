@@ -77,8 +77,22 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  description:
+                    description: The name of the custom action target.
+                    type: string
+                  name:
+                    description: The description for the custom action target.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -278,12 +292,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: description is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.description)'
-            - message: name is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.description)
+                || has(self.initProvider.description)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)
+                || has(self.initProvider.name)'
           status:
             description: ActionTargetStatus defines the observed state of ActionTarget.
             properties:

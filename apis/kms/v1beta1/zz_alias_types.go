@@ -13,6 +13,21 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AliasInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Identifier for the key for which the alias is for, can be either an ARN or key_id.
+	// +crossplane:generate:reference:type=Key
+	TargetKeyID *string `json:"targetKeyId,omitempty" tf:"target_key_id,omitempty"`
+
+	TargetKeyIDRef *v1.Reference `json:"targetKeyIdRef,omitempty" tf:"-"`
+
+	TargetKeyIDSelector *v1.Selector `json:"targetKeyIdSelector,omitempty" tf:"-"`
+}
+
 type AliasObservation struct {
 
 	// The Amazon Resource Name (ARN) of the key alias.
@@ -31,12 +46,10 @@ type AliasParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Identifier for the key for which the alias is for, can be either an ARN or key_id.
 	// +crossplane:generate:reference:type=Key
-	// +kubebuilder:validation:Optional
 	TargetKeyID *string `json:"targetKeyId,omitempty" tf:"target_key_id,omitempty"`
 
 	// Reference to a Key to populate targetKeyId.
@@ -52,6 +65,10 @@ type AliasParameters struct {
 type AliasSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AliasParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AliasInitParameters `json:"initProvider,omitempty"`
 }
 
 // AliasStatus defines the observed state of Alias.

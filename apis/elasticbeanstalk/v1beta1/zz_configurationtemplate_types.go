@@ -13,6 +13,36 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConfigurationTemplateInitParameters struct {
+
+	// –  name of the application to associate with this configuration template
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elasticbeanstalk/v1beta1.Application
+	Application *string `json:"application,omitempty" tf:"application,omitempty"`
+
+	ApplicationRef *v1.Reference `json:"applicationRef,omitempty" tf:"-"`
+
+	ApplicationSelector *v1.Selector `json:"applicationSelector,omitempty" tf:"-"`
+
+	// Short description of the Template
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// –  The ID of the environment used with this configuration template
+	EnvironmentID *string `json:"environmentId,omitempty" tf:"environment_id,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// –  Option settings to configure the new Environment. These
+	// override specific values that are set as defaults. The format is detailed
+	// below in Option Settings
+	Setting []SettingInitParameters `json:"setting,omitempty" tf:"setting,omitempty"`
+
+	// –  A solution stack to base your Template
+	// off of. Example stacks can be found in the Amazon API documentation
+	SolutionStackName *string `json:"solutionStackName,omitempty" tf:"solution_stack_name,omitempty"`
+}
+
 type ConfigurationTemplateObservation struct {
 
 	// –  name of the application to associate with this configuration template
@@ -40,7 +70,6 @@ type ConfigurationTemplateParameters struct {
 
 	// –  name of the application to associate with this configuration template
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elasticbeanstalk/v1beta1.Application
-	// +kubebuilder:validation:Optional
 	Application *string `json:"application,omitempty" tf:"application,omitempty"`
 
 	// Reference to a Application in elasticbeanstalk to populate application.
@@ -52,28 +81,38 @@ type ConfigurationTemplateParameters struct {
 	ApplicationSelector *v1.Selector `json:"applicationSelector,omitempty" tf:"-"`
 
 	// Short description of the Template
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// –  The ID of the environment used with this configuration template
-	// +kubebuilder:validation:Optional
 	EnvironmentID *string `json:"environmentId,omitempty" tf:"environment_id,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// –  Option settings to configure the new Environment. These
 	// override specific values that are set as defaults. The format is detailed
 	// below in Option Settings
-	// +kubebuilder:validation:Optional
 	Setting []SettingParameters `json:"setting,omitempty" tf:"setting,omitempty"`
 
 	// –  A solution stack to base your Template
 	// off of. Example stacks can be found in the Amazon API documentation
-	// +kubebuilder:validation:Optional
 	SolutionStackName *string `json:"solutionStackName,omitempty" tf:"solution_stack_name,omitempty"`
+}
+
+type SettingInitParameters struct {
+
+	// A unique name for this Template.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// unique namespace identifying the option's associated AWS resource
+	Namespace *string `json:"namespace,omitempty" tf:"namespace,omitempty"`
+
+	// resource name for scheduled action
+	Resource *string `json:"resource,omitempty" tf:"resource,omitempty"`
+
+	// value for the configuration option
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type SettingObservation struct {
@@ -94,26 +133,26 @@ type SettingObservation struct {
 type SettingParameters struct {
 
 	// A unique name for this Template.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// unique namespace identifying the option's associated AWS resource
-	// +kubebuilder:validation:Required
-	Namespace *string `json:"namespace" tf:"namespace,omitempty"`
+	Namespace *string `json:"namespace,omitempty" tf:"namespace,omitempty"`
 
 	// resource name for scheduled action
-	// +kubebuilder:validation:Optional
 	Resource *string `json:"resource,omitempty" tf:"resource,omitempty"`
 
 	// value for the configuration option
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 // ConfigurationTemplateSpec defines the desired state of ConfigurationTemplate
 type ConfigurationTemplateSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ConfigurationTemplateParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ConfigurationTemplateInitParameters `json:"initProvider,omitempty"`
 }
 
 // ConfigurationTemplateStatus defines the observed state of ConfigurationTemplate.

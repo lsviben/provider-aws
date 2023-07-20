@@ -111,16 +111,10 @@ spec:
                                                     to. Must be between 1 and 255
                                                     characters in length.
                                                   type: string
-                                              required:
-                                              - virtualServiceName
                                               type: object
                                             type: array
-                                        required:
-                                        - virtualService
                                         type: object
                                       type: array
-                                  required:
-                                  - target
                                   type: object
                                 type: array
                               match:
@@ -135,13 +129,8 @@ spec:
                                       description: Fully qualified domain name for
                                         the service to match from the request.
                                       type: string
-                                  required:
-                                  - serviceName
                                   type: object
                                 type: array
-                            required:
-                            - action
-                            - match
                             type: object
                           type: array
                         http2Route:
@@ -165,8 +154,6 @@ spec:
                                                     name to write to. Valid values:
                                                     ENABLED, DISABLED.'
                                                   type: string
-                                              required:
-                                              - defaultTargetHostname
                                               type: object
                                             type: array
                                           prefix:
@@ -205,16 +192,10 @@ spec:
                                                     to. Must be between 1 and 255
                                                     characters in length.
                                                   type: string
-                                              required:
-                                              - virtualServiceName
                                               type: object
                                             type: array
-                                        required:
-                                        - virtualService
                                         type: object
                                       type: array
-                                  required:
-                                  - target
                                   type: object
                                 type: array
                               match:
@@ -245,9 +226,6 @@ spec:
                                       type: string
                                   type: object
                                 type: array
-                            required:
-                            - action
-                            - match
                             type: object
                           type: array
                         httpRoute:
@@ -271,8 +249,6 @@ spec:
                                                     name to write to. Valid values:
                                                     ENABLED, DISABLED.'
                                                   type: string
-                                              required:
-                                              - defaultTargetHostname
                                               type: object
                                             type: array
                                           prefix:
@@ -413,12 +389,8 @@ spec:
                                                   type: object
                                               type: object
                                             type: array
-                                        required:
-                                        - virtualService
                                         type: object
                                       type: array
-                                  required:
-                                  - target
                                   type: object
                                 type: array
                               match:
@@ -449,9 +421,6 @@ spec:
                                       type: string
                                   type: object
                                 type: array
-                            required:
-                            - action
-                            - match
                             type: object
                           type: array
                       type: object
@@ -540,8 +509,452 @@ spec:
                             type: string
                         type: object
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  meshName:
+                    description: Name of the service mesh in which to create the gateway
+                      route. Must be between 1 and 255 characters in length.
+                    type: string
+                  meshOwner:
+                    description: AWS account ID of the service mesh's owner. Defaults
+                      to the account ID the AWS provider is currently connected to.
+                    type: string
+                  name:
+                    description: Name to use for the gateway route. Must be between
+                      1 and 255 characters in length.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  spec:
+                    description: Gateway route specification to apply.
+                    items:
+                      properties:
+                        grpcRoute:
+                          description: Specification of a gRPC gateway route.
+                          items:
+                            properties:
+                              action:
+                                description: Action to take if a match is determined.
+                                items:
+                                  properties:
+                                    target:
+                                      description: Target that traffic is routed to
+                                        when a request matches the gateway route.
+                                      items:
+                                        properties:
+                                          virtualService:
+                                            description: Virtual service gateway route
+                                              target.
+                                            items:
+                                              properties:
+                                                virtualServiceName:
+                                                  description: Name of the virtual
+                                                    service that traffic is routed
+                                                    to. Must be between 1 and 255
+                                                    characters in length.
+                                                  type: string
+                                              type: object
+                                            type: array
+                                        type: object
+                                      type: array
+                                  type: object
+                                type: array
+                              match:
+                                description: Criteria for determining a request match.
+                                items:
+                                  properties:
+                                    port:
+                                      description: The port number to match from the
+                                        request.
+                                      type: number
+                                    serviceName:
+                                      description: Fully qualified domain name for
+                                        the service to match from the request.
+                                      type: string
+                                  type: object
+                                type: array
+                            type: object
+                          type: array
+                        http2Route:
+                          description: Specification of an HTTP/2 gateway route.
+                          items:
+                            properties:
+                              action:
+                                description: Action to take if a match is determined.
+                                items:
+                                  properties:
+                                    rewrite:
+                                      description: Gateway route action to rewrite.
+                                      items:
+                                        properties:
+                                          hostname:
+                                            description: Host name to rewrite.
+                                            items:
+                                              properties:
+                                                defaultTargetHostname:
+                                                  description: 'Default target host
+                                                    name to write to. Valid values:
+                                                    ENABLED, DISABLED.'
+                                                  type: string
+                                              type: object
+                                            type: array
+                                          prefix:
+                                            description: Specified beginning characters
+                                              to rewrite.
+                                            items:
+                                              properties:
+                                                defaultPrefix:
+                                                  description: 'Default prefix used
+                                                    to replace the incoming route
+                                                    prefix when rewritten. Valid values:
+                                                    ENABLED, DISABLED.'
+                                                  type: string
+                                                value:
+                                                  description: Value used to replace
+                                                    the incoming route prefix when
+                                                    rewritten.
+                                                  type: string
+                                              type: object
+                                            type: array
+                                        type: object
+                                      type: array
+                                    target:
+                                      description: Target that traffic is routed to
+                                        when a request matches the gateway route.
+                                      items:
+                                        properties:
+                                          virtualService:
+                                            description: Virtual service gateway route
+                                              target.
+                                            items:
+                                              properties:
+                                                virtualServiceName:
+                                                  description: Name of the virtual
+                                                    service that traffic is routed
+                                                    to. Must be between 1 and 255
+                                                    characters in length.
+                                                  type: string
+                                              type: object
+                                            type: array
+                                        type: object
+                                      type: array
+                                  type: object
+                                type: array
+                              match:
+                                description: Criteria for determining a request match.
+                                items:
+                                  properties:
+                                    hostname:
+                                      description: Host name to rewrite.
+                                      items:
+                                        properties:
+                                          exact:
+                                            description: Exact host name to match
+                                              on.
+                                            type: string
+                                          suffix:
+                                            description: Specified ending characters
+                                              of the host name to match on.
+                                            type: string
+                                        type: object
+                                      type: array
+                                    port:
+                                      description: The port number to match from the
+                                        request.
+                                      type: number
+                                    prefix:
+                                      description: Specified beginning characters
+                                        to rewrite.
+                                      type: string
+                                  type: object
+                                type: array
+                            type: object
+                          type: array
+                        httpRoute:
+                          description: Specification of an HTTP gateway route.
+                          items:
+                            properties:
+                              action:
+                                description: Action to take if a match is determined.
+                                items:
+                                  properties:
+                                    rewrite:
+                                      description: Gateway route action to rewrite.
+                                      items:
+                                        properties:
+                                          hostname:
+                                            description: Host name to rewrite.
+                                            items:
+                                              properties:
+                                                defaultTargetHostname:
+                                                  description: 'Default target host
+                                                    name to write to. Valid values:
+                                                    ENABLED, DISABLED.'
+                                                  type: string
+                                              type: object
+                                            type: array
+                                          prefix:
+                                            description: Specified beginning characters
+                                              to rewrite.
+                                            items:
+                                              properties:
+                                                defaultPrefix:
+                                                  description: 'Default prefix used
+                                                    to replace the incoming route
+                                                    prefix when rewritten. Valid values:
+                                                    ENABLED, DISABLED.'
+                                                  type: string
+                                                value:
+                                                  description: Value used to replace
+                                                    the incoming route prefix when
+                                                    rewritten.
+                                                  type: string
+                                              type: object
+                                            type: array
+                                        type: object
+                                      type: array
+                                    target:
+                                      description: Target that traffic is routed to
+                                        when a request matches the gateway route.
+                                      items:
+                                        properties:
+                                          virtualService:
+                                            description: Virtual service gateway route
+                                              target.
+                                            items:
+                                              properties:
+                                                virtualServiceName:
+                                                  description: Name of the virtual
+                                                    service that traffic is routed
+                                                    to. Must be between 1 and 255
+                                                    characters in length.
+                                                  type: string
+                                                virtualServiceNameRef:
+                                                  description: A Reference to a named
+                                                    object.
+                                                  properties:
+                                                    name:
+                                                      description: Name of the referenced
+                                                        object.
+                                                      type: string
+                                                    policy:
+                                                      description: Policies for referencing.
+                                                      properties:
+                                                        resolution:
+                                                          default: Required
+                                                          description: Resolution
+                                                            specifies whether resolution
+                                                            of this reference is required.
+                                                            The default is 'Required',
+                                                            which means the reconcile
+                                                            will fail if the reference
+                                                            cannot be resolved. 'Optional'
+                                                            means this reference will
+                                                            be a no-op if it cannot
+                                                            be resolved.
+                                                          enum:
+                                                          - Required
+                                                          - Optional
+                                                          type: string
+                                                        resolve:
+                                                          description: Resolve specifies
+                                                            when this reference should
+                                                            be resolved. The default
+                                                            is 'IfNotPresent', which
+                                                            will attempt to resolve
+                                                            the reference only when
+                                                            the corresponding field
+                                                            is not present. Use 'Always'
+                                                            to resolve the reference
+                                                            on every reconcile.
+                                                          enum:
+                                                          - Always
+                                                          - IfNotPresent
+                                                          type: string
+                                                      type: object
+                                                  required:
+                                                  - name
+                                                  type: object
+                                                virtualServiceNameSelector:
+                                                  description: A Selector selects
+                                                    an object.
+                                                  properties:
+                                                    matchControllerRef:
+                                                      description: MatchControllerRef
+                                                        ensures an object with the
+                                                        same controller reference
+                                                        as the selecting object is
+                                                        selected.
+                                                      type: boolean
+                                                    matchLabels:
+                                                      additionalProperties:
+                                                        type: string
+                                                      description: MatchLabels ensures
+                                                        an object with matching labels
+                                                        is selected.
+                                                      type: object
+                                                    policy:
+                                                      description: Policies for selection.
+                                                      properties:
+                                                        resolution:
+                                                          default: Required
+                                                          description: Resolution
+                                                            specifies whether resolution
+                                                            of this reference is required.
+                                                            The default is 'Required',
+                                                            which means the reconcile
+                                                            will fail if the reference
+                                                            cannot be resolved. 'Optional'
+                                                            means this reference will
+                                                            be a no-op if it cannot
+                                                            be resolved.
+                                                          enum:
+                                                          - Required
+                                                          - Optional
+                                                          type: string
+                                                        resolve:
+                                                          description: Resolve specifies
+                                                            when this reference should
+                                                            be resolved. The default
+                                                            is 'IfNotPresent', which
+                                                            will attempt to resolve
+                                                            the reference only when
+                                                            the corresponding field
+                                                            is not present. Use 'Always'
+                                                            to resolve the reference
+                                                            on every reconcile.
+                                                          enum:
+                                                          - Always
+                                                          - IfNotPresent
+                                                          type: string
+                                                      type: object
+                                                  type: object
+                                              type: object
+                                            type: array
+                                        type: object
+                                      type: array
+                                  type: object
+                                type: array
+                              match:
+                                description: Criteria for determining a request match.
+                                items:
+                                  properties:
+                                    hostname:
+                                      description: Host name to rewrite.
+                                      items:
+                                        properties:
+                                          exact:
+                                            description: Exact host name to match
+                                              on.
+                                            type: string
+                                          suffix:
+                                            description: Specified ending characters
+                                              of the host name to match on.
+                                            type: string
+                                        type: object
+                                      type: array
+                                    port:
+                                      description: The port number to match from the
+                                        request.
+                                      type: number
+                                    prefix:
+                                      description: Specified beginning characters
+                                        to rewrite.
+                                      type: string
+                                  type: object
+                                type: array
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
+                  virtualGatewayName:
+                    description: Name of the virtual gateway to associate the gateway
+                      route with. Must be between 1 and 255 characters in length.
+                    type: string
+                  virtualGatewayNameRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  virtualGatewayNameSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
                 type: object
               managementPolicies:
                 default:
@@ -741,15 +1154,18 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: meshName is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.meshName)'
-            - message: name is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.meshName)
+                || has(self.initProvider.meshName)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)'
-            - message: spec is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)
+                || has(self.initProvider.name)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.spec)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.spec)
+                || has(self.initProvider.spec)'
           status:
             description: GatewayRouteStatus defines the observed state of GatewayRoute.
             properties:

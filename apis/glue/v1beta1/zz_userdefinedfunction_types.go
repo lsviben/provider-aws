@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ResourceUrisInitParameters struct {
+
+	// The type of the resource. can be one of JAR, FILE, and ARCHIVE.
+	ResourceType *string `json:"resourceType,omitempty" tf:"resource_type,omitempty"`
+
+	// The URI for accessing the resource.
+	URI *string `json:"uri,omitempty" tf:"uri,omitempty"`
+}
+
 type ResourceUrisObservation struct {
 
 	// The type of the resource. can be one of JAR, FILE, and ARCHIVE.
@@ -25,12 +34,40 @@ type ResourceUrisObservation struct {
 type ResourceUrisParameters struct {
 
 	// The type of the resource. can be one of JAR, FILE, and ARCHIVE.
-	// +kubebuilder:validation:Required
-	ResourceType *string `json:"resourceType" tf:"resource_type,omitempty"`
+	ResourceType *string `json:"resourceType,omitempty" tf:"resource_type,omitempty"`
 
 	// The URI for accessing the resource.
-	// +kubebuilder:validation:Required
-	URI *string `json:"uri" tf:"uri,omitempty"`
+	URI *string `json:"uri,omitempty" tf:"uri,omitempty"`
+}
+
+type UserDefinedFunctionInitParameters struct {
+
+	// ID of the Glue Catalog to create the function in. If omitted, this defaults to the AWS Account ID.
+	CatalogID *string `json:"catalogId,omitempty" tf:"catalog_id,omitempty"`
+
+	// The Java class that contains the function code.
+	ClassName *string `json:"className,omitempty" tf:"class_name,omitempty"`
+
+	// The name of the Database to create the Function.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.CatalogDatabase
+	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
+
+	DatabaseNameRef *v1.Reference `json:"databaseNameRef,omitempty" tf:"-"`
+
+	DatabaseNameSelector *v1.Selector `json:"databaseNameSelector,omitempty" tf:"-"`
+
+	// The owner of the function.
+	OwnerName *string `json:"ownerName,omitempty" tf:"owner_name,omitempty"`
+
+	// The owner type. can be one of USER, ROLE, and GROUP.
+	OwnerType *string `json:"ownerType,omitempty" tf:"owner_type,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The configuration block for Resource URIs. See resource uris below for more details.
+	ResourceUris []ResourceUrisInitParameters `json:"resourceUris,omitempty" tf:"resource_uris,omitempty"`
 }
 
 type UserDefinedFunctionObservation struct {
@@ -66,16 +103,13 @@ type UserDefinedFunctionObservation struct {
 type UserDefinedFunctionParameters struct {
 
 	// ID of the Glue Catalog to create the function in. If omitted, this defaults to the AWS Account ID.
-	// +kubebuilder:validation:Required
-	CatalogID *string `json:"catalogId" tf:"catalog_id,omitempty"`
+	CatalogID *string `json:"catalogId,omitempty" tf:"catalog_id,omitempty"`
 
 	// The Java class that contains the function code.
-	// +kubebuilder:validation:Optional
 	ClassName *string `json:"className,omitempty" tf:"class_name,omitempty"`
 
 	// The name of the Database to create the Function.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.CatalogDatabase
-	// +kubebuilder:validation:Optional
 	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
 
 	// Reference to a CatalogDatabase in glue to populate databaseName.
@@ -87,20 +121,16 @@ type UserDefinedFunctionParameters struct {
 	DatabaseNameSelector *v1.Selector `json:"databaseNameSelector,omitempty" tf:"-"`
 
 	// The owner of the function.
-	// +kubebuilder:validation:Optional
 	OwnerName *string `json:"ownerName,omitempty" tf:"owner_name,omitempty"`
 
 	// The owner type. can be one of USER, ROLE, and GROUP.
-	// +kubebuilder:validation:Optional
 	OwnerType *string `json:"ownerType,omitempty" tf:"owner_type,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The configuration block for Resource URIs. See resource uris below for more details.
-	// +kubebuilder:validation:Optional
 	ResourceUris []ResourceUrisParameters `json:"resourceUris,omitempty" tf:"resource_uris,omitempty"`
 }
 
@@ -108,6 +138,10 @@ type UserDefinedFunctionParameters struct {
 type UserDefinedFunctionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     UserDefinedFunctionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider UserDefinedFunctionInitParameters `json:"initProvider,omitempty"`
 }
 
 // UserDefinedFunctionStatus defines the observed state of UserDefinedFunction.
@@ -128,9 +162,9 @@ type UserDefinedFunctionStatus struct {
 type UserDefinedFunction struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.className)",message="className is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ownerName)",message="ownerName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ownerType)",message="ownerType is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.className) || has(self.initProvider.className)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ownerName) || has(self.initProvider.ownerName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ownerType) || has(self.initProvider.ownerType)",message="%!s(MISSING) is a required parameter"
 	Spec   UserDefinedFunctionSpec   `json:"spec"`
 	Status UserDefinedFunctionStatus `json:"status,omitempty"`
 }

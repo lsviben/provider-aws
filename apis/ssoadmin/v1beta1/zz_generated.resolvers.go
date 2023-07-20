@@ -36,6 +36,22 @@ func (mg *ManagedPolicyAttachment) ResolveReferences(ctx context.Context, c clie
 	mg.Spec.ForProvider.PermissionSetArn = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Spec.ForProvider.PermissionSetArnRef = rsp.ResolvedReference
 
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.PermissionSetArn),
+		Extract:      resource.ExtractParamPath("arn", true),
+		Reference:    mg.Spec.InitProvider.PermissionSetArnRef,
+		Selector:     mg.Spec.InitProvider.PermissionSetArnSelector,
+		To: reference.To{
+			List:    &PermissionSetList{},
+			Managed: &PermissionSet{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.InitProvider.PermissionSetArn")
+	}
+	mg.Spec.InitProvider.PermissionSetArn = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.InitProvider.PermissionSetArnRef = rsp.ResolvedReference
+
 	return nil
 }
 
@@ -77,6 +93,38 @@ func (mg *PermissionSetInlinePolicy) ResolveReferences(ctx context.Context, c cl
 	}
 	mg.Spec.ForProvider.PermissionSetArn = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Spec.ForProvider.PermissionSetArnRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.InstanceArn),
+		Extract:      resource.ExtractParamPath("instance_arn", false),
+		Reference:    mg.Spec.InitProvider.InstanceArnRef,
+		Selector:     mg.Spec.InitProvider.InstanceArnSelector,
+		To: reference.To{
+			List:    &PermissionSetList{},
+			Managed: &PermissionSet{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.InitProvider.InstanceArn")
+	}
+	mg.Spec.InitProvider.InstanceArn = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.InitProvider.InstanceArnRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.PermissionSetArn),
+		Extract:      resource.ExtractParamPath("arn", true),
+		Reference:    mg.Spec.InitProvider.PermissionSetArnRef,
+		Selector:     mg.Spec.InitProvider.PermissionSetArnSelector,
+		To: reference.To{
+			List:    &PermissionSetList{},
+			Managed: &PermissionSet{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.InitProvider.PermissionSetArn")
+	}
+	mg.Spec.InitProvider.PermissionSetArn = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.InitProvider.PermissionSetArnRef = rsp.ResolvedReference
 
 	return nil
 }

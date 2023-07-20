@@ -9,6 +9,8 @@ package v1beta1
 import (
 	"github.com/pkg/errors"
 
+	"github.com/imdario/mergo"
+
 	"github.com/upbound/upjet/pkg/resource"
 	"github.com/upbound/upjet/pkg/resource/json"
 )
@@ -57,7 +59,22 @@ func (tr *Queue) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this Queue
@@ -85,6 +102,31 @@ func (tr *Queue) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *Queue) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this Queue
+func (tr *Queue) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this QueuePolicy
@@ -131,7 +173,22 @@ func (tr *QueuePolicy) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this QueuePolicy
@@ -159,6 +216,31 @@ func (tr *QueuePolicy) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *QueuePolicy) GetTerraformSchemaVersion() int {
 	return 1
+}
+
+// GetIgnorableFields of this QueuePolicy
+func (tr *QueuePolicy) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this QueueRedriveAllowPolicy
@@ -205,7 +287,22 @@ func (tr *QueueRedriveAllowPolicy) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this QueueRedriveAllowPolicy
@@ -233,6 +330,31 @@ func (tr *QueueRedriveAllowPolicy) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *QueueRedriveAllowPolicy) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this QueueRedriveAllowPolicy
+func (tr *QueueRedriveAllowPolicy) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this QueueRedrivePolicy
@@ -279,7 +401,22 @@ func (tr *QueueRedrivePolicy) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this QueueRedrivePolicy
@@ -307,4 +444,29 @@ func (tr *QueueRedrivePolicy) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *QueueRedrivePolicy) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this QueueRedrivePolicy
+func (tr *QueueRedrivePolicy) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }

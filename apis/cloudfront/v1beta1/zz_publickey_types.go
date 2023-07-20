@@ -13,6 +13,22 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PublicKeyInitParameters struct {
+
+	// An optional comment about the public key.
+	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
+
+	// The encoded public key that you want to add to CloudFront to use with features like field-level encryption.
+	EncodedKeySecretRef v1.SecretKeySelector `json:"encodedKeySecretRef" tf:"-"`
+
+	// The name for the public key.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type PublicKeyObservation struct {
 
 	// Internal value used by CloudFront to allow future updates to the public key configuration.
@@ -34,27 +50,27 @@ type PublicKeyObservation struct {
 type PublicKeyParameters struct {
 
 	// An optional comment about the public key.
-	// +kubebuilder:validation:Optional
 	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
 
 	// The encoded public key that you want to add to CloudFront to use with features like field-level encryption.
-	// +kubebuilder:validation:Optional
 	EncodedKeySecretRef v1.SecretKeySelector `json:"encodedKeySecretRef" tf:"-"`
 
 	// The name for the public key.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // PublicKeySpec defines the desired state of PublicKey
 type PublicKeySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PublicKeyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PublicKeyInitParameters `json:"initProvider,omitempty"`
 }
 
 // PublicKeyStatus defines the observed state of PublicKey.
@@ -75,7 +91,7 @@ type PublicKeyStatus struct {
 type PublicKey struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.encodedKeySecretRef)",message="encodedKeySecretRef is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.encodedKeySecretRef) || has(self.initProvider.encodedKeySecretRef)",message="%!s(MISSING) is a required parameter"
 	Spec   PublicKeySpec   `json:"spec"`
 	Status PublicKeyStatus `json:"status,omitempty"`
 }

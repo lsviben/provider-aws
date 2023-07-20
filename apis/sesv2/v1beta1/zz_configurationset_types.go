@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConfigurationSetInitParameters struct {
+
+	// An object that defines the dedicated IP pool that is used to send emails that you send using the configuration set.
+	DeliveryOptions []DeliveryOptionsInitParameters `json:"deliveryOptions,omitempty" tf:"delivery_options,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// An object that defines whether or not Amazon SES collects reputation metrics for the emails that you send that use the configuration set.
+	ReputationOptions []ReputationOptionsInitParameters `json:"reputationOptions,omitempty" tf:"reputation_options,omitempty"`
+
+	// An object that defines whether or not Amazon SES can send email that you send using the configuration set.
+	SendingOptions []SendingOptionsInitParameters `json:"sendingOptions,omitempty" tf:"sending_options,omitempty"`
+
+	// An object that contains information about the suppression list preferences for your account.
+	SuppressionOptions []SuppressionOptionsInitParameters `json:"suppressionOptions,omitempty" tf:"suppression_options,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// An object that defines the open and click tracking options for emails that you send using the configuration set.
+	TrackingOptions []TrackingOptionsInitParameters `json:"trackingOptions,omitempty" tf:"tracking_options,omitempty"`
+}
+
 type ConfigurationSetObservation struct {
 
 	// ARN of the Configuration Set.
@@ -44,33 +69,35 @@ type ConfigurationSetObservation struct {
 type ConfigurationSetParameters struct {
 
 	// An object that defines the dedicated IP pool that is used to send emails that you send using the configuration set.
-	// +kubebuilder:validation:Optional
 	DeliveryOptions []DeliveryOptionsParameters `json:"deliveryOptions,omitempty" tf:"delivery_options,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// An object that defines whether or not Amazon SES collects reputation metrics for the emails that you send that use the configuration set.
-	// +kubebuilder:validation:Optional
 	ReputationOptions []ReputationOptionsParameters `json:"reputationOptions,omitempty" tf:"reputation_options,omitempty"`
 
 	// An object that defines whether or not Amazon SES can send email that you send using the configuration set.
-	// +kubebuilder:validation:Optional
 	SendingOptions []SendingOptionsParameters `json:"sendingOptions,omitempty" tf:"sending_options,omitempty"`
 
 	// An object that contains information about the suppression list preferences for your account.
-	// +kubebuilder:validation:Optional
 	SuppressionOptions []SuppressionOptionsParameters `json:"suppressionOptions,omitempty" tf:"suppression_options,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// An object that defines the open and click tracking options for emails that you send using the configuration set.
-	// +kubebuilder:validation:Optional
 	TrackingOptions []TrackingOptionsParameters `json:"trackingOptions,omitempty" tf:"tracking_options,omitempty"`
+}
+
+type DeliveryOptionsInitParameters struct {
+
+	// The name of the dedicated IP pool to associate with the configuration set.
+	SendingPoolName *string `json:"sendingPoolName,omitempty" tf:"sending_pool_name,omitempty"`
+
+	// Specifies whether messages that use the configuration set are required to use Transport Layer Security (TLS). Valid values: REQUIRE, OPTIONAL.
+	TLSPolicy *string `json:"tlsPolicy,omitempty" tf:"tls_policy,omitempty"`
 }
 
 type DeliveryOptionsObservation struct {
@@ -85,12 +112,16 @@ type DeliveryOptionsObservation struct {
 type DeliveryOptionsParameters struct {
 
 	// The name of the dedicated IP pool to associate with the configuration set.
-	// +kubebuilder:validation:Optional
 	SendingPoolName *string `json:"sendingPoolName,omitempty" tf:"sending_pool_name,omitempty"`
 
 	// Specifies whether messages that use the configuration set are required to use Transport Layer Security (TLS). Valid values: REQUIRE, OPTIONAL.
-	// +kubebuilder:validation:Optional
 	TLSPolicy *string `json:"tlsPolicy,omitempty" tf:"tls_policy,omitempty"`
+}
+
+type ReputationOptionsInitParameters struct {
+
+	// If true, tracking of reputation metrics is enabled for the configuration set. If false, tracking of reputation metrics is disabled for the configuration set.
+	ReputationMetricsEnabled *bool `json:"reputationMetricsEnabled,omitempty" tf:"reputation_metrics_enabled,omitempty"`
 }
 
 type ReputationOptionsObservation struct {
@@ -105,8 +136,13 @@ type ReputationOptionsObservation struct {
 type ReputationOptionsParameters struct {
 
 	// If true, tracking of reputation metrics is enabled for the configuration set. If false, tracking of reputation metrics is disabled for the configuration set.
-	// +kubebuilder:validation:Optional
 	ReputationMetricsEnabled *bool `json:"reputationMetricsEnabled,omitempty" tf:"reputation_metrics_enabled,omitempty"`
+}
+
+type SendingOptionsInitParameters struct {
+
+	// If true, email sending is enabled for the configuration set. If false, email sending is disabled for the configuration set.
+	SendingEnabled *bool `json:"sendingEnabled,omitempty" tf:"sending_enabled,omitempty"`
 }
 
 type SendingOptionsObservation struct {
@@ -118,8 +154,13 @@ type SendingOptionsObservation struct {
 type SendingOptionsParameters struct {
 
 	// If true, email sending is enabled for the configuration set. If false, email sending is disabled for the configuration set.
-	// +kubebuilder:validation:Optional
 	SendingEnabled *bool `json:"sendingEnabled,omitempty" tf:"sending_enabled,omitempty"`
+}
+
+type SuppressionOptionsInitParameters struct {
+
+	// A list that contains the reasons that email addresses are automatically added to the suppression list for your account. Valid values: BOUNCE, COMPLAINT.
+	SuppressedReasons []*string `json:"suppressedReasons,omitempty" tf:"suppressed_reasons,omitempty"`
 }
 
 type SuppressionOptionsObservation struct {
@@ -131,8 +172,13 @@ type SuppressionOptionsObservation struct {
 type SuppressionOptionsParameters struct {
 
 	// A list that contains the reasons that email addresses are automatically added to the suppression list for your account. Valid values: BOUNCE, COMPLAINT.
-	// +kubebuilder:validation:Optional
 	SuppressedReasons []*string `json:"suppressedReasons,omitempty" tf:"suppressed_reasons,omitempty"`
+}
+
+type TrackingOptionsInitParameters struct {
+
+	// The domain to use for tracking open and click events.
+	CustomRedirectDomain *string `json:"customRedirectDomain,omitempty" tf:"custom_redirect_domain,omitempty"`
 }
 
 type TrackingOptionsObservation struct {
@@ -144,14 +190,17 @@ type TrackingOptionsObservation struct {
 type TrackingOptionsParameters struct {
 
 	// The domain to use for tracking open and click events.
-	// +kubebuilder:validation:Required
-	CustomRedirectDomain *string `json:"customRedirectDomain" tf:"custom_redirect_domain,omitempty"`
+	CustomRedirectDomain *string `json:"customRedirectDomain,omitempty" tf:"custom_redirect_domain,omitempty"`
 }
 
 // ConfigurationSetSpec defines the desired state of ConfigurationSet
 type ConfigurationSetSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ConfigurationSetParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ConfigurationSetInitParameters `json:"initProvider,omitempty"`
 }
 
 // ConfigurationSetStatus defines the observed state of ConfigurationSet.

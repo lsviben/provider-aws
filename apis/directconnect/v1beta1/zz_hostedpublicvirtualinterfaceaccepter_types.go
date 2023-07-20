@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type HostedPublicVirtualInterfaceAccepterInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The ID of the Direct Connect virtual interface to accept.
+	// +crossplane:generate:reference:type=HostedPublicVirtualInterface
+	VirtualInterfaceID *string `json:"virtualInterfaceId,omitempty" tf:"virtual_interface_id,omitempty"`
+
+	VirtualInterfaceIDRef *v1.Reference `json:"virtualInterfaceIdRef,omitempty" tf:"-"`
+
+	VirtualInterfaceIDSelector *v1.Selector `json:"virtualInterfaceIdSelector,omitempty" tf:"-"`
+}
+
 type HostedPublicVirtualInterfaceAccepterObservation struct {
 
 	// The ARN of the virtual interface.
@@ -35,16 +53,13 @@ type HostedPublicVirtualInterfaceAccepterParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The ID of the Direct Connect virtual interface to accept.
 	// +crossplane:generate:reference:type=HostedPublicVirtualInterface
-	// +kubebuilder:validation:Optional
 	VirtualInterfaceID *string `json:"virtualInterfaceId,omitempty" tf:"virtual_interface_id,omitempty"`
 
 	// Reference to a HostedPublicVirtualInterface to populate virtualInterfaceId.
@@ -60,6 +75,10 @@ type HostedPublicVirtualInterfaceAccepterParameters struct {
 type HostedPublicVirtualInterfaceAccepterSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     HostedPublicVirtualInterfaceAccepterParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider HostedPublicVirtualInterfaceAccepterInitParameters `json:"initProvider,omitempty"`
 }
 
 // HostedPublicVirtualInterfaceAccepterStatus defines the observed state of HostedPublicVirtualInterfaceAccepter.

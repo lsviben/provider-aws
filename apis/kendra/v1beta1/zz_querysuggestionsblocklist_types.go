@@ -13,6 +13,43 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type QuerySuggestionsBlockListInitParameters struct {
+
+	// The description for a block list.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The identifier of the index for a block list.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kendra/v1beta1.Index
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	IndexID *string `json:"indexId,omitempty" tf:"index_id,omitempty"`
+
+	IndexIDRef *v1.Reference `json:"indexIdRef,omitempty" tf:"-"`
+
+	IndexIDSelector *v1.Selector `json:"indexIdSelector,omitempty" tf:"-"`
+
+	// The name for the block list.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The IAM (Identity and Access Management) role used to access the block list text file in S3.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
+
+	// The S3 path where your block list text file sits in S3. Detailed below.
+	SourceS3Path []SourceS3PathInitParameters `json:"sourceS3Path,omitempty" tf:"source_s3_path,omitempty"`
+
+	// Key-value map of resource tags. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type QuerySuggestionsBlockListObservation struct {
 
 	// ARN of the block list.
@@ -50,13 +87,11 @@ type QuerySuggestionsBlockListObservation struct {
 type QuerySuggestionsBlockListParameters struct {
 
 	// The description for a block list.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The identifier of the index for a block list.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kendra/v1beta1.Index
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	IndexID *string `json:"indexId,omitempty" tf:"index_id,omitempty"`
 
 	// Reference to a Index in kendra to populate indexId.
@@ -68,18 +103,15 @@ type QuerySuggestionsBlockListParameters struct {
 	IndexIDSelector *v1.Selector `json:"indexIdSelector,omitempty" tf:"-"`
 
 	// The name for the block list.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The IAM (Identity and Access Management) role used to access the block list text file in S3.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -91,12 +123,25 @@ type QuerySuggestionsBlockListParameters struct {
 	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
 
 	// The S3 path where your block list text file sits in S3. Detailed below.
-	// +kubebuilder:validation:Optional
 	SourceS3Path []SourceS3PathParameters `json:"sourceS3Path,omitempty" tf:"source_s3_path,omitempty"`
 
 	// Key-value map of resource tags. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type SourceS3PathInitParameters struct {
+
+	// The name of the S3 bucket that contains the file.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	BucketRef *v1.Reference `json:"bucketRef,omitempty" tf:"-"`
+
+	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
+
+	// The name of the file.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 }
 
 type SourceS3PathObservation struct {
@@ -113,7 +158,6 @@ type SourceS3PathParameters struct {
 	// The name of the S3 bucket that contains the file.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucket.
@@ -125,14 +169,17 @@ type SourceS3PathParameters struct {
 	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
 
 	// The name of the file.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 }
 
 // QuerySuggestionsBlockListSpec defines the desired state of QuerySuggestionsBlockList
 type QuerySuggestionsBlockListSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     QuerySuggestionsBlockListParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider QuerySuggestionsBlockListInitParameters `json:"initProvider,omitempty"`
 }
 
 // QuerySuggestionsBlockListStatus defines the observed state of QuerySuggestionsBlockList.
@@ -153,8 +200,8 @@ type QuerySuggestionsBlockListStatus struct {
 type QuerySuggestionsBlockList struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.sourceS3Path)",message="sourceS3Path is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.sourceS3Path) || has(self.initProvider.sourceS3Path)",message="%!s(MISSING) is a required parameter"
 	Spec   QuerySuggestionsBlockListSpec   `json:"spec"`
 	Status QuerySuggestionsBlockListStatus `json:"status,omitempty"`
 }

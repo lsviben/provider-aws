@@ -13,6 +13,23 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AccessKeyInitParameters struct {
+
+	// Either a base-64 encoded PGP public key, or a keybase username in the form keybase:some_person_that_exists, for use in the encrypted_secret output attribute. If providing a base-64 encoded PGP public key, make sure to provide the "raw" version and not the "armored" one (e.g. avoid passing the -a option to gpg --export).
+	PgpKey *string `json:"pgpKey,omitempty" tf:"pgp_key,omitempty"`
+
+	// Access key status to apply. Defaults to Active. Valid values are Active and Inactive.
+	Status *string `json:"status,omitempty" tf:"status,omitempty"`
+
+	// IAM user to associate with this access key.
+	// +crossplane:generate:reference:type=User
+	User *string `json:"user,omitempty" tf:"user,omitempty"`
+
+	UserRef *v1.Reference `json:"userRef,omitempty" tf:"-"`
+
+	UserSelector *v1.Selector `json:"userSelector,omitempty" tf:"-"`
+}
+
 type AccessKeyObservation struct {
 
 	// Date and time in RFC3339 format that the access key was created.
@@ -43,16 +60,13 @@ type AccessKeyObservation struct {
 type AccessKeyParameters struct {
 
 	// Either a base-64 encoded PGP public key, or a keybase username in the form keybase:some_person_that_exists, for use in the encrypted_secret output attribute. If providing a base-64 encoded PGP public key, make sure to provide the "raw" version and not the "armored" one (e.g. avoid passing the -a option to gpg --export).
-	// +kubebuilder:validation:Optional
 	PgpKey *string `json:"pgpKey,omitempty" tf:"pgp_key,omitempty"`
 
 	// Access key status to apply. Defaults to Active. Valid values are Active and Inactive.
-	// +kubebuilder:validation:Optional
 	Status *string `json:"status,omitempty" tf:"status,omitempty"`
 
 	// IAM user to associate with this access key.
 	// +crossplane:generate:reference:type=User
-	// +kubebuilder:validation:Optional
 	User *string `json:"user,omitempty" tf:"user,omitempty"`
 
 	// Reference to a User to populate user.
@@ -68,6 +82,10 @@ type AccessKeyParameters struct {
 type AccessKeySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AccessKeyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AccessKeyInitParameters `json:"initProvider,omitempty"`
 }
 
 // AccessKeyStatus defines the observed state of AccessKey.

@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ScriptInitParameters struct {
+
+	// Name of the script
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Information indicating where your game script files are stored. See below.
+	StorageLocation []ScriptStorageLocationInitParameters `json:"storageLocation,omitempty" tf:"storage_location,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Version that is associated with this script.
+	Version *string `json:"version,omitempty" tf:"version,omitempty"`
+
+	// A data object containing your Realtime scripts and dependencies as a zip  file. The zip file can have one or multiple files. Maximum size of a zip file is 5 MB.
+	ZipFile *string `json:"zipFile,omitempty" tf:"zip_file,omitempty"`
+}
+
 type ScriptObservation struct {
 
 	// GameLift Script ARN.
@@ -43,29 +65,55 @@ type ScriptObservation struct {
 type ScriptParameters struct {
 
 	// Name of the script
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Information indicating where your game script files are stored. See below.
-	// +kubebuilder:validation:Optional
 	StorageLocation []ScriptStorageLocationParameters `json:"storageLocation,omitempty" tf:"storage_location,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Version that is associated with this script.
-	// +kubebuilder:validation:Optional
 	Version *string `json:"version,omitempty" tf:"version,omitempty"`
 
 	// A data object containing your Realtime scripts and dependencies as a zip  file. The zip file can have one or multiple files. Maximum size of a zip file is 5 MB.
-	// +kubebuilder:validation:Optional
 	ZipFile *string `json:"zipFile,omitempty" tf:"zip_file,omitempty"`
+}
+
+type ScriptStorageLocationInitParameters struct {
+
+	// Name of your S3 bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	BucketRef *v1.Reference `json:"bucketRef,omitempty" tf:"-"`
+
+	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
+
+	// Name of the zip file containing your script files.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Object
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("key",false)
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	KeyRef *v1.Reference `json:"keyRef,omitempty" tf:"-"`
+
+	KeySelector *v1.Selector `json:"keySelector,omitempty" tf:"-"`
+
+	// A specific version of the file. If not set, the latest version of the file is retrieved.
+	ObjectVersion *string `json:"objectVersion,omitempty" tf:"object_version,omitempty"`
+
+	// ARN of the access role that allows Amazon GameLift to access your S3 bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
 }
 
 type ScriptStorageLocationObservation struct {
@@ -87,7 +135,6 @@ type ScriptStorageLocationParameters struct {
 
 	// Name of your S3 bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
-	// +kubebuilder:validation:Optional
 	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucket.
@@ -101,7 +148,6 @@ type ScriptStorageLocationParameters struct {
 	// Name of the zip file containing your script files.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Object
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("key",false)
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Reference to a Object in s3 to populate key.
@@ -113,13 +159,11 @@ type ScriptStorageLocationParameters struct {
 	KeySelector *v1.Selector `json:"keySelector,omitempty" tf:"-"`
 
 	// A specific version of the file. If not set, the latest version of the file is retrieved.
-	// +kubebuilder:validation:Optional
 	ObjectVersion *string `json:"objectVersion,omitempty" tf:"object_version,omitempty"`
 
 	// ARN of the access role that allows Amazon GameLift to access your S3 bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -135,6 +179,10 @@ type ScriptStorageLocationParameters struct {
 type ScriptSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ScriptParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ScriptInitParameters `json:"initProvider,omitempty"`
 }
 
 // ScriptStatus defines the observed state of Script.
@@ -155,7 +203,7 @@ type ScriptStatus struct {
 type Script struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   ScriptSpec   `json:"spec"`
 	Status ScriptStatus `json:"status,omitempty"`
 }

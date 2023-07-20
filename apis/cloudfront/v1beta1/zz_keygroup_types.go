@@ -13,6 +13,29 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type KeyGroupInitParameters struct {
+
+	// A comment to describe the key group..
+	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
+
+	ItemRefs []v1.Reference `json:"itemRefs,omitempty" tf:"-"`
+
+	ItemSelector *v1.Selector `json:"itemSelector,omitempty" tf:"-"`
+
+	// A list of the identifiers of the public keys in the key group.
+	// +crossplane:generate:reference:type=PublicKey
+	// +crossplane:generate:reference:refFieldName=ItemRefs
+	// +crossplane:generate:reference:selectorFieldName=ItemSelector
+	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
+
+	// A name to identify the key group.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type KeyGroupObservation struct {
 
 	// A comment to describe the key group..
@@ -34,7 +57,6 @@ type KeyGroupObservation struct {
 type KeyGroupParameters struct {
 
 	// A comment to describe the key group..
-	// +kubebuilder:validation:Optional
 	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
 
 	// References to PublicKey to populate items.
@@ -49,23 +71,24 @@ type KeyGroupParameters struct {
 	// +crossplane:generate:reference:type=PublicKey
 	// +crossplane:generate:reference:refFieldName=ItemRefs
 	// +crossplane:generate:reference:selectorFieldName=ItemSelector
-	// +kubebuilder:validation:Optional
 	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
 
 	// A name to identify the key group.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // KeyGroupSpec defines the desired state of KeyGroup
 type KeyGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     KeyGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider KeyGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // KeyGroupStatus defines the observed state of KeyGroup.
@@ -86,7 +109,7 @@ type KeyGroupStatus struct {
 type KeyGroup struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   KeyGroupSpec   `json:"spec"`
 	Status KeyGroupStatus `json:"status,omitempty"`
 }

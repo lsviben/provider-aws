@@ -13,6 +13,61 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PlatformApplicationInitParameters struct {
+
+	// The bundle identifier that's assigned to your iOS app. May only include alphanumeric characters, hyphens (-), and periods (.).
+	ApplePlatformBundleID *string `json:"applePlatformBundleId,omitempty" tf:"apple_platform_bundle_id,omitempty"`
+
+	// The identifier that's assigned to your Apple developer account team. Must be 10 alphanumeric characters.
+	ApplePlatformTeamID *string `json:"applePlatformTeamId,omitempty" tf:"apple_platform_team_id,omitempty"`
+
+	// The ARN of the SNS Topic triggered when a delivery to any of the platform endpoints associated with your platform application encounters a permanent failure.
+	EventDeliveryFailureTopicArn *string `json:"eventDeliveryFailureTopicArn,omitempty" tf:"event_delivery_failure_topic_arn,omitempty"`
+
+	// The ARN of the SNS Topic triggered when a new platform endpoint is added to your platform application.
+	EventEndpointCreatedTopicArn *string `json:"eventEndpointCreatedTopicArn,omitempty" tf:"event_endpoint_created_topic_arn,omitempty"`
+
+	// The ARN of the SNS Topic triggered when an existing platform endpoint is deleted from your platform application.
+	EventEndpointDeletedTopicArn *string `json:"eventEndpointDeletedTopicArn,omitempty" tf:"event_endpoint_deleted_topic_arn,omitempty"`
+
+	// The ARN of the SNS Topic triggered when an existing platform endpoint is changed from your platform application.
+	EventEndpointUpdatedTopicArn *string `json:"eventEndpointUpdatedTopicArn,omitempty" tf:"event_endpoint_updated_topic_arn,omitempty"`
+
+	// The IAM role ARN permitted to receive failure feedback for this application and give SNS write access to use CloudWatch logs on your behalf.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	FailureFeedbackRoleArn *string `json:"failureFeedbackRoleArn,omitempty" tf:"failure_feedback_role_arn,omitempty"`
+
+	FailureFeedbackRoleArnRef *v1.Reference `json:"failureFeedbackRoleArnRef,omitempty" tf:"-"`
+
+	FailureFeedbackRoleArnSelector *v1.Selector `json:"failureFeedbackRoleArnSelector,omitempty" tf:"-"`
+
+	// The platform that the app is registered with. See Platform for supported platforms.
+	Platform *string `json:"platform,omitempty" tf:"platform,omitempty"`
+
+	// Application Platform credential. See Credential for type of credential required for platform.
+	PlatformCredentialSecretRef v1.SecretKeySelector `json:"platformCredentialSecretRef" tf:"-"`
+
+	// Application Platform principal. See Principal for type of principal required for platform.
+	PlatformPrincipalSecretRef *v1.SecretKeySelector `json:"platformPrincipalSecretRef,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The IAM role ARN permitted to receive success feedback for this application and give SNS write access to use CloudWatch logs on your behalf.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	SuccessFeedbackRoleArn *string `json:"successFeedbackRoleArn,omitempty" tf:"success_feedback_role_arn,omitempty"`
+
+	SuccessFeedbackRoleArnRef *v1.Reference `json:"successFeedbackRoleArnRef,omitempty" tf:"-"`
+
+	SuccessFeedbackRoleArnSelector *v1.Selector `json:"successFeedbackRoleArnSelector,omitempty" tf:"-"`
+
+	// The sample rate percentage (0-100) of successfully delivered messages.
+	SuccessFeedbackSampleRate *string `json:"successFeedbackSampleRate,omitempty" tf:"success_feedback_sample_rate,omitempty"`
+}
+
 type PlatformApplicationObservation struct {
 
 	// The bundle identifier that's assigned to your iOS app. May only include alphanumeric characters, hyphens (-), and periods (.).
@@ -55,33 +110,26 @@ type PlatformApplicationObservation struct {
 type PlatformApplicationParameters struct {
 
 	// The bundle identifier that's assigned to your iOS app. May only include alphanumeric characters, hyphens (-), and periods (.).
-	// +kubebuilder:validation:Optional
 	ApplePlatformBundleID *string `json:"applePlatformBundleId,omitempty" tf:"apple_platform_bundle_id,omitempty"`
 
 	// The identifier that's assigned to your Apple developer account team. Must be 10 alphanumeric characters.
-	// +kubebuilder:validation:Optional
 	ApplePlatformTeamID *string `json:"applePlatformTeamId,omitempty" tf:"apple_platform_team_id,omitempty"`
 
 	// The ARN of the SNS Topic triggered when a delivery to any of the platform endpoints associated with your platform application encounters a permanent failure.
-	// +kubebuilder:validation:Optional
 	EventDeliveryFailureTopicArn *string `json:"eventDeliveryFailureTopicArn,omitempty" tf:"event_delivery_failure_topic_arn,omitempty"`
 
 	// The ARN of the SNS Topic triggered when a new platform endpoint is added to your platform application.
-	// +kubebuilder:validation:Optional
 	EventEndpointCreatedTopicArn *string `json:"eventEndpointCreatedTopicArn,omitempty" tf:"event_endpoint_created_topic_arn,omitempty"`
 
 	// The ARN of the SNS Topic triggered when an existing platform endpoint is deleted from your platform application.
-	// +kubebuilder:validation:Optional
 	EventEndpointDeletedTopicArn *string `json:"eventEndpointDeletedTopicArn,omitempty" tf:"event_endpoint_deleted_topic_arn,omitempty"`
 
 	// The ARN of the SNS Topic triggered when an existing platform endpoint is changed from your platform application.
-	// +kubebuilder:validation:Optional
 	EventEndpointUpdatedTopicArn *string `json:"eventEndpointUpdatedTopicArn,omitempty" tf:"event_endpoint_updated_topic_arn,omitempty"`
 
 	// The IAM role ARN permitted to receive failure feedback for this application and give SNS write access to use CloudWatch logs on your behalf.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	FailureFeedbackRoleArn *string `json:"failureFeedbackRoleArn,omitempty" tf:"failure_feedback_role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate failureFeedbackRoleArn.
@@ -93,26 +141,21 @@ type PlatformApplicationParameters struct {
 	FailureFeedbackRoleArnSelector *v1.Selector `json:"failureFeedbackRoleArnSelector,omitempty" tf:"-"`
 
 	// The platform that the app is registered with. See Platform for supported platforms.
-	// +kubebuilder:validation:Optional
 	Platform *string `json:"platform,omitempty" tf:"platform,omitempty"`
 
 	// Application Platform credential. See Credential for type of credential required for platform.
-	// +kubebuilder:validation:Optional
 	PlatformCredentialSecretRef v1.SecretKeySelector `json:"platformCredentialSecretRef" tf:"-"`
 
 	// Application Platform principal. See Principal for type of principal required for platform.
-	// +kubebuilder:validation:Optional
 	PlatformPrincipalSecretRef *v1.SecretKeySelector `json:"platformPrincipalSecretRef,omitempty" tf:"-"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The IAM role ARN permitted to receive success feedback for this application and give SNS write access to use CloudWatch logs on your behalf.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	SuccessFeedbackRoleArn *string `json:"successFeedbackRoleArn,omitempty" tf:"success_feedback_role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate successFeedbackRoleArn.
@@ -124,7 +167,6 @@ type PlatformApplicationParameters struct {
 	SuccessFeedbackRoleArnSelector *v1.Selector `json:"successFeedbackRoleArnSelector,omitempty" tf:"-"`
 
 	// The sample rate percentage (0-100) of successfully delivered messages.
-	// +kubebuilder:validation:Optional
 	SuccessFeedbackSampleRate *string `json:"successFeedbackSampleRate,omitempty" tf:"success_feedback_sample_rate,omitempty"`
 }
 
@@ -132,6 +174,10 @@ type PlatformApplicationParameters struct {
 type PlatformApplicationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PlatformApplicationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PlatformApplicationInitParameters `json:"initProvider,omitempty"`
 }
 
 // PlatformApplicationStatus defines the observed state of PlatformApplication.
@@ -152,8 +198,8 @@ type PlatformApplicationStatus struct {
 type PlatformApplication struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.platform)",message="platform is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.platformCredentialSecretRef)",message="platformCredentialSecretRef is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.platform) || has(self.initProvider.platform)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.platformCredentialSecretRef) || has(self.initProvider.platformCredentialSecretRef)",message="%!s(MISSING) is a required parameter"
 	Spec   PlatformApplicationSpec   `json:"spec"`
 	Status PlatformApplicationStatus `json:"status,omitempty"`
 }

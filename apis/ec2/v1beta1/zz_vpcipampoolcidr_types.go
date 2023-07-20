@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CidrAuthorizationContextInitParameters struct {
+
+	// The plain-text authorization message for the prefix and account.
+	Message *string `json:"message,omitempty" tf:"message,omitempty"`
+
+	// The signed authorization message for the prefix and account.
+	Signature *string `json:"signature,omitempty" tf:"signature,omitempty"`
+}
+
 type CidrAuthorizationContextObservation struct {
 
 	// The plain-text authorization message for the prefix and account.
@@ -25,12 +34,35 @@ type CidrAuthorizationContextObservation struct {
 type CidrAuthorizationContextParameters struct {
 
 	// The plain-text authorization message for the prefix and account.
-	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty" tf:"message,omitempty"`
 
 	// The signed authorization message for the prefix and account.
-	// +kubebuilder:validation:Optional
 	Signature *string `json:"signature,omitempty" tf:"signature,omitempty"`
+}
+
+type VPCIpamPoolCidrInitParameters struct {
+
+	// The CIDR you want to assign to the pool. Conflicts with netmask_length.
+	Cidr *string `json:"cidr,omitempty" tf:"cidr,omitempty"`
+
+	// A signed document that proves that you are authorized to bring the specified IP address range to Amazon using BYOIP. This is not stored in the state file. See cidr_authorization_context for more information.
+	CidrAuthorizationContext []CidrAuthorizationContextInitParameters `json:"cidrAuthorizationContext,omitempty" tf:"cidr_authorization_context,omitempty"`
+
+	// The ID of the pool to which you want to assign a CIDR.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPCIpamPool
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	IpamPoolID *string `json:"ipamPoolId,omitempty" tf:"ipam_pool_id,omitempty"`
+
+	IpamPoolIDRef *v1.Reference `json:"ipamPoolIdRef,omitempty" tf:"-"`
+
+	IpamPoolIDSelector *v1.Selector `json:"ipamPoolIdSelector,omitempty" tf:"-"`
+
+	// If provided, the cidr provisioned into the specified pool will be the next available cidr given this declared netmask length. Conflicts with cidr.
+	NetmaskLength *float64 `json:"netmaskLength,omitempty" tf:"netmask_length,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type VPCIpamPoolCidrObservation struct {
@@ -57,17 +89,14 @@ type VPCIpamPoolCidrObservation struct {
 type VPCIpamPoolCidrParameters struct {
 
 	// The CIDR you want to assign to the pool. Conflicts with netmask_length.
-	// +kubebuilder:validation:Optional
 	Cidr *string `json:"cidr,omitempty" tf:"cidr,omitempty"`
 
 	// A signed document that proves that you are authorized to bring the specified IP address range to Amazon using BYOIP. This is not stored in the state file. See cidr_authorization_context for more information.
-	// +kubebuilder:validation:Optional
 	CidrAuthorizationContext []CidrAuthorizationContextParameters `json:"cidrAuthorizationContext,omitempty" tf:"cidr_authorization_context,omitempty"`
 
 	// The ID of the pool to which you want to assign a CIDR.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPCIpamPool
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	IpamPoolID *string `json:"ipamPoolId,omitempty" tf:"ipam_pool_id,omitempty"`
 
 	// Reference to a VPCIpamPool in ec2 to populate ipamPoolId.
@@ -79,19 +108,21 @@ type VPCIpamPoolCidrParameters struct {
 	IpamPoolIDSelector *v1.Selector `json:"ipamPoolIdSelector,omitempty" tf:"-"`
 
 	// If provided, the cidr provisioned into the specified pool will be the next available cidr given this declared netmask length. Conflicts with cidr.
-	// +kubebuilder:validation:Optional
 	NetmaskLength *float64 `json:"netmaskLength,omitempty" tf:"netmask_length,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // VPCIpamPoolCidrSpec defines the desired state of VPCIpamPoolCidr
 type VPCIpamPoolCidrSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VPCIpamPoolCidrParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VPCIpamPoolCidrInitParameters `json:"initProvider,omitempty"`
 }
 
 // VPCIpamPoolCidrStatus defines the observed state of VPCIpamPoolCidr.

@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type WorkspaceAPIKeyInitParameters struct {
+
+	// Specifies the name of the API key. Key names must be unique to the workspace.
+	KeyName *string `json:"keyName,omitempty" tf:"key_name,omitempty"`
+
+	// Specifies the permission level of the API key. Valid values are VIEWER, EDITOR, or ADMIN.
+	KeyRole *string `json:"keyRole,omitempty" tf:"key_role,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Specifies the time in seconds until the API key expires. Keys can be valid for up to 30 days.
+	SecondsToLive *float64 `json:"secondsToLive,omitempty" tf:"seconds_to_live,omitempty"`
+
+	// The ID of the workspace that the API key is valid for.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/grafana/v1beta1.Workspace
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	WorkspaceID *string `json:"workspaceId,omitempty" tf:"workspace_id,omitempty"`
+
+	WorkspaceIDRef *v1.Reference `json:"workspaceIdRef,omitempty" tf:"-"`
+
+	WorkspaceIDSelector *v1.Selector `json:"workspaceIdSelector,omitempty" tf:"-"`
+}
+
 type WorkspaceAPIKeyObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -35,26 +60,21 @@ type WorkspaceAPIKeyObservation struct {
 type WorkspaceAPIKeyParameters struct {
 
 	// Specifies the name of the API key. Key names must be unique to the workspace.
-	// +kubebuilder:validation:Optional
 	KeyName *string `json:"keyName,omitempty" tf:"key_name,omitempty"`
 
 	// Specifies the permission level of the API key. Valid values are VIEWER, EDITOR, or ADMIN.
-	// +kubebuilder:validation:Optional
 	KeyRole *string `json:"keyRole,omitempty" tf:"key_role,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Specifies the time in seconds until the API key expires. Keys can be valid for up to 30 days.
-	// +kubebuilder:validation:Optional
 	SecondsToLive *float64 `json:"secondsToLive,omitempty" tf:"seconds_to_live,omitempty"`
 
 	// The ID of the workspace that the API key is valid for.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/grafana/v1beta1.Workspace
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	WorkspaceID *string `json:"workspaceId,omitempty" tf:"workspace_id,omitempty"`
 
 	// Reference to a Workspace in grafana to populate workspaceId.
@@ -70,6 +90,10 @@ type WorkspaceAPIKeyParameters struct {
 type WorkspaceAPIKeySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     WorkspaceAPIKeyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider WorkspaceAPIKeyInitParameters `json:"initProvider,omitempty"`
 }
 
 // WorkspaceAPIKeyStatus defines the observed state of WorkspaceAPIKey.
@@ -90,9 +114,9 @@ type WorkspaceAPIKeyStatus struct {
 type WorkspaceAPIKey struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.keyName)",message="keyName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.keyRole)",message="keyRole is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.secondsToLive)",message="secondsToLive is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.keyName) || has(self.initProvider.keyName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.keyRole) || has(self.initProvider.keyRole)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.secondsToLive) || has(self.initProvider.secondsToLive)",message="%!s(MISSING) is a required parameter"
 	Spec   WorkspaceAPIKeySpec   `json:"spec"`
 	Status WorkspaceAPIKeyStatus `json:"status,omitempty"`
 }

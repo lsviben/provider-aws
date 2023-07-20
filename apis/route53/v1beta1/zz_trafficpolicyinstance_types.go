@@ -13,6 +13,38 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type TrafficPolicyInstanceInitParameters struct {
+
+	// ID of the hosted zone that you want Amazon Route 53 to create resource record sets in by using the configuration in a traffic policy.
+	// +crossplane:generate:reference:type=Zone
+	HostedZoneID *string `json:"hostedZoneId,omitempty" tf:"hosted_zone_id,omitempty"`
+
+	HostedZoneIDRef *v1.Reference `json:"hostedZoneIdRef,omitempty" tf:"-"`
+
+	HostedZoneIDSelector *v1.Selector `json:"hostedZoneIdSelector,omitempty" tf:"-"`
+
+	// Domain name for which Amazon Route 53 responds to DNS queries by using the resource record sets that Route 53 creates for this traffic policy instance.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// TTL that you want Amazon Route 53 to assign to all the resource record sets that it creates in the specified hosted zone.
+	TTL *float64 `json:"ttl,omitempty" tf:"ttl,omitempty"`
+
+	// ID of the traffic policy that you want to use to create resource record sets in the specified hosted zone.
+	// +crossplane:generate:reference:type=TrafficPolicy
+	TrafficPolicyID *string `json:"trafficPolicyId,omitempty" tf:"traffic_policy_id,omitempty"`
+
+	TrafficPolicyIDRef *v1.Reference `json:"trafficPolicyIdRef,omitempty" tf:"-"`
+
+	TrafficPolicyIDSelector *v1.Selector `json:"trafficPolicyIdSelector,omitempty" tf:"-"`
+
+	// Version of the traffic policy
+	TrafficPolicyVersion *float64 `json:"trafficPolicyVersion,omitempty" tf:"traffic_policy_version,omitempty"`
+}
+
 type TrafficPolicyInstanceObservation struct {
 
 	// ID of the hosted zone that you want Amazon Route 53 to create resource record sets in by using the configuration in a traffic policy.
@@ -38,7 +70,6 @@ type TrafficPolicyInstanceParameters struct {
 
 	// ID of the hosted zone that you want Amazon Route 53 to create resource record sets in by using the configuration in a traffic policy.
 	// +crossplane:generate:reference:type=Zone
-	// +kubebuilder:validation:Optional
 	HostedZoneID *string `json:"hostedZoneId,omitempty" tf:"hosted_zone_id,omitempty"`
 
 	// Reference to a Zone to populate hostedZoneId.
@@ -50,21 +81,17 @@ type TrafficPolicyInstanceParameters struct {
 	HostedZoneIDSelector *v1.Selector `json:"hostedZoneIdSelector,omitempty" tf:"-"`
 
 	// Domain name for which Amazon Route 53 responds to DNS queries by using the resource record sets that Route 53 creates for this traffic policy instance.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// TTL that you want Amazon Route 53 to assign to all the resource record sets that it creates in the specified hosted zone.
-	// +kubebuilder:validation:Optional
 	TTL *float64 `json:"ttl,omitempty" tf:"ttl,omitempty"`
 
 	// ID of the traffic policy that you want to use to create resource record sets in the specified hosted zone.
 	// +crossplane:generate:reference:type=TrafficPolicy
-	// +kubebuilder:validation:Optional
 	TrafficPolicyID *string `json:"trafficPolicyId,omitempty" tf:"traffic_policy_id,omitempty"`
 
 	// Reference to a TrafficPolicy to populate trafficPolicyId.
@@ -76,7 +103,6 @@ type TrafficPolicyInstanceParameters struct {
 	TrafficPolicyIDSelector *v1.Selector `json:"trafficPolicyIdSelector,omitempty" tf:"-"`
 
 	// Version of the traffic policy
-	// +kubebuilder:validation:Optional
 	TrafficPolicyVersion *float64 `json:"trafficPolicyVersion,omitempty" tf:"traffic_policy_version,omitempty"`
 }
 
@@ -84,6 +110,10 @@ type TrafficPolicyInstanceParameters struct {
 type TrafficPolicyInstanceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     TrafficPolicyInstanceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider TrafficPolicyInstanceInitParameters `json:"initProvider,omitempty"`
 }
 
 // TrafficPolicyInstanceStatus defines the observed state of TrafficPolicyInstance.
@@ -104,9 +134,9 @@ type TrafficPolicyInstanceStatus struct {
 type TrafficPolicyInstance struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.trafficPolicyVersion)",message="trafficPolicyVersion is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ttl)",message="ttl is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.trafficPolicyVersion) || has(self.initProvider.trafficPolicyVersion)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ttl) || has(self.initProvider.ttl)",message="%!s(MISSING) is a required parameter"
 	Spec   TrafficPolicyInstanceSpec   `json:"spec"`
 	Status TrafficPolicyInstanceStatus `json:"status,omitempty"`
 }

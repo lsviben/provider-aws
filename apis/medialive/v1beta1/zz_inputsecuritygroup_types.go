@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type InputSecurityGroupInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Whitelist rules. See Whitelist Rules for more details.
+	WhitelistRules []WhitelistRulesInitParameters `json:"whitelistRules,omitempty" tf:"whitelist_rules,omitempty"`
+}
+
 type InputSecurityGroupObservation struct {
 
 	// ARN of the InputSecurityGroup.
@@ -37,16 +50,19 @@ type InputSecurityGroupParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Whitelist rules. See Whitelist Rules for more details.
-	// +kubebuilder:validation:Optional
 	WhitelistRules []WhitelistRulesParameters `json:"whitelistRules,omitempty" tf:"whitelist_rules,omitempty"`
+}
+
+type WhitelistRulesInitParameters struct {
+
+	// The IPv4 CIDR that's whitelisted.
+	Cidr *string `json:"cidr,omitempty" tf:"cidr,omitempty"`
 }
 
 type WhitelistRulesObservation struct {
@@ -58,14 +74,17 @@ type WhitelistRulesObservation struct {
 type WhitelistRulesParameters struct {
 
 	// The IPv4 CIDR that's whitelisted.
-	// +kubebuilder:validation:Required
-	Cidr *string `json:"cidr" tf:"cidr,omitempty"`
+	Cidr *string `json:"cidr,omitempty" tf:"cidr,omitempty"`
 }
 
 // InputSecurityGroupSpec defines the desired state of InputSecurityGroup
 type InputSecurityGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     InputSecurityGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider InputSecurityGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // InputSecurityGroupStatus defines the observed state of InputSecurityGroup.
@@ -86,7 +105,7 @@ type InputSecurityGroupStatus struct {
 type InputSecurityGroup struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.whitelistRules)",message="whitelistRules is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.whitelistRules) || has(self.initProvider.whitelistRules)",message="%!s(MISSING) is a required parameter"
 	Spec   InputSecurityGroupSpec   `json:"spec"`
 	Status InputSecurityGroupStatus `json:"status,omitempty"`
 }

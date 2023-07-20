@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PolicyAttributeInitParameters struct {
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.Policy
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("policy_name",false)
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+
+	ValueRef *v1.Reference `json:"valueRef,omitempty" tf:"-"`
+
+	ValueSelector *v1.Selector `json:"valueSelector,omitempty" tf:"-"`
+}
+
 type PolicyAttributeObservation struct {
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
@@ -20,13 +32,10 @@ type PolicyAttributeObservation struct {
 }
 
 type PolicyAttributeParameters struct {
-
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.Policy
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("policy_name",false)
-	// +kubebuilder:validation:Optional
 	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 
 	// Reference to a Policy in elb to populate value.
@@ -36,6 +45,30 @@ type PolicyAttributeParameters struct {
 	// Selector for a Policy in elb to populate value.
 	// +kubebuilder:validation:Optional
 	ValueSelector *v1.Selector `json:"valueSelector,omitempty" tf:"-"`
+}
+
+type PolicyInitParameters struct {
+
+	// The load balancer on which the policy is defined.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.ELB
+	LoadBalancerName *string `json:"loadBalancerName,omitempty" tf:"load_balancer_name,omitempty"`
+
+	LoadBalancerNameRef *v1.Reference `json:"loadBalancerNameRef,omitempty" tf:"-"`
+
+	LoadBalancerNameSelector *v1.Selector `json:"loadBalancerNameSelector,omitempty" tf:"-"`
+
+	// Policy attribute to apply to the policy.
+	PolicyAttribute []PolicyAttributeInitParameters `json:"policyAttribute,omitempty" tf:"policy_attribute,omitempty"`
+
+	// The name of the load balancer policy.
+	PolicyName *string `json:"policyName,omitempty" tf:"policy_name,omitempty"`
+
+	// The policy type.
+	PolicyTypeName *string `json:"policyTypeName,omitempty" tf:"policy_type_name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type PolicyObservation struct {
@@ -60,7 +93,6 @@ type PolicyParameters struct {
 
 	// The load balancer on which the policy is defined.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.ELB
-	// +kubebuilder:validation:Optional
 	LoadBalancerName *string `json:"loadBalancerName,omitempty" tf:"load_balancer_name,omitempty"`
 
 	// Reference to a ELB in elb to populate loadBalancerName.
@@ -72,27 +104,27 @@ type PolicyParameters struct {
 	LoadBalancerNameSelector *v1.Selector `json:"loadBalancerNameSelector,omitempty" tf:"-"`
 
 	// Policy attribute to apply to the policy.
-	// +kubebuilder:validation:Optional
 	PolicyAttribute []PolicyAttributeParameters `json:"policyAttribute,omitempty" tf:"policy_attribute,omitempty"`
 
 	// The name of the load balancer policy.
-	// +kubebuilder:validation:Optional
 	PolicyName *string `json:"policyName,omitempty" tf:"policy_name,omitempty"`
 
 	// The policy type.
-	// +kubebuilder:validation:Optional
 	PolicyTypeName *string `json:"policyTypeName,omitempty" tf:"policy_type_name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // PolicySpec defines the desired state of Policy
 type PolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // PolicyStatus defines the observed state of Policy.
@@ -113,8 +145,8 @@ type PolicyStatus struct {
 type Policy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policyName)",message="policyName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policyTypeName)",message="policyTypeName is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policyName) || has(self.initProvider.policyName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policyTypeName) || has(self.initProvider.policyTypeName)",message="%!s(MISSING) is a required parameter"
 	Spec   PolicySpec   `json:"spec"`
 	Status PolicyStatus `json:"status,omitempty"`
 }

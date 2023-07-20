@@ -104,8 +104,49 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  assignIpv6AddressOnCreation:
+                    type: boolean
+                  availabilityZone:
+                    description: is required
+                    type: string
+                  customerOwnedIpv4Pool:
+                    type: string
+                  enableDns64:
+                    type: boolean
+                  enableResourceNameDnsARecordOnLaunch:
+                    type: boolean
+                  enableResourceNameDnsAaaaRecordOnLaunch:
+                    type: boolean
+                  forceDestroy:
+                    description: 'Whether destroying the resource deletes the default
+                      subnet. Default: false'
+                    type: boolean
+                  ipv6CidrBlock:
+                    description: The IPv4 CIDR block assigned to the subnet
+                    type: string
+                  ipv6Native:
+                    type: boolean
+                  mapCustomerOwnedIpOnLaunch:
+                    type: boolean
+                  mapPublicIpOnLaunch:
+                    description: is true
+                    type: boolean
+                  privateDnsHostnameTypeOnLaunch:
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  tags:
+                    additionalProperties:
+                      type: string
+                    type: object
                 type: object
               managementPolicies:
                 default:
@@ -305,9 +346,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: availabilityZone is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.availabilityZone)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.availabilityZone)
+                || has(self.initProvider.availabilityZone)'
           status:
             description: DefaultSubnetStatus defines the observed state of DefaultSubnet.
             properties:

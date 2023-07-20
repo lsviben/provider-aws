@@ -89,8 +89,35 @@ spec:
                     items:
                       type: string
                     type: array
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  languageCode:
+                    description: The language code you selected for your vocabulary
+                      filter. Refer to the supported languages page for accepted codes.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
+                  vocabularyFilterFileUri:
+                    description: The Amazon S3 location (URI) of the text file that
+                      contains your custom VocabularyFilter. Conflicts with words.
+                    type: string
+                  words:
+                    description: '- A list of terms to include in the vocabulary.
+                      Conflicts with vocabulary_file_uri'
+                    items:
+                      type: string
+                    type: array
                 type: object
               managementPolicies:
                 default:
@@ -290,9 +317,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: languageCode is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.languageCode)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.languageCode)
+                || has(self.initProvider.languageCode)'
           status:
             description: VocabularyFilterStatus defines the observed state of VocabularyFilter.
             properties:

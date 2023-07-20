@@ -79,8 +79,24 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  enableHybrid:
+                    description: Indicates that you are using both methods to grant
+                      cross-account. Valid values are TRUE and FALSE.
+                    type: string
+                  policy:
+                    description: –  The policy to be applied to the aws glue data
+                      catalog.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -280,9 +296,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: policy is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.policy)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.policy)
+                || has(self.initProvider.policy)'
           status:
             description: ResourcePolicyStatus defines the observed state of ResourcePolicy.
             properties:

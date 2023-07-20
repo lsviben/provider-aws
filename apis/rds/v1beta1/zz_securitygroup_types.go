@@ -13,6 +13,22 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type IngressInitParameters struct {
+
+	// The CIDR block to accept
+	Cidr *string `json:"cidr,omitempty" tf:"cidr,omitempty"`
+
+	// The ID of the security group to authorize
+	SecurityGroupID *string `json:"securityGroupId,omitempty" tf:"security_group_id,omitempty"`
+
+	// The name of the security group to authorize
+	SecurityGroupName *string `json:"securityGroupName,omitempty" tf:"security_group_name,omitempty"`
+
+	// The owner Id of the security group provided
+	// by security_group_name.
+	SecurityGroupOwnerID *string `json:"securityGroupOwnerId,omitempty" tf:"security_group_owner_id,omitempty"`
+}
+
 type IngressObservation struct {
 
 	// The CIDR block to accept
@@ -32,21 +48,33 @@ type IngressObservation struct {
 type IngressParameters struct {
 
 	// The CIDR block to accept
-	// +kubebuilder:validation:Optional
 	Cidr *string `json:"cidr,omitempty" tf:"cidr,omitempty"`
 
 	// The ID of the security group to authorize
-	// +kubebuilder:validation:Optional
 	SecurityGroupID *string `json:"securityGroupId,omitempty" tf:"security_group_id,omitempty"`
 
 	// The name of the security group to authorize
-	// +kubebuilder:validation:Optional
 	SecurityGroupName *string `json:"securityGroupName,omitempty" tf:"security_group_name,omitempty"`
 
 	// The owner Id of the security group provided
 	// by security_group_name.
-	// +kubebuilder:validation:Optional
 	SecurityGroupOwnerID *string `json:"securityGroupOwnerId,omitempty" tf:"security_group_owner_id,omitempty"`
+}
+
+type SecurityGroupInitParameters struct {
+
+	// The description of the DB security group.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// A list of ingress rules.
+	Ingress []IngressInitParameters `json:"ingress,omitempty" tf:"ingress,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type SecurityGroupObservation struct {
@@ -73,20 +101,16 @@ type SecurityGroupObservation struct {
 type SecurityGroupParameters struct {
 
 	// The description of the DB security group.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// A list of ingress rules.
-	// +kubebuilder:validation:Optional
 	Ingress []IngressParameters `json:"ingress,omitempty" tf:"ingress,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -94,6 +118,10 @@ type SecurityGroupParameters struct {
 type SecurityGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SecurityGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SecurityGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // SecurityGroupStatus defines the observed state of SecurityGroup.
@@ -114,7 +142,7 @@ type SecurityGroupStatus struct {
 type SecurityGroup struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ingress)",message="ingress is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ingress) || has(self.initProvider.ingress)",message="%!s(MISSING) is a required parameter"
 	Spec   SecurityGroupSpec   `json:"spec"`
 	Status SecurityGroupStatus `json:"status,omitempty"`
 }

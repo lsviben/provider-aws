@@ -9,6 +9,8 @@ package v1beta1
 import (
 	"github.com/pkg/errors"
 
+	"github.com/imdario/mergo"
+
 	"github.com/upbound/upjet/pkg/resource"
 	"github.com/upbound/upjet/pkg/resource/json"
 )
@@ -57,7 +59,22 @@ func (tr *Activation) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this Activation
@@ -85,6 +102,31 @@ func (tr *Activation) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *Activation) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this Activation
+func (tr *Activation) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this Association
@@ -131,7 +173,22 @@ func (tr *Association) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this Association
@@ -159,6 +216,31 @@ func (tr *Association) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *Association) GetTerraformSchemaVersion() int {
 	return 1
+}
+
+// GetIgnorableFields of this Association
+func (tr *Association) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this DefaultPatchBaseline
@@ -205,7 +287,22 @@ func (tr *DefaultPatchBaseline) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this DefaultPatchBaseline
@@ -233,6 +330,31 @@ func (tr *DefaultPatchBaseline) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *DefaultPatchBaseline) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this DefaultPatchBaseline
+func (tr *DefaultPatchBaseline) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this Document
@@ -279,7 +401,22 @@ func (tr *Document) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this Document
@@ -307,6 +444,31 @@ func (tr *Document) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *Document) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this Document
+func (tr *Document) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this MaintenanceWindow
@@ -353,7 +515,22 @@ func (tr *MaintenanceWindow) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this MaintenanceWindow
@@ -381,6 +558,31 @@ func (tr *MaintenanceWindow) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *MaintenanceWindow) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this MaintenanceWindow
+func (tr *MaintenanceWindow) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this MaintenanceWindowTarget
@@ -427,7 +629,22 @@ func (tr *MaintenanceWindowTarget) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this MaintenanceWindowTarget
@@ -455,6 +672,31 @@ func (tr *MaintenanceWindowTarget) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *MaintenanceWindowTarget) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this MaintenanceWindowTarget
+func (tr *MaintenanceWindowTarget) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this MaintenanceWindowTask
@@ -501,7 +743,22 @@ func (tr *MaintenanceWindowTask) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this MaintenanceWindowTask
@@ -529,6 +786,31 @@ func (tr *MaintenanceWindowTask) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *MaintenanceWindowTask) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this MaintenanceWindowTask
+func (tr *MaintenanceWindowTask) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this Parameter
@@ -575,7 +857,22 @@ func (tr *Parameter) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this Parameter
@@ -603,6 +900,31 @@ func (tr *Parameter) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *Parameter) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this Parameter
+func (tr *Parameter) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this PatchBaseline
@@ -649,7 +971,22 @@ func (tr *PatchBaseline) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this PatchBaseline
@@ -677,6 +1014,31 @@ func (tr *PatchBaseline) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *PatchBaseline) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this PatchBaseline
+func (tr *PatchBaseline) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this PatchGroup
@@ -723,7 +1085,22 @@ func (tr *PatchGroup) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this PatchGroup
@@ -751,6 +1128,31 @@ func (tr *PatchGroup) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *PatchGroup) GetTerraformSchemaVersion() int {
 	return 1
+}
+
+// GetIgnorableFields of this PatchGroup
+func (tr *PatchGroup) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this ResourceDataSync
@@ -797,7 +1199,22 @@ func (tr *ResourceDataSync) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this ResourceDataSync
@@ -825,6 +1242,31 @@ func (tr *ResourceDataSync) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *ResourceDataSync) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this ResourceDataSync
+func (tr *ResourceDataSync) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }
 
 // GetTerraformResourceType returns Terraform resource type for this ServiceSetting
@@ -871,7 +1313,22 @@ func (tr *ServiceSetting) GetParameters() (map[string]any, error) {
 		return nil, err
 	}
 	base := map[string]any{}
-	return base, json.TFParser.Unmarshal(p, &base)
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return base, mergo.Merge(&base, initBase, mergo.WithSliceDeepCopy)
 }
 
 // SetParameters for this ServiceSetting
@@ -899,4 +1356,29 @@ func (tr *ServiceSetting) LateInitialize(attrs []byte) (bool, error) {
 // GetTerraformSchemaVersion returns the associated Terraform schema version
 func (tr *ServiceSetting) GetTerraformSchemaVersion() int {
 	return 0
+}
+
+// GetIgnorableFields of this ServiceSetting
+func (tr *ServiceSetting) GetIgnorableFields() ([]string, error) {
+	p, err := json.TFParser.Marshal(tr.Spec.ForProvider)
+	if err != nil {
+		return nil, err
+	}
+	base := map[string]any{}
+	err = json.TFParser.Unmarshal(p, &base)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := json.TFParser.Marshal(tr.Spec.InitProvider)
+	if err != nil {
+		return nil, err
+	}
+	initBase := map[string]any{}
+	err = json.TFParser.Unmarshal(i, &initBase)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource.GetIgnoredFields(base, initBase), nil
 }

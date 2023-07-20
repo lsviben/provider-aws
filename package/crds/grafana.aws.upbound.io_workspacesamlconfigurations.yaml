@@ -192,8 +192,136 @@ spec:
                             type: string
                         type: object
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  adminRoleValues:
+                    description: The admin role values.
+                    items:
+                      type: string
+                    type: array
+                  allowedOrganizations:
+                    description: The allowed organizations.
+                    items:
+                      type: string
+                    type: array
+                  editorRoleValues:
+                    description: The editor role values.
+                    items:
+                      type: string
+                    type: array
+                  emailAssertion:
+                    description: The email assertion.
+                    type: string
+                  groupsAssertion:
+                    description: The groups assertion.
+                    type: string
+                  idpMetadataUrl:
+                    description: The IDP Metadata URL. Note that either idp_metadata_url
+                      or idp_metadata_xml (but not both) must be specified.
+                    type: string
+                  idpMetadataXml:
+                    description: The IDP Metadata XML. Note that either idp_metadata_url
+                      or idp_metadata_xml (but not both) must be specified.
+                    type: string
+                  loginAssertion:
+                    description: The login assertion.
+                    type: string
+                  loginValidityDuration:
+                    description: The login validity duration.
+                    type: number
+                  nameAssertion:
+                    description: The name assertion.
+                    type: string
+                  orgAssertion:
+                    description: The org assertion.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  roleAssertion:
+                    description: The role assertion.
+                    type: string
+                  workspaceId:
+                    description: The workspace id.
+                    type: string
+                  workspaceIdRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  workspaceIdSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
                 type: object
               managementPolicies:
                 default:
@@ -393,9 +521,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: editorRoleValues is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.editorRoleValues)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.editorRoleValues)
+                || has(self.initProvider.editorRoleValues)'
           status:
             description: WorkspaceSAMLConfigurationStatus defines the observed state
               of WorkspaceSAMLConfiguration.

@@ -13,6 +13,37 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type APICacheInitParameters struct {
+
+	// Caching behavior. Valid values are FULL_REQUEST_CACHING and PER_RESOLVER_CACHING.
+	APICachingBehavior *string `json:"apiCachingBehavior,omitempty" tf:"api_caching_behavior,omitempty"`
+
+	// GraphQL API ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appsync/v1beta1.GraphQLAPI
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
+
+	APIIDRef *v1.Reference `json:"apiIdRef,omitempty" tf:"-"`
+
+	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
+
+	// At-rest encryption flag for cache. You cannot update this setting after creation.
+	AtRestEncryptionEnabled *bool `json:"atRestEncryptionEnabled,omitempty" tf:"at_rest_encryption_enabled,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// TTL in seconds for cache entries.
+	TTL *float64 `json:"ttl,omitempty" tf:"ttl,omitempty"`
+
+	// Transit encryption flag when connecting to cache. You cannot update this setting after creation.
+	TransitEncryptionEnabled *bool `json:"transitEncryptionEnabled,omitempty" tf:"transit_encryption_enabled,omitempty"`
+
+	// Cache instance type. Valid values are SMALL, MEDIUM, LARGE, XLARGE, LARGE_2X, LARGE_4X, LARGE_8X, LARGE_12X, T2_SMALL, T2_MEDIUM, R4_LARGE, R4_XLARGE, R4_2XLARGE, R4_4XLARGE, R4_8XLARGE.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type APICacheObservation struct {
 
 	// Caching behavior. Valid values are FULL_REQUEST_CACHING and PER_RESOLVER_CACHING.
@@ -40,13 +71,11 @@ type APICacheObservation struct {
 type APICacheParameters struct {
 
 	// Caching behavior. Valid values are FULL_REQUEST_CACHING and PER_RESOLVER_CACHING.
-	// +kubebuilder:validation:Optional
 	APICachingBehavior *string `json:"apiCachingBehavior,omitempty" tf:"api_caching_behavior,omitempty"`
 
 	// GraphQL API ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appsync/v1beta1.GraphQLAPI
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
 
 	// Reference to a GraphQLAPI in appsync to populate apiId.
@@ -58,24 +87,19 @@ type APICacheParameters struct {
 	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
 
 	// At-rest encryption flag for cache. You cannot update this setting after creation.
-	// +kubebuilder:validation:Optional
 	AtRestEncryptionEnabled *bool `json:"atRestEncryptionEnabled,omitempty" tf:"at_rest_encryption_enabled,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// TTL in seconds for cache entries.
-	// +kubebuilder:validation:Optional
 	TTL *float64 `json:"ttl,omitempty" tf:"ttl,omitempty"`
 
 	// Transit encryption flag when connecting to cache. You cannot update this setting after creation.
-	// +kubebuilder:validation:Optional
 	TransitEncryptionEnabled *bool `json:"transitEncryptionEnabled,omitempty" tf:"transit_encryption_enabled,omitempty"`
 
 	// Cache instance type. Valid values are SMALL, MEDIUM, LARGE, XLARGE, LARGE_2X, LARGE_4X, LARGE_8X, LARGE_12X, T2_SMALL, T2_MEDIUM, R4_LARGE, R4_XLARGE, R4_2XLARGE, R4_4XLARGE, R4_8XLARGE.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -83,6 +107,10 @@ type APICacheParameters struct {
 type APICacheSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     APICacheParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider APICacheInitParameters `json:"initProvider,omitempty"`
 }
 
 // APICacheStatus defines the observed state of APICache.
@@ -103,9 +131,9 @@ type APICacheStatus struct {
 type APICache struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.apiCachingBehavior)",message="apiCachingBehavior is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ttl)",message="ttl is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.type)",message="type is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.apiCachingBehavior) || has(self.initProvider.apiCachingBehavior)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ttl) || has(self.initProvider.ttl)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.type) || has(self.initProvider.type)",message="%!s(MISSING) is a required parameter"
 	Spec   APICacheSpec   `json:"spec"`
 	Status APICacheStatus `json:"status,omitempty"`
 }

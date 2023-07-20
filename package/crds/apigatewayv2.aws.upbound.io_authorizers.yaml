@@ -286,8 +286,231 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  apiId:
+                    description: API identifier.
+                    type: string
+                  apiIdRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  apiIdSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  authorizerCredentialsArn:
+                    description: Required credentials as an IAM role for API Gateway
+                      to invoke the authorizer. Supported only for REQUEST authorizers.
+                    type: string
+                  authorizerPayloadFormatVersion:
+                    description: 'Format of the payload sent to an HTTP API Lambda
+                      authorizer. Required for HTTP API Lambda authorizers. Valid
+                      values: 1.0, 2.0.'
+                    type: string
+                  authorizerResultTtlInSeconds:
+                    description: Time to live (TTL) for cached authorizer results,
+                      in seconds. If it equals 0, authorization caching is disabled.
+                      If it is greater than 0, API Gateway caches authorizer responses.
+                      The maximum value is 3600, or 1 hour. Defaults to 300. Supported
+                      only for HTTP API Lambda authorizers.
+                    type: number
+                  authorizerType:
+                    description: 'Authorizer type. Valid values: JWT, REQUEST. Specify
+                      REQUEST for a Lambda function using incoming request parameters.
+                      For HTTP APIs, specify JWT to use JSON Web Tokens.'
+                    type: string
+                  authorizerUri:
+                    description: Authorizer's Uniform Resource Identifier (URI). For
+                      REQUEST authorizers this must be a well-formed Lambda function
+                      URI, such as the invoke_arn attribute of the aws_lambda_function
+                      resource. Supported only for REQUEST authorizers. Must be between
+                      1 and 2048 characters in length.
+                    type: string
+                  authorizerUriRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  authorizerUriSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  enableSimpleResponses:
+                    description: Whether a Lambda authorizer returns a response in
+                      a simple format. If enabled, the Lambda authorizer can return
+                      a boolean value instead of an IAM policy. Supported only for
+                      HTTP APIs.
+                    type: boolean
+                  identitySources:
+                    description: Identity sources for which authorization is requested.
+                      For REQUEST authorizers the value is a list of one or more mapping
+                      expressions of the specified request parameters. For JWT authorizers
+                      the single entry specifies where to extract the JSON Web Token
+                      (JWT) from inbound requests.
+                    items:
+                      type: string
+                    type: array
+                  jwtConfiguration:
+                    description: Configuration of a JWT authorizer. Required for the
+                      JWT authorizer type. Supported only for HTTP APIs.
+                    items:
+                      properties:
+                        audience:
+                          description: List of the intended recipients of the JWT.
+                            A valid JWT must provide an aud that matches at least
+                            one entry in this list.
+                          items:
+                            type: string
+                          type: array
+                        issuer:
+                          description: Base domain of the identity provider that issues
+                            JSON Web Tokens, such as the endpoint attribute of the
+                            aws_cognito_user_pool resource.
+                          type: string
+                      type: object
+                    type: array
+                  name:
+                    description: Name of the authorizer. Must be between 1 and 128
+                      characters in length.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -487,12 +710,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: authorizerType is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.authorizerType)'
-            - message: name is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.authorizerType)
+                || has(self.initProvider.authorizerType)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)
+                || has(self.initProvider.name)'
           status:
             description: AuthorizerStatus defines the observed state of Authorizer.
             properties:

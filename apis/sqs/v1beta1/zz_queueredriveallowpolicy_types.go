@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type QueueRedriveAllowPolicyInitParameters struct {
+
+	// The URL of the SQS Queue to which to attach the policy
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sqs/v1beta1.Queue
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
+	QueueURL *string `json:"queueUrl,omitempty" tf:"queue_url,omitempty"`
+
+	QueueURLRef *v1.Reference `json:"queueUrlRef,omitempty" tf:"-"`
+
+	QueueURLSelector *v1.Selector `json:"queueUrlSelector,omitempty" tf:"-"`
+
+	// The JSON redrive allow policy for the SQS queue. Learn more in the Amazon SQS dead-letter queues documentation.
+	RedriveAllowPolicy *string `json:"redriveAllowPolicy,omitempty" tf:"redrive_allow_policy,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type QueueRedriveAllowPolicyObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -28,7 +47,6 @@ type QueueRedriveAllowPolicyParameters struct {
 	// The URL of the SQS Queue to which to attach the policy
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sqs/v1beta1.Queue
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
-	// +kubebuilder:validation:Optional
 	QueueURL *string `json:"queueUrl,omitempty" tf:"queue_url,omitempty"`
 
 	// Reference to a Queue in sqs to populate queueUrl.
@@ -40,19 +58,21 @@ type QueueRedriveAllowPolicyParameters struct {
 	QueueURLSelector *v1.Selector `json:"queueUrlSelector,omitempty" tf:"-"`
 
 	// The JSON redrive allow policy for the SQS queue. Learn more in the Amazon SQS dead-letter queues documentation.
-	// +kubebuilder:validation:Optional
 	RedriveAllowPolicy *string `json:"redriveAllowPolicy,omitempty" tf:"redrive_allow_policy,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // QueueRedriveAllowPolicySpec defines the desired state of QueueRedriveAllowPolicy
 type QueueRedriveAllowPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     QueueRedriveAllowPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider QueueRedriveAllowPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // QueueRedriveAllowPolicyStatus defines the observed state of QueueRedriveAllowPolicy.
@@ -73,7 +93,7 @@ type QueueRedriveAllowPolicyStatus struct {
 type QueueRedriveAllowPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.redriveAllowPolicy)",message="redriveAllowPolicy is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.redriveAllowPolicy) || has(self.initProvider.redriveAllowPolicy)",message="%!s(MISSING) is a required parameter"
 	Spec   QueueRedriveAllowPolicySpec   `json:"spec"`
 	Status QueueRedriveAllowPolicyStatus `json:"status,omitempty"`
 }

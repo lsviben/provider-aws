@@ -80,10 +80,25 @@ spec:
                   value:
                     description: The value of the tag.
                     type: string
-                required:
-                - key
-                - region
-                - resourceId
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  key:
+                    description: The tag name.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  resourceId:
+                    description: The ID of the EC2 resource to manage the tag for.
+                    type: string
+                  value:
+                    description: The value of the tag.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -283,9 +298,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: value is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.value)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.value)
+                || has(self.initProvider.value)'
           status:
             description: TagStatus defines the observed state of Tag.
             properties:

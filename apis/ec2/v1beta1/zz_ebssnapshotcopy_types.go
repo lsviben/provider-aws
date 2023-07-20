@@ -13,6 +13,51 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EBSSnapshotCopyInitParameters struct {
+
+	// A description of what the snapshot is.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Whether the snapshot is encrypted.
+	Encrypted *bool `json:"encrypted,omitempty" tf:"encrypted,omitempty"`
+
+	// The ARN for the KMS encryption key.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
+
+	KMSKeyIDRef *v1.Reference `json:"kmsKeyIdRef,omitempty" tf:"-"`
+
+	KMSKeyIDSelector *v1.Selector `json:"kmsKeyIdSelector,omitempty" tf:"-"`
+
+	// Indicates whether to permanently restore an archived snapshot.
+	PermanentRestore *bool `json:"permanentRestore,omitempty" tf:"permanent_restore,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The region of the source snapshot.
+	SourceRegion *string `json:"sourceRegion,omitempty" tf:"source_region,omitempty"`
+
+	// The ARN for the snapshot to be copied.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.EBSSnapshot
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	SourceSnapshotID *string `json:"sourceSnapshotId,omitempty" tf:"source_snapshot_id,omitempty"`
+
+	SourceSnapshotIDRef *v1.Reference `json:"sourceSnapshotIdRef,omitempty" tf:"-"`
+
+	SourceSnapshotIDSelector *v1.Selector `json:"sourceSnapshotIdSelector,omitempty" tf:"-"`
+
+	// The name of the storage tier. Valid values are archive and standard. Default value is standard.
+	StorageTier *string `json:"storageTier,omitempty" tf:"storage_tier,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Specifies the number of days for which to temporarily restore an archived snapshot. Required for temporary restores only. The snapshot will be automatically re-archived after this period.
+	TemporaryRestoreDays *float64 `json:"temporaryRestoreDays,omitempty" tf:"temporary_restore_days,omitempty"`
+}
+
 type EBSSnapshotCopyObservation struct {
 
 	// Amazon Resource Name (ARN) of the EBS Snapshot.
@@ -73,16 +118,13 @@ type EBSSnapshotCopyObservation struct {
 type EBSSnapshotCopyParameters struct {
 
 	// A description of what the snapshot is.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Whether the snapshot is encrypted.
-	// +kubebuilder:validation:Optional
 	Encrypted *bool `json:"encrypted,omitempty" tf:"encrypted,omitempty"`
 
 	// The ARN for the KMS encryption key.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
-	// +kubebuilder:validation:Optional
 	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
 
 	// Reference to a Key in kms to populate kmsKeyId.
@@ -94,22 +136,18 @@ type EBSSnapshotCopyParameters struct {
 	KMSKeyIDSelector *v1.Selector `json:"kmsKeyIdSelector,omitempty" tf:"-"`
 
 	// Indicates whether to permanently restore an archived snapshot.
-	// +kubebuilder:validation:Optional
 	PermanentRestore *bool `json:"permanentRestore,omitempty" tf:"permanent_restore,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The region of the source snapshot.
-	// +kubebuilder:validation:Optional
 	SourceRegion *string `json:"sourceRegion,omitempty" tf:"source_region,omitempty"`
 
 	// The ARN for the snapshot to be copied.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.EBSSnapshot
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	SourceSnapshotID *string `json:"sourceSnapshotId,omitempty" tf:"source_snapshot_id,omitempty"`
 
 	// Reference to a EBSSnapshot in ec2 to populate sourceSnapshotId.
@@ -121,15 +159,12 @@ type EBSSnapshotCopyParameters struct {
 	SourceSnapshotIDSelector *v1.Selector `json:"sourceSnapshotIdSelector,omitempty" tf:"-"`
 
 	// The name of the storage tier. Valid values are archive and standard. Default value is standard.
-	// +kubebuilder:validation:Optional
 	StorageTier *string `json:"storageTier,omitempty" tf:"storage_tier,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Specifies the number of days for which to temporarily restore an archived snapshot. Required for temporary restores only. The snapshot will be automatically re-archived after this period.
-	// +kubebuilder:validation:Optional
 	TemporaryRestoreDays *float64 `json:"temporaryRestoreDays,omitempty" tf:"temporary_restore_days,omitempty"`
 }
 
@@ -137,6 +172,10 @@ type EBSSnapshotCopyParameters struct {
 type EBSSnapshotCopySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EBSSnapshotCopyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EBSSnapshotCopyInitParameters `json:"initProvider,omitempty"`
 }
 
 // EBSSnapshotCopyStatus defines the observed state of EBSSnapshotCopy.
@@ -157,7 +196,7 @@ type EBSSnapshotCopyStatus struct {
 type EBSSnapshotCopy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.sourceRegion)",message="sourceRegion is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.sourceRegion) || has(self.initProvider.sourceRegion)",message="%!s(MISSING) is a required parameter"
 	Spec   EBSSnapshotCopySpec   `json:"spec"`
 	Status EBSSnapshotCopyStatus `json:"status,omitempty"`
 }

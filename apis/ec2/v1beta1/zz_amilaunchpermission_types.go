@@ -13,6 +13,33 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AMILaunchPermissionInitParameters struct {
+
+	// AWS account ID for the launch permission.
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	// Name of the group for the launch permission. Valid values: "all".
+	Group *string `json:"group,omitempty" tf:"group,omitempty"`
+
+	// ID of the AMI.
+	// +crossplane:generate:reference:type=AMI
+	ImageID *string `json:"imageId,omitempty" tf:"image_id,omitempty"`
+
+	ImageIDRef *v1.Reference `json:"imageIdRef,omitempty" tf:"-"`
+
+	ImageIDSelector *v1.Selector `json:"imageIdSelector,omitempty" tf:"-"`
+
+	// ARN of an organization for the launch permission.
+	OrganizationArn *string `json:"organizationArn,omitempty" tf:"organization_arn,omitempty"`
+
+	// ARN of an organizational unit for the launch permission.
+	OrganizationalUnitArn *string `json:"organizationalUnitArn,omitempty" tf:"organizational_unit_arn,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type AMILaunchPermissionObservation struct {
 
 	// AWS account ID for the launch permission.
@@ -37,16 +64,13 @@ type AMILaunchPermissionObservation struct {
 type AMILaunchPermissionParameters struct {
 
 	// AWS account ID for the launch permission.
-	// +kubebuilder:validation:Optional
 	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// Name of the group for the launch permission. Valid values: "all".
-	// +kubebuilder:validation:Optional
 	Group *string `json:"group,omitempty" tf:"group,omitempty"`
 
 	// ID of the AMI.
 	// +crossplane:generate:reference:type=AMI
-	// +kubebuilder:validation:Optional
 	ImageID *string `json:"imageId,omitempty" tf:"image_id,omitempty"`
 
 	// Reference to a AMI to populate imageId.
@@ -58,23 +82,24 @@ type AMILaunchPermissionParameters struct {
 	ImageIDSelector *v1.Selector `json:"imageIdSelector,omitempty" tf:"-"`
 
 	// ARN of an organization for the launch permission.
-	// +kubebuilder:validation:Optional
 	OrganizationArn *string `json:"organizationArn,omitempty" tf:"organization_arn,omitempty"`
 
 	// ARN of an organizational unit for the launch permission.
-	// +kubebuilder:validation:Optional
 	OrganizationalUnitArn *string `json:"organizationalUnitArn,omitempty" tf:"organizational_unit_arn,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // AMILaunchPermissionSpec defines the desired state of AMILaunchPermission
 type AMILaunchPermissionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AMILaunchPermissionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AMILaunchPermissionInitParameters `json:"initProvider,omitempty"`
 }
 
 // AMILaunchPermissionStatus defines the observed state of AMILaunchPermission.

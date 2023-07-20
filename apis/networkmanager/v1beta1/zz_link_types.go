@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BandwidthInitParameters struct {
+
+	// Download speed in Mbps.
+	DownloadSpeed *float64 `json:"downloadSpeed,omitempty" tf:"download_speed,omitempty"`
+
+	// Upload speed in Mbps.
+	UploadSpeed *float64 `json:"uploadSpeed,omitempty" tf:"upload_speed,omitempty"`
+}
+
 type BandwidthObservation struct {
 
 	// Download speed in Mbps.
@@ -25,12 +34,49 @@ type BandwidthObservation struct {
 type BandwidthParameters struct {
 
 	// Download speed in Mbps.
-	// +kubebuilder:validation:Optional
 	DownloadSpeed *float64 `json:"downloadSpeed,omitempty" tf:"download_speed,omitempty"`
 
 	// Upload speed in Mbps.
-	// +kubebuilder:validation:Optional
 	UploadSpeed *float64 `json:"uploadSpeed,omitempty" tf:"upload_speed,omitempty"`
+}
+
+type LinkInitParameters struct {
+
+	// The upload speed and download speed in Mbps. Documented below.
+	Bandwidth []BandwidthInitParameters `json:"bandwidth,omitempty" tf:"bandwidth,omitempty"`
+
+	// A description of the link.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The ID of the global network.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.GlobalNetwork
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	GlobalNetworkID *string `json:"globalNetworkId,omitempty" tf:"global_network_id,omitempty"`
+
+	GlobalNetworkIDRef *v1.Reference `json:"globalNetworkIdRef,omitempty" tf:"-"`
+
+	GlobalNetworkIDSelector *v1.Selector `json:"globalNetworkIdSelector,omitempty" tf:"-"`
+
+	// The provider of the link.
+	ProviderName *string `json:"providerName,omitempty" tf:"provider_name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ID of the site.
+	// +crossplane:generate:reference:type=Site
+	SiteID *string `json:"siteId,omitempty" tf:"site_id,omitempty"`
+
+	SiteIDRef *v1.Reference `json:"siteIdRef,omitempty" tf:"-"`
+
+	SiteIDSelector *v1.Selector `json:"siteIdSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The type of the link.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type LinkObservation struct {
@@ -68,17 +114,14 @@ type LinkObservation struct {
 type LinkParameters struct {
 
 	// The upload speed and download speed in Mbps. Documented below.
-	// +kubebuilder:validation:Optional
 	Bandwidth []BandwidthParameters `json:"bandwidth,omitempty" tf:"bandwidth,omitempty"`
 
 	// A description of the link.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The ID of the global network.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.GlobalNetwork
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	GlobalNetworkID *string `json:"globalNetworkId,omitempty" tf:"global_network_id,omitempty"`
 
 	// Reference to a GlobalNetwork in networkmanager to populate globalNetworkId.
@@ -90,17 +133,14 @@ type LinkParameters struct {
 	GlobalNetworkIDSelector *v1.Selector `json:"globalNetworkIdSelector,omitempty" tf:"-"`
 
 	// The provider of the link.
-	// +kubebuilder:validation:Optional
 	ProviderName *string `json:"providerName,omitempty" tf:"provider_name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ID of the site.
 	// +crossplane:generate:reference:type=Site
-	// +kubebuilder:validation:Optional
 	SiteID *string `json:"siteId,omitempty" tf:"site_id,omitempty"`
 
 	// Reference to a Site to populate siteId.
@@ -112,11 +152,9 @@ type LinkParameters struct {
 	SiteIDSelector *v1.Selector `json:"siteIdSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The type of the link.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -124,6 +162,10 @@ type LinkParameters struct {
 type LinkSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     LinkParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider LinkInitParameters `json:"initProvider,omitempty"`
 }
 
 // LinkStatus defines the observed state of Link.
@@ -144,7 +186,7 @@ type LinkStatus struct {
 type Link struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.bandwidth)",message="bandwidth is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.bandwidth) || has(self.initProvider.bandwidth)",message="%!s(MISSING) is a required parameter"
 	Spec   LinkSpec   `json:"spec"`
 	Status LinkStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type MainRouteTableAssociationInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ID of the Route Table to set as the new
+	// main route table for the target VPC
+	// +crossplane:generate:reference:type=RouteTable
+	RouteTableID *string `json:"routeTableId,omitempty" tf:"route_table_id,omitempty"`
+
+	RouteTableIDRef *v1.Reference `json:"routeTableIdRef,omitempty" tf:"-"`
+
+	RouteTableIDSelector *v1.Selector `json:"routeTableIdSelector,omitempty" tf:"-"`
+
+	// The ID of the VPC whose main route table should be set
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
+	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
+
+	VPCIDRef *v1.Reference `json:"vpcIdRef,omitempty" tf:"-"`
+
+	VPCIDSelector *v1.Selector `json:"vpcIdSelector,omitempty" tf:"-"`
+}
+
 type MainRouteTableAssociationObservation struct {
 
 	// The ID of the Route Table Association
@@ -33,13 +57,11 @@ type MainRouteTableAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ID of the Route Table to set as the new
 	// main route table for the target VPC
 	// +crossplane:generate:reference:type=RouteTable
-	// +kubebuilder:validation:Optional
 	RouteTableID *string `json:"routeTableId,omitempty" tf:"route_table_id,omitempty"`
 
 	// Reference to a RouteTable to populate routeTableId.
@@ -52,7 +74,6 @@ type MainRouteTableAssociationParameters struct {
 
 	// The ID of the VPC whose main route table should be set
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
-	// +kubebuilder:validation:Optional
 	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
 
 	// Reference to a VPC in ec2 to populate vpcId.
@@ -68,6 +89,10 @@ type MainRouteTableAssociationParameters struct {
 type MainRouteTableAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     MainRouteTableAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider MainRouteTableAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // MainRouteTableAssociationStatus defines the observed state of MainRouteTableAssociation.

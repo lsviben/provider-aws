@@ -13,6 +13,36 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type IdentityProviderInitParameters struct {
+
+	// The map of attribute mapping of user pool attributes. AttributeMapping in AWS API documentation
+	AttributeMapping map[string]*string `json:"attributeMapping,omitempty" tf:"attribute_mapping,omitempty"`
+
+	// The list of identity providers.
+	IdpIdentifiers []*string `json:"idpIdentifiers,omitempty" tf:"idp_identifiers,omitempty"`
+
+	// The map of identity details, such as access token
+	ProviderDetails map[string]*string `json:"providerDetails,omitempty" tf:"provider_details,omitempty"`
+
+	// The provider name
+	ProviderName *string `json:"providerName,omitempty" tf:"provider_name,omitempty"`
+
+	// The provider type.  See AWS API for valid values
+	ProviderType *string `json:"providerType,omitempty" tf:"provider_type,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The user pool id
+	// +crossplane:generate:reference:type=UserPool
+	UserPoolID *string `json:"userPoolId,omitempty" tf:"user_pool_id,omitempty"`
+
+	UserPoolIDRef *v1.Reference `json:"userPoolIdRef,omitempty" tf:"-"`
+
+	UserPoolIDSelector *v1.Selector `json:"userPoolIdSelector,omitempty" tf:"-"`
+}
+
 type IdentityProviderObservation struct {
 
 	// The map of attribute mapping of user pool attributes. AttributeMapping in AWS API documentation
@@ -39,33 +69,26 @@ type IdentityProviderObservation struct {
 type IdentityProviderParameters struct {
 
 	// The map of attribute mapping of user pool attributes. AttributeMapping in AWS API documentation
-	// +kubebuilder:validation:Optional
 	AttributeMapping map[string]*string `json:"attributeMapping,omitempty" tf:"attribute_mapping,omitempty"`
 
 	// The list of identity providers.
-	// +kubebuilder:validation:Optional
 	IdpIdentifiers []*string `json:"idpIdentifiers,omitempty" tf:"idp_identifiers,omitempty"`
 
 	// The map of identity details, such as access token
-	// +kubebuilder:validation:Optional
 	ProviderDetails map[string]*string `json:"providerDetails,omitempty" tf:"provider_details,omitempty"`
 
 	// The provider name
-	// +kubebuilder:validation:Optional
 	ProviderName *string `json:"providerName,omitempty" tf:"provider_name,omitempty"`
 
 	// The provider type.  See AWS API for valid values
-	// +kubebuilder:validation:Optional
 	ProviderType *string `json:"providerType,omitempty" tf:"provider_type,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The user pool id
 	// +crossplane:generate:reference:type=UserPool
-	// +kubebuilder:validation:Optional
 	UserPoolID *string `json:"userPoolId,omitempty" tf:"user_pool_id,omitempty"`
 
 	// Reference to a UserPool to populate userPoolId.
@@ -81,6 +104,10 @@ type IdentityProviderParameters struct {
 type IdentityProviderSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     IdentityProviderParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider IdentityProviderInitParameters `json:"initProvider,omitempty"`
 }
 
 // IdentityProviderStatus defines the observed state of IdentityProvider.
@@ -101,9 +128,9 @@ type IdentityProviderStatus struct {
 type IdentityProvider struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.providerDetails)",message="providerDetails is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.providerName)",message="providerName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.providerType)",message="providerType is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.providerDetails) || has(self.initProvider.providerDetails)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.providerName) || has(self.initProvider.providerName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.providerType) || has(self.initProvider.providerType)",message="%!s(MISSING) is a required parameter"
 	Spec   IdentityProviderSpec   `json:"spec"`
 	Status IdentityProviderStatus `json:"status,omitempty"`
 }

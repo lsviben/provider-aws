@@ -13,6 +13,49 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ProvisioningArtifactInitParameters struct {
+
+	// Language code. Valid values: en (English), jp (Japanese), zh (Chinese). The default value is en.
+	AcceptLanguage *string `json:"acceptLanguage,omitempty" tf:"accept_language,omitempty"`
+
+	// Whether the product version is active. Inactive provisioning artifacts are invisible to end users. End users cannot launch or update a provisioned product from an inactive provisioning artifact. Default is true.
+	Active *bool `json:"active,omitempty" tf:"active,omitempty"`
+
+	// Description of the provisioning artifact (i.e., version), including how it differs from the previous provisioning artifact.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Whether AWS Service Catalog stops validating the specified provisioning artifact template even if it is invalid.
+	DisableTemplateValidation *bool `json:"disableTemplateValidation,omitempty" tf:"disable_template_validation,omitempty"`
+
+	// Information set by the administrator to provide guidance to end users about which provisioning artifacts to use. Valid values are DEFAULT and DEPRECATED. The default is DEFAULT. Users are able to make updates to a provisioned product of a deprecated version but cannot launch new provisioned products using a deprecated version.
+	Guidance *string `json:"guidance,omitempty" tf:"guidance,omitempty"`
+
+	// Name of the provisioning artifact (for example, v1, v2beta). No spaces are allowed.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Identifier of the product.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/servicecatalog/v1beta1.Product
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	ProductID *string `json:"productId,omitempty" tf:"product_id,omitempty"`
+
+	ProductIDRef *v1.Reference `json:"productIdRef,omitempty" tf:"-"`
+
+	ProductIDSelector *v1.Selector `json:"productIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Template source as the physical ID of the resource that contains the template. Currently only supports CloudFormation stack ARN. Specify the physical ID as arn:[partition]:cloudformation:[region]:[account ID]:stack/[stack name]/[resource ID].
+	TemplatePhysicalID *string `json:"templatePhysicalId,omitempty" tf:"template_physical_id,omitempty"`
+
+	// Template source as URL of the CloudFormation template in Amazon S3.
+	TemplateURL *string `json:"templateUrl,omitempty" tf:"template_url,omitempty"`
+
+	// Type of provisioning artifact. Valid values: CLOUD_FORMATION_TEMPLATE, MARKETPLACE_AMI, MARKETPLACE_CAR (Marketplace Clusters and AWS Resources).
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type ProvisioningArtifactObservation struct {
 
 	// Language code. Valid values: en (English), jp (Japanese), zh (Chinese). The default value is en.
@@ -55,33 +98,26 @@ type ProvisioningArtifactObservation struct {
 type ProvisioningArtifactParameters struct {
 
 	// Language code. Valid values: en (English), jp (Japanese), zh (Chinese). The default value is en.
-	// +kubebuilder:validation:Optional
 	AcceptLanguage *string `json:"acceptLanguage,omitempty" tf:"accept_language,omitempty"`
 
 	// Whether the product version is active. Inactive provisioning artifacts are invisible to end users. End users cannot launch or update a provisioned product from an inactive provisioning artifact. Default is true.
-	// +kubebuilder:validation:Optional
 	Active *bool `json:"active,omitempty" tf:"active,omitempty"`
 
 	// Description of the provisioning artifact (i.e., version), including how it differs from the previous provisioning artifact.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Whether AWS Service Catalog stops validating the specified provisioning artifact template even if it is invalid.
-	// +kubebuilder:validation:Optional
 	DisableTemplateValidation *bool `json:"disableTemplateValidation,omitempty" tf:"disable_template_validation,omitempty"`
 
 	// Information set by the administrator to provide guidance to end users about which provisioning artifacts to use. Valid values are DEFAULT and DEPRECATED. The default is DEFAULT. Users are able to make updates to a provisioned product of a deprecated version but cannot launch new provisioned products using a deprecated version.
-	// +kubebuilder:validation:Optional
 	Guidance *string `json:"guidance,omitempty" tf:"guidance,omitempty"`
 
 	// Name of the provisioning artifact (for example, v1, v2beta). No spaces are allowed.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Identifier of the product.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/servicecatalog/v1beta1.Product
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	ProductID *string `json:"productId,omitempty" tf:"product_id,omitempty"`
 
 	// Reference to a Product in servicecatalog to populate productId.
@@ -94,19 +130,15 @@ type ProvisioningArtifactParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Template source as the physical ID of the resource that contains the template. Currently only supports CloudFormation stack ARN. Specify the physical ID as arn:[partition]:cloudformation:[region]:[account ID]:stack/[stack name]/[resource ID].
-	// +kubebuilder:validation:Optional
 	TemplatePhysicalID *string `json:"templatePhysicalId,omitempty" tf:"template_physical_id,omitempty"`
 
 	// Template source as URL of the CloudFormation template in Amazon S3.
-	// +kubebuilder:validation:Optional
 	TemplateURL *string `json:"templateUrl,omitempty" tf:"template_url,omitempty"`
 
 	// Type of provisioning artifact. Valid values: CLOUD_FORMATION_TEMPLATE, MARKETPLACE_AMI, MARKETPLACE_CAR (Marketplace Clusters and AWS Resources).
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -114,6 +146,10 @@ type ProvisioningArtifactParameters struct {
 type ProvisioningArtifactSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ProvisioningArtifactParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ProvisioningArtifactInitParameters `json:"initProvider,omitempty"`
 }
 
 // ProvisioningArtifactStatus defines the observed state of ProvisioningArtifact.

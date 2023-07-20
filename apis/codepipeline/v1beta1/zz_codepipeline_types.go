@@ -13,6 +13,45 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ActionInitParameters struct {
+
+	// A category defines what kind of action can be taken in the stage, and constrains the provider type for the action. Possible values are Approval, Build, Deploy, Invoke, Source and Test.
+	Category *string `json:"category,omitempty" tf:"category,omitempty"`
+
+	// A map of the action declaration's configuration. Configurations options for action types and providers can be found in the Pipeline Structure Reference and Action Structure Reference documentation.
+	Configuration map[string]*string `json:"configuration,omitempty" tf:"configuration,omitempty"`
+
+	// A list of artifact names to be worked on.
+	InputArtifacts []*string `json:"inputArtifacts,omitempty" tf:"input_artifacts,omitempty"`
+
+	// The action declaration's name.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The namespace all output variables will be accessed from.
+	Namespace *string `json:"namespace,omitempty" tf:"namespace,omitempty"`
+
+	// A list of artifact names to output. Output artifact names must be unique within a pipeline.
+	OutputArtifacts []*string `json:"outputArtifacts,omitempty" tf:"output_artifacts,omitempty"`
+
+	// The creator of the action being called. Possible values are AWS, Custom and ThirdParty.
+	Owner *string `json:"owner,omitempty" tf:"owner,omitempty"`
+
+	// The provider of the service being called by the action. Valid providers are determined by the action category. Provider names are listed in the Action Structure Reference documentation.
+	Provider *string `json:"provider,omitempty" tf:"provider,omitempty"`
+
+	// The region in which to run the action.
+	Region *string `json:"region,omitempty" tf:"region,omitempty"`
+
+	// The ARN of the IAM service role that will perform the declared action. This is assumed through the roleArn for the pipeline.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The order in which actions are run.
+	RunOrder *float64 `json:"runOrder,omitempty" tf:"run_order,omitempty"`
+
+	// A string that identifies the action type.
+	Version *string `json:"version,omitempty" tf:"version,omitempty"`
+}
+
 type ActionObservation struct {
 
 	// A category defines what kind of action can be taken in the stage, and constrains the provider type for the action. Possible values are Approval, Build, Deploy, Invoke, Source and Test.
@@ -55,52 +94,60 @@ type ActionObservation struct {
 type ActionParameters struct {
 
 	// A category defines what kind of action can be taken in the stage, and constrains the provider type for the action. Possible values are Approval, Build, Deploy, Invoke, Source and Test.
-	// +kubebuilder:validation:Required
-	Category *string `json:"category" tf:"category,omitempty"`
+	Category *string `json:"category,omitempty" tf:"category,omitempty"`
 
 	// A map of the action declaration's configuration. Configurations options for action types and providers can be found in the Pipeline Structure Reference and Action Structure Reference documentation.
-	// +kubebuilder:validation:Optional
 	Configuration map[string]*string `json:"configuration,omitempty" tf:"configuration,omitempty"`
 
 	// A list of artifact names to be worked on.
-	// +kubebuilder:validation:Optional
 	InputArtifacts []*string `json:"inputArtifacts,omitempty" tf:"input_artifacts,omitempty"`
 
 	// The action declaration's name.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The namespace all output variables will be accessed from.
-	// +kubebuilder:validation:Optional
 	Namespace *string `json:"namespace,omitempty" tf:"namespace,omitempty"`
 
 	// A list of artifact names to output. Output artifact names must be unique within a pipeline.
-	// +kubebuilder:validation:Optional
 	OutputArtifacts []*string `json:"outputArtifacts,omitempty" tf:"output_artifacts,omitempty"`
 
 	// The creator of the action being called. Possible values are AWS, Custom and ThirdParty.
-	// +kubebuilder:validation:Required
-	Owner *string `json:"owner" tf:"owner,omitempty"`
+	Owner *string `json:"owner,omitempty" tf:"owner,omitempty"`
 
 	// The provider of the service being called by the action. Valid providers are determined by the action category. Provider names are listed in the Action Structure Reference documentation.
-	// +kubebuilder:validation:Required
-	Provider *string `json:"provider" tf:"provider,omitempty"`
+	Provider *string `json:"provider,omitempty" tf:"provider,omitempty"`
 
 	// The region in which to run the action.
-	// +kubebuilder:validation:Optional
 	Region *string `json:"region,omitempty" tf:"region,omitempty"`
 
 	// The ARN of the IAM service role that will perform the declared action. This is assumed through the roleArn for the pipeline.
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The order in which actions are run.
-	// +kubebuilder:validation:Optional
 	RunOrder *float64 `json:"runOrder,omitempty" tf:"run_order,omitempty"`
 
 	// A string that identifies the action type.
-	// +kubebuilder:validation:Required
-	Version *string `json:"version" tf:"version,omitempty"`
+	Version *string `json:"version,omitempty" tf:"version,omitempty"`
+}
+
+type ArtifactStoreInitParameters struct {
+
+	// The encryption key block AWS CodePipeline uses to encrypt the data in the artifact store, such as an AWS Key Management Service (AWS KMS) key. If you don't specify a key, AWS CodePipeline uses the default key for Amazon Simple Storage Service (Amazon S3). An encryption_key block is documented below.
+	EncryptionKey []EncryptionKeyInitParameters `json:"encryptionKey,omitempty" tf:"encryption_key,omitempty"`
+
+	// The location where AWS CodePipeline stores artifacts for a pipeline; currently only S3 is supported.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	Location *string `json:"location,omitempty" tf:"location,omitempty"`
+
+	LocationRef *v1.Reference `json:"locationRef,omitempty" tf:"-"`
+
+	LocationSelector *v1.Selector `json:"locationSelector,omitempty" tf:"-"`
+
+	// The region where the artifact store is located. Required for a cross-region CodePipeline, do not provide for a single-region CodePipeline.
+	Region *string `json:"region,omitempty" tf:"region,omitempty"`
+
+	// The type of the artifact store, such as Amazon S3
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type ArtifactStoreObservation struct {
@@ -121,12 +168,10 @@ type ArtifactStoreObservation struct {
 type ArtifactStoreParameters struct {
 
 	// The encryption key block AWS CodePipeline uses to encrypt the data in the artifact store, such as an AWS Key Management Service (AWS KMS) key. If you don't specify a key, AWS CodePipeline uses the default key for Amazon Simple Storage Service (Amazon S3). An encryption_key block is documented below.
-	// +kubebuilder:validation:Optional
 	EncryptionKey []EncryptionKeyParameters `json:"encryptionKey,omitempty" tf:"encryption_key,omitempty"`
 
 	// The location where AWS CodePipeline stores artifacts for a pipeline; currently only S3 is supported.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
-	// +kubebuilder:validation:Optional
 	Location *string `json:"location,omitempty" tf:"location,omitempty"`
 
 	// Reference to a Bucket in s3 to populate location.
@@ -138,12 +183,36 @@ type ArtifactStoreParameters struct {
 	LocationSelector *v1.Selector `json:"locationSelector,omitempty" tf:"-"`
 
 	// The region where the artifact store is located. Required for a cross-region CodePipeline, do not provide for a single-region CodePipeline.
-	// +kubebuilder:validation:Optional
 	Region *string `json:"region,omitempty" tf:"region,omitempty"`
 
 	// The type of the artifact store, such as Amazon S3
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type CodepipelineInitParameters struct {
+
+	// One or more artifact_store blocks. Artifact stores are documented below.
+	ArtifactStore []ArtifactStoreInitParameters `json:"artifactStore,omitempty" tf:"artifact_store,omitempty"`
+
+	// The region in which to run the action.
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A service role Amazon Resource Name (ARN) that grants AWS CodePipeline permission to make calls to AWS services on your behalf.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
+
+	// (Minimum of at least two stage blocks is required) A stage block. Stages are documented below.
+	Stage []StageInitParameters `json:"stage,omitempty" tf:"stage,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type CodepipelineObservation struct {
@@ -173,19 +242,16 @@ type CodepipelineObservation struct {
 type CodepipelineParameters struct {
 
 	// One or more artifact_store blocks. Artifact stores are documented below.
-	// +kubebuilder:validation:Optional
 	ArtifactStore []ArtifactStoreParameters `json:"artifactStore,omitempty" tf:"artifact_store,omitempty"`
 
 	// The region in which to run the action.
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A service role Amazon Resource Name (ARN) that grants AWS CodePipeline permission to make calls to AWS services on your behalf.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -197,12 +263,19 @@ type CodepipelineParameters struct {
 	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
 
 	// (Minimum of at least two stage blocks is required) A stage block. Stages are documented below.
-	// +kubebuilder:validation:Optional
 	Stage []StageParameters `json:"stage,omitempty" tf:"stage,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type EncryptionKeyInitParameters struct {
+
+	// The KMS key ARN or ID
+	ID *string `json:"id,omitempty" tf:"id,omitempty"`
+
+	// The type of key; currently only KMS is supported
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type EncryptionKeyObservation struct {
@@ -217,12 +290,19 @@ type EncryptionKeyObservation struct {
 type EncryptionKeyParameters struct {
 
 	// The KMS key ARN or ID
-	// +kubebuilder:validation:Required
-	ID *string `json:"id" tf:"id,omitempty"`
+	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
 	// The type of key; currently only KMS is supported
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type StageInitParameters struct {
+
+	// The action(s) to include in the stage. Defined as an action block below
+	Action []ActionInitParameters `json:"action,omitempty" tf:"action,omitempty"`
+
+	// The name of the stage.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 }
 
 type StageObservation struct {
@@ -237,18 +317,20 @@ type StageObservation struct {
 type StageParameters struct {
 
 	// The action(s) to include in the stage. Defined as an action block below
-	// +kubebuilder:validation:Required
-	Action []ActionParameters `json:"action" tf:"action,omitempty"`
+	Action []ActionParameters `json:"action,omitempty" tf:"action,omitempty"`
 
 	// The name of the stage.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 }
 
 // CodepipelineSpec defines the desired state of Codepipeline
 type CodepipelineSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     CodepipelineParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider CodepipelineInitParameters `json:"initProvider,omitempty"`
 }
 
 // CodepipelineStatus defines the observed state of Codepipeline.
@@ -269,8 +351,8 @@ type CodepipelineStatus struct {
 type Codepipeline struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.artifactStore)",message="artifactStore is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.stage)",message="stage is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.artifactStore) || has(self.initProvider.artifactStore)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.stage) || has(self.initProvider.stage)",message="%!s(MISSING) is a required parameter"
 	Spec   CodepipelineSpec   `json:"spec"`
 	Status CodepipelineStatus `json:"status,omitempty"`
 }

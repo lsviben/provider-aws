@@ -13,6 +13,38 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RouteTableAssociationInitParameters struct {
+
+	// The gateway ID to create an association. Conflicts with subnet_id.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.InternetGateway
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	GatewayID *string `json:"gatewayId,omitempty" tf:"gateway_id,omitempty"`
+
+	GatewayIDRef *v1.Reference `json:"gatewayIdRef,omitempty" tf:"-"`
+
+	GatewayIDSelector *v1.Selector `json:"gatewayIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ID of the routing table to associate with.
+	// +crossplane:generate:reference:type=RouteTable
+	RouteTableID *string `json:"routeTableId,omitempty" tf:"route_table_id,omitempty"`
+
+	RouteTableIDRef *v1.Reference `json:"routeTableIdRef,omitempty" tf:"-"`
+
+	RouteTableIDSelector *v1.Selector `json:"routeTableIdSelector,omitempty" tf:"-"`
+
+	// The subnet ID to create an association. Conflicts with gateway_id.
+	// +crossplane:generate:reference:type=Subnet
+	SubnetID *string `json:"subnetId,omitempty" tf:"subnet_id,omitempty"`
+
+	SubnetIDRef *v1.Reference `json:"subnetIdRef,omitempty" tf:"-"`
+
+	SubnetIDSelector *v1.Selector `json:"subnetIdSelector,omitempty" tf:"-"`
+}
+
 type RouteTableAssociationObservation struct {
 
 	// The gateway ID to create an association. Conflicts with subnet_id.
@@ -33,7 +65,6 @@ type RouteTableAssociationParameters struct {
 	// The gateway ID to create an association. Conflicts with subnet_id.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.InternetGateway
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	GatewayID *string `json:"gatewayId,omitempty" tf:"gateway_id,omitempty"`
 
 	// Reference to a InternetGateway in ec2 to populate gatewayId.
@@ -46,12 +77,10 @@ type RouteTableAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ID of the routing table to associate with.
 	// +crossplane:generate:reference:type=RouteTable
-	// +kubebuilder:validation:Optional
 	RouteTableID *string `json:"routeTableId,omitempty" tf:"route_table_id,omitempty"`
 
 	// Reference to a RouteTable to populate routeTableId.
@@ -64,7 +93,6 @@ type RouteTableAssociationParameters struct {
 
 	// The subnet ID to create an association. Conflicts with gateway_id.
 	// +crossplane:generate:reference:type=Subnet
-	// +kubebuilder:validation:Optional
 	SubnetID *string `json:"subnetId,omitempty" tf:"subnet_id,omitempty"`
 
 	// Reference to a Subnet to populate subnetId.
@@ -80,6 +108,10 @@ type RouteTableAssociationParameters struct {
 type RouteTableAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RouteTableAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RouteTableAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // RouteTableAssociationStatus defines the observed state of RouteTableAssociation.

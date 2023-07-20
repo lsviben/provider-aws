@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DelegatedAdministratorInitParameters struct {
+
+	// The account ID number of the member account in the organization to register as a delegated administrator.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/organizations/v1beta1.Account
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	AccountIDRef *v1.Reference `json:"accountIdRef,omitempty" tf:"-"`
+
+	AccountIDSelector *v1.Selector `json:"accountIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The service principal of the AWS service for which you want to make the member account a delegated administrator.
+	ServicePrincipal *string `json:"servicePrincipal,omitempty" tf:"service_principal,omitempty"`
+}
+
 type DelegatedAdministratorObservation struct {
 
 	// The account ID number of the member account in the organization to register as a delegated administrator.
@@ -50,7 +68,6 @@ type DelegatedAdministratorParameters struct {
 
 	// The account ID number of the member account in the organization to register as a delegated administrator.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/organizations/v1beta1.Account
-	// +kubebuilder:validation:Optional
 	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// Reference to a Account in organizations to populate accountId.
@@ -63,11 +80,9 @@ type DelegatedAdministratorParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The service principal of the AWS service for which you want to make the member account a delegated administrator.
-	// +kubebuilder:validation:Optional
 	ServicePrincipal *string `json:"servicePrincipal,omitempty" tf:"service_principal,omitempty"`
 }
 
@@ -75,6 +90,10 @@ type DelegatedAdministratorParameters struct {
 type DelegatedAdministratorSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DelegatedAdministratorParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DelegatedAdministratorInitParameters `json:"initProvider,omitempty"`
 }
 
 // DelegatedAdministratorStatus defines the observed state of DelegatedAdministrator.
@@ -95,7 +114,7 @@ type DelegatedAdministratorStatus struct {
 type DelegatedAdministrator struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.servicePrincipal)",message="servicePrincipal is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.servicePrincipal) || has(self.initProvider.servicePrincipal)",message="%!s(MISSING) is a required parameter"
 	Spec   DelegatedAdministratorSpec   `json:"spec"`
 	Status DelegatedAdministratorStatus `json:"status,omitempty"`
 }

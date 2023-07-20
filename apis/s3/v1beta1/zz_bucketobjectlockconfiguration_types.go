@@ -13,6 +13,35 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BucketObjectLockConfigurationInitParameters struct {
+
+	// Name of the bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	BucketRef *v1.Reference `json:"bucketRef,omitempty" tf:"-"`
+
+	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
+
+	// Account ID of the expected bucket owner.
+	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
+
+	// Indicates whether this bucket has an Object Lock configuration enabled. Defaults to Enabled. Valid values: Enabled.
+	ObjectLockEnabled *string `json:"objectLockEnabled,omitempty" tf:"object_lock_enabled,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Configuration block for specifying the Object Lock rule for the specified object. See below.
+	Rule []BucketObjectLockConfigurationRuleInitParameters `json:"rule,omitempty" tf:"rule,omitempty"`
+
+	// Token to allow Object Lock to be enabled for an existing bucket. You must contact AWS support for the bucket's "Object Lock token".
+	// The token is generated in the back-end when versioning is enabled on a bucket. For more details on versioning, see the aws_s3_bucket_versioning resource.
+	TokenSecretRef *v1.SecretKeySelector `json:"tokenSecretRef,omitempty" tf:"-"`
+}
+
 type BucketObjectLockConfigurationObservation struct {
 
 	// Name of the bucket.
@@ -36,7 +65,6 @@ type BucketObjectLockConfigurationParameters struct {
 	// Name of the bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucket.
@@ -48,26 +76,27 @@ type BucketObjectLockConfigurationParameters struct {
 	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
 
 	// Account ID of the expected bucket owner.
-	// +kubebuilder:validation:Optional
 	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
 
 	// Indicates whether this bucket has an Object Lock configuration enabled. Defaults to Enabled. Valid values: Enabled.
-	// +kubebuilder:validation:Optional
 	ObjectLockEnabled *string `json:"objectLockEnabled,omitempty" tf:"object_lock_enabled,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Configuration block for specifying the Object Lock rule for the specified object. See below.
-	// +kubebuilder:validation:Optional
 	Rule []BucketObjectLockConfigurationRuleParameters `json:"rule,omitempty" tf:"rule,omitempty"`
 
 	// Token to allow Object Lock to be enabled for an existing bucket. You must contact AWS support for the bucket's "Object Lock token".
 	// The token is generated in the back-end when versioning is enabled on a bucket. For more details on versioning, see the aws_s3_bucket_versioning resource.
-	// +kubebuilder:validation:Optional
 	TokenSecretRef *v1.SecretKeySelector `json:"tokenSecretRef,omitempty" tf:"-"`
+}
+
+type BucketObjectLockConfigurationRuleInitParameters struct {
+
+	// Configuration block for specifying the default Object Lock retention settings for new objects placed in the specified bucket. See below.
+	DefaultRetention []RuleDefaultRetentionInitParameters `json:"defaultRetention,omitempty" tf:"default_retention,omitempty"`
 }
 
 type BucketObjectLockConfigurationRuleObservation struct {
@@ -79,8 +108,19 @@ type BucketObjectLockConfigurationRuleObservation struct {
 type BucketObjectLockConfigurationRuleParameters struct {
 
 	// Configuration block for specifying the default Object Lock retention settings for new objects placed in the specified bucket. See below.
-	// +kubebuilder:validation:Required
-	DefaultRetention []RuleDefaultRetentionParameters `json:"defaultRetention" tf:"default_retention,omitempty"`
+	DefaultRetention []RuleDefaultRetentionParameters `json:"defaultRetention,omitempty" tf:"default_retention,omitempty"`
+}
+
+type RuleDefaultRetentionInitParameters struct {
+
+	// Number of days that you want to specify for the default retention period.
+	Days *float64 `json:"days,omitempty" tf:"days,omitempty"`
+
+	// Default Object Lock retention mode you want to apply to new objects placed in the specified bucket. Valid values: COMPLIANCE, GOVERNANCE.
+	Mode *string `json:"mode,omitempty" tf:"mode,omitempty"`
+
+	// Number of years that you want to specify for the default retention period.
+	Years *float64 `json:"years,omitempty" tf:"years,omitempty"`
 }
 
 type RuleDefaultRetentionObservation struct {
@@ -98,15 +138,12 @@ type RuleDefaultRetentionObservation struct {
 type RuleDefaultRetentionParameters struct {
 
 	// Number of days that you want to specify for the default retention period.
-	// +kubebuilder:validation:Optional
 	Days *float64 `json:"days,omitempty" tf:"days,omitempty"`
 
 	// Default Object Lock retention mode you want to apply to new objects placed in the specified bucket. Valid values: COMPLIANCE, GOVERNANCE.
-	// +kubebuilder:validation:Optional
 	Mode *string `json:"mode,omitempty" tf:"mode,omitempty"`
 
 	// Number of years that you want to specify for the default retention period.
-	// +kubebuilder:validation:Optional
 	Years *float64 `json:"years,omitempty" tf:"years,omitempty"`
 }
 
@@ -114,6 +151,10 @@ type RuleDefaultRetentionParameters struct {
 type BucketObjectLockConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BucketObjectLockConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BucketObjectLockConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // BucketObjectLockConfigurationStatus defines the observed state of BucketObjectLockConfiguration.

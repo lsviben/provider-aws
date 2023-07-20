@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type HomeDirectoryMappingsInitParameters struct {
+
+	// Represents an entry and a target.
+	Entry *string `json:"entry,omitempty" tf:"entry,omitempty"`
+
+	// Represents the map target.
+	Target *string `json:"target,omitempty" tf:"target,omitempty"`
+}
+
 type HomeDirectoryMappingsObservation struct {
 
 	// Represents an entry and a target.
@@ -25,12 +34,22 @@ type HomeDirectoryMappingsObservation struct {
 type HomeDirectoryMappingsParameters struct {
 
 	// Represents an entry and a target.
-	// +kubebuilder:validation:Required
-	Entry *string `json:"entry" tf:"entry,omitempty"`
+	Entry *string `json:"entry,omitempty" tf:"entry,omitempty"`
 
 	// Represents the map target.
-	// +kubebuilder:validation:Required
-	Target *string `json:"target" tf:"target,omitempty"`
+	Target *string `json:"target,omitempty" tf:"target,omitempty"`
+}
+
+type PosixProfileInitParameters struct {
+
+	// The POSIX group ID used for all EFS operations by this user.
+	GID *float64 `json:"gid,omitempty" tf:"gid,omitempty"`
+
+	// The secondary POSIX group IDs used for all EFS operations by this user.
+	SecondaryGids []*float64 `json:"secondaryGids,omitempty" tf:"secondary_gids,omitempty"`
+
+	// The POSIX user ID used for all EFS operations by this user.
+	UID *float64 `json:"uid,omitempty" tf:"uid,omitempty"`
 }
 
 type PosixProfileObservation struct {
@@ -48,16 +67,55 @@ type PosixProfileObservation struct {
 type PosixProfileParameters struct {
 
 	// The POSIX group ID used for all EFS operations by this user.
-	// +kubebuilder:validation:Required
-	GID *float64 `json:"gid" tf:"gid,omitempty"`
+	GID *float64 `json:"gid,omitempty" tf:"gid,omitempty"`
 
 	// The secondary POSIX group IDs used for all EFS operations by this user.
-	// +kubebuilder:validation:Optional
 	SecondaryGids []*float64 `json:"secondaryGids,omitempty" tf:"secondary_gids,omitempty"`
 
 	// The POSIX user ID used for all EFS operations by this user.
-	// +kubebuilder:validation:Required
-	UID *float64 `json:"uid" tf:"uid,omitempty"`
+	UID *float64 `json:"uid,omitempty" tf:"uid,omitempty"`
+}
+
+type UserInitParameters struct {
+
+	// The landing directory (folder) for a user when they log in to the server using their SFTP client.  It should begin with a /.  The first item in the path is the name of the home bucket (accessible as ${Transfer:HomeBucket} in the policy) and the rest is the home directory (accessible as ${Transfer:HomeDirectory} in the policy). For example, /example-bucket-1234/username would set the home bucket to example-bucket-1234 and the home directory to username.
+	HomeDirectory *string `json:"homeDirectory,omitempty" tf:"home_directory,omitempty"`
+
+	// Logical directory mappings that specify what S3 paths and keys should be visible to your user and how you want to make them visible. See Home Directory Mappings below.
+	HomeDirectoryMappings []HomeDirectoryMappingsInitParameters `json:"homeDirectoryMappings,omitempty" tf:"home_directory_mappings,omitempty"`
+
+	// The type of landing directory (folder) you mapped for your users' home directory. Valid values are PATH and LOGICAL.
+	HomeDirectoryType *string `json:"homeDirectoryType,omitempty" tf:"home_directory_type,omitempty"`
+
+	// An IAM JSON policy document that scopes down user access to portions of their Amazon S3 bucket. IAM variables you can use inside this policy include ${Transfer:UserName}, ${Transfer:HomeDirectory}, and ${Transfer:HomeBucket}.  These are evaluated on-the-fly when navigating the bucket.
+	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
+
+	// Specifies the full POSIX identity, including user ID (Uid), group ID (Gid), and any secondary groups IDs (SecondaryGids), that controls your users' access to your Amazon EFS file systems. See Posix Profile below.
+	PosixProfile []PosixProfileInitParameters `json:"posixProfile,omitempty" tf:"posix_profile,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Amazon Resource Name (ARN) of an IAM role that allows the service to controls your user’s access to your Amazon S3 bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	Role *string `json:"role,omitempty" tf:"role,omitempty"`
+
+	RoleRef *v1.Reference `json:"roleRef,omitempty" tf:"-"`
+
+	RoleSelector *v1.Selector `json:"roleSelector,omitempty" tf:"-"`
+
+	// The Server ID of the Transfer Server (e.g., s-12345678)
+	// +crossplane:generate:reference:type=Server
+	ServerID *string `json:"serverId,omitempty" tf:"server_id,omitempty"`
+
+	ServerIDRef *v1.Reference `json:"serverIdRef,omitempty" tf:"-"`
+
+	ServerIDSelector *v1.Selector `json:"serverIdSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type UserObservation struct {
@@ -98,34 +156,27 @@ type UserObservation struct {
 type UserParameters struct {
 
 	// The landing directory (folder) for a user when they log in to the server using their SFTP client.  It should begin with a /.  The first item in the path is the name of the home bucket (accessible as ${Transfer:HomeBucket} in the policy) and the rest is the home directory (accessible as ${Transfer:HomeDirectory} in the policy). For example, /example-bucket-1234/username would set the home bucket to example-bucket-1234 and the home directory to username.
-	// +kubebuilder:validation:Optional
 	HomeDirectory *string `json:"homeDirectory,omitempty" tf:"home_directory,omitempty"`
 
 	// Logical directory mappings that specify what S3 paths and keys should be visible to your user and how you want to make them visible. See Home Directory Mappings below.
-	// +kubebuilder:validation:Optional
 	HomeDirectoryMappings []HomeDirectoryMappingsParameters `json:"homeDirectoryMappings,omitempty" tf:"home_directory_mappings,omitempty"`
 
 	// The type of landing directory (folder) you mapped for your users' home directory. Valid values are PATH and LOGICAL.
-	// +kubebuilder:validation:Optional
 	HomeDirectoryType *string `json:"homeDirectoryType,omitempty" tf:"home_directory_type,omitempty"`
 
 	// An IAM JSON policy document that scopes down user access to portions of their Amazon S3 bucket. IAM variables you can use inside this policy include ${Transfer:UserName}, ${Transfer:HomeDirectory}, and ${Transfer:HomeBucket}.  These are evaluated on-the-fly when navigating the bucket.
-	// +kubebuilder:validation:Optional
 	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
 
 	// Specifies the full POSIX identity, including user ID (Uid), group ID (Gid), and any secondary groups IDs (SecondaryGids), that controls your users' access to your Amazon EFS file systems. See Posix Profile below.
-	// +kubebuilder:validation:Optional
 	PosixProfile []PosixProfileParameters `json:"posixProfile,omitempty" tf:"posix_profile,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Amazon Resource Name (ARN) of an IAM role that allows the service to controls your user’s access to your Amazon S3 bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	Role *string `json:"role,omitempty" tf:"role,omitempty"`
 
 	// Reference to a Role in iam to populate role.
@@ -138,7 +189,6 @@ type UserParameters struct {
 
 	// The Server ID of the Transfer Server (e.g., s-12345678)
 	// +crossplane:generate:reference:type=Server
-	// +kubebuilder:validation:Optional
 	ServerID *string `json:"serverId,omitempty" tf:"server_id,omitempty"`
 
 	// Reference to a Server to populate serverId.
@@ -150,7 +200,6 @@ type UserParameters struct {
 	ServerIDSelector *v1.Selector `json:"serverIdSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -158,6 +207,10 @@ type UserParameters struct {
 type UserSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     UserParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider UserInitParameters `json:"initProvider,omitempty"`
 }
 
 // UserStatus defines the observed state of User.

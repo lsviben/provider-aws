@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ThingInitParameters struct {
+
+	// Map of attributes of the thing.
+	Attributes map[string]*string `json:"attributes,omitempty" tf:"attributes,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The thing type name.
+	ThingTypeName *string `json:"thingTypeName,omitempty" tf:"thing_type_name,omitempty"`
+}
+
 type ThingObservation struct {
 
 	// The ARN of the thing.
@@ -36,16 +49,13 @@ type ThingObservation struct {
 type ThingParameters struct {
 
 	// Map of attributes of the thing.
-	// +kubebuilder:validation:Optional
 	Attributes map[string]*string `json:"attributes,omitempty" tf:"attributes,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The thing type name.
-	// +kubebuilder:validation:Optional
 	ThingTypeName *string `json:"thingTypeName,omitempty" tf:"thing_type_name,omitempty"`
 }
 
@@ -53,6 +63,10 @@ type ThingParameters struct {
 type ThingSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ThingParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ThingInitParameters `json:"initProvider,omitempty"`
 }
 
 // ThingStatus defines the observed state of Thing.

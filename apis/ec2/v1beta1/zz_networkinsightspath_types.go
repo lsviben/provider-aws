@@ -13,6 +13,46 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type NetworkInsightsPathInitParameters struct {
+
+	// ID of the resource which is the source of the path. Can be an Instance, Internet Gateway, Network Interface, Transit Gateway, VPC Endpoint, VPC Peering Connection or VPN Gateway.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.NetworkInterface
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Destination *string `json:"destination,omitempty" tf:"destination,omitempty"`
+
+	// IP address of the destination resource.
+	DestinationIP *string `json:"destinationIp,omitempty" tf:"destination_ip,omitempty"`
+
+	// Destination port to analyze access to.
+	DestinationPort *float64 `json:"destinationPort,omitempty" tf:"destination_port,omitempty"`
+
+	DestinationRef *v1.Reference `json:"destinationRef,omitempty" tf:"-"`
+
+	DestinationSelector *v1.Selector `json:"destinationSelector,omitempty" tf:"-"`
+
+	// Protocol to use for analysis. Valid options are tcp or udp.
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// ID of the resource which is the source of the path. Can be an Instance, Internet Gateway, Network Interface, Transit Gateway, VPC Endpoint, VPC Peering Connection or VPN Gateway.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.NetworkInterface
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Source *string `json:"source,omitempty" tf:"source,omitempty"`
+
+	// IP address of the source resource.
+	SourceIP *string `json:"sourceIp,omitempty" tf:"source_ip,omitempty"`
+
+	SourceRef *v1.Reference `json:"sourceRef,omitempty" tf:"-"`
+
+	SourceSelector *v1.Selector `json:"sourceSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type NetworkInsightsPathObservation struct {
 
 	// ARN of the Network Insights Path.
@@ -51,15 +91,12 @@ type NetworkInsightsPathParameters struct {
 	// ID of the resource which is the source of the path. Can be an Instance, Internet Gateway, Network Interface, Transit Gateway, VPC Endpoint, VPC Peering Connection or VPN Gateway.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.NetworkInterface
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Destination *string `json:"destination,omitempty" tf:"destination,omitempty"`
 
 	// IP address of the destination resource.
-	// +kubebuilder:validation:Optional
 	DestinationIP *string `json:"destinationIp,omitempty" tf:"destination_ip,omitempty"`
 
 	// Destination port to analyze access to.
-	// +kubebuilder:validation:Optional
 	DestinationPort *float64 `json:"destinationPort,omitempty" tf:"destination_port,omitempty"`
 
 	// Reference to a NetworkInterface in ec2 to populate destination.
@@ -71,22 +108,18 @@ type NetworkInsightsPathParameters struct {
 	DestinationSelector *v1.Selector `json:"destinationSelector,omitempty" tf:"-"`
 
 	// Protocol to use for analysis. Valid options are tcp or udp.
-	// +kubebuilder:validation:Optional
 	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// ID of the resource which is the source of the path. Can be an Instance, Internet Gateway, Network Interface, Transit Gateway, VPC Endpoint, VPC Peering Connection or VPN Gateway.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.NetworkInterface
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Source *string `json:"source,omitempty" tf:"source,omitempty"`
 
 	// IP address of the source resource.
-	// +kubebuilder:validation:Optional
 	SourceIP *string `json:"sourceIp,omitempty" tf:"source_ip,omitempty"`
 
 	// Reference to a NetworkInterface in ec2 to populate source.
@@ -98,7 +131,6 @@ type NetworkInsightsPathParameters struct {
 	SourceSelector *v1.Selector `json:"sourceSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -106,6 +138,10 @@ type NetworkInsightsPathParameters struct {
 type NetworkInsightsPathSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     NetworkInsightsPathParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider NetworkInsightsPathInitParameters `json:"initProvider,omitempty"`
 }
 
 // NetworkInsightsPathStatus defines the observed state of NetworkInsightsPath.
@@ -126,7 +162,7 @@ type NetworkInsightsPathStatus struct {
 type NetworkInsightsPath struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.protocol)",message="protocol is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.protocol) || has(self.initProvider.protocol)",message="%!s(MISSING) is a required parameter"
 	Spec   NetworkInsightsPathSpec   `json:"spec"`
 	Status NetworkInsightsPathStatus `json:"status,omitempty"`
 }

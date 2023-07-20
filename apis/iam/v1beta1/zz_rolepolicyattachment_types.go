@@ -13,6 +13,26 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RolePolicyAttachmentInitParameters struct {
+
+	// The ARN of the policy you want to apply
+	// +crossplane:generate:reference:type=Policy
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	PolicyArn *string `json:"policyArn,omitempty" tf:"policy_arn,omitempty"`
+
+	PolicyArnRef *v1.Reference `json:"policyArnRef,omitempty" tf:"-"`
+
+	PolicyArnSelector *v1.Selector `json:"policyArnSelector,omitempty" tf:"-"`
+
+	// The name of the IAM role to which the policy should be applied
+	// +crossplane:generate:reference:type=Role
+	Role *string `json:"role,omitempty" tf:"role,omitempty"`
+
+	RoleRef *v1.Reference `json:"roleRef,omitempty" tf:"-"`
+
+	RoleSelector *v1.Selector `json:"roleSelector,omitempty" tf:"-"`
+}
+
 type RolePolicyAttachmentObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -28,7 +48,6 @@ type RolePolicyAttachmentParameters struct {
 	// The ARN of the policy you want to apply
 	// +crossplane:generate:reference:type=Policy
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	PolicyArn *string `json:"policyArn,omitempty" tf:"policy_arn,omitempty"`
 
 	// Reference to a Policy to populate policyArn.
@@ -41,7 +60,6 @@ type RolePolicyAttachmentParameters struct {
 
 	// The name of the IAM role to which the policy should be applied
 	// +crossplane:generate:reference:type=Role
-	// +kubebuilder:validation:Optional
 	Role *string `json:"role,omitempty" tf:"role,omitempty"`
 
 	// Reference to a Role to populate role.
@@ -57,6 +75,10 @@ type RolePolicyAttachmentParameters struct {
 type RolePolicyAttachmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RolePolicyAttachmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RolePolicyAttachmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // RolePolicyAttachmentStatus defines the observed state of RolePolicyAttachment.

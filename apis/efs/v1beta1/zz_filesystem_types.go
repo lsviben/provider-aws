@@ -13,6 +13,48 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type FileSystemInitParameters struct {
+
+	// the AWS Availability Zone in which to create the file system. Used to create a file system that uses One Zone storage classes. See user guide for more information.
+	AvailabilityZoneName *string `json:"availabilityZoneName,omitempty" tf:"availability_zone_name,omitempty"`
+
+	// A unique name (a maximum of 64 characters are allowed)
+	// used as reference when creating the Elastic File System to ensure idempotent file
+	// system creation. See Elastic File System
+	// user guide for more information.
+	CreationToken *string `json:"creationToken,omitempty" tf:"creation_token,omitempty"`
+
+	// If true, the disk will be encrypted.
+	Encrypted *bool `json:"encrypted,omitempty" tf:"encrypted,omitempty"`
+
+	// The ARN for the KMS encryption key. When specifying kms_key_id, encrypted needs to be set to true.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
+
+	KMSKeyIDRef *v1.Reference `json:"kmsKeyIdRef,omitempty" tf:"-"`
+
+	KMSKeyIDSelector *v1.Selector `json:"kmsKeyIdSelector,omitempty" tf:"-"`
+
+	// A file system lifecycle policy object (documented below).
+	LifecyclePolicy []LifecyclePolicyInitParameters `json:"lifecyclePolicy,omitempty" tf:"lifecycle_policy,omitempty"`
+
+	// The file system performance mode. Can be either "generalPurpose" or "maxIO" (Default: "generalPurpose").
+	PerformanceMode *string `json:"performanceMode,omitempty" tf:"performance_mode,omitempty"`
+
+	// The throughput, measured in MiB/s, that you want to provision for the file system. Only applicable with throughput_mode set to provisioned.
+	ProvisionedThroughputInMibps *float64 `json:"provisionedThroughputInMibps,omitempty" tf:"provisioned_throughput_in_mibps,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Throughput mode for the file system. Defaults to bursting. Valid values: bursting, provisioned, or elastic. When using provisioned, also set provisioned_throughput_in_mibps.
+	ThroughputMode *string `json:"throughputMode,omitempty" tf:"throughput_mode,omitempty"`
+}
+
 type FileSystemObservation struct {
 
 	// Amazon Resource Name of the file system.
@@ -73,23 +115,19 @@ type FileSystemObservation struct {
 type FileSystemParameters struct {
 
 	// the AWS Availability Zone in which to create the file system. Used to create a file system that uses One Zone storage classes. See user guide for more information.
-	// +kubebuilder:validation:Optional
 	AvailabilityZoneName *string `json:"availabilityZoneName,omitempty" tf:"availability_zone_name,omitempty"`
 
 	// A unique name (a maximum of 64 characters are allowed)
 	// used as reference when creating the Elastic File System to ensure idempotent file
 	// system creation. See Elastic File System
 	// user guide for more information.
-	// +kubebuilder:validation:Optional
 	CreationToken *string `json:"creationToken,omitempty" tf:"creation_token,omitempty"`
 
 	// If true, the disk will be encrypted.
-	// +kubebuilder:validation:Optional
 	Encrypted *bool `json:"encrypted,omitempty" tf:"encrypted,omitempty"`
 
 	// The ARN for the KMS encryption key. When specifying kms_key_id, encrypted needs to be set to true.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
-	// +kubebuilder:validation:Optional
 	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
 
 	// Reference to a Key in kms to populate kmsKeyId.
@@ -101,29 +139,32 @@ type FileSystemParameters struct {
 	KMSKeyIDSelector *v1.Selector `json:"kmsKeyIdSelector,omitempty" tf:"-"`
 
 	// A file system lifecycle policy object (documented below).
-	// +kubebuilder:validation:Optional
 	LifecyclePolicy []LifecyclePolicyParameters `json:"lifecyclePolicy,omitempty" tf:"lifecycle_policy,omitempty"`
 
 	// The file system performance mode. Can be either "generalPurpose" or "maxIO" (Default: "generalPurpose").
-	// +kubebuilder:validation:Optional
 	PerformanceMode *string `json:"performanceMode,omitempty" tf:"performance_mode,omitempty"`
 
 	// The throughput, measured in MiB/s, that you want to provision for the file system. Only applicable with throughput_mode set to provisioned.
-	// +kubebuilder:validation:Optional
 	ProvisionedThroughputInMibps *float64 `json:"provisionedThroughputInMibps,omitempty" tf:"provisioned_throughput_in_mibps,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Throughput mode for the file system. Defaults to bursting. Valid values: bursting, provisioned, or elastic. When using provisioned, also set provisioned_throughput_in_mibps.
-	// +kubebuilder:validation:Optional
 	ThroughputMode *string `json:"throughputMode,omitempty" tf:"throughput_mode,omitempty"`
+}
+
+type LifecyclePolicyInitParameters struct {
+
+	// Indicates how long it takes to transition files to the IA storage class. Valid values: AFTER_1_DAY, AFTER_7_DAYS, AFTER_14_DAYS, AFTER_30_DAYS, AFTER_60_DAYS, or AFTER_90_DAYS.
+	TransitionToIa *string `json:"transitionToIa,omitempty" tf:"transition_to_ia,omitempty"`
+
+	// Describes the policy used to transition a file from infequent access storage to primary storage. Valid values: AFTER_1_ACCESS.
+	TransitionToPrimaryStorageClass *string `json:"transitionToPrimaryStorageClass,omitempty" tf:"transition_to_primary_storage_class,omitempty"`
 }
 
 type LifecyclePolicyObservation struct {
@@ -138,12 +179,13 @@ type LifecyclePolicyObservation struct {
 type LifecyclePolicyParameters struct {
 
 	// Indicates how long it takes to transition files to the IA storage class. Valid values: AFTER_1_DAY, AFTER_7_DAYS, AFTER_14_DAYS, AFTER_30_DAYS, AFTER_60_DAYS, or AFTER_90_DAYS.
-	// +kubebuilder:validation:Optional
 	TransitionToIa *string `json:"transitionToIa,omitempty" tf:"transition_to_ia,omitempty"`
 
 	// Describes the policy used to transition a file from infequent access storage to primary storage. Valid values: AFTER_1_ACCESS.
-	// +kubebuilder:validation:Optional
 	TransitionToPrimaryStorageClass *string `json:"transitionToPrimaryStorageClass,omitempty" tf:"transition_to_primary_storage_class,omitempty"`
+}
+
+type SizeInBytesInitParameters struct {
 }
 
 type SizeInBytesObservation struct {
@@ -165,6 +207,10 @@ type SizeInBytesParameters struct {
 type FileSystemSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     FileSystemParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider FileSystemInitParameters `json:"initProvider,omitempty"`
 }
 
 // FileSystemStatus defines the observed state of FileSystem.

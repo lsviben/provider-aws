@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ActiveDirectoryConfigurationInitParameters struct {
+
+	// The NetBIOS name of the Active Directory computer object that will be created for your SVM. This is often the same as the SVM name but can be different. AWS limits to 15 characters because of standard NetBIOS naming limits.
+	NetbiosName *string `json:"netbiosName,omitempty" tf:"netbios_name,omitempty"`
+
+	// Configuration block that Amazon FSx uses to join the FSx ONTAP Storage Virtual Machine(SVM) to your Microsoft Active Directory (AD) directory. Detailed below.
+	SelfManagedActiveDirectoryConfiguration []SelfManagedActiveDirectoryConfigurationInitParameters `json:"selfManagedActiveDirectoryConfiguration,omitempty" tf:"self_managed_active_directory_configuration,omitempty"`
+}
+
 type ActiveDirectoryConfigurationObservation struct {
 
 	// The NetBIOS name of the Active Directory computer object that will be created for your SVM. This is often the same as the SVM name but can be different. AWS limits to 15 characters because of standard NetBIOS naming limits.
@@ -25,12 +34,13 @@ type ActiveDirectoryConfigurationObservation struct {
 type ActiveDirectoryConfigurationParameters struct {
 
 	// The NetBIOS name of the Active Directory computer object that will be created for your SVM. This is often the same as the SVM name but can be different. AWS limits to 15 characters because of standard NetBIOS naming limits.
-	// +kubebuilder:validation:Optional
 	NetbiosName *string `json:"netbiosName,omitempty" tf:"netbios_name,omitempty"`
 
 	// Configuration block that Amazon FSx uses to join the FSx ONTAP Storage Virtual Machine(SVM) to your Microsoft Active Directory (AD) directory. Detailed below.
-	// +kubebuilder:validation:Optional
 	SelfManagedActiveDirectoryConfiguration []SelfManagedActiveDirectoryConfigurationParameters `json:"selfManagedActiveDirectoryConfiguration,omitempty" tf:"self_managed_active_directory_configuration,omitempty"`
+}
+
+type EndpointsManagementInitParameters struct {
 }
 
 type EndpointsManagementObservation struct {
@@ -45,6 +55,9 @@ type EndpointsManagementObservation struct {
 type EndpointsManagementParameters struct {
 }
 
+type ISCSIInitParameters struct {
+}
+
 type ISCSIObservation struct {
 
 	// The Domain Name Service (DNS) name for the storage virtual machine. You can mount your storage virtual machine using its DNS name.
@@ -57,6 +70,9 @@ type ISCSIObservation struct {
 type ISCSIParameters struct {
 }
 
+type NFSInitParameters struct {
+}
+
 type NFSObservation struct {
 
 	// The Domain Name Service (DNS) name for the storage virtual machine. You can mount your storage virtual machine using its DNS name.
@@ -67,6 +83,9 @@ type NFSObservation struct {
 }
 
 type NFSParameters struct {
+}
+
+type OntapStorageVirtualMachineEndpointsInitParameters struct {
 }
 
 type OntapStorageVirtualMachineEndpointsObservation struct {
@@ -85,6 +104,36 @@ type OntapStorageVirtualMachineEndpointsObservation struct {
 }
 
 type OntapStorageVirtualMachineEndpointsParameters struct {
+}
+
+type OntapStorageVirtualMachineInitParameters struct {
+
+	// Configuration block that Amazon FSx uses to join the FSx ONTAP Storage Virtual Machine(SVM) to your Microsoft Active Directory (AD) directory. Detailed below.
+	ActiveDirectoryConfiguration []ActiveDirectoryConfigurationInitParameters `json:"activeDirectoryConfiguration,omitempty" tf:"active_directory_configuration,omitempty"`
+
+	// The ID of the Amazon FSx ONTAP File System that this SVM will be created on.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/fsx/v1beta1.OntapFileSystem
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	FileSystemID *string `json:"fileSystemId,omitempty" tf:"file_system_id,omitempty"`
+
+	FileSystemIDRef *v1.Reference `json:"fileSystemIdRef,omitempty" tf:"-"`
+
+	FileSystemIDSelector *v1.Selector `json:"fileSystemIdSelector,omitempty" tf:"-"`
+
+	// The name of the SVM. You can use a maximum of 47 alphanumeric characters, plus the underscore (_) special character.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Specifies the root volume security style, Valid values are UNIX, NTFS, and MIXED. All volumes created under this SVM will inherit the root security style unless the security style is specified on the volume. Default value is UNIX.
+	RootVolumeSecurityStyle *string `json:"rootVolumeSecurityStyle,omitempty" tf:"root_volume_security_style,omitempty"`
+
+	SvmAdminPasswordSecretRef *v1.SecretKeySelector `json:"svmAdminPasswordSecretRef,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type OntapStorageVirtualMachineObservation struct {
@@ -126,13 +175,11 @@ type OntapStorageVirtualMachineObservation struct {
 type OntapStorageVirtualMachineParameters struct {
 
 	// Configuration block that Amazon FSx uses to join the FSx ONTAP Storage Virtual Machine(SVM) to your Microsoft Active Directory (AD) directory. Detailed below.
-	// +kubebuilder:validation:Optional
 	ActiveDirectoryConfiguration []ActiveDirectoryConfigurationParameters `json:"activeDirectoryConfiguration,omitempty" tf:"active_directory_configuration,omitempty"`
 
 	// The ID of the Amazon FSx ONTAP File System that this SVM will be created on.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/fsx/v1beta1.OntapFileSystem
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	FileSystemID *string `json:"fileSystemId,omitempty" tf:"file_system_id,omitempty"`
 
 	// Reference to a OntapFileSystem in fsx to populate fileSystemId.
@@ -144,24 +191,22 @@ type OntapStorageVirtualMachineParameters struct {
 	FileSystemIDSelector *v1.Selector `json:"fileSystemIdSelector,omitempty" tf:"-"`
 
 	// The name of the SVM. You can use a maximum of 47 alphanumeric characters, plus the underscore (_) special character.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Specifies the root volume security style, Valid values are UNIX, NTFS, and MIXED. All volumes created under this SVM will inherit the root security style unless the security style is specified on the volume. Default value is UNIX.
-	// +kubebuilder:validation:Optional
 	RootVolumeSecurityStyle *string `json:"rootVolumeSecurityStyle,omitempty" tf:"root_volume_security_style,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	SvmAdminPasswordSecretRef *v1.SecretKeySelector `json:"svmAdminPasswordSecretRef,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type SMBInitParameters struct {
 }
 
 type SMBObservation struct {
@@ -174,6 +219,27 @@ type SMBObservation struct {
 }
 
 type SMBParameters struct {
+}
+
+type SelfManagedActiveDirectoryConfigurationInitParameters struct {
+
+	// A list of up to three IP addresses of DNS servers or domain controllers in the self-managed AD directory.
+	DNSIps []*string `json:"dnsIps,omitempty" tf:"dns_ips,omitempty"`
+
+	// The fully qualified domain name of the self-managed AD directory. For example, corp.example.com.
+	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
+
+	// The name of the domain group whose members are granted administrative privileges for the SVM. The group that you specify must already exist in your domain. Defaults to Domain Admins.
+	FileSystemAdministratorsGroup *string `json:"fileSystemAdministratorsGroup,omitempty" tf:"file_system_administrators_group,omitempty"`
+
+	// The fully qualified distinguished name of the organizational unit within your self-managed AD directory that the Windows File Server instance will join. For example, OU=FSx,DC=yourdomain,DC=corp,DC=com. Only accepts OU as the direct parent of the SVM. If none is provided, the SVM is created in the default location of your self-managed AD directory. To learn more, see RFC 2253.
+	OrganizationalUnitDistinguishedName *string `json:"organizationalUnitDistinguishedName,omitempty" tf:"organizational_unit_distinguished_name,omitempty"`
+
+	// The password for the service account on your self-managed AD domain that Amazon FSx will use to join to your AD domain.
+	PasswordSecretRef v1.SecretKeySelector `json:"passwordSecretRef" tf:"-"`
+
+	// The user name for the service account on your self-managed AD domain that Amazon FSx will use to join to your AD domain.
+	Username *string `json:"username,omitempty" tf:"username,omitempty"`
 }
 
 type SelfManagedActiveDirectoryConfigurationObservation struct {
@@ -197,34 +263,32 @@ type SelfManagedActiveDirectoryConfigurationObservation struct {
 type SelfManagedActiveDirectoryConfigurationParameters struct {
 
 	// A list of up to three IP addresses of DNS servers or domain controllers in the self-managed AD directory.
-	// +kubebuilder:validation:Required
-	DNSIps []*string `json:"dnsIps" tf:"dns_ips,omitempty"`
+	DNSIps []*string `json:"dnsIps,omitempty" tf:"dns_ips,omitempty"`
 
 	// The fully qualified domain name of the self-managed AD directory. For example, corp.example.com.
-	// +kubebuilder:validation:Required
-	DomainName *string `json:"domainName" tf:"domain_name,omitempty"`
+	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
 
 	// The name of the domain group whose members are granted administrative privileges for the SVM. The group that you specify must already exist in your domain. Defaults to Domain Admins.
-	// +kubebuilder:validation:Optional
 	FileSystemAdministratorsGroup *string `json:"fileSystemAdministratorsGroup,omitempty" tf:"file_system_administrators_group,omitempty"`
 
 	// The fully qualified distinguished name of the organizational unit within your self-managed AD directory that the Windows File Server instance will join. For example, OU=FSx,DC=yourdomain,DC=corp,DC=com. Only accepts OU as the direct parent of the SVM. If none is provided, the SVM is created in the default location of your self-managed AD directory. To learn more, see RFC 2253.
-	// +kubebuilder:validation:Optional
 	OrganizationalUnitDistinguishedName *string `json:"organizationalUnitDistinguishedName,omitempty" tf:"organizational_unit_distinguished_name,omitempty"`
 
 	// The password for the service account on your self-managed AD domain that Amazon FSx will use to join to your AD domain.
-	// +kubebuilder:validation:Required
 	PasswordSecretRef v1.SecretKeySelector `json:"passwordSecretRef" tf:"-"`
 
 	// The user name for the service account on your self-managed AD domain that Amazon FSx will use to join to your AD domain.
-	// +kubebuilder:validation:Required
-	Username *string `json:"username" tf:"username,omitempty"`
+	Username *string `json:"username,omitempty" tf:"username,omitempty"`
 }
 
 // OntapStorageVirtualMachineSpec defines the desired state of OntapStorageVirtualMachine
 type OntapStorageVirtualMachineSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     OntapStorageVirtualMachineParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider OntapStorageVirtualMachineInitParameters `json:"initProvider,omitempty"`
 }
 
 // OntapStorageVirtualMachineStatus defines the observed state of OntapStorageVirtualMachine.
@@ -245,7 +309,7 @@ type OntapStorageVirtualMachineStatus struct {
 type OntapStorageVirtualMachine struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   OntapStorageVirtualMachineSpec   `json:"spec"`
 	Status OntapStorageVirtualMachineStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EncryptionConfigInitParameters struct {
+
+	// An AWS KMS customer master key (CMK) ARN.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
+
+	KeyIDRef *v1.Reference `json:"keyIdRef,omitempty" tf:"-"`
+
+	KeyIDSelector *v1.Selector `json:"keyIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The type of encryption. Set to KMS to use your own key for encryption. Set to NONE for default encryption.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type EncryptionConfigObservation struct {
 
 	// Region name.
@@ -30,7 +49,6 @@ type EncryptionConfigParameters struct {
 	// An AWS KMS customer master key (CMK) ARN.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
 
 	// Reference to a Key in kms to populate keyId.
@@ -43,11 +61,9 @@ type EncryptionConfigParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The type of encryption. Set to KMS to use your own key for encryption. Set to NONE for default encryption.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -55,6 +71,10 @@ type EncryptionConfigParameters struct {
 type EncryptionConfigSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EncryptionConfigParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EncryptionConfigInitParameters `json:"initProvider,omitempty"`
 }
 
 // EncryptionConfigStatus defines the observed state of EncryptionConfig.
@@ -75,7 +95,7 @@ type EncryptionConfigStatus struct {
 type EncryptionConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.type)",message="type is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.type) || has(self.initProvider.type)",message="%!s(MISSING) is a required parameter"
 	Spec   EncryptionConfigSpec   `json:"spec"`
 	Status EncryptionConfigStatus `json:"status,omitempty"`
 }

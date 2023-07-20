@@ -13,6 +13,52 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EIPInitParameters struct {
+
+	// IP address from an EC2 BYOIP pool. This option is only available for VPC EIPs.
+	Address *string `json:"address,omitempty" tf:"address,omitempty"`
+
+	// User-specified primary or secondary private IP address to associate with the Elastic IP address. If no private IP address is specified, the Elastic IP address is associated with the primary private IP address.
+	AssociateWithPrivateIP *string `json:"associateWithPrivateIp,omitempty" tf:"associate_with_private_ip,omitempty"`
+
+	// ID  of a customer-owned address pool. For more on customer owned IP addressed check out Customer-owned IP addresses guide.
+	CustomerOwnedIPv4Pool *string `json:"customerOwnedIpv4Pool,omitempty" tf:"customer_owned_ipv4_pool,omitempty"`
+
+	// EC2 instance ID.
+	// +crossplane:generate:reference:type=Instance
+	Instance *string `json:"instance,omitempty" tf:"instance,omitempty"`
+
+	InstanceRef *v1.Reference `json:"instanceRef,omitempty" tf:"-"`
+
+	InstanceSelector *v1.Selector `json:"instanceSelector,omitempty" tf:"-"`
+
+	// Location from which the IP address is advertised. Use this parameter to limit the address to this location.
+	NetworkBorderGroup *string `json:"networkBorderGroup,omitempty" tf:"network_border_group,omitempty"`
+
+	// Network interface ID to associate with.
+	// +crossplane:generate:reference:type=NetworkInterface
+	NetworkInterface *string `json:"networkInterface,omitempty" tf:"network_interface,omitempty"`
+
+	NetworkInterfaceRef *v1.Reference `json:"networkInterfaceRef,omitempty" tf:"-"`
+
+	NetworkInterfaceSelector *v1.Selector `json:"networkInterfaceSelector,omitempty" tf:"-"`
+
+	// EC2 IPv4 address pool identifier or amazon.
+	// This option is only available for VPC EIPs.
+	PublicIPv4Pool *string `json:"publicIpv4Pool,omitempty" tf:"public_ipv4_pool,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Boolean if the EIP is in a VPC or not.
+	// Defaults to true unless the region supports EC2-Classic.
+	VPC *bool `json:"vpc,omitempty" tf:"vpc,omitempty"`
+}
+
 type EIPObservation struct {
 
 	// IP address from an EC2 BYOIP pool. This option is only available for VPC EIPs.
@@ -81,20 +127,16 @@ type EIPObservation struct {
 type EIPParameters struct {
 
 	// IP address from an EC2 BYOIP pool. This option is only available for VPC EIPs.
-	// +kubebuilder:validation:Optional
 	Address *string `json:"address,omitempty" tf:"address,omitempty"`
 
 	// User-specified primary or secondary private IP address to associate with the Elastic IP address. If no private IP address is specified, the Elastic IP address is associated with the primary private IP address.
-	// +kubebuilder:validation:Optional
 	AssociateWithPrivateIP *string `json:"associateWithPrivateIp,omitempty" tf:"associate_with_private_ip,omitempty"`
 
 	// ID  of a customer-owned address pool. For more on customer owned IP addressed check out Customer-owned IP addresses guide.
-	// +kubebuilder:validation:Optional
 	CustomerOwnedIPv4Pool *string `json:"customerOwnedIpv4Pool,omitempty" tf:"customer_owned_ipv4_pool,omitempty"`
 
 	// EC2 instance ID.
 	// +crossplane:generate:reference:type=Instance
-	// +kubebuilder:validation:Optional
 	Instance *string `json:"instance,omitempty" tf:"instance,omitempty"`
 
 	// Reference to a Instance to populate instance.
@@ -106,12 +148,10 @@ type EIPParameters struct {
 	InstanceSelector *v1.Selector `json:"instanceSelector,omitempty" tf:"-"`
 
 	// Location from which the IP address is advertised. Use this parameter to limit the address to this location.
-	// +kubebuilder:validation:Optional
 	NetworkBorderGroup *string `json:"networkBorderGroup,omitempty" tf:"network_border_group,omitempty"`
 
 	// Network interface ID to associate with.
 	// +crossplane:generate:reference:type=NetworkInterface
-	// +kubebuilder:validation:Optional
 	NetworkInterface *string `json:"networkInterface,omitempty" tf:"network_interface,omitempty"`
 
 	// Reference to a NetworkInterface to populate networkInterface.
@@ -124,21 +164,17 @@ type EIPParameters struct {
 
 	// EC2 IPv4 address pool identifier or amazon.
 	// This option is only available for VPC EIPs.
-	// +kubebuilder:validation:Optional
 	PublicIPv4Pool *string `json:"publicIpv4Pool,omitempty" tf:"public_ipv4_pool,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Boolean if the EIP is in a VPC or not.
 	// Defaults to true unless the region supports EC2-Classic.
-	// +kubebuilder:validation:Optional
 	VPC *bool `json:"vpc,omitempty" tf:"vpc,omitempty"`
 }
 
@@ -146,6 +182,10 @@ type EIPParameters struct {
 type EIPSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EIPParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EIPInitParameters `json:"initProvider,omitempty"`
 }
 
 // EIPStatus defines the observed state of EIP.

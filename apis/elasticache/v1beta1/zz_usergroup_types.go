@@ -13,6 +13,32 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type UserGroupInitParameters struct {
+
+	// The ARN that identifies the user group.
+	Arn *string `json:"arn,omitempty" tf:"arn,omitempty"`
+
+	// The current supported value is REDIS.
+	Engine *string `json:"engine,omitempty" tf:"engine,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	UserIDRefs []v1.Reference `json:"userIdRefs,omitempty" tf:"-"`
+
+	UserIDSelector *v1.Selector `json:"userIdSelector,omitempty" tf:"-"`
+
+	// The list of user IDs that belong to the user group.
+	// +crossplane:generate:reference:type=User
+	// +crossplane:generate:reference:refFieldName=UserIDRefs
+	// +crossplane:generate:reference:selectorFieldName=UserIDSelector
+	UserIds []*string `json:"userIds,omitempty" tf:"user_ids,omitempty"`
+}
+
 type UserGroupObservation struct {
 
 	// The ARN that identifies the user group.
@@ -37,20 +63,16 @@ type UserGroupObservation struct {
 type UserGroupParameters struct {
 
 	// The ARN that identifies the user group.
-	// +kubebuilder:validation:Optional
 	Arn *string `json:"arn,omitempty" tf:"arn,omitempty"`
 
 	// The current supported value is REDIS.
-	// +kubebuilder:validation:Optional
 	Engine *string `json:"engine,omitempty" tf:"engine,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// References to User to populate userIds.
@@ -65,7 +87,6 @@ type UserGroupParameters struct {
 	// +crossplane:generate:reference:type=User
 	// +crossplane:generate:reference:refFieldName=UserIDRefs
 	// +crossplane:generate:reference:selectorFieldName=UserIDSelector
-	// +kubebuilder:validation:Optional
 	UserIds []*string `json:"userIds,omitempty" tf:"user_ids,omitempty"`
 }
 
@@ -73,6 +94,10 @@ type UserGroupParameters struct {
 type UserGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     UserGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider UserGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // UserGroupStatus defines the observed state of UserGroup.
@@ -93,7 +118,7 @@ type UserGroupStatus struct {
 type UserGroup struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.engine)",message="engine is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.engine) || has(self.initProvider.engine)",message="%!s(MISSING) is a required parameter"
 	Spec   UserGroupSpec   `json:"spec"`
 	Status UserGroupStatus `json:"status,omitempty"`
 }

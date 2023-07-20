@@ -13,6 +13,51 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ComponentInitParameters struct {
+
+	// Change description of the component.
+	ChangeDescription *string `json:"changeDescription,omitempty" tf:"change_description,omitempty"`
+
+	// Inline YAML string with data of the component. Exactly one of data and uri can be specified.
+	Data *string `json:"data,omitempty" tf:"data,omitempty"`
+
+	// Description of the component.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Amazon Resource Name (ARN) of the Key Management Service (KMS) Key used to encrypt the component.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
+
+	KMSKeyIDRef *v1.Reference `json:"kmsKeyIdRef,omitempty" tf:"-"`
+
+	KMSKeyIDSelector *v1.Selector `json:"kmsKeyIdSelector,omitempty" tf:"-"`
+
+	// Name of the component.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Platform of the component.
+	Platform *string `json:"platform,omitempty" tf:"platform,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Whether to retain the old version when the resource is destroyed or replacement is necessary. Defaults to false.
+	SkipDestroy *bool `json:"skipDestroy,omitempty" tf:"skip_destroy,omitempty"`
+
+	// Set of Operating Systems (OS) supported by the component.
+	SupportedOsVersions []*string `json:"supportedOsVersions,omitempty" tf:"supported_os_versions,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// S3 URI with data of the component. Exactly one of data and uri can be specified.
+	URI *string `json:"uri,omitempty" tf:"uri,omitempty"`
+
+	// Version of the component.
+	Version *string `json:"version,omitempty" tf:"version,omitempty"`
+}
+
 type ComponentObservation struct {
 
 	// Amazon Resource Name (ARN) of the component.
@@ -72,20 +117,16 @@ type ComponentObservation struct {
 type ComponentParameters struct {
 
 	// Change description of the component.
-	// +kubebuilder:validation:Optional
 	ChangeDescription *string `json:"changeDescription,omitempty" tf:"change_description,omitempty"`
 
 	// Inline YAML string with data of the component. Exactly one of data and uri can be specified.
-	// +kubebuilder:validation:Optional
 	Data *string `json:"data,omitempty" tf:"data,omitempty"`
 
 	// Description of the component.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Amazon Resource Name (ARN) of the Key Management Service (KMS) Key used to encrypt the component.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
-	// +kubebuilder:validation:Optional
 	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
 
 	// Reference to a Key in kms to populate kmsKeyId.
@@ -97,36 +138,28 @@ type ComponentParameters struct {
 	KMSKeyIDSelector *v1.Selector `json:"kmsKeyIdSelector,omitempty" tf:"-"`
 
 	// Name of the component.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Platform of the component.
-	// +kubebuilder:validation:Optional
 	Platform *string `json:"platform,omitempty" tf:"platform,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Whether to retain the old version when the resource is destroyed or replacement is necessary. Defaults to false.
-	// +kubebuilder:validation:Optional
 	SkipDestroy *bool `json:"skipDestroy,omitempty" tf:"skip_destroy,omitempty"`
 
 	// Set of Operating Systems (OS) supported by the component.
-	// +kubebuilder:validation:Optional
 	SupportedOsVersions []*string `json:"supportedOsVersions,omitempty" tf:"supported_os_versions,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// S3 URI with data of the component. Exactly one of data and uri can be specified.
-	// +kubebuilder:validation:Optional
 	URI *string `json:"uri,omitempty" tf:"uri,omitempty"`
 
 	// Version of the component.
-	// +kubebuilder:validation:Optional
 	Version *string `json:"version,omitempty" tf:"version,omitempty"`
 }
 
@@ -134,6 +167,10 @@ type ComponentParameters struct {
 type ComponentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ComponentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ComponentInitParameters `json:"initProvider,omitempty"`
 }
 
 // ComponentStatus defines the observed state of Component.
@@ -154,9 +191,9 @@ type ComponentStatus struct {
 type Component struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.platform)",message="platform is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.version)",message="version is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.platform) || has(self.initProvider.platform)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.version) || has(self.initProvider.version)",message="%!s(MISSING) is a required parameter"
 	Spec   ComponentSpec   `json:"spec"`
 	Status ComponentStatus `json:"status,omitempty"`
 }

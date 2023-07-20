@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ResourceAssociationInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Amazon Resource Name (ARN) of the resource to associate with the RAM Resource Share.
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
+
+	// Amazon Resource Name (ARN) of the RAM Resource Share.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ram/v1beta1.ResourceShare
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	ResourceShareArn *string `json:"resourceShareArn,omitempty" tf:"resource_share_arn,omitempty"`
+
+	ResourceShareArnRef *v1.Reference `json:"resourceShareArnRef,omitempty" tf:"-"`
+
+	ResourceShareArnSelector *v1.Selector `json:"resourceShareArnSelector,omitempty" tf:"-"`
+}
+
 type ResourceAssociationObservation struct {
 
 	// The Amazon Resource Name (ARN) of the resource share.
@@ -29,17 +48,14 @@ type ResourceAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Amazon Resource Name (ARN) of the resource to associate with the RAM Resource Share.
-	// +kubebuilder:validation:Optional
 	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
 
 	// Amazon Resource Name (ARN) of the RAM Resource Share.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ram/v1beta1.ResourceShare
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	ResourceShareArn *string `json:"resourceShareArn,omitempty" tf:"resource_share_arn,omitempty"`
 
 	// Reference to a ResourceShare in ram to populate resourceShareArn.
@@ -55,6 +71,10 @@ type ResourceAssociationParameters struct {
 type ResourceAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ResourceAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ResourceAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // ResourceAssociationStatus defines the observed state of ResourceAssociation.
@@ -75,7 +95,7 @@ type ResourceAssociationStatus struct {
 type ResourceAssociation struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceArn)",message="resourceArn is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceArn) || has(self.initProvider.resourceArn)",message="%!s(MISSING) is a required parameter"
 	Spec   ResourceAssociationSpec   `json:"spec"`
 	Status ResourceAssociationStatus `json:"status,omitempty"`
 }

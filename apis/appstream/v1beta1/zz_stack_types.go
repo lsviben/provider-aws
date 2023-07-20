@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AccessEndpointsInitParameters struct {
+
+	// Type of the interface endpoint.
+	// See the AccessEndpoint AWS API documentation for valid values.
+	EndpointType *string `json:"endpointType,omitempty" tf:"endpoint_type,omitempty"`
+
+	// ID of the VPC in which the interface endpoint is used.
+	VpceID *string `json:"vpceId,omitempty" tf:"vpce_id,omitempty"`
+}
+
 type AccessEndpointsObservation struct {
 
 	// Type of the interface endpoint.
@@ -27,12 +37,21 @@ type AccessEndpointsParameters struct {
 
 	// Type of the interface endpoint.
 	// See the AccessEndpoint AWS API documentation for valid values.
-	// +kubebuilder:validation:Required
-	EndpointType *string `json:"endpointType" tf:"endpoint_type,omitempty"`
+	EndpointType *string `json:"endpointType,omitempty" tf:"endpoint_type,omitempty"`
 
 	// ID of the VPC in which the interface endpoint is used.
-	// +kubebuilder:validation:Optional
 	VpceID *string `json:"vpceId,omitempty" tf:"vpce_id,omitempty"`
+}
+
+type ApplicationSettingsInitParameters struct {
+
+	// Whether application settings should be persisted.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// Name of the settings group.
+	// Required when enabled is true.
+	// Can be up to 100 characters.
+	SettingsGroup *string `json:"settingsGroup,omitempty" tf:"settings_group,omitempty"`
 }
 
 type ApplicationSettingsObservation struct {
@@ -49,14 +68,56 @@ type ApplicationSettingsObservation struct {
 type ApplicationSettingsParameters struct {
 
 	// Whether application settings should be persisted.
-	// +kubebuilder:validation:Required
-	Enabled *bool `json:"enabled" tf:"enabled,omitempty"`
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// Name of the settings group.
 	// Required when enabled is true.
 	// Can be up to 100 characters.
-	// +kubebuilder:validation:Optional
 	SettingsGroup *string `json:"settingsGroup,omitempty" tf:"settings_group,omitempty"`
+}
+
+type StackInitParameters struct {
+
+	// Set of configuration blocks defining the interface VPC endpoints. Users of the stack can connect to AppStream 2.0 only through the specified endpoints.
+	// See access_endpoints below.
+	AccessEndpoints []AccessEndpointsInitParameters `json:"accessEndpoints,omitempty" tf:"access_endpoints,omitempty"`
+
+	// Settings for application settings persistence.
+	// See application_settings below.
+	ApplicationSettings []ApplicationSettingsInitParameters `json:"applicationSettings,omitempty" tf:"application_settings,omitempty"`
+
+	// Description for the AppStream stack.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Stack name to display.
+	DisplayName *string `json:"displayName,omitempty" tf:"display_name,omitempty"`
+
+	// Domains where AppStream 2.0 streaming sessions can be embedded in an iframe. You must approve the domains that you want to host embedded AppStream 2.0 streaming sessions.
+	EmbedHostDomains []*string `json:"embedHostDomains,omitempty" tf:"embed_host_domains,omitempty"`
+
+	// URL that users are redirected to after they click the Send Feedback link. If no URL is specified, no Send Feedback link is displayed. .
+	FeedbackURL *string `json:"feedbackUrl,omitempty" tf:"feedback_url,omitempty"`
+
+	// Unique name for the AppStream stack.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// URL that users are redirected to after their streaming session ends.
+	RedirectURL *string `json:"redirectUrl,omitempty" tf:"redirect_url,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Configuration block for the storage connectors to enable.
+	// See storage_connectors below.
+	StorageConnectors []StorageConnectorsInitParameters `json:"storageConnectors,omitempty" tf:"storage_connectors,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Configuration block for the actions that are enabled or disabled for users during their streaming sessions. If not provided, these settings are configured automatically by AWS.
+	// See user_settings below.
+	UserSettings []UserSettingsInitParameters `json:"userSettings,omitempty" tf:"user_settings,omitempty"`
 }
 
 type StackObservation struct {
@@ -114,56 +175,57 @@ type StackParameters struct {
 
 	// Set of configuration blocks defining the interface VPC endpoints. Users of the stack can connect to AppStream 2.0 only through the specified endpoints.
 	// See access_endpoints below.
-	// +kubebuilder:validation:Optional
 	AccessEndpoints []AccessEndpointsParameters `json:"accessEndpoints,omitempty" tf:"access_endpoints,omitempty"`
 
 	// Settings for application settings persistence.
 	// See application_settings below.
-	// +kubebuilder:validation:Optional
 	ApplicationSettings []ApplicationSettingsParameters `json:"applicationSettings,omitempty" tf:"application_settings,omitempty"`
 
 	// Description for the AppStream stack.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Stack name to display.
-	// +kubebuilder:validation:Optional
 	DisplayName *string `json:"displayName,omitempty" tf:"display_name,omitempty"`
 
 	// Domains where AppStream 2.0 streaming sessions can be embedded in an iframe. You must approve the domains that you want to host embedded AppStream 2.0 streaming sessions.
-	// +kubebuilder:validation:Optional
 	EmbedHostDomains []*string `json:"embedHostDomains,omitempty" tf:"embed_host_domains,omitempty"`
 
 	// URL that users are redirected to after they click the Send Feedback link. If no URL is specified, no Send Feedback link is displayed. .
-	// +kubebuilder:validation:Optional
 	FeedbackURL *string `json:"feedbackUrl,omitempty" tf:"feedback_url,omitempty"`
 
 	// Unique name for the AppStream stack.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// URL that users are redirected to after their streaming session ends.
-	// +kubebuilder:validation:Optional
 	RedirectURL *string `json:"redirectUrl,omitempty" tf:"redirect_url,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Configuration block for the storage connectors to enable.
 	// See storage_connectors below.
-	// +kubebuilder:validation:Optional
 	StorageConnectors []StorageConnectorsParameters `json:"storageConnectors,omitempty" tf:"storage_connectors,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Configuration block for the actions that are enabled or disabled for users during their streaming sessions. If not provided, these settings are configured automatically by AWS.
 	// See user_settings below.
-	// +kubebuilder:validation:Optional
 	UserSettings []UserSettingsParameters `json:"userSettings,omitempty" tf:"user_settings,omitempty"`
+}
+
+type StorageConnectorsInitParameters struct {
+
+	// Type of storage connector.
+	// Valid values are HOMEFOLDERS, GOOGLE_DRIVE, or ONE_DRIVE.
+	ConnectorType *string `json:"connectorType,omitempty" tf:"connector_type,omitempty"`
+
+	// Names of the domains for the account.
+	Domains []*string `json:"domains,omitempty" tf:"domains,omitempty"`
+
+	// ARN of the storage connector.
+	ResourceIdentifier *string `json:"resourceIdentifier,omitempty" tf:"resource_identifier,omitempty"`
 }
 
 type StorageConnectorsObservation struct {
@@ -183,16 +245,24 @@ type StorageConnectorsParameters struct {
 
 	// Type of storage connector.
 	// Valid values are HOMEFOLDERS, GOOGLE_DRIVE, or ONE_DRIVE.
-	// +kubebuilder:validation:Required
-	ConnectorType *string `json:"connectorType" tf:"connector_type,omitempty"`
+	ConnectorType *string `json:"connectorType,omitempty" tf:"connector_type,omitempty"`
 
 	// Names of the domains for the account.
-	// +kubebuilder:validation:Optional
 	Domains []*string `json:"domains,omitempty" tf:"domains,omitempty"`
 
 	// ARN of the storage connector.
-	// +kubebuilder:validation:Optional
 	ResourceIdentifier *string `json:"resourceIdentifier,omitempty" tf:"resource_identifier,omitempty"`
+}
+
+type UserSettingsInitParameters struct {
+
+	// Action that is enabled or disabled.
+	// Valid values are CLIPBOARD_COPY_FROM_LOCAL_DEVICE,  CLIPBOARD_COPY_TO_LOCAL_DEVICE, FILE_UPLOAD, FILE_DOWNLOAD, PRINTING_TO_LOCAL_DEVICE, DOMAIN_PASSWORD_SIGNIN, or DOMAIN_SMART_CARD_SIGNIN.
+	Action *string `json:"action,omitempty" tf:"action,omitempty"`
+
+	// Whether the action is enabled or disabled.
+	// Valid values are ENABLED or DISABLED.
+	Permission *string `json:"permission,omitempty" tf:"permission,omitempty"`
 }
 
 type UserSettingsObservation struct {
@@ -210,19 +280,21 @@ type UserSettingsParameters struct {
 
 	// Action that is enabled or disabled.
 	// Valid values are CLIPBOARD_COPY_FROM_LOCAL_DEVICE,  CLIPBOARD_COPY_TO_LOCAL_DEVICE, FILE_UPLOAD, FILE_DOWNLOAD, PRINTING_TO_LOCAL_DEVICE, DOMAIN_PASSWORD_SIGNIN, or DOMAIN_SMART_CARD_SIGNIN.
-	// +kubebuilder:validation:Required
-	Action *string `json:"action" tf:"action,omitempty"`
+	Action *string `json:"action,omitempty" tf:"action,omitempty"`
 
 	// Whether the action is enabled or disabled.
 	// Valid values are ENABLED or DISABLED.
-	// +kubebuilder:validation:Required
-	Permission *string `json:"permission" tf:"permission,omitempty"`
+	Permission *string `json:"permission,omitempty" tf:"permission,omitempty"`
 }
 
 // StackSpec defines the desired state of Stack
 type StackSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     StackParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider StackInitParameters `json:"initProvider,omitempty"`
 }
 
 // StackStatus defines the observed state of Stack.
@@ -243,7 +315,7 @@ type StackStatus struct {
 type Stack struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   StackSpec   `json:"spec"`
 	Status StackStatus `json:"status,omitempty"`
 }

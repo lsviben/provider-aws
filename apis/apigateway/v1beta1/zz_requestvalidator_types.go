@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RequestValidatorInitParameters struct {
+
+	// Name of the request validator
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// ID of the associated Rest API
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	RestAPIID *string `json:"restApiId,omitempty" tf:"rest_api_id,omitempty"`
+
+	RestAPIIDRef *v1.Reference `json:"restApiIdRef,omitempty" tf:"-"`
+
+	RestAPIIDSelector *v1.Selector `json:"restApiIdSelector,omitempty" tf:"-"`
+
+	// Boolean whether to validate request body. Defaults to false.
+	ValidateRequestBody *bool `json:"validateRequestBody,omitempty" tf:"validate_request_body,omitempty"`
+
+	// Boolean whether to validate request parameters. Defaults to false.
+	ValidateRequestParameters *bool `json:"validateRequestParameters,omitempty" tf:"validate_request_parameters,omitempty"`
+}
+
 type RequestValidatorObservation struct {
 
 	// Unique ID of the request validator
@@ -34,18 +59,15 @@ type RequestValidatorObservation struct {
 type RequestValidatorParameters struct {
 
 	// Name of the request validator
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// ID of the associated Rest API
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	RestAPIID *string `json:"restApiId,omitempty" tf:"rest_api_id,omitempty"`
 
 	// Reference to a RestAPI in apigateway to populate restApiId.
@@ -57,11 +79,9 @@ type RequestValidatorParameters struct {
 	RestAPIIDSelector *v1.Selector `json:"restApiIdSelector,omitempty" tf:"-"`
 
 	// Boolean whether to validate request body. Defaults to false.
-	// +kubebuilder:validation:Optional
 	ValidateRequestBody *bool `json:"validateRequestBody,omitempty" tf:"validate_request_body,omitempty"`
 
 	// Boolean whether to validate request parameters. Defaults to false.
-	// +kubebuilder:validation:Optional
 	ValidateRequestParameters *bool `json:"validateRequestParameters,omitempty" tf:"validate_request_parameters,omitempty"`
 }
 
@@ -69,6 +89,10 @@ type RequestValidatorParameters struct {
 type RequestValidatorSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RequestValidatorParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RequestValidatorInitParameters `json:"initProvider,omitempty"`
 }
 
 // RequestValidatorStatus defines the observed state of RequestValidator.
@@ -89,7 +113,7 @@ type RequestValidatorStatus struct {
 type RequestValidator struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   RequestValidatorSpec   `json:"spec"`
 	Status RequestValidatorStatus `json:"status,omitempty"`
 }

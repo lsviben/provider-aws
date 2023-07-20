@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type TrackerAssociationInitParameters struct {
+
+	// The Amazon Resource Name (ARN) for the geofence collection to be associated to tracker resource. Used when you need to specify a resource across all AWS.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/location/v1beta1.GeofenceCollection
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("collection_arn",true)
+	ConsumerArn *string `json:"consumerArn,omitempty" tf:"consumer_arn,omitempty"`
+
+	ConsumerArnRef *v1.Reference `json:"consumerArnRef,omitempty" tf:"-"`
+
+	ConsumerArnSelector *v1.Selector `json:"consumerArnSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The name of the tracker resource to be associated with a geofence collection.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/location/v1beta1.Tracker
+	TrackerName *string `json:"trackerName,omitempty" tf:"tracker_name,omitempty"`
+
+	TrackerNameRef *v1.Reference `json:"trackerNameRef,omitempty" tf:"-"`
+
+	TrackerNameSelector *v1.Selector `json:"trackerNameSelector,omitempty" tf:"-"`
+}
+
 type TrackerAssociationObservation struct {
 
 	// The Amazon Resource Name (ARN) for the geofence collection to be associated to tracker resource. Used when you need to specify a resource across all AWS.
@@ -29,7 +53,6 @@ type TrackerAssociationParameters struct {
 	// The Amazon Resource Name (ARN) for the geofence collection to be associated to tracker resource. Used when you need to specify a resource across all AWS.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/location/v1beta1.GeofenceCollection
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("collection_arn",true)
-	// +kubebuilder:validation:Optional
 	ConsumerArn *string `json:"consumerArn,omitempty" tf:"consumer_arn,omitempty"`
 
 	// Reference to a GeofenceCollection in location to populate consumerArn.
@@ -42,12 +65,10 @@ type TrackerAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The name of the tracker resource to be associated with a geofence collection.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/location/v1beta1.Tracker
-	// +kubebuilder:validation:Optional
 	TrackerName *string `json:"trackerName,omitempty" tf:"tracker_name,omitempty"`
 
 	// Reference to a Tracker in location to populate trackerName.
@@ -63,6 +84,10 @@ type TrackerAssociationParameters struct {
 type TrackerAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     TrackerAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider TrackerAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // TrackerAssociationStatus defines the observed state of TrackerAssociation.

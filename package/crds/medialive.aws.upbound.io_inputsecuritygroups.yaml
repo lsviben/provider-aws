@@ -83,12 +83,32 @@ spec:
                         cidr:
                           description: The IPv4 CIDR that's whitelisted.
                           type: string
-                      required:
-                      - cidr
                       type: object
                     type: array
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
+                  whitelistRules:
+                    description: Whitelist rules. See Whitelist Rules for more details.
+                    items:
+                      properties:
+                        cidr:
+                          description: The IPv4 CIDR that's whitelisted.
+                          type: string
+                      type: object
+                    type: array
                 type: object
               managementPolicies:
                 default:
@@ -288,9 +308,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: whitelistRules is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.whitelistRules)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.whitelistRules)
+                || has(self.initProvider.whitelistRules)'
           status:
             description: InputSecurityGroupStatus defines the observed state of InputSecurityGroup.
             properties:

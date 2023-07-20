@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type InstancePublicPortsInitParameters struct {
+
+	// Name of the Lightsail Instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Instance
+	InstanceName *string `json:"instanceName,omitempty" tf:"instance_name,omitempty"`
+
+	InstanceNameRef *v1.Reference `json:"instanceNameRef,omitempty" tf:"-"`
+
+	InstanceNameSelector *v1.Selector `json:"instanceNameSelector,omitempty" tf:"-"`
+
+	// Configuration block with port information. AWS closes all currently open ports that are not included in the port_info. Detailed below.
+	PortInfo []PortInfoInitParameters `json:"portInfo,omitempty" tf:"port_info,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type InstancePublicPortsObservation struct {
 
 	// ID of the resource.
@@ -29,7 +47,6 @@ type InstancePublicPortsParameters struct {
 
 	// Name of the Lightsail Instance.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Instance
-	// +kubebuilder:validation:Optional
 	InstanceName *string `json:"instanceName,omitempty" tf:"instance_name,omitempty"`
 
 	// Reference to a Instance in lightsail to populate instanceName.
@@ -41,13 +58,31 @@ type InstancePublicPortsParameters struct {
 	InstanceNameSelector *v1.Selector `json:"instanceNameSelector,omitempty" tf:"-"`
 
 	// Configuration block with port information. AWS closes all currently open ports that are not included in the port_info. Detailed below.
-	// +kubebuilder:validation:Optional
 	PortInfo []PortInfoParameters `json:"portInfo,omitempty" tf:"port_info,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type PortInfoInitParameters struct {
+
+	// Set of CIDR aliases that define access for a preconfigured range of IP addresses.
+	CidrListAliases []*string `json:"cidrListAliases,omitempty" tf:"cidr_list_aliases,omitempty"`
+
+	// Set of CIDR blocks.
+	Cidrs []*string `json:"cidrs,omitempty" tf:"cidrs,omitempty"`
+
+	// First port in a range of open ports on an instance.
+	FromPort *float64 `json:"fromPort,omitempty" tf:"from_port,omitempty"`
+
+	IPv6Cidrs []*string `json:"ipv6Cidrs,omitempty" tf:"ipv6_cidrs,omitempty"`
+
+	// IP protocol name. Valid values are tcp, all, udp, and icmp.
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
+
+	// Last port in a range of open ports on an instance.
+	ToPort *float64 `json:"toPort,omitempty" tf:"to_port,omitempty"`
 }
 
 type PortInfoObservation struct {
@@ -73,33 +108,31 @@ type PortInfoObservation struct {
 type PortInfoParameters struct {
 
 	// Set of CIDR aliases that define access for a preconfigured range of IP addresses.
-	// +kubebuilder:validation:Optional
 	CidrListAliases []*string `json:"cidrListAliases,omitempty" tf:"cidr_list_aliases,omitempty"`
 
 	// Set of CIDR blocks.
-	// +kubebuilder:validation:Optional
 	Cidrs []*string `json:"cidrs,omitempty" tf:"cidrs,omitempty"`
 
 	// First port in a range of open ports on an instance.
-	// +kubebuilder:validation:Required
-	FromPort *float64 `json:"fromPort" tf:"from_port,omitempty"`
+	FromPort *float64 `json:"fromPort,omitempty" tf:"from_port,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	IPv6Cidrs []*string `json:"ipv6Cidrs,omitempty" tf:"ipv6_cidrs,omitempty"`
 
 	// IP protocol name. Valid values are tcp, all, udp, and icmp.
-	// +kubebuilder:validation:Required
-	Protocol *string `json:"protocol" tf:"protocol,omitempty"`
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
 
 	// Last port in a range of open ports on an instance.
-	// +kubebuilder:validation:Required
-	ToPort *float64 `json:"toPort" tf:"to_port,omitempty"`
+	ToPort *float64 `json:"toPort,omitempty" tf:"to_port,omitempty"`
 }
 
 // InstancePublicPortsSpec defines the desired state of InstancePublicPorts
 type InstancePublicPortsSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     InstancePublicPortsParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider InstancePublicPortsInitParameters `json:"initProvider,omitempty"`
 }
 
 // InstancePublicPortsStatus defines the observed state of InstancePublicPorts.
@@ -120,7 +153,7 @@ type InstancePublicPortsStatus struct {
 type InstancePublicPorts struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.portInfo)",message="portInfo is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.portInfo) || has(self.initProvider.portInfo)",message="%!s(MISSING) is a required parameter"
 	Spec   InstancePublicPortsSpec   `json:"spec"`
 	Status InstancePublicPortsStatus `json:"status,omitempty"`
 }

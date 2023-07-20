@@ -13,6 +13,40 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SchemaInitParameters struct {
+
+	// The compatibility mode of the schema. Values values are: NONE, DISABLED, BACKWARD, BACKWARD_ALL, FORWARD, FORWARD_ALL, FULL, and FULL_ALL.
+	Compatibility *string `json:"compatibility,omitempty" tf:"compatibility,omitempty"`
+
+	// The data format of the schema definition. Valid values are AVRO, JSON and PROTOBUF.
+	DataFormat *string `json:"dataFormat,omitempty" tf:"data_format,omitempty"`
+
+	// –  A description of the schema.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ARN of the Glue Registry to create the schema in.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.Registry
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	RegistryArn *string `json:"registryArn,omitempty" tf:"registry_arn,omitempty"`
+
+	RegistryArnRef *v1.Reference `json:"registryArnRef,omitempty" tf:"-"`
+
+	RegistryArnSelector *v1.Selector `json:"registryArnSelector,omitempty" tf:"-"`
+
+	// The schema definition using the data_format setting for schema_name.
+	SchemaDefinition *string `json:"schemaDefinition,omitempty" tf:"schema_definition,omitempty"`
+
+	// –  The Name of the schema.
+	SchemaName *string `json:"schemaName,omitempty" tf:"schema_name,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type SchemaObservation struct {
 
 	// Amazon Resource Name (ARN) of the schema.
@@ -61,26 +95,21 @@ type SchemaObservation struct {
 type SchemaParameters struct {
 
 	// The compatibility mode of the schema. Values values are: NONE, DISABLED, BACKWARD, BACKWARD_ALL, FORWARD, FORWARD_ALL, FULL, and FULL_ALL.
-	// +kubebuilder:validation:Optional
 	Compatibility *string `json:"compatibility,omitempty" tf:"compatibility,omitempty"`
 
 	// The data format of the schema definition. Valid values are AVRO, JSON and PROTOBUF.
-	// +kubebuilder:validation:Optional
 	DataFormat *string `json:"dataFormat,omitempty" tf:"data_format,omitempty"`
 
 	// –  A description of the schema.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ARN of the Glue Registry to create the schema in.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.Registry
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	RegistryArn *string `json:"registryArn,omitempty" tf:"registry_arn,omitempty"`
 
 	// Reference to a Registry in glue to populate registryArn.
@@ -92,15 +121,12 @@ type SchemaParameters struct {
 	RegistryArnSelector *v1.Selector `json:"registryArnSelector,omitempty" tf:"-"`
 
 	// The schema definition using the data_format setting for schema_name.
-	// +kubebuilder:validation:Optional
 	SchemaDefinition *string `json:"schemaDefinition,omitempty" tf:"schema_definition,omitempty"`
 
 	// –  The Name of the schema.
-	// +kubebuilder:validation:Optional
 	SchemaName *string `json:"schemaName,omitempty" tf:"schema_name,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -108,6 +134,10 @@ type SchemaParameters struct {
 type SchemaSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SchemaParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SchemaInitParameters `json:"initProvider,omitempty"`
 }
 
 // SchemaStatus defines the observed state of Schema.
@@ -128,10 +158,10 @@ type SchemaStatus struct {
 type Schema struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.compatibility)",message="compatibility is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dataFormat)",message="dataFormat is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.schemaDefinition)",message="schemaDefinition is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.schemaName)",message="schemaName is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.compatibility) || has(self.initProvider.compatibility)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dataFormat) || has(self.initProvider.dataFormat)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.schemaDefinition) || has(self.initProvider.schemaDefinition)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.schemaName) || has(self.initProvider.schemaName)",message="%!s(MISSING) is a required parameter"
 	Spec   SchemaSpec   `json:"spec"`
 	Status SchemaStatus `json:"status,omitempty"`
 }

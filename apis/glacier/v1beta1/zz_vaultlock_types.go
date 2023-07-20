@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VaultLockInitParameters struct {
+
+	// Boolean whether to permanently apply this Glacier Lock Policy. Once completed, this cannot be undone. If set to false, the Glacier Lock Policy remains in a testing mode for 24 hours. Changing this from false to true will show as resource recreation, which is expected. Changing this from true to false is not possible unless the Glacier Vault is recreated at the same time.
+	CompleteLock *bool `json:"completeLock,omitempty" tf:"complete_lock,omitempty"`
+
+	// This should only be used in conjunction with complete_lock being set to true.
+	IgnoreDeletionError *bool `json:"ignoreDeletionError,omitempty" tf:"ignore_deletion_error,omitempty"`
+
+	// JSON string containing the IAM policy to apply as the Glacier Vault Lock policy.
+	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The name of the Glacier Vault.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glacier/v1beta1.Vault
+	VaultName *string `json:"vaultName,omitempty" tf:"vault_name,omitempty"`
+
+	VaultNameRef *v1.Reference `json:"vaultNameRef,omitempty" tf:"-"`
+
+	VaultNameSelector *v1.Selector `json:"vaultNameSelector,omitempty" tf:"-"`
+}
+
 type VaultLockObservation struct {
 
 	// Boolean whether to permanently apply this Glacier Lock Policy. Once completed, this cannot be undone. If set to false, the Glacier Lock Policy remains in a testing mode for 24 hours. Changing this from false to true will show as resource recreation, which is expected. Changing this from true to false is not possible unless the Glacier Vault is recreated at the same time.
@@ -34,25 +58,20 @@ type VaultLockObservation struct {
 type VaultLockParameters struct {
 
 	// Boolean whether to permanently apply this Glacier Lock Policy. Once completed, this cannot be undone. If set to false, the Glacier Lock Policy remains in a testing mode for 24 hours. Changing this from false to true will show as resource recreation, which is expected. Changing this from true to false is not possible unless the Glacier Vault is recreated at the same time.
-	// +kubebuilder:validation:Optional
 	CompleteLock *bool `json:"completeLock,omitempty" tf:"complete_lock,omitempty"`
 
 	// This should only be used in conjunction with complete_lock being set to true.
-	// +kubebuilder:validation:Optional
 	IgnoreDeletionError *bool `json:"ignoreDeletionError,omitempty" tf:"ignore_deletion_error,omitempty"`
 
 	// JSON string containing the IAM policy to apply as the Glacier Vault Lock policy.
-	// +kubebuilder:validation:Optional
 	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The name of the Glacier Vault.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glacier/v1beta1.Vault
-	// +kubebuilder:validation:Optional
 	VaultName *string `json:"vaultName,omitempty" tf:"vault_name,omitempty"`
 
 	// Reference to a Vault in glacier to populate vaultName.
@@ -68,6 +87,10 @@ type VaultLockParameters struct {
 type VaultLockSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VaultLockParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VaultLockInitParameters `json:"initProvider,omitempty"`
 }
 
 // VaultLockStatus defines the observed state of VaultLock.
@@ -88,8 +111,8 @@ type VaultLockStatus struct {
 type VaultLock struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.completeLock)",message="completeLock is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policy)",message="policy is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.completeLock) || has(self.initProvider.completeLock)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policy) || has(self.initProvider.policy)",message="%!s(MISSING) is a required parameter"
 	Spec   VaultLockSpec   `json:"spec"`
 	Status VaultLockStatus `json:"status,omitempty"`
 }

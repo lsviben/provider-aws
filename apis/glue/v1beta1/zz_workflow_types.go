@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type WorkflowInitParameters struct {
+
+	// –  A map of default run properties for this workflow. These properties are passed to all jobs associated to the workflow.
+	DefaultRunProperties map[string]*string `json:"defaultRunProperties,omitempty" tf:"default_run_properties,omitempty"`
+
+	// –  Description of the workflow.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Prevents exceeding the maximum number of concurrent runs of any of the component jobs. If you leave this parameter blank, there is no limit to the number of concurrent workflow runs.
+	MaxConcurrentRuns *float64 `json:"maxConcurrentRuns,omitempty" tf:"max_concurrent_runs,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type WorkflowObservation struct {
 
 	// Amazon Resource Name (ARN) of Glue Workflow
@@ -40,24 +59,19 @@ type WorkflowObservation struct {
 type WorkflowParameters struct {
 
 	// –  A map of default run properties for this workflow. These properties are passed to all jobs associated to the workflow.
-	// +kubebuilder:validation:Optional
 	DefaultRunProperties map[string]*string `json:"defaultRunProperties,omitempty" tf:"default_run_properties,omitempty"`
 
 	// –  Description of the workflow.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Prevents exceeding the maximum number of concurrent runs of any of the component jobs. If you leave this parameter blank, there is no limit to the number of concurrent workflow runs.
-	// +kubebuilder:validation:Optional
 	MaxConcurrentRuns *float64 `json:"maxConcurrentRuns,omitempty" tf:"max_concurrent_runs,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -65,6 +79,10 @@ type WorkflowParameters struct {
 type WorkflowSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     WorkflowParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider WorkflowInitParameters `json:"initProvider,omitempty"`
 }
 
 // WorkflowStatus defines the observed state of Workflow.

@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ArchiveInitParameters struct {
+
+	// The description of the new event archive.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Instructs the new event archive to only capture events matched by this pattern. By default, it attempts to archive every event received in the event_source_arn.
+	EventPattern *string `json:"eventPattern,omitempty" tf:"event_pattern,omitempty"`
+
+	// Event bus source ARN from where these events should be archived.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudwatchevents/v1beta1.Bus
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	EventSourceArn *string `json:"eventSourceArn,omitempty" tf:"event_source_arn,omitempty"`
+
+	EventSourceArnRef *v1.Reference `json:"eventSourceArnRef,omitempty" tf:"-"`
+
+	EventSourceArnSelector *v1.Selector `json:"eventSourceArnSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The maximum number of days to retain events in the new event archive. By default, it archives indefinitely.
+	RetentionDays *float64 `json:"retentionDays,omitempty" tf:"retention_days,omitempty"`
+}
+
 type ArchiveObservation struct {
 
 	// The Amazon Resource Name (ARN) of the event archive.
@@ -36,17 +61,14 @@ type ArchiveObservation struct {
 type ArchiveParameters struct {
 
 	// The description of the new event archive.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Instructs the new event archive to only capture events matched by this pattern. By default, it attempts to archive every event received in the event_source_arn.
-	// +kubebuilder:validation:Optional
 	EventPattern *string `json:"eventPattern,omitempty" tf:"event_pattern,omitempty"`
 
 	// Event bus source ARN from where these events should be archived.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudwatchevents/v1beta1.Bus
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	EventSourceArn *string `json:"eventSourceArn,omitempty" tf:"event_source_arn,omitempty"`
 
 	// Reference to a Bus in cloudwatchevents to populate eventSourceArn.
@@ -59,11 +81,9 @@ type ArchiveParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The maximum number of days to retain events in the new event archive. By default, it archives indefinitely.
-	// +kubebuilder:validation:Optional
 	RetentionDays *float64 `json:"retentionDays,omitempty" tf:"retention_days,omitempty"`
 }
 
@@ -71,6 +91,10 @@ type ArchiveParameters struct {
 type ArchiveSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ArchiveParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ArchiveInitParameters `json:"initProvider,omitempty"`
 }
 
 // ArchiveStatus defines the observed state of Archive.

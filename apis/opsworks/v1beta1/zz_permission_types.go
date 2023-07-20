@@ -13,6 +13,36 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PermissionInitParameters struct {
+
+	// Whether the user is allowed to use SSH to communicate with the instance
+	AllowSSH *bool `json:"allowSsh,omitempty" tf:"allow_ssh,omitempty"`
+
+	// Whether the user is allowed to use sudo to elevate privileges
+	AllowSudo *bool `json:"allowSudo,omitempty" tf:"allow_sudo,omitempty"`
+
+	// The users permission level. Mus be one of deny, show, deploy, manage, iam_only
+	Level *string `json:"level,omitempty" tf:"level,omitempty"`
+
+	// The stack to set the permissions for
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/opsworks/v1beta1.Stack
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	StackID *string `json:"stackId,omitempty" tf:"stack_id,omitempty"`
+
+	StackIDRef *v1.Reference `json:"stackIdRef,omitempty" tf:"-"`
+
+	StackIDSelector *v1.Selector `json:"stackIdSelector,omitempty" tf:"-"`
+
+	// The user's IAM ARN to set permissions for
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.User
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	UserArn *string `json:"userArn,omitempty" tf:"user_arn,omitempty"`
+
+	UserArnRef *v1.Reference `json:"userArnRef,omitempty" tf:"-"`
+
+	UserArnSelector *v1.Selector `json:"userArnSelector,omitempty" tf:"-"`
+}
+
 type PermissionObservation struct {
 
 	// Whether the user is allowed to use SSH to communicate with the instance
@@ -37,21 +67,17 @@ type PermissionObservation struct {
 type PermissionParameters struct {
 
 	// Whether the user is allowed to use SSH to communicate with the instance
-	// +kubebuilder:validation:Optional
 	AllowSSH *bool `json:"allowSsh,omitempty" tf:"allow_ssh,omitempty"`
 
 	// Whether the user is allowed to use sudo to elevate privileges
-	// +kubebuilder:validation:Optional
 	AllowSudo *bool `json:"allowSudo,omitempty" tf:"allow_sudo,omitempty"`
 
 	// The users permission level. Mus be one of deny, show, deploy, manage, iam_only
-	// +kubebuilder:validation:Optional
 	Level *string `json:"level,omitempty" tf:"level,omitempty"`
 
 	// The stack to set the permissions for
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/opsworks/v1beta1.Stack
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	StackID *string `json:"stackId,omitempty" tf:"stack_id,omitempty"`
 
 	// Reference to a Stack in opsworks to populate stackId.
@@ -65,7 +91,6 @@ type PermissionParameters struct {
 	// The user's IAM ARN to set permissions for
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.User
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	UserArn *string `json:"userArn,omitempty" tf:"user_arn,omitempty"`
 
 	// Reference to a User in iam to populate userArn.
@@ -81,6 +106,10 @@ type PermissionParameters struct {
 type PermissionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PermissionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PermissionInitParameters `json:"initProvider,omitempty"`
 }
 
 // PermissionStatus defines the observed state of Permission.

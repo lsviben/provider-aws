@@ -74,8 +74,19 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  configuration:
+                    description: A JSON formatted Security Configuration
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -275,9 +286,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: configuration is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.configuration)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.configuration)
+                || has(self.initProvider.configuration)'
           status:
             description: SecurityConfigurationStatus defines the observed state of
               SecurityConfiguration.

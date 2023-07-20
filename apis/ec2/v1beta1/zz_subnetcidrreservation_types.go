@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SubnetCidrReservationInitParameters struct {
+
+	// The CIDR block for the reservation.
+	CidrBlock *string `json:"cidrBlock,omitempty" tf:"cidr_block,omitempty"`
+
+	// A brief description of the reservation.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The type of reservation to create. Valid values: explicit, prefix
+	ReservationType *string `json:"reservationType,omitempty" tf:"reservation_type,omitempty"`
+
+	// The ID of the subnet to create the reservation for.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
+	SubnetID *string `json:"subnetId,omitempty" tf:"subnet_id,omitempty"`
+
+	SubnetIDRef *v1.Reference `json:"subnetIdRef,omitempty" tf:"-"`
+
+	SubnetIDSelector *v1.Selector `json:"subnetIdSelector,omitempty" tf:"-"`
+}
+
 type SubnetCidrReservationObservation struct {
 
 	// The CIDR block for the reservation.
@@ -37,25 +61,20 @@ type SubnetCidrReservationObservation struct {
 type SubnetCidrReservationParameters struct {
 
 	// The CIDR block for the reservation.
-	// +kubebuilder:validation:Optional
 	CidrBlock *string `json:"cidrBlock,omitempty" tf:"cidr_block,omitempty"`
 
 	// A brief description of the reservation.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The type of reservation to create. Valid values: explicit, prefix
-	// +kubebuilder:validation:Optional
 	ReservationType *string `json:"reservationType,omitempty" tf:"reservation_type,omitempty"`
 
 	// The ID of the subnet to create the reservation for.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
-	// +kubebuilder:validation:Optional
 	SubnetID *string `json:"subnetId,omitempty" tf:"subnet_id,omitempty"`
 
 	// Reference to a Subnet in ec2 to populate subnetId.
@@ -71,6 +90,10 @@ type SubnetCidrReservationParameters struct {
 type SubnetCidrReservationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SubnetCidrReservationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SubnetCidrReservationInitParameters `json:"initProvider,omitempty"`
 }
 
 // SubnetCidrReservationStatus defines the observed state of SubnetCidrReservation.
@@ -91,8 +114,8 @@ type SubnetCidrReservationStatus struct {
 type SubnetCidrReservation struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.cidrBlock)",message="cidrBlock is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.reservationType)",message="reservationType is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.cidrBlock) || has(self.initProvider.cidrBlock)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.reservationType) || has(self.initProvider.reservationType)",message="%!s(MISSING) is a required parameter"
 	Spec   SubnetCidrReservationSpec   `json:"spec"`
 	Status SubnetCidrReservationStatus `json:"status,omitempty"`
 }

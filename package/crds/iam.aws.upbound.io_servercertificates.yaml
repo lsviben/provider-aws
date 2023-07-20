@@ -101,6 +101,50 @@ spec:
                       type: string
                     description: Key-value map of resource tags.
                     type: object
+                required:
+                - privateKeySecretRef
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  certificateBody:
+                    description: encoded format.
+                    type: string
+                  certificateChain:
+                    description: encoded public key certificates of the chain.
+                    type: string
+                  path:
+                    description: The IAM path for the server certificate.  If it is
+                      not included, it defaults to a slash (/). If this certificate
+                      is for use with AWS CloudFront, the path must be in format /cloudfront/your_path_here.
+                      See IAM Identifiers for more details on IAM Paths.
+                    type: string
+                  privateKeySecretRef:
+                    description: encoded format.
+                    properties:
+                      key:
+                        description: The key to select.
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                      namespace:
+                        description: Namespace of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    - namespace
+                    type: object
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
+                required:
+                - privateKeySecretRef
                 type: object
               managementPolicies:
                 default:
@@ -300,12 +344,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: certificateBody is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.certificateBody)'
-            - message: privateKeySecretRef is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.certificateBody)
+                || has(self.initProvider.certificateBody)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.privateKeySecretRef)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.privateKeySecretRef)
+                || has(self.initProvider.privateKeySecretRef)'
           status:
             description: ServerCertificateStatus defines the observed state of ServerCertificate.
             properties:

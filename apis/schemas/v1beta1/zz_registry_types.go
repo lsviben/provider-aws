@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RegistryInitParameters struct {
+
+	// The description of the discoverer. Maximum of 256 characters.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type RegistryObservation struct {
 
 	// The Amazon Resource Name (ARN) of the discoverer.
@@ -33,16 +46,13 @@ type RegistryObservation struct {
 type RegistryParameters struct {
 
 	// The description of the discoverer. Maximum of 256 characters.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -50,6 +60,10 @@ type RegistryParameters struct {
 type RegistrySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RegistryParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RegistryInitParameters `json:"initProvider,omitempty"`
 }
 
 // RegistryStatus defines the observed state of Registry.

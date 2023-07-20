@@ -13,6 +13,40 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BucketLoggingInitParameters struct {
+
+	// Name of the bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	BucketRef *v1.Reference `json:"bucketRef,omitempty" tf:"-"`
+
+	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
+
+	// Account ID of the expected bucket owner.
+	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Name of the bucket where you want Amazon S3 to store server access logs.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	TargetBucket *string `json:"targetBucket,omitempty" tf:"target_bucket,omitempty"`
+
+	TargetBucketRef *v1.Reference `json:"targetBucketRef,omitempty" tf:"-"`
+
+	TargetBucketSelector *v1.Selector `json:"targetBucketSelector,omitempty" tf:"-"`
+
+	// Set of configuration blocks with information for granting permissions. See below.
+	TargetGrant []TargetGrantInitParameters `json:"targetGrant,omitempty" tf:"target_grant,omitempty"`
+
+	// Prefix for all log object keys.
+	TargetPrefix *string `json:"targetPrefix,omitempty" tf:"target_prefix,omitempty"`
+}
+
 type BucketLoggingObservation struct {
 
 	// Name of the bucket.
@@ -39,7 +73,6 @@ type BucketLoggingParameters struct {
 	// Name of the bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucket.
@@ -51,18 +84,15 @@ type BucketLoggingParameters struct {
 	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
 
 	// Account ID of the expected bucket owner.
-	// +kubebuilder:validation:Optional
 	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Name of the bucket where you want Amazon S3 to store server access logs.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	TargetBucket *string `json:"targetBucket,omitempty" tf:"target_bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate targetBucket.
@@ -74,12 +104,25 @@ type BucketLoggingParameters struct {
 	TargetBucketSelector *v1.Selector `json:"targetBucketSelector,omitempty" tf:"-"`
 
 	// Set of configuration blocks with information for granting permissions. See below.
-	// +kubebuilder:validation:Optional
 	TargetGrant []TargetGrantParameters `json:"targetGrant,omitempty" tf:"target_grant,omitempty"`
 
 	// Prefix for all log object keys.
-	// +kubebuilder:validation:Optional
 	TargetPrefix *string `json:"targetPrefix,omitempty" tf:"target_prefix,omitempty"`
+}
+
+type TargetGrantGranteeInitParameters struct {
+
+	// Email address of the grantee. See Regions and Endpoints for supported AWS regions where this argument can be specified.
+	EmailAddress *string `json:"emailAddress,omitempty" tf:"email_address,omitempty"`
+
+	// Canonical user ID of the grantee.
+	ID *string `json:"id,omitempty" tf:"id,omitempty"`
+
+	// Type of grantee. Valid values: CanonicalUser, AmazonCustomerByEmail, Group.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+
+	// URI of the grantee group.
+	URI *string `json:"uri,omitempty" tf:"uri,omitempty"`
 }
 
 type TargetGrantGranteeObservation struct {
@@ -101,20 +144,25 @@ type TargetGrantGranteeObservation struct {
 type TargetGrantGranteeParameters struct {
 
 	// Email address of the grantee. See Regions and Endpoints for supported AWS regions where this argument can be specified.
-	// +kubebuilder:validation:Optional
 	EmailAddress *string `json:"emailAddress,omitempty" tf:"email_address,omitempty"`
 
 	// Canonical user ID of the grantee.
-	// +kubebuilder:validation:Optional
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
 	// Type of grantee. Valid values: CanonicalUser, AmazonCustomerByEmail, Group.
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 
 	// URI of the grantee group.
-	// +kubebuilder:validation:Optional
 	URI *string `json:"uri,omitempty" tf:"uri,omitempty"`
+}
+
+type TargetGrantInitParameters struct {
+
+	// Configuration block for the person being granted permissions. See below.
+	Grantee []TargetGrantGranteeInitParameters `json:"grantee,omitempty" tf:"grantee,omitempty"`
+
+	// Logging permissions assigned to the grantee for the bucket. Valid values: FULL_CONTROL, READ, WRITE.
+	Permission *string `json:"permission,omitempty" tf:"permission,omitempty"`
 }
 
 type TargetGrantObservation struct {
@@ -129,18 +177,20 @@ type TargetGrantObservation struct {
 type TargetGrantParameters struct {
 
 	// Configuration block for the person being granted permissions. See below.
-	// +kubebuilder:validation:Required
-	Grantee []TargetGrantGranteeParameters `json:"grantee" tf:"grantee,omitempty"`
+	Grantee []TargetGrantGranteeParameters `json:"grantee,omitempty" tf:"grantee,omitempty"`
 
 	// Logging permissions assigned to the grantee for the bucket. Valid values: FULL_CONTROL, READ, WRITE.
-	// +kubebuilder:validation:Required
-	Permission *string `json:"permission" tf:"permission,omitempty"`
+	Permission *string `json:"permission,omitempty" tf:"permission,omitempty"`
 }
 
 // BucketLoggingSpec defines the desired state of BucketLogging
 type BucketLoggingSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BucketLoggingParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BucketLoggingInitParameters `json:"initProvider,omitempty"`
 }
 
 // BucketLoggingStatus defines the observed state of BucketLogging.
@@ -161,7 +211,7 @@ type BucketLoggingStatus struct {
 type BucketLogging struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.targetPrefix)",message="targetPrefix is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.targetPrefix) || has(self.initProvider.targetPrefix)",message="%!s(MISSING) is a required parameter"
 	Spec   BucketLoggingSpec   `json:"spec"`
 	Status BucketLoggingStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type MonitoringSubscriptionInitParameters struct {
+
+	// The ID of the distribution that you are enabling metrics for.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudfront/v1beta1.Distribution
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DistributionID *string `json:"distributionId,omitempty" tf:"distribution_id,omitempty"`
+
+	DistributionIDRef *v1.Reference `json:"distributionIdRef,omitempty" tf:"-"`
+
+	DistributionIDSelector *v1.Selector `json:"distributionIdSelector,omitempty" tf:"-"`
+
+	// A monitoring subscription. This structure contains information about whether additional CloudWatch metrics are enabled for a given CloudFront distribution.
+	MonitoringSubscription []MonitoringSubscriptionMonitoringSubscriptionInitParameters `json:"monitoringSubscription,omitempty" tf:"monitoring_subscription,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type MonitoringSubscriptionMonitoringSubscriptionInitParameters struct {
+
+	// A subscription configuration for additional CloudWatch metrics. See below.
+	RealtimeMetricsSubscriptionConfig []RealtimeMetricsSubscriptionConfigInitParameters `json:"realtimeMetricsSubscriptionConfig,omitempty" tf:"realtime_metrics_subscription_config,omitempty"`
+}
+
 type MonitoringSubscriptionMonitoringSubscriptionObservation struct {
 
 	// A subscription configuration for additional CloudWatch metrics. See below.
@@ -22,8 +47,7 @@ type MonitoringSubscriptionMonitoringSubscriptionObservation struct {
 type MonitoringSubscriptionMonitoringSubscriptionParameters struct {
 
 	// A subscription configuration for additional CloudWatch metrics. See below.
-	// +kubebuilder:validation:Required
-	RealtimeMetricsSubscriptionConfig []RealtimeMetricsSubscriptionConfigParameters `json:"realtimeMetricsSubscriptionConfig" tf:"realtime_metrics_subscription_config,omitempty"`
+	RealtimeMetricsSubscriptionConfig []RealtimeMetricsSubscriptionConfigParameters `json:"realtimeMetricsSubscriptionConfig,omitempty" tf:"realtime_metrics_subscription_config,omitempty"`
 }
 
 type MonitoringSubscriptionObservation struct {
@@ -43,7 +67,6 @@ type MonitoringSubscriptionParameters struct {
 	// The ID of the distribution that you are enabling metrics for.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudfront/v1beta1.Distribution
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DistributionID *string `json:"distributionId,omitempty" tf:"distribution_id,omitempty"`
 
 	// Reference to a Distribution in cloudfront to populate distributionId.
@@ -55,13 +78,17 @@ type MonitoringSubscriptionParameters struct {
 	DistributionIDSelector *v1.Selector `json:"distributionIdSelector,omitempty" tf:"-"`
 
 	// A monitoring subscription. This structure contains information about whether additional CloudWatch metrics are enabled for a given CloudFront distribution.
-	// +kubebuilder:validation:Optional
 	MonitoringSubscription []MonitoringSubscriptionMonitoringSubscriptionParameters `json:"monitoringSubscription,omitempty" tf:"monitoring_subscription,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type RealtimeMetricsSubscriptionConfigInitParameters struct {
+
+	// A flag that indicates whether additional CloudWatch metrics are enabled for a given CloudFront distribution. Valid values are Enabled and Disabled. See below.
+	RealtimeMetricsSubscriptionStatus *string `json:"realtimeMetricsSubscriptionStatus,omitempty" tf:"realtime_metrics_subscription_status,omitempty"`
 }
 
 type RealtimeMetricsSubscriptionConfigObservation struct {
@@ -73,14 +100,17 @@ type RealtimeMetricsSubscriptionConfigObservation struct {
 type RealtimeMetricsSubscriptionConfigParameters struct {
 
 	// A flag that indicates whether additional CloudWatch metrics are enabled for a given CloudFront distribution. Valid values are Enabled and Disabled. See below.
-	// +kubebuilder:validation:Required
-	RealtimeMetricsSubscriptionStatus *string `json:"realtimeMetricsSubscriptionStatus" tf:"realtime_metrics_subscription_status,omitempty"`
+	RealtimeMetricsSubscriptionStatus *string `json:"realtimeMetricsSubscriptionStatus,omitempty" tf:"realtime_metrics_subscription_status,omitempty"`
 }
 
 // MonitoringSubscriptionSpec defines the desired state of MonitoringSubscription
 type MonitoringSubscriptionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     MonitoringSubscriptionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider MonitoringSubscriptionInitParameters `json:"initProvider,omitempty"`
 }
 
 // MonitoringSubscriptionStatus defines the observed state of MonitoringSubscription.
@@ -101,7 +131,7 @@ type MonitoringSubscriptionStatus struct {
 type MonitoringSubscription struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.monitoringSubscription)",message="monitoringSubscription is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.monitoringSubscription) || has(self.initProvider.monitoringSubscription)",message="%!s(MISSING) is a required parameter"
 	Spec   MonitoringSubscriptionSpec   `json:"spec"`
 	Status MonitoringSubscriptionStatus `json:"status,omitempty"`
 }

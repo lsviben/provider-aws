@@ -13,6 +13,41 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type IntegrationResponseInitParameters struct {
+
+	// API identifier.
+	// +crossplane:generate:reference:type=API
+	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
+
+	APIIDRef *v1.Reference `json:"apiIdRef,omitempty" tf:"-"`
+
+	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
+
+	// How to handle response payload content type conversions. Valid values: CONVERT_TO_BINARY, CONVERT_TO_TEXT.
+	ContentHandlingStrategy *string `json:"contentHandlingStrategy,omitempty" tf:"content_handling_strategy,omitempty"`
+
+	// Identifier of the aws_apigatewayv2_integration.
+	// +crossplane:generate:reference:type=Integration
+	IntegrationID *string `json:"integrationId,omitempty" tf:"integration_id,omitempty"`
+
+	IntegrationIDRef *v1.Reference `json:"integrationIdRef,omitempty" tf:"-"`
+
+	IntegrationIDSelector *v1.Selector `json:"integrationIdSelector,omitempty" tf:"-"`
+
+	// Integration response key.
+	IntegrationResponseKey *string `json:"integrationResponseKey,omitempty" tf:"integration_response_key,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Map of Velocity templates that are applied on the request payload based on the value of the Content-Type header sent by the client.
+	ResponseTemplates map[string]*string `json:"responseTemplates,omitempty" tf:"response_templates,omitempty"`
+
+	// The template selection expression for the integration response.
+	TemplateSelectionExpression *string `json:"templateSelectionExpression,omitempty" tf:"template_selection_expression,omitempty"`
+}
+
 type IntegrationResponseObservation struct {
 
 	// API identifier.
@@ -41,7 +76,6 @@ type IntegrationResponseParameters struct {
 
 	// API identifier.
 	// +crossplane:generate:reference:type=API
-	// +kubebuilder:validation:Optional
 	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
 
 	// Reference to a API to populate apiId.
@@ -53,12 +87,10 @@ type IntegrationResponseParameters struct {
 	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
 
 	// How to handle response payload content type conversions. Valid values: CONVERT_TO_BINARY, CONVERT_TO_TEXT.
-	// +kubebuilder:validation:Optional
 	ContentHandlingStrategy *string `json:"contentHandlingStrategy,omitempty" tf:"content_handling_strategy,omitempty"`
 
 	// Identifier of the aws_apigatewayv2_integration.
 	// +crossplane:generate:reference:type=Integration
-	// +kubebuilder:validation:Optional
 	IntegrationID *string `json:"integrationId,omitempty" tf:"integration_id,omitempty"`
 
 	// Reference to a Integration to populate integrationId.
@@ -70,20 +102,16 @@ type IntegrationResponseParameters struct {
 	IntegrationIDSelector *v1.Selector `json:"integrationIdSelector,omitempty" tf:"-"`
 
 	// Integration response key.
-	// +kubebuilder:validation:Optional
 	IntegrationResponseKey *string `json:"integrationResponseKey,omitempty" tf:"integration_response_key,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Map of Velocity templates that are applied on the request payload based on the value of the Content-Type header sent by the client.
-	// +kubebuilder:validation:Optional
 	ResponseTemplates map[string]*string `json:"responseTemplates,omitempty" tf:"response_templates,omitempty"`
 
 	// The template selection expression for the integration response.
-	// +kubebuilder:validation:Optional
 	TemplateSelectionExpression *string `json:"templateSelectionExpression,omitempty" tf:"template_selection_expression,omitempty"`
 }
 
@@ -91,6 +119,10 @@ type IntegrationResponseParameters struct {
 type IntegrationResponseSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     IntegrationResponseParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider IntegrationResponseInitParameters `json:"initProvider,omitempty"`
 }
 
 // IntegrationResponseStatus defines the observed state of IntegrationResponse.
@@ -111,7 +143,7 @@ type IntegrationResponseStatus struct {
 type IntegrationResponse struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.integrationResponseKey)",message="integrationResponseKey is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.integrationResponseKey) || has(self.initProvider.integrationResponseKey)",message="%!s(MISSING) is a required parameter"
 	Spec   IntegrationResponseSpec   `json:"spec"`
 	Status IntegrationResponseStatus `json:"status,omitempty"`
 }

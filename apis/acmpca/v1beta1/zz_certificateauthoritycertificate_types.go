@@ -13,6 +13,27 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CertificateAuthorityCertificateInitParameters struct {
+
+	// ARN of the Certificate Authority.
+	// +crossplane:generate:reference:type=CertificateAuthority
+	CertificateAuthorityArn *string `json:"certificateAuthorityArn,omitempty" tf:"certificate_authority_arn,omitempty"`
+
+	CertificateAuthorityArnRef *v1.Reference `json:"certificateAuthorityArnRef,omitempty" tf:"-"`
+
+	CertificateAuthorityArnSelector *v1.Selector `json:"certificateAuthorityArnSelector,omitempty" tf:"-"`
+
+	// PEM-encoded certificate chain that includes any intermediate certificates and chains up to root CA. Required for subordinate Certificate Authorities. Not allowed for root Certificate Authorities.
+	CertificateChainSecretRef *v1.SecretKeySelector `json:"certificateChainSecretRef,omitempty" tf:"-"`
+
+	// PEM-encoded certificate for the Certificate Authority.
+	CertificateSecretRef v1.SecretKeySelector `json:"certificateSecretRef" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type CertificateAuthorityCertificateObservation struct {
 
 	// ARN of the Certificate Authority.
@@ -25,7 +46,6 @@ type CertificateAuthorityCertificateParameters struct {
 
 	// ARN of the Certificate Authority.
 	// +crossplane:generate:reference:type=CertificateAuthority
-	// +kubebuilder:validation:Optional
 	CertificateAuthorityArn *string `json:"certificateAuthorityArn,omitempty" tf:"certificate_authority_arn,omitempty"`
 
 	// Reference to a CertificateAuthority to populate certificateAuthorityArn.
@@ -37,23 +57,24 @@ type CertificateAuthorityCertificateParameters struct {
 	CertificateAuthorityArnSelector *v1.Selector `json:"certificateAuthorityArnSelector,omitempty" tf:"-"`
 
 	// PEM-encoded certificate chain that includes any intermediate certificates and chains up to root CA. Required for subordinate Certificate Authorities. Not allowed for root Certificate Authorities.
-	// +kubebuilder:validation:Optional
 	CertificateChainSecretRef *v1.SecretKeySelector `json:"certificateChainSecretRef,omitempty" tf:"-"`
 
 	// PEM-encoded certificate for the Certificate Authority.
-	// +kubebuilder:validation:Optional
 	CertificateSecretRef v1.SecretKeySelector `json:"certificateSecretRef" tf:"-"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // CertificateAuthorityCertificateSpec defines the desired state of CertificateAuthorityCertificate
 type CertificateAuthorityCertificateSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     CertificateAuthorityCertificateParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider CertificateAuthorityCertificateInitParameters `json:"initProvider,omitempty"`
 }
 
 // CertificateAuthorityCertificateStatus defines the observed state of CertificateAuthorityCertificate.
@@ -74,7 +95,7 @@ type CertificateAuthorityCertificateStatus struct {
 type CertificateAuthorityCertificate struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.certificateSecretRef)",message="certificateSecretRef is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.certificateSecretRef) || has(self.initProvider.certificateSecretRef)",message="%!s(MISSING) is a required parameter"
 	Spec   CertificateAuthorityCertificateSpec   `json:"spec"`
 	Status CertificateAuthorityCertificateStatus `json:"status,omitempty"`
 }

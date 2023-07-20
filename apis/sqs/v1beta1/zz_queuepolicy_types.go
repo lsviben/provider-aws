@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type QueuePolicyInitParameters struct {
+
+	// The JSON policy for the SQS queue.
+	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
+
+	// The URL of the SQS Queue to which to attach the policy
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sqs/v1beta1.Queue
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
+	QueueURL *string `json:"queueUrl,omitempty" tf:"queue_url,omitempty"`
+
+	QueueURLRef *v1.Reference `json:"queueUrlRef,omitempty" tf:"-"`
+
+	QueueURLSelector *v1.Selector `json:"queueUrlSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type QueuePolicyObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -26,13 +45,11 @@ type QueuePolicyObservation struct {
 type QueuePolicyParameters struct {
 
 	// The JSON policy for the SQS queue.
-	// +kubebuilder:validation:Optional
 	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
 
 	// The URL of the SQS Queue to which to attach the policy
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sqs/v1beta1.Queue
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
-	// +kubebuilder:validation:Optional
 	QueueURL *string `json:"queueUrl,omitempty" tf:"queue_url,omitempty"`
 
 	// Reference to a Queue in sqs to populate queueUrl.
@@ -45,14 +62,17 @@ type QueuePolicyParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // QueuePolicySpec defines the desired state of QueuePolicy
 type QueuePolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     QueuePolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider QueuePolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // QueuePolicyStatus defines the observed state of QueuePolicy.
@@ -73,7 +93,7 @@ type QueuePolicyStatus struct {
 type QueuePolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policy)",message="policy is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policy) || has(self.initProvider.policy)",message="%!s(MISSING) is a required parameter"
 	Spec   QueuePolicySpec   `json:"spec"`
 	Status QueuePolicyStatus `json:"status,omitempty"`
 }

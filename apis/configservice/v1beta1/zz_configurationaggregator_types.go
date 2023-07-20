@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AccountAggregationSourceInitParameters struct {
+
+	// List of 12-digit account IDs of the account(s) being aggregated.
+	AccountIds []*string `json:"accountIds,omitempty" tf:"account_ids,omitempty"`
+
+	// If true, aggregate existing AWS Config regions and future regions.
+	AllRegions *bool `json:"allRegions,omitempty" tf:"all_regions,omitempty"`
+
+	// List of source regions being aggregated.
+	Regions []*string `json:"regions,omitempty" tf:"regions,omitempty"`
+}
+
 type AccountAggregationSourceObservation struct {
 
 	// List of 12-digit account IDs of the account(s) being aggregated.
@@ -28,16 +40,29 @@ type AccountAggregationSourceObservation struct {
 type AccountAggregationSourceParameters struct {
 
 	// List of 12-digit account IDs of the account(s) being aggregated.
-	// +kubebuilder:validation:Required
-	AccountIds []*string `json:"accountIds" tf:"account_ids,omitempty"`
+	AccountIds []*string `json:"accountIds,omitempty" tf:"account_ids,omitempty"`
 
 	// If true, aggregate existing AWS Config regions and future regions.
-	// +kubebuilder:validation:Optional
 	AllRegions *bool `json:"allRegions,omitempty" tf:"all_regions,omitempty"`
 
 	// List of source regions being aggregated.
-	// +kubebuilder:validation:Optional
 	Regions []*string `json:"regions,omitempty" tf:"regions,omitempty"`
+}
+
+type ConfigurationAggregatorInitParameters struct {
+
+	// The account(s) to aggregate config data from as documented below.
+	AccountAggregationSource []AccountAggregationSourceInitParameters `json:"accountAggregationSource,omitempty" tf:"account_aggregation_source,omitempty"`
+
+	// The organization to aggregate config data from as documented below.
+	OrganizationAggregationSource []OrganizationAggregationSourceInitParameters `json:"organizationAggregationSource,omitempty" tf:"organization_aggregation_source,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type ConfigurationAggregatorObservation struct {
@@ -63,21 +88,35 @@ type ConfigurationAggregatorObservation struct {
 type ConfigurationAggregatorParameters struct {
 
 	// The account(s) to aggregate config data from as documented below.
-	// +kubebuilder:validation:Optional
 	AccountAggregationSource []AccountAggregationSourceParameters `json:"accountAggregationSource,omitempty" tf:"account_aggregation_source,omitempty"`
 
 	// The organization to aggregate config data from as documented below.
-	// +kubebuilder:validation:Optional
 	OrganizationAggregationSource []OrganizationAggregationSourceParameters `json:"organizationAggregationSource,omitempty" tf:"organization_aggregation_source,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type OrganizationAggregationSourceInitParameters struct {
+
+	// If true, aggregate existing AWS Config regions and future regions.
+	AllRegions *bool `json:"allRegions,omitempty" tf:"all_regions,omitempty"`
+
+	// List of source regions being aggregated.
+	Regions []*string `json:"regions,omitempty" tf:"regions,omitempty"`
+
+	// ARN of the IAM role used to retrieve AWS Organization details associated with the aggregator account.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
 }
 
 type OrganizationAggregationSourceObservation struct {
@@ -95,17 +134,14 @@ type OrganizationAggregationSourceObservation struct {
 type OrganizationAggregationSourceParameters struct {
 
 	// If true, aggregate existing AWS Config regions and future regions.
-	// +kubebuilder:validation:Optional
 	AllRegions *bool `json:"allRegions,omitempty" tf:"all_regions,omitempty"`
 
 	// List of source regions being aggregated.
-	// +kubebuilder:validation:Optional
 	Regions []*string `json:"regions,omitempty" tf:"regions,omitempty"`
 
 	// ARN of the IAM role used to retrieve AWS Organization details associated with the aggregator account.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -121,6 +157,10 @@ type OrganizationAggregationSourceParameters struct {
 type ConfigurationAggregatorSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ConfigurationAggregatorParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ConfigurationAggregatorInitParameters `json:"initProvider,omitempty"`
 }
 
 // ConfigurationAggregatorStatus defines the observed state of ConfigurationAggregator.

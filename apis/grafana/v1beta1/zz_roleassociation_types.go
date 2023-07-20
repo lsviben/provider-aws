@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RoleAssociationInitParameters struct {
+
+	// The AWS SSO group ids to be assigned the role given in role.
+	GroupIds []*string `json:"groupIds,omitempty" tf:"group_ids,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The grafana role. Valid values can be found here.
+	Role *string `json:"role,omitempty" tf:"role,omitempty"`
+
+	// The AWS SSO user ids to be assigned the role given in role.
+	UserIds []*string `json:"userIds,omitempty" tf:"user_ids,omitempty"`
+
+	// The workspace id.
+	// +crossplane:generate:reference:type=Workspace
+	WorkspaceID *string `json:"workspaceId,omitempty" tf:"workspace_id,omitempty"`
+
+	WorkspaceIDRef *v1.Reference `json:"workspaceIdRef,omitempty" tf:"-"`
+
+	WorkspaceIDSelector *v1.Selector `json:"workspaceIdSelector,omitempty" tf:"-"`
+}
+
 type RoleAssociationObservation struct {
 
 	// The AWS SSO group ids to be assigned the role given in role.
@@ -33,25 +57,20 @@ type RoleAssociationObservation struct {
 type RoleAssociationParameters struct {
 
 	// The AWS SSO group ids to be assigned the role given in role.
-	// +kubebuilder:validation:Optional
 	GroupIds []*string `json:"groupIds,omitempty" tf:"group_ids,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The grafana role. Valid values can be found here.
-	// +kubebuilder:validation:Optional
 	Role *string `json:"role,omitempty" tf:"role,omitempty"`
 
 	// The AWS SSO user ids to be assigned the role given in role.
-	// +kubebuilder:validation:Optional
 	UserIds []*string `json:"userIds,omitempty" tf:"user_ids,omitempty"`
 
 	// The workspace id.
 	// +crossplane:generate:reference:type=Workspace
-	// +kubebuilder:validation:Optional
 	WorkspaceID *string `json:"workspaceId,omitempty" tf:"workspace_id,omitempty"`
 
 	// Reference to a Workspace to populate workspaceId.
@@ -67,6 +86,10 @@ type RoleAssociationParameters struct {
 type RoleAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RoleAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RoleAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // RoleAssociationStatus defines the observed state of RoleAssociation.
@@ -87,7 +110,7 @@ type RoleAssociationStatus struct {
 type RoleAssociation struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.role)",message="role is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.role) || has(self.initProvider.role)",message="%!s(MISSING) is a required parameter"
 	Spec   RoleAssociationSpec   `json:"spec"`
 	Status RoleAssociationStatus `json:"status,omitempty"`
 }

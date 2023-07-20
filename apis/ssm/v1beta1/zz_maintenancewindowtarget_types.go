@@ -13,6 +13,38 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type MaintenanceWindowTargetInitParameters struct {
+
+	// The description of the maintenance window target.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The name of the maintenance window target.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// User-provided value that will be included in any CloudWatch events raised while running tasks for these targets in this Maintenance Window.
+	OwnerInformation *string `json:"ownerInformation,omitempty" tf:"owner_information,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The type of target being registered with the Maintenance Window. Possible values are INSTANCE and RESOURCE_GROUP.
+	ResourceType *string `json:"resourceType,omitempty" tf:"resource_type,omitempty"`
+
+	// The targets to register with the maintenance window. In other words, the instances to run commands on when the maintenance window runs. You can specify targets using instance IDs, resource group names, or tags that have been applied to instances. For more information about these examples formats see
+	// (https://docs.aws.amazon.com/systems-manager/latest/userguide/mw-cli-tutorial-targets-examples.html)
+	Targets []MaintenanceWindowTargetTargetsInitParameters `json:"targets,omitempty" tf:"targets,omitempty"`
+
+	// The Id of the maintenance window to register the target with.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssm/v1beta1.MaintenanceWindow
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	WindowID *string `json:"windowId,omitempty" tf:"window_id,omitempty"`
+
+	WindowIDRef *v1.Reference `json:"windowIdRef,omitempty" tf:"-"`
+
+	WindowIDSelector *v1.Selector `json:"windowIdSelector,omitempty" tf:"-"`
+}
+
 type MaintenanceWindowTargetObservation struct {
 
 	// The description of the maintenance window target.
@@ -41,35 +73,28 @@ type MaintenanceWindowTargetObservation struct {
 type MaintenanceWindowTargetParameters struct {
 
 	// The description of the maintenance window target.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The name of the maintenance window target.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// User-provided value that will be included in any CloudWatch events raised while running tasks for these targets in this Maintenance Window.
-	// +kubebuilder:validation:Optional
 	OwnerInformation *string `json:"ownerInformation,omitempty" tf:"owner_information,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The type of target being registered with the Maintenance Window. Possible values are INSTANCE and RESOURCE_GROUP.
-	// +kubebuilder:validation:Optional
 	ResourceType *string `json:"resourceType,omitempty" tf:"resource_type,omitempty"`
 
 	// The targets to register with the maintenance window. In other words, the instances to run commands on when the maintenance window runs. You can specify targets using instance IDs, resource group names, or tags that have been applied to instances. For more information about these examples formats see
 	// (https://docs.aws.amazon.com/systems-manager/latest/userguide/mw-cli-tutorial-targets-examples.html)
-	// +kubebuilder:validation:Optional
 	Targets []MaintenanceWindowTargetTargetsParameters `json:"targets,omitempty" tf:"targets,omitempty"`
 
 	// The Id of the maintenance window to register the target with.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssm/v1beta1.MaintenanceWindow
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	WindowID *string `json:"windowId,omitempty" tf:"window_id,omitempty"`
 
 	// Reference to a MaintenanceWindow in ssm to populate windowId.
@@ -81,6 +106,12 @@ type MaintenanceWindowTargetParameters struct {
 	WindowIDSelector *v1.Selector `json:"windowIdSelector,omitempty" tf:"-"`
 }
 
+type MaintenanceWindowTargetTargetsInitParameters struct {
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
+}
+
 type MaintenanceWindowTargetTargetsObservation struct {
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
@@ -88,18 +119,19 @@ type MaintenanceWindowTargetTargetsObservation struct {
 }
 
 type MaintenanceWindowTargetTargetsParameters struct {
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
-
-	// +kubebuilder:validation:Required
-	Values []*string `json:"values" tf:"values,omitempty"`
+	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
 }
 
 // MaintenanceWindowTargetSpec defines the desired state of MaintenanceWindowTarget
 type MaintenanceWindowTargetSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     MaintenanceWindowTargetParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider MaintenanceWindowTargetInitParameters `json:"initProvider,omitempty"`
 }
 
 // MaintenanceWindowTargetStatus defines the observed state of MaintenanceWindowTarget.
@@ -120,8 +152,8 @@ type MaintenanceWindowTargetStatus struct {
 type MaintenanceWindowTarget struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceType)",message="resourceType is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.targets)",message="targets is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceType) || has(self.initProvider.resourceType)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.targets) || has(self.initProvider.targets)",message="%!s(MISSING) is a required parameter"
 	Spec   MaintenanceWindowTargetSpec   `json:"spec"`
 	Status MaintenanceWindowTargetStatus `json:"status,omitempty"`
 }

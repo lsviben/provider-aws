@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VoiceConnectorInitParameters struct {
+
+	// The AWS Region in which the Amazon Chime Voice Connector is created. Default value: us-east-1
+	AwsRegion *string `json:"awsRegion,omitempty" tf:"aws_region,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// When enabled, requires encryption for the Amazon Chime Voice Connector.
+	RequireEncryption *bool `json:"requireEncryption,omitempty" tf:"require_encryption,omitempty"`
+}
+
 type VoiceConnectorObservation struct {
 
 	// The AWS Region in which the Amazon Chime Voice Connector is created. Default value: us-east-1
@@ -30,16 +43,13 @@ type VoiceConnectorObservation struct {
 type VoiceConnectorParameters struct {
 
 	// The AWS Region in which the Amazon Chime Voice Connector is created. Default value: us-east-1
-	// +kubebuilder:validation:Optional
 	AwsRegion *string `json:"awsRegion,omitempty" tf:"aws_region,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// When enabled, requires encryption for the Amazon Chime Voice Connector.
-	// +kubebuilder:validation:Optional
 	RequireEncryption *bool `json:"requireEncryption,omitempty" tf:"require_encryption,omitempty"`
 }
 
@@ -47,6 +57,10 @@ type VoiceConnectorParameters struct {
 type VoiceConnectorSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VoiceConnectorParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VoiceConnectorInitParameters `json:"initProvider,omitempty"`
 }
 
 // VoiceConnectorStatus defines the observed state of VoiceConnector.
@@ -67,7 +81,7 @@ type VoiceConnectorStatus struct {
 type VoiceConnector struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.requireEncryption)",message="requireEncryption is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.requireEncryption) || has(self.initProvider.requireEncryption)",message="%!s(MISSING) is a required parameter"
 	Spec   VoiceConnectorSpec   `json:"spec"`
 	Status VoiceConnectorStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,38 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RouteResponseInitParameters struct {
+
+	// API identifier.
+	// +crossplane:generate:reference:type=API
+	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
+
+	APIIDRef *v1.Reference `json:"apiIdRef,omitempty" tf:"-"`
+
+	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
+
+	// The model selection expression for the route response.
+	ModelSelectionExpression *string `json:"modelSelectionExpression,omitempty" tf:"model_selection_expression,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Response models for the route response.
+	ResponseModels map[string]*string `json:"responseModels,omitempty" tf:"response_models,omitempty"`
+
+	// Identifier of the aws_apigatewayv2_route.
+	// +crossplane:generate:reference:type=Route
+	RouteID *string `json:"routeId,omitempty" tf:"route_id,omitempty"`
+
+	RouteIDRef *v1.Reference `json:"routeIdRef,omitempty" tf:"-"`
+
+	RouteIDSelector *v1.Selector `json:"routeIdSelector,omitempty" tf:"-"`
+
+	// Route response key.
+	RouteResponseKey *string `json:"routeResponseKey,omitempty" tf:"route_response_key,omitempty"`
+}
+
 type RouteResponseObservation struct {
 
 	// API identifier.
@@ -38,7 +70,6 @@ type RouteResponseParameters struct {
 
 	// API identifier.
 	// +crossplane:generate:reference:type=API
-	// +kubebuilder:validation:Optional
 	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
 
 	// Reference to a API to populate apiId.
@@ -50,21 +81,17 @@ type RouteResponseParameters struct {
 	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
 
 	// The model selection expression for the route response.
-	// +kubebuilder:validation:Optional
 	ModelSelectionExpression *string `json:"modelSelectionExpression,omitempty" tf:"model_selection_expression,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Response models for the route response.
-	// +kubebuilder:validation:Optional
 	ResponseModels map[string]*string `json:"responseModels,omitempty" tf:"response_models,omitempty"`
 
 	// Identifier of the aws_apigatewayv2_route.
 	// +crossplane:generate:reference:type=Route
-	// +kubebuilder:validation:Optional
 	RouteID *string `json:"routeId,omitempty" tf:"route_id,omitempty"`
 
 	// Reference to a Route to populate routeId.
@@ -76,7 +103,6 @@ type RouteResponseParameters struct {
 	RouteIDSelector *v1.Selector `json:"routeIdSelector,omitempty" tf:"-"`
 
 	// Route response key.
-	// +kubebuilder:validation:Optional
 	RouteResponseKey *string `json:"routeResponseKey,omitempty" tf:"route_response_key,omitempty"`
 }
 
@@ -84,6 +110,10 @@ type RouteResponseParameters struct {
 type RouteResponseSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RouteResponseParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RouteResponseInitParameters `json:"initProvider,omitempty"`
 }
 
 // RouteResponseStatus defines the observed state of RouteResponse.
@@ -104,7 +134,7 @@ type RouteResponseStatus struct {
 type RouteResponse struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.routeResponseKey)",message="routeResponseKey is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.routeResponseKey) || has(self.initProvider.routeResponseKey)",message="%!s(MISSING) is a required parameter"
 	Spec   RouteResponseSpec   `json:"spec"`
 	Status RouteResponseStatus `json:"status,omitempty"`
 }

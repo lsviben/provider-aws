@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AllowedPublishersInitParameters struct {
+
+	// The Amazon Resource Name (ARN) for each of the signing profiles. A signing profile defines a trusted user who can sign a code package.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/signer/v1beta1.SigningProfile
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	SigningProfileVersionArns []*string `json:"signingProfileVersionArns,omitempty" tf:"signing_profile_version_arns,omitempty"`
+
+	SigningProfileVersionArnsRefs []v1.Reference `json:"signingProfileVersionArnsRefs,omitempty" tf:"-"`
+
+	SigningProfileVersionArnsSelector *v1.Selector `json:"signingProfileVersionArnsSelector,omitempty" tf:"-"`
+}
+
 type AllowedPublishersObservation struct {
 
 	// The Amazon Resource Name (ARN) for each of the signing profiles. A signing profile defines a trusted user who can sign a code package.
@@ -24,7 +36,6 @@ type AllowedPublishersParameters struct {
 	// The Amazon Resource Name (ARN) for each of the signing profiles. A signing profile defines a trusted user who can sign a code package.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/signer/v1beta1.SigningProfile
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	SigningProfileVersionArns []*string `json:"signingProfileVersionArns,omitempty" tf:"signing_profile_version_arns,omitempty"`
 
 	// References to SigningProfile in signer to populate signingProfileVersionArns.
@@ -34,6 +45,22 @@ type AllowedPublishersParameters struct {
 	// Selector for a list of SigningProfile in signer to populate signingProfileVersionArns.
 	// +kubebuilder:validation:Optional
 	SigningProfileVersionArnsSelector *v1.Selector `json:"signingProfileVersionArnsSelector,omitempty" tf:"-"`
+}
+
+type CodeSigningConfigInitParameters struct {
+
+	// A configuration block of allowed publishers as signing profiles for this code signing configuration. Detailed below.
+	AllowedPublishers []AllowedPublishersInitParameters `json:"allowedPublishers,omitempty" tf:"allowed_publishers,omitempty"`
+
+	// Descriptive name for this code signing configuration.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// A configuration block of code signing policies that define the actions to take if the validation checks fail. Detailed below.
+	Policies []PoliciesInitParameters `json:"policies,omitempty" tf:"policies,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type CodeSigningConfigObservation struct {
@@ -62,21 +89,23 @@ type CodeSigningConfigObservation struct {
 type CodeSigningConfigParameters struct {
 
 	// A configuration block of allowed publishers as signing profiles for this code signing configuration. Detailed below.
-	// +kubebuilder:validation:Optional
 	AllowedPublishers []AllowedPublishersParameters `json:"allowedPublishers,omitempty" tf:"allowed_publishers,omitempty"`
 
 	// Descriptive name for this code signing configuration.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// A configuration block of code signing policies that define the actions to take if the validation checks fail. Detailed below.
-	// +kubebuilder:validation:Optional
 	Policies []PoliciesParameters `json:"policies,omitempty" tf:"policies,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type PoliciesInitParameters struct {
+
+	// Code signing configuration policy for deployment validation failure. If you set the policy to Enforce, Lambda blocks the deployment request if code-signing validation checks fail. If you set the policy to Warn, Lambda allows the deployment and creates a CloudWatch log. Valid values: Warn, Enforce. Default value: Warn.
+	UntrustedArtifactOnDeployment *string `json:"untrustedArtifactOnDeployment,omitempty" tf:"untrusted_artifact_on_deployment,omitempty"`
 }
 
 type PoliciesObservation struct {
@@ -88,14 +117,17 @@ type PoliciesObservation struct {
 type PoliciesParameters struct {
 
 	// Code signing configuration policy for deployment validation failure. If you set the policy to Enforce, Lambda blocks the deployment request if code-signing validation checks fail. If you set the policy to Warn, Lambda allows the deployment and creates a CloudWatch log. Valid values: Warn, Enforce. Default value: Warn.
-	// +kubebuilder:validation:Required
-	UntrustedArtifactOnDeployment *string `json:"untrustedArtifactOnDeployment" tf:"untrusted_artifact_on_deployment,omitempty"`
+	UntrustedArtifactOnDeployment *string `json:"untrustedArtifactOnDeployment,omitempty" tf:"untrusted_artifact_on_deployment,omitempty"`
 }
 
 // CodeSigningConfigSpec defines the desired state of CodeSigningConfig
 type CodeSigningConfigSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     CodeSigningConfigParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider CodeSigningConfigInitParameters `json:"initProvider,omitempty"`
 }
 
 // CodeSigningConfigStatus defines the observed state of CodeSigningConfig.
@@ -116,7 +148,7 @@ type CodeSigningConfigStatus struct {
 type CodeSigningConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.allowedPublishers)",message="allowedPublishers is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.allowedPublishers) || has(self.initProvider.allowedPublishers)",message="%!s(MISSING) is a required parameter"
 	Spec   CodeSigningConfigSpec   `json:"spec"`
 	Status CodeSigningConfigStatus `json:"status,omitempty"`
 }

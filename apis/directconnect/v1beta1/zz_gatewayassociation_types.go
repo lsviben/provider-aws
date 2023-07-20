@@ -13,6 +13,46 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type GatewayAssociationInitParameters struct {
+
+	// VPC prefixes (CIDRs) to advertise to the Direct Connect gateway. Defaults to the CIDR block of the VPC associated with the Virtual Gateway. To enable drift detection, must be configured.
+	AllowedPrefixes []*string `json:"allowedPrefixes,omitempty" tf:"allowed_prefixes,omitempty"`
+
+	// The ID of the VGW or transit gateway with which to associate the Direct Connect gateway.
+	// Used for single account Direct Connect gateway associations.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPNGateway
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	AssociatedGatewayID *string `json:"associatedGatewayId,omitempty" tf:"associated_gateway_id,omitempty"`
+
+	AssociatedGatewayIDRef *v1.Reference `json:"associatedGatewayIdRef,omitempty" tf:"-"`
+
+	AssociatedGatewayIDSelector *v1.Selector `json:"associatedGatewayIdSelector,omitempty" tf:"-"`
+
+	// The ID of the AWS account that owns the VGW or transit gateway with which to associate the Direct Connect gateway.
+	// Used for cross-account Direct Connect gateway associations.
+	AssociatedGatewayOwnerAccountID *string `json:"associatedGatewayOwnerAccountId,omitempty" tf:"associated_gateway_owner_account_id,omitempty"`
+
+	// The ID of the Direct Connect gateway.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/directconnect/v1beta1.Gateway
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DxGatewayID *string `json:"dxGatewayId,omitempty" tf:"dx_gateway_id,omitempty"`
+
+	DxGatewayIDRef *v1.Reference `json:"dxGatewayIdRef,omitempty" tf:"-"`
+
+	DxGatewayIDSelector *v1.Selector `json:"dxGatewayIdSelector,omitempty" tf:"-"`
+
+	// The ID of the Direct Connect gateway association proposal.
+	// Used for cross-account Direct Connect gateway associations.
+	ProposalID *string `json:"proposalId,omitempty" tf:"proposal_id,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ID of the Direct Connect gateway association resource.
+	VPNGatewayID *string `json:"vpnGatewayId,omitempty" tf:"vpn_gateway_id,omitempty"`
+}
+
 type GatewayAssociationObservation struct {
 
 	// VPC prefixes (CIDRs) to advertise to the Direct Connect gateway. Defaults to the CIDR block of the VPC associated with the Virtual Gateway. To enable drift detection, must be configured.
@@ -52,14 +92,12 @@ type GatewayAssociationObservation struct {
 type GatewayAssociationParameters struct {
 
 	// VPC prefixes (CIDRs) to advertise to the Direct Connect gateway. Defaults to the CIDR block of the VPC associated with the Virtual Gateway. To enable drift detection, must be configured.
-	// +kubebuilder:validation:Optional
 	AllowedPrefixes []*string `json:"allowedPrefixes,omitempty" tf:"allowed_prefixes,omitempty"`
 
 	// The ID of the VGW or transit gateway with which to associate the Direct Connect gateway.
 	// Used for single account Direct Connect gateway associations.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPNGateway
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	AssociatedGatewayID *string `json:"associatedGatewayId,omitempty" tf:"associated_gateway_id,omitempty"`
 
 	// Reference to a VPNGateway in ec2 to populate associatedGatewayId.
@@ -72,13 +110,11 @@ type GatewayAssociationParameters struct {
 
 	// The ID of the AWS account that owns the VGW or transit gateway with which to associate the Direct Connect gateway.
 	// Used for cross-account Direct Connect gateway associations.
-	// +kubebuilder:validation:Optional
 	AssociatedGatewayOwnerAccountID *string `json:"associatedGatewayOwnerAccountId,omitempty" tf:"associated_gateway_owner_account_id,omitempty"`
 
 	// The ID of the Direct Connect gateway.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/directconnect/v1beta1.Gateway
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DxGatewayID *string `json:"dxGatewayId,omitempty" tf:"dx_gateway_id,omitempty"`
 
 	// Reference to a Gateway in directconnect to populate dxGatewayId.
@@ -91,16 +127,13 @@ type GatewayAssociationParameters struct {
 
 	// The ID of the Direct Connect gateway association proposal.
 	// Used for cross-account Direct Connect gateway associations.
-	// +kubebuilder:validation:Optional
 	ProposalID *string `json:"proposalId,omitempty" tf:"proposal_id,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ID of the Direct Connect gateway association resource.
-	// +kubebuilder:validation:Optional
 	VPNGatewayID *string `json:"vpnGatewayId,omitempty" tf:"vpn_gateway_id,omitempty"`
 }
 
@@ -108,6 +141,10 @@ type GatewayAssociationParameters struct {
 type GatewayAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     GatewayAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider GatewayAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // GatewayAssociationStatus defines the observed state of GatewayAssociation.

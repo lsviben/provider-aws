@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AwsLocationInitParameters struct {
+
+	// The Amazon Resource Name (ARN) of the subnet that the device is located in.
+	SubnetArn *string `json:"subnetArn,omitempty" tf:"subnet_arn,omitempty"`
+
+	// The Zone that the device is located in. Specify the ID of an Availability Zone, Local Zone, Wavelength Zone, or an Outpost.
+	Zone *string `json:"zone,omitempty" tf:"zone,omitempty"`
+}
+
 type AwsLocationObservation struct {
 
 	// The Amazon Resource Name (ARN) of the subnet that the device is located in.
@@ -25,12 +34,59 @@ type AwsLocationObservation struct {
 type AwsLocationParameters struct {
 
 	// The Amazon Resource Name (ARN) of the subnet that the device is located in.
-	// +kubebuilder:validation:Optional
 	SubnetArn *string `json:"subnetArn,omitempty" tf:"subnet_arn,omitempty"`
 
 	// The Zone that the device is located in. Specify the ID of an Availability Zone, Local Zone, Wavelength Zone, or an Outpost.
-	// +kubebuilder:validation:Optional
 	Zone *string `json:"zone,omitempty" tf:"zone,omitempty"`
+}
+
+type DeviceInitParameters struct {
+
+	// The AWS location of the device. Documented below.
+	AwsLocation []AwsLocationInitParameters `json:"awsLocation,omitempty" tf:"aws_location,omitempty"`
+
+	// A description of the device.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The ID of the global network.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.GlobalNetwork
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	GlobalNetworkID *string `json:"globalNetworkId,omitempty" tf:"global_network_id,omitempty"`
+
+	GlobalNetworkIDRef *v1.Reference `json:"globalNetworkIdRef,omitempty" tf:"-"`
+
+	GlobalNetworkIDSelector *v1.Selector `json:"globalNetworkIdSelector,omitempty" tf:"-"`
+
+	// The location of the device. Documented below.
+	Location []LocationInitParameters `json:"location,omitempty" tf:"location,omitempty"`
+
+	// The model of device.
+	Model *string `json:"model,omitempty" tf:"model,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The serial number of the device.
+	SerialNumber *string `json:"serialNumber,omitempty" tf:"serial_number,omitempty"`
+
+	// The ID of the site.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.Site
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	SiteID *string `json:"siteId,omitempty" tf:"site_id,omitempty"`
+
+	SiteIDRef *v1.Reference `json:"siteIdRef,omitempty" tf:"-"`
+
+	SiteIDSelector *v1.Selector `json:"siteIdSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The type of device.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+
+	// The vendor of the device.
+	Vendor *string `json:"vendor,omitempty" tf:"vendor,omitempty"`
 }
 
 type DeviceObservation struct {
@@ -77,17 +133,14 @@ type DeviceObservation struct {
 type DeviceParameters struct {
 
 	// The AWS location of the device. Documented below.
-	// +kubebuilder:validation:Optional
 	AwsLocation []AwsLocationParameters `json:"awsLocation,omitempty" tf:"aws_location,omitempty"`
 
 	// A description of the device.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The ID of the global network.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.GlobalNetwork
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	GlobalNetworkID *string `json:"globalNetworkId,omitempty" tf:"global_network_id,omitempty"`
 
 	// Reference to a GlobalNetwork in networkmanager to populate globalNetworkId.
@@ -99,26 +152,21 @@ type DeviceParameters struct {
 	GlobalNetworkIDSelector *v1.Selector `json:"globalNetworkIdSelector,omitempty" tf:"-"`
 
 	// The location of the device. Documented below.
-	// +kubebuilder:validation:Optional
 	Location []LocationParameters `json:"location,omitempty" tf:"location,omitempty"`
 
 	// The model of device.
-	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty" tf:"model,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The serial number of the device.
-	// +kubebuilder:validation:Optional
 	SerialNumber *string `json:"serialNumber,omitempty" tf:"serial_number,omitempty"`
 
 	// The ID of the site.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.Site
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	SiteID *string `json:"siteId,omitempty" tf:"site_id,omitempty"`
 
 	// Reference to a Site in networkmanager to populate siteId.
@@ -130,16 +178,25 @@ type DeviceParameters struct {
 	SiteIDSelector *v1.Selector `json:"siteIdSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The type of device.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 
 	// The vendor of the device.
-	// +kubebuilder:validation:Optional
 	Vendor *string `json:"vendor,omitempty" tf:"vendor,omitempty"`
+}
+
+type LocationInitParameters struct {
+
+	// The physical address.
+	Address *string `json:"address,omitempty" tf:"address,omitempty"`
+
+	// The latitude.
+	Latitude *string `json:"latitude,omitempty" tf:"latitude,omitempty"`
+
+	// The longitude.
+	Longitude *string `json:"longitude,omitempty" tf:"longitude,omitempty"`
 }
 
 type LocationObservation struct {
@@ -157,15 +214,12 @@ type LocationObservation struct {
 type LocationParameters struct {
 
 	// The physical address.
-	// +kubebuilder:validation:Optional
 	Address *string `json:"address,omitempty" tf:"address,omitempty"`
 
 	// The latitude.
-	// +kubebuilder:validation:Optional
 	Latitude *string `json:"latitude,omitempty" tf:"latitude,omitempty"`
 
 	// The longitude.
-	// +kubebuilder:validation:Optional
 	Longitude *string `json:"longitude,omitempty" tf:"longitude,omitempty"`
 }
 
@@ -173,6 +227,10 @@ type LocationParameters struct {
 type DeviceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DeviceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DeviceInitParameters `json:"initProvider,omitempty"`
 }
 
 // DeviceStatus defines the observed state of Device.

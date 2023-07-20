@@ -13,6 +13,46 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AppInitParameters struct {
+
+	// The name of the app.
+	AppName *string `json:"appName,omitempty" tf:"app_name,omitempty"`
+
+	// The type of app. Valid values are JupyterServer, KernelGateway, RStudioServerPro, RSessionGateway and TensorBoard.
+	AppType *string `json:"appType,omitempty" tf:"app_type,omitempty"`
+
+	// The domain ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.Domain
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DomainID *string `json:"domainId,omitempty" tf:"domain_id,omitempty"`
+
+	DomainIDRef *v1.Reference `json:"domainIdRef,omitempty" tf:"-"`
+
+	DomainIDSelector *v1.Selector `json:"domainIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The instance type and the Amazon Resource Name (ARN) of the SageMaker image created on the instance.See Resource Spec below.
+	ResourceSpec []ResourceSpecInitParameters `json:"resourceSpec,omitempty" tf:"resource_spec,omitempty"`
+
+	// The name of the space. At least on of user_profile_name or space_name required.
+	SpaceName *string `json:"spaceName,omitempty" tf:"space_name,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The user profile name. At least on of user_profile_name or space_name required.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.UserProfile
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("user_profile_name",false)
+	UserProfileName *string `json:"userProfileName,omitempty" tf:"user_profile_name,omitempty"`
+
+	UserProfileNameRef *v1.Reference `json:"userProfileNameRef,omitempty" tf:"-"`
+
+	UserProfileNameSelector *v1.Selector `json:"userProfileNameSelector,omitempty" tf:"-"`
+}
+
 type AppObservation struct {
 
 	// The name of the app.
@@ -49,17 +89,14 @@ type AppObservation struct {
 type AppParameters struct {
 
 	// The name of the app.
-	// +kubebuilder:validation:Optional
 	AppName *string `json:"appName,omitempty" tf:"app_name,omitempty"`
 
 	// The type of app. Valid values are JupyterServer, KernelGateway, RStudioServerPro, RSessionGateway and TensorBoard.
-	// +kubebuilder:validation:Optional
 	AppType *string `json:"appType,omitempty" tf:"app_type,omitempty"`
 
 	// The domain ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.Domain
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DomainID *string `json:"domainId,omitempty" tf:"domain_id,omitempty"`
 
 	// Reference to a Domain in sagemaker to populate domainId.
@@ -72,25 +109,20 @@ type AppParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The instance type and the Amazon Resource Name (ARN) of the SageMaker image created on the instance.See Resource Spec below.
-	// +kubebuilder:validation:Optional
 	ResourceSpec []ResourceSpecParameters `json:"resourceSpec,omitempty" tf:"resource_spec,omitempty"`
 
 	// The name of the space. At least on of user_profile_name or space_name required.
-	// +kubebuilder:validation:Optional
 	SpaceName *string `json:"spaceName,omitempty" tf:"space_name,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The user profile name. At least on of user_profile_name or space_name required.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.UserProfile
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("user_profile_name",false)
-	// +kubebuilder:validation:Optional
 	UserProfileName *string `json:"userProfileName,omitempty" tf:"user_profile_name,omitempty"`
 
 	// Reference to a UserProfile in sagemaker to populate userProfileName.
@@ -100,6 +132,21 @@ type AppParameters struct {
 	// Selector for a UserProfile in sagemaker to populate userProfileName.
 	// +kubebuilder:validation:Optional
 	UserProfileNameSelector *v1.Selector `json:"userProfileNameSelector,omitempty" tf:"-"`
+}
+
+type ResourceSpecInitParameters struct {
+
+	// The instance type that the image version runs on. For valid values see SageMaker Instance Types.
+	InstanceType *string `json:"instanceType,omitempty" tf:"instance_type,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.
+	LifecycleConfigArn *string `json:"lifecycleConfigArn,omitempty" tf:"lifecycle_config_arn,omitempty"`
+
+	// The ARN of the SageMaker image that the image version belongs to.
+	SagemakerImageArn *string `json:"sagemakerImageArn,omitempty" tf:"sagemaker_image_arn,omitempty"`
+
+	// The ARN of the image version created on the instance.
+	SagemakerImageVersionArn *string `json:"sagemakerImageVersionArn,omitempty" tf:"sagemaker_image_version_arn,omitempty"`
 }
 
 type ResourceSpecObservation struct {
@@ -120,19 +167,15 @@ type ResourceSpecObservation struct {
 type ResourceSpecParameters struct {
 
 	// The instance type that the image version runs on. For valid values see SageMaker Instance Types.
-	// +kubebuilder:validation:Optional
 	InstanceType *string `json:"instanceType,omitempty" tf:"instance_type,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.
-	// +kubebuilder:validation:Optional
 	LifecycleConfigArn *string `json:"lifecycleConfigArn,omitempty" tf:"lifecycle_config_arn,omitempty"`
 
 	// The ARN of the SageMaker image that the image version belongs to.
-	// +kubebuilder:validation:Optional
 	SagemakerImageArn *string `json:"sagemakerImageArn,omitempty" tf:"sagemaker_image_arn,omitempty"`
 
 	// The ARN of the image version created on the instance.
-	// +kubebuilder:validation:Optional
 	SagemakerImageVersionArn *string `json:"sagemakerImageVersionArn,omitempty" tf:"sagemaker_image_version_arn,omitempty"`
 }
 
@@ -140,6 +183,10 @@ type ResourceSpecParameters struct {
 type AppSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AppParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AppInitParameters `json:"initProvider,omitempty"`
 }
 
 // AppStatus defines the observed state of App.
@@ -160,8 +207,8 @@ type AppStatus struct {
 type App struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.appName)",message="appName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.appType)",message="appType is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.appName) || has(self.initProvider.appName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.appType) || has(self.initProvider.appType)",message="%!s(MISSING) is a required parameter"
 	Spec   AppSpec   `json:"spec"`
 	Status AppStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AcceleratorInitParameters struct {
+
+	// The attributes of the accelerator. Fields documented below.
+	Attributes []AttributesInitParameters `json:"attributes,omitempty" tf:"attributes,omitempty"`
+
+	// Indicates whether the accelerator is enabled. Defaults to true. Valid values: true, false.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// The value for the address type. Defaults to IPV4. Valid values: IPV4, DUAL_STACK.
+	IPAddressType *string `json:"ipAddressType,omitempty" tf:"ip_address_type,omitempty"`
+
+	// The IP addresses to use for BYOIP accelerators. If not specified, the service assigns IP addresses. Valid values: 1 or 2 IPv4 addresses.
+	IPAddresses []*string `json:"ipAddresses,omitempty" tf:"ip_addresses,omitempty"`
+
+	// The name of the accelerator.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type AcceleratorObservation struct {
 
 	// The attributes of the accelerator. Fields documented below.
@@ -54,33 +79,38 @@ type AcceleratorObservation struct {
 type AcceleratorParameters struct {
 
 	// The attributes of the accelerator. Fields documented below.
-	// +kubebuilder:validation:Optional
 	Attributes []AttributesParameters `json:"attributes,omitempty" tf:"attributes,omitempty"`
 
 	// Indicates whether the accelerator is enabled. Defaults to true. Valid values: true, false.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// The value for the address type. Defaults to IPV4. Valid values: IPV4, DUAL_STACK.
-	// +kubebuilder:validation:Optional
 	IPAddressType *string `json:"ipAddressType,omitempty" tf:"ip_address_type,omitempty"`
 
 	// The IP addresses to use for BYOIP accelerators. If not specified, the service assigns IP addresses. Valid values: 1 or 2 IPv4 addresses.
-	// +kubebuilder:validation:Optional
 	IPAddresses []*string `json:"ipAddresses,omitempty" tf:"ip_addresses,omitempty"`
 
 	// The name of the accelerator.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type AttributesInitParameters struct {
+
+	// Indicates whether flow logs are enabled. Defaults to false. Valid values: true, false.
+	FlowLogsEnabled *bool `json:"flowLogsEnabled,omitempty" tf:"flow_logs_enabled,omitempty"`
+
+	// The name of the Amazon S3 bucket for the flow logs. Required if flow_logs_enabled is true.
+	FlowLogsS3Bucket *string `json:"flowLogsS3Bucket,omitempty" tf:"flow_logs_s3_bucket,omitempty"`
+
+	// The prefix for the location in the Amazon S3 bucket for the flow logs. Required if flow_logs_enabled is true.
+	FlowLogsS3Prefix *string `json:"flowLogsS3Prefix,omitempty" tf:"flow_logs_s3_prefix,omitempty"`
 }
 
 type AttributesObservation struct {
@@ -98,16 +128,16 @@ type AttributesObservation struct {
 type AttributesParameters struct {
 
 	// Indicates whether flow logs are enabled. Defaults to false. Valid values: true, false.
-	// +kubebuilder:validation:Optional
 	FlowLogsEnabled *bool `json:"flowLogsEnabled,omitempty" tf:"flow_logs_enabled,omitempty"`
 
 	// The name of the Amazon S3 bucket for the flow logs. Required if flow_logs_enabled is true.
-	// +kubebuilder:validation:Optional
 	FlowLogsS3Bucket *string `json:"flowLogsS3Bucket,omitempty" tf:"flow_logs_s3_bucket,omitempty"`
 
 	// The prefix for the location in the Amazon S3 bucket for the flow logs. Required if flow_logs_enabled is true.
-	// +kubebuilder:validation:Optional
 	FlowLogsS3Prefix *string `json:"flowLogsS3Prefix,omitempty" tf:"flow_logs_s3_prefix,omitempty"`
+}
+
+type IPSetsInitParameters struct {
 }
 
 type IPSetsObservation struct {
@@ -126,6 +156,10 @@ type IPSetsParameters struct {
 type AcceleratorSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AcceleratorParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AcceleratorInitParameters `json:"initProvider,omitempty"`
 }
 
 // AcceleratorStatus defines the observed state of Accelerator.
@@ -146,7 +180,7 @@ type AcceleratorStatus struct {
 type Accelerator struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   AcceleratorSpec   `json:"spec"`
 	Status AcceleratorStatus `json:"status,omitempty"`
 }

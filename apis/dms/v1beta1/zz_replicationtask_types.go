@@ -13,6 +13,61 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ReplicationTaskInitParameters struct {
+
+	// Indicates when you want a change data capture (CDC) operation to start. The value can be in date, checkpoint, or LSN/SCN format depending on the source engine. For more information, see Determining a CDC native start point.
+	CdcStartPosition *string `json:"cdcStartPosition,omitempty" tf:"cdc_start_position,omitempty"`
+
+	// The Unix timestamp integer for the start of the Change Data Capture (CDC) operation.
+	CdcStartTime *string `json:"cdcStartTime,omitempty" tf:"cdc_start_time,omitempty"`
+
+	// The migration type. Can be one of full-load | cdc | full-load-and-cdc.
+	MigrationType *string `json:"migrationType,omitempty" tf:"migration_type,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The Amazon Resource Name (ARN) of the replication instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/dms/v1beta1.ReplicationInstance
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("replication_instance_arn",true)
+	ReplicationInstanceArn *string `json:"replicationInstanceArn,omitempty" tf:"replication_instance_arn,omitempty"`
+
+	ReplicationInstanceArnRef *v1.Reference `json:"replicationInstanceArnRef,omitempty" tf:"-"`
+
+	ReplicationInstanceArnSelector *v1.Selector `json:"replicationInstanceArnSelector,omitempty" tf:"-"`
+
+	// An escaped JSON string that contains the task settings. For a complete list of task settings, see Task Settings for AWS Database Migration Service Tasks.
+	ReplicationTaskSettings *string `json:"replicationTaskSettings,omitempty" tf:"replication_task_settings,omitempty"`
+
+	// The Amazon Resource Name (ARN) string that uniquely identifies the source endpoint.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/dms/v1beta1.Endpoint
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("endpoint_arn",true)
+	SourceEndpointArn *string `json:"sourceEndpointArn,omitempty" tf:"source_endpoint_arn,omitempty"`
+
+	SourceEndpointArnRef *v1.Reference `json:"sourceEndpointArnRef,omitempty" tf:"-"`
+
+	SourceEndpointArnSelector *v1.Selector `json:"sourceEndpointArnSelector,omitempty" tf:"-"`
+
+	// Whether to run or stop the replication task.
+	StartReplicationTask *bool `json:"startReplicationTask,omitempty" tf:"start_replication_task,omitempty"`
+
+	// An escaped JSON string that contains the table mappings. For information on table mapping see Using Table Mapping with an AWS Database Migration Service Task to Select and Filter Data
+	TableMappings *string `json:"tableMappings,omitempty" tf:"table_mappings,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The Amazon Resource Name (ARN) string that uniquely identifies the target endpoint.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/dms/v1beta1.Endpoint
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("endpoint_arn",true)
+	TargetEndpointArn *string `json:"targetEndpointArn,omitempty" tf:"target_endpoint_arn,omitempty"`
+
+	TargetEndpointArnRef *v1.Reference `json:"targetEndpointArnRef,omitempty" tf:"-"`
+
+	TargetEndpointArnSelector *v1.Selector `json:"targetEndpointArnSelector,omitempty" tf:"-"`
+}
+
 type ReplicationTaskObservation struct {
 
 	// Indicates when you want a change data capture (CDC) operation to start. The value can be in date, checkpoint, or LSN/SCN format depending on the source engine. For more information, see Determining a CDC native start point.
@@ -60,26 +115,21 @@ type ReplicationTaskObservation struct {
 type ReplicationTaskParameters struct {
 
 	// Indicates when you want a change data capture (CDC) operation to start. The value can be in date, checkpoint, or LSN/SCN format depending on the source engine. For more information, see Determining a CDC native start point.
-	// +kubebuilder:validation:Optional
 	CdcStartPosition *string `json:"cdcStartPosition,omitempty" tf:"cdc_start_position,omitempty"`
 
 	// The Unix timestamp integer for the start of the Change Data Capture (CDC) operation.
-	// +kubebuilder:validation:Optional
 	CdcStartTime *string `json:"cdcStartTime,omitempty" tf:"cdc_start_time,omitempty"`
 
 	// The migration type. Can be one of full-load | cdc | full-load-and-cdc.
-	// +kubebuilder:validation:Optional
 	MigrationType *string `json:"migrationType,omitempty" tf:"migration_type,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The Amazon Resource Name (ARN) of the replication instance.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/dms/v1beta1.ReplicationInstance
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("replication_instance_arn",true)
-	// +kubebuilder:validation:Optional
 	ReplicationInstanceArn *string `json:"replicationInstanceArn,omitempty" tf:"replication_instance_arn,omitempty"`
 
 	// Reference to a ReplicationInstance in dms to populate replicationInstanceArn.
@@ -91,13 +141,11 @@ type ReplicationTaskParameters struct {
 	ReplicationInstanceArnSelector *v1.Selector `json:"replicationInstanceArnSelector,omitempty" tf:"-"`
 
 	// An escaped JSON string that contains the task settings. For a complete list of task settings, see Task Settings for AWS Database Migration Service Tasks.
-	// +kubebuilder:validation:Optional
 	ReplicationTaskSettings *string `json:"replicationTaskSettings,omitempty" tf:"replication_task_settings,omitempty"`
 
 	// The Amazon Resource Name (ARN) string that uniquely identifies the source endpoint.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/dms/v1beta1.Endpoint
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("endpoint_arn",true)
-	// +kubebuilder:validation:Optional
 	SourceEndpointArn *string `json:"sourceEndpointArn,omitempty" tf:"source_endpoint_arn,omitempty"`
 
 	// Reference to a Endpoint in dms to populate sourceEndpointArn.
@@ -109,21 +157,17 @@ type ReplicationTaskParameters struct {
 	SourceEndpointArnSelector *v1.Selector `json:"sourceEndpointArnSelector,omitempty" tf:"-"`
 
 	// Whether to run or stop the replication task.
-	// +kubebuilder:validation:Optional
 	StartReplicationTask *bool `json:"startReplicationTask,omitempty" tf:"start_replication_task,omitempty"`
 
 	// An escaped JSON string that contains the table mappings. For information on table mapping see Using Table Mapping with an AWS Database Migration Service Task to Select and Filter Data
-	// +kubebuilder:validation:Optional
 	TableMappings *string `json:"tableMappings,omitempty" tf:"table_mappings,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The Amazon Resource Name (ARN) string that uniquely identifies the target endpoint.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/dms/v1beta1.Endpoint
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("endpoint_arn",true)
-	// +kubebuilder:validation:Optional
 	TargetEndpointArn *string `json:"targetEndpointArn,omitempty" tf:"target_endpoint_arn,omitempty"`
 
 	// Reference to a Endpoint in dms to populate targetEndpointArn.
@@ -139,6 +183,10 @@ type ReplicationTaskParameters struct {
 type ReplicationTaskSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ReplicationTaskParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ReplicationTaskInitParameters `json:"initProvider,omitempty"`
 }
 
 // ReplicationTaskStatus defines the observed state of ReplicationTask.
@@ -159,8 +207,8 @@ type ReplicationTaskStatus struct {
 type ReplicationTask struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.migrationType)",message="migrationType is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.tableMappings)",message="tableMappings is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.migrationType) || has(self.initProvider.migrationType)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.tableMappings) || has(self.initProvider.tableMappings)",message="%!s(MISSING) is a required parameter"
 	Spec   ReplicationTaskSpec   `json:"spec"`
 	Status ReplicationTaskStatus `json:"status,omitempty"`
 }

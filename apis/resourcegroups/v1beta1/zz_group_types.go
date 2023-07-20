@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConfigurationInitParameters struct {
+
+	// A collection of parameters for this group configuration item. See below for details.
+	Parameters []ParametersInitParameters `json:"parameters,omitempty" tf:"parameters,omitempty"`
+
+	// Specifies the type of group configuration item.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type ConfigurationObservation struct {
 
 	// A collection of parameters for this group configuration item. See below for details.
@@ -25,12 +34,29 @@ type ConfigurationObservation struct {
 type ConfigurationParameters struct {
 
 	// A collection of parameters for this group configuration item. See below for details.
-	// +kubebuilder:validation:Optional
 	Parameters []ParametersParameters `json:"parameters,omitempty" tf:"parameters,omitempty"`
 
 	// Specifies the type of group configuration item.
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type GroupInitParameters struct {
+
+	// A configuration associates the resource group with an AWS service and specifies how the service can interact with the resources in the group. See below for details.
+	Configuration []ConfigurationInitParameters `json:"configuration,omitempty" tf:"configuration,omitempty"`
+
+	// A description of the resource group.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A resource_query block. Resource queries are documented below.
+	ResourceQuery []ResourceQueryInitParameters `json:"resourceQuery,omitempty" tf:"resource_query,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type GroupObservation struct {
@@ -59,25 +85,29 @@ type GroupObservation struct {
 type GroupParameters struct {
 
 	// A configuration associates the resource group with an AWS service and specifies how the service can interact with the resources in the group. See below for details.
-	// +kubebuilder:validation:Optional
 	Configuration []ConfigurationParameters `json:"configuration,omitempty" tf:"configuration,omitempty"`
 
 	// A description of the resource group.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A resource_query block. Resource queries are documented below.
-	// +kubebuilder:validation:Optional
 	ResourceQuery []ResourceQueryParameters `json:"resourceQuery,omitempty" tf:"resource_query,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type ParametersInitParameters struct {
+
+	// The name of the group configuration parameter.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The value or values to be used for the specified parameter.
+	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
 }
 
 type ParametersObservation struct {
@@ -92,12 +122,19 @@ type ParametersObservation struct {
 type ParametersParameters struct {
 
 	// The name of the group configuration parameter.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The value or values to be used for the specified parameter.
-	// +kubebuilder:validation:Required
-	Values []*string `json:"values" tf:"values,omitempty"`
+	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
+}
+
+type ResourceQueryInitParameters struct {
+
+	// The resource query as a JSON string.
+	Query *string `json:"query,omitempty" tf:"query,omitempty"`
+
+	// The type of the resource query. Defaults to TAG_FILTERS_1_0.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type ResourceQueryObservation struct {
@@ -112,11 +149,9 @@ type ResourceQueryObservation struct {
 type ResourceQueryParameters struct {
 
 	// The resource query as a JSON string.
-	// +kubebuilder:validation:Required
-	Query *string `json:"query" tf:"query,omitempty"`
+	Query *string `json:"query,omitempty" tf:"query,omitempty"`
 
 	// The type of the resource query. Defaults to TAG_FILTERS_1_0.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -124,6 +159,10 @@ type ResourceQueryParameters struct {
 type GroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     GroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider GroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // GroupStatus defines the observed state of Group.

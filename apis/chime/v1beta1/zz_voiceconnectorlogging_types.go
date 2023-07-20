@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VoiceConnectorLoggingInitParameters struct {
+
+	// When true, enables logging of detailed media metrics for Voice Connectors to Amazon CloudWatch logs.
+	EnableMediaMetricLogs *bool `json:"enableMediaMetricLogs,omitempty" tf:"enable_media_metric_logs,omitempty"`
+
+	// When true, enables SIP message logs for sending to Amazon CloudWatch Logs.
+	EnableSIPLogs *bool `json:"enableSipLogs,omitempty" tf:"enable_sip_logs,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The Amazon Chime Voice Connector ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/chime/v1beta1.VoiceConnector
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	VoiceConnectorID *string `json:"voiceConnectorId,omitempty" tf:"voice_connector_id,omitempty"`
+
+	VoiceConnectorIDRef *v1.Reference `json:"voiceConnectorIdRef,omitempty" tf:"-"`
+
+	VoiceConnectorIDSelector *v1.Selector `json:"voiceConnectorIdSelector,omitempty" tf:"-"`
+}
+
 type VoiceConnectorLoggingObservation struct {
 
 	// When true, enables logging of detailed media metrics for Voice Connectors to Amazon CloudWatch logs.
@@ -31,22 +53,18 @@ type VoiceConnectorLoggingObservation struct {
 type VoiceConnectorLoggingParameters struct {
 
 	// When true, enables logging of detailed media metrics for Voice Connectors to Amazon CloudWatch logs.
-	// +kubebuilder:validation:Optional
 	EnableMediaMetricLogs *bool `json:"enableMediaMetricLogs,omitempty" tf:"enable_media_metric_logs,omitempty"`
 
 	// When true, enables SIP message logs for sending to Amazon CloudWatch Logs.
-	// +kubebuilder:validation:Optional
 	EnableSIPLogs *bool `json:"enableSipLogs,omitempty" tf:"enable_sip_logs,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The Amazon Chime Voice Connector ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/chime/v1beta1.VoiceConnector
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	VoiceConnectorID *string `json:"voiceConnectorId,omitempty" tf:"voice_connector_id,omitempty"`
 
 	// Reference to a VoiceConnector in chime to populate voiceConnectorId.
@@ -62,6 +80,10 @@ type VoiceConnectorLoggingParameters struct {
 type VoiceConnectorLoggingSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VoiceConnectorLoggingParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VoiceConnectorLoggingInitParameters `json:"initProvider,omitempty"`
 }
 
 // VoiceConnectorLoggingStatus defines the observed state of VoiceConnectorLogging.

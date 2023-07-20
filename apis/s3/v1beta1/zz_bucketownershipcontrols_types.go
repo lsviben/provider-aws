@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BucketOwnershipControlsInitParameters struct {
+
+	// Name of the bucket that you want to associate this access point with.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	BucketRef *v1.Reference `json:"bucketRef,omitempty" tf:"-"`
+
+	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Configuration block(s) with Ownership Controls rules. Detailed below.
+	Rule []BucketOwnershipControlsRuleInitParameters `json:"rule,omitempty" tf:"rule,omitempty"`
+}
+
 type BucketOwnershipControlsObservation struct {
 
 	// Name of the bucket that you want to associate this access point with.
@@ -30,7 +49,6 @@ type BucketOwnershipControlsParameters struct {
 	// Name of the bucket that you want to associate this access point with.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucket.
@@ -43,12 +61,16 @@ type BucketOwnershipControlsParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Configuration block(s) with Ownership Controls rules. Detailed below.
-	// +kubebuilder:validation:Optional
 	Rule []BucketOwnershipControlsRuleParameters `json:"rule,omitempty" tf:"rule,omitempty"`
+}
+
+type BucketOwnershipControlsRuleInitParameters struct {
+
+	// Object ownership. Valid values: BucketOwnerPreferred, ObjectWriter or BucketOwnerEnforced
+	ObjectOwnership *string `json:"objectOwnership,omitempty" tf:"object_ownership,omitempty"`
 }
 
 type BucketOwnershipControlsRuleObservation struct {
@@ -60,14 +82,17 @@ type BucketOwnershipControlsRuleObservation struct {
 type BucketOwnershipControlsRuleParameters struct {
 
 	// Object ownership. Valid values: BucketOwnerPreferred, ObjectWriter or BucketOwnerEnforced
-	// +kubebuilder:validation:Required
-	ObjectOwnership *string `json:"objectOwnership" tf:"object_ownership,omitempty"`
+	ObjectOwnership *string `json:"objectOwnership,omitempty" tf:"object_ownership,omitempty"`
 }
 
 // BucketOwnershipControlsSpec defines the desired state of BucketOwnershipControls
 type BucketOwnershipControlsSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BucketOwnershipControlsParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BucketOwnershipControlsInitParameters `json:"initProvider,omitempty"`
 }
 
 // BucketOwnershipControlsStatus defines the observed state of BucketOwnershipControls.
@@ -88,7 +113,7 @@ type BucketOwnershipControlsStatus struct {
 type BucketOwnershipControls struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rule)",message="rule is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rule) || has(self.initProvider.rule)",message="%!s(MISSING) is a required parameter"
 	Spec   BucketOwnershipControlsSpec   `json:"spec"`
 	Status BucketOwnershipControlsStatus `json:"status,omitempty"`
 }

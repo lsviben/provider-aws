@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SnapshotCreateVolumePermissionInitParameters struct {
+
+	// An AWS Account ID to add create volume permissions. The AWS Account cannot be the snapshot's owner
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A snapshot ID
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.EBSSnapshot
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	SnapshotID *string `json:"snapshotId,omitempty" tf:"snapshot_id,omitempty"`
+
+	SnapshotIDRef *v1.Reference `json:"snapshotIdRef,omitempty" tf:"-"`
+
+	SnapshotIDSelector *v1.Selector `json:"snapshotIdSelector,omitempty" tf:"-"`
+}
+
 type SnapshotCreateVolumePermissionObservation struct {
 
 	// An AWS Account ID to add create volume permissions. The AWS Account cannot be the snapshot's owner
@@ -28,18 +47,15 @@ type SnapshotCreateVolumePermissionObservation struct {
 type SnapshotCreateVolumePermissionParameters struct {
 
 	// An AWS Account ID to add create volume permissions. The AWS Account cannot be the snapshot's owner
-	// +kubebuilder:validation:Optional
 	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A snapshot ID
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.EBSSnapshot
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	SnapshotID *string `json:"snapshotId,omitempty" tf:"snapshot_id,omitempty"`
 
 	// Reference to a EBSSnapshot in ec2 to populate snapshotId.
@@ -55,6 +71,10 @@ type SnapshotCreateVolumePermissionParameters struct {
 type SnapshotCreateVolumePermissionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SnapshotCreateVolumePermissionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SnapshotCreateVolumePermissionInitParameters `json:"initProvider,omitempty"`
 }
 
 // SnapshotCreateVolumePermissionStatus defines the observed state of SnapshotCreateVolumePermission.
@@ -75,7 +95,7 @@ type SnapshotCreateVolumePermissionStatus struct {
 type SnapshotCreateVolumePermission struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accountId)",message="accountId is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accountId) || has(self.initProvider.accountId)",message="%!s(MISSING) is a required parameter"
 	Spec   SnapshotCreateVolumePermissionSpec   `json:"spec"`
 	Status SnapshotCreateVolumePermissionStatus `json:"status,omitempty"`
 }

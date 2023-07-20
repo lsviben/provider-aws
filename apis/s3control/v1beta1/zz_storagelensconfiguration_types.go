@@ -13,6 +13,12 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AccountLevelDetailedStatusCodeMetricsInitParameters struct {
+
+	// Whether the S3 Storage Lens configuration is enabled.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+}
+
 type AccountLevelDetailedStatusCodeMetricsObservation struct {
 
 	// Whether the S3 Storage Lens configuration is enabled.
@@ -22,8 +28,25 @@ type AccountLevelDetailedStatusCodeMetricsObservation struct {
 type AccountLevelDetailedStatusCodeMetricsParameters struct {
 
 	// Whether the S3 Storage Lens configuration is enabled.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+}
+
+type AccountLevelInitParameters struct {
+
+	// S3 Storage Lens activity metrics. See Activity Metrics below for more details.
+	ActivityMetrics []ActivityMetricsInitParameters `json:"activityMetrics,omitempty" tf:"activity_metrics,omitempty"`
+
+	// optimization metrics for S3 Storage Lens. See Advanced Cost-Optimization Metrics below for more details.
+	AdvancedCostOptimizationMetrics []AdvancedCostOptimizationMetricsInitParameters `json:"advancedCostOptimizationMetrics,omitempty" tf:"advanced_cost_optimization_metrics,omitempty"`
+
+	// protection metrics for S3 Storage Lens. See Advanced Data-Protection Metrics below for more details.
+	AdvancedDataProtectionMetrics []AdvancedDataProtectionMetricsInitParameters `json:"advancedDataProtectionMetrics,omitempty" tf:"advanced_data_protection_metrics,omitempty"`
+
+	// level configuration. See Bucket Level below for more details.
+	BucketLevel []BucketLevelInitParameters `json:"bucketLevel,omitempty" tf:"bucket_level,omitempty"`
+
+	// Detailed status code metrics for S3 Storage Lens. See Detailed Status Code Metrics below for more details.
+	DetailedStatusCodeMetrics []AccountLevelDetailedStatusCodeMetricsInitParameters `json:"detailedStatusCodeMetrics,omitempty" tf:"detailed_status_code_metrics,omitempty"`
 }
 
 type AccountLevelObservation struct {
@@ -47,24 +70,25 @@ type AccountLevelObservation struct {
 type AccountLevelParameters struct {
 
 	// S3 Storage Lens activity metrics. See Activity Metrics below for more details.
-	// +kubebuilder:validation:Optional
 	ActivityMetrics []ActivityMetricsParameters `json:"activityMetrics,omitempty" tf:"activity_metrics,omitempty"`
 
 	// optimization metrics for S3 Storage Lens. See Advanced Cost-Optimization Metrics below for more details.
-	// +kubebuilder:validation:Optional
 	AdvancedCostOptimizationMetrics []AdvancedCostOptimizationMetricsParameters `json:"advancedCostOptimizationMetrics,omitempty" tf:"advanced_cost_optimization_metrics,omitempty"`
 
 	// protection metrics for S3 Storage Lens. See Advanced Data-Protection Metrics below for more details.
-	// +kubebuilder:validation:Optional
 	AdvancedDataProtectionMetrics []AdvancedDataProtectionMetricsParameters `json:"advancedDataProtectionMetrics,omitempty" tf:"advanced_data_protection_metrics,omitempty"`
 
 	// level configuration. See Bucket Level below for more details.
-	// +kubebuilder:validation:Required
-	BucketLevel []BucketLevelParameters `json:"bucketLevel" tf:"bucket_level,omitempty"`
+	BucketLevel []BucketLevelParameters `json:"bucketLevel,omitempty" tf:"bucket_level,omitempty"`
 
 	// Detailed status code metrics for S3 Storage Lens. See Detailed Status Code Metrics below for more details.
-	// +kubebuilder:validation:Optional
 	DetailedStatusCodeMetrics []AccountLevelDetailedStatusCodeMetricsParameters `json:"detailedStatusCodeMetrics,omitempty" tf:"detailed_status_code_metrics,omitempty"`
+}
+
+type ActivityMetricsInitParameters struct {
+
+	// Whether the activity metrics are enabled.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 }
 
 type ActivityMetricsObservation struct {
@@ -76,7 +100,12 @@ type ActivityMetricsObservation struct {
 type ActivityMetricsParameters struct {
 
 	// Whether the activity metrics are enabled.
-	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+}
+
+type AdvancedCostOptimizationMetricsInitParameters struct {
+
+	// Whether the S3 Storage Lens configuration is enabled.
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 }
 
@@ -89,7 +118,12 @@ type AdvancedCostOptimizationMetricsObservation struct {
 type AdvancedCostOptimizationMetricsParameters struct {
 
 	// Whether the S3 Storage Lens configuration is enabled.
-	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+}
+
+type AdvancedDataProtectionMetricsInitParameters struct {
+
+	// Whether the S3 Storage Lens configuration is enabled.
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 }
 
@@ -102,8 +136,13 @@ type AdvancedDataProtectionMetricsObservation struct {
 type AdvancedDataProtectionMetricsParameters struct {
 
 	// Whether the S3 Storage Lens configuration is enabled.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+}
+
+type AwsOrgInitParameters struct {
+
+	// The Amazon Resource Name (ARN) of the bucket.
+	Arn *string `json:"arn,omitempty" tf:"arn,omitempty"`
 }
 
 type AwsOrgObservation struct {
@@ -115,8 +154,13 @@ type AwsOrgObservation struct {
 type AwsOrgParameters struct {
 
 	// The Amazon Resource Name (ARN) of the bucket.
-	// +kubebuilder:validation:Required
-	Arn *string `json:"arn" tf:"arn,omitempty"`
+	Arn *string `json:"arn,omitempty" tf:"arn,omitempty"`
+}
+
+type BucketLevelActivityMetricsInitParameters struct {
+
+	// Whether the S3 Storage Lens configuration is enabled.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 }
 
 type BucketLevelActivityMetricsObservation struct {
@@ -128,7 +172,12 @@ type BucketLevelActivityMetricsObservation struct {
 type BucketLevelActivityMetricsParameters struct {
 
 	// Whether the S3 Storage Lens configuration is enabled.
-	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+}
+
+type BucketLevelAdvancedCostOptimizationMetricsInitParameters struct {
+
+	// Whether the S3 Storage Lens configuration is enabled.
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 }
 
@@ -141,7 +190,12 @@ type BucketLevelAdvancedCostOptimizationMetricsObservation struct {
 type BucketLevelAdvancedCostOptimizationMetricsParameters struct {
 
 	// Whether the S3 Storage Lens configuration is enabled.
-	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+}
+
+type BucketLevelAdvancedDataProtectionMetricsInitParameters struct {
+
+	// Whether the S3 Storage Lens configuration is enabled.
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 }
 
@@ -154,8 +208,25 @@ type BucketLevelAdvancedDataProtectionMetricsObservation struct {
 type BucketLevelAdvancedDataProtectionMetricsParameters struct {
 
 	// Whether the S3 Storage Lens configuration is enabled.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+}
+
+type BucketLevelInitParameters struct {
+
+	// S3 Storage Lens activity metrics. See Activity Metrics below for more details.
+	ActivityMetrics []BucketLevelActivityMetricsInitParameters `json:"activityMetrics,omitempty" tf:"activity_metrics,omitempty"`
+
+	// optimization metrics for S3 Storage Lens. See Advanced Cost-Optimization Metrics below for more details.
+	AdvancedCostOptimizationMetrics []BucketLevelAdvancedCostOptimizationMetricsInitParameters `json:"advancedCostOptimizationMetrics,omitempty" tf:"advanced_cost_optimization_metrics,omitempty"`
+
+	// protection metrics for S3 Storage Lens. See Advanced Data-Protection Metrics below for more details.
+	AdvancedDataProtectionMetrics []BucketLevelAdvancedDataProtectionMetricsInitParameters `json:"advancedDataProtectionMetrics,omitempty" tf:"advanced_data_protection_metrics,omitempty"`
+
+	// Detailed status code metrics for S3 Storage Lens. See Detailed Status Code Metrics below for more details.
+	DetailedStatusCodeMetrics []DetailedStatusCodeMetricsInitParameters `json:"detailedStatusCodeMetrics,omitempty" tf:"detailed_status_code_metrics,omitempty"`
+
+	// level metrics for S3 Storage Lens. See Prefix Level below for more details.
+	PrefixLevel []PrefixLevelInitParameters `json:"prefixLevel,omitempty" tf:"prefix_level,omitempty"`
 }
 
 type BucketLevelObservation struct {
@@ -179,24 +250,25 @@ type BucketLevelObservation struct {
 type BucketLevelParameters struct {
 
 	// S3 Storage Lens activity metrics. See Activity Metrics below for more details.
-	// +kubebuilder:validation:Optional
 	ActivityMetrics []BucketLevelActivityMetricsParameters `json:"activityMetrics,omitempty" tf:"activity_metrics,omitempty"`
 
 	// optimization metrics for S3 Storage Lens. See Advanced Cost-Optimization Metrics below for more details.
-	// +kubebuilder:validation:Optional
 	AdvancedCostOptimizationMetrics []BucketLevelAdvancedCostOptimizationMetricsParameters `json:"advancedCostOptimizationMetrics,omitempty" tf:"advanced_cost_optimization_metrics,omitempty"`
 
 	// protection metrics for S3 Storage Lens. See Advanced Data-Protection Metrics below for more details.
-	// +kubebuilder:validation:Optional
 	AdvancedDataProtectionMetrics []BucketLevelAdvancedDataProtectionMetricsParameters `json:"advancedDataProtectionMetrics,omitempty" tf:"advanced_data_protection_metrics,omitempty"`
 
 	// Detailed status code metrics for S3 Storage Lens. See Detailed Status Code Metrics below for more details.
-	// +kubebuilder:validation:Optional
 	DetailedStatusCodeMetrics []DetailedStatusCodeMetricsParameters `json:"detailedStatusCodeMetrics,omitempty" tf:"detailed_status_code_metrics,omitempty"`
 
 	// level metrics for S3 Storage Lens. See Prefix Level below for more details.
-	// +kubebuilder:validation:Optional
 	PrefixLevel []PrefixLevelParameters `json:"prefixLevel,omitempty" tf:"prefix_level,omitempty"`
+}
+
+type CloudWatchMetricsInitParameters struct {
+
+	// Whether the S3 Storage Lens configuration is enabled.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 }
 
 type CloudWatchMetricsObservation struct {
@@ -208,8 +280,16 @@ type CloudWatchMetricsObservation struct {
 type CloudWatchMetricsParameters struct {
 
 	// Whether the S3 Storage Lens configuration is enabled.
-	// +kubebuilder:validation:Required
-	Enabled *bool `json:"enabled" tf:"enabled,omitempty"`
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+}
+
+type DataExportInitParameters struct {
+
+	// Amazon CloudWatch publishing for S3 Storage Lens metrics. See Cloud Watch Metrics below for more details.
+	CloudWatchMetrics []CloudWatchMetricsInitParameters `json:"cloudWatchMetrics,omitempty" tf:"cloud_watch_metrics,omitempty"`
+
+	// The bucket where the S3 Storage Lens metrics export will be located. See S3 Bucket Destination below for more details.
+	S3BucketDestination []S3BucketDestinationInitParameters `json:"s3BucketDestination,omitempty" tf:"s3_bucket_destination,omitempty"`
 }
 
 type DataExportObservation struct {
@@ -224,12 +304,16 @@ type DataExportObservation struct {
 type DataExportParameters struct {
 
 	// Amazon CloudWatch publishing for S3 Storage Lens metrics. See Cloud Watch Metrics below for more details.
-	// +kubebuilder:validation:Optional
 	CloudWatchMetrics []CloudWatchMetricsParameters `json:"cloudWatchMetrics,omitempty" tf:"cloud_watch_metrics,omitempty"`
 
 	// The bucket where the S3 Storage Lens metrics export will be located. See S3 Bucket Destination below for more details.
-	// +kubebuilder:validation:Optional
 	S3BucketDestination []S3BucketDestinationParameters `json:"s3BucketDestination,omitempty" tf:"s3_bucket_destination,omitempty"`
+}
+
+type DetailedStatusCodeMetricsInitParameters struct {
+
+	// Whether the S3 Storage Lens configuration is enabled.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 }
 
 type DetailedStatusCodeMetricsObservation struct {
@@ -241,8 +325,16 @@ type DetailedStatusCodeMetricsObservation struct {
 type DetailedStatusCodeMetricsParameters struct {
 
 	// Whether the S3 Storage Lens configuration is enabled.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+}
+
+type EncryptionInitParameters struct {
+
+	// KMS encryption. See SSE KMS below for more details.
+	SseKMS []SseKMSInitParameters `json:"sseKms,omitempty" tf:"sse_kms,omitempty"`
+
+	// S3 encryption. An empty configuration block {} should be used.
+	SseS3 []SseS3InitParameters `json:"sseS3,omitempty" tf:"sse_s3,omitempty"`
 }
 
 type EncryptionObservation struct {
@@ -257,12 +349,19 @@ type EncryptionObservation struct {
 type EncryptionParameters struct {
 
 	// KMS encryption. See SSE KMS below for more details.
-	// +kubebuilder:validation:Optional
 	SseKMS []SseKMSParameters `json:"sseKms,omitempty" tf:"sse_kms,omitempty"`
 
 	// S3 encryption. An empty configuration block {} should be used.
-	// +kubebuilder:validation:Optional
 	SseS3 []SseS3Parameters `json:"sseS3,omitempty" tf:"sse_s3,omitempty"`
+}
+
+type ExcludeInitParameters struct {
+
+	// List of S3 bucket ARNs.
+	Buckets []*string `json:"buckets,omitempty" tf:"buckets,omitempty"`
+
+	// List of AWS Regions.
+	Regions []*string `json:"regions,omitempty" tf:"regions,omitempty"`
 }
 
 type ExcludeObservation struct {
@@ -277,11 +376,18 @@ type ExcludeObservation struct {
 type ExcludeParameters struct {
 
 	// List of S3 bucket ARNs.
-	// +kubebuilder:validation:Optional
 	Buckets []*string `json:"buckets,omitempty" tf:"buckets,omitempty"`
 
 	// List of AWS Regions.
-	// +kubebuilder:validation:Optional
+	Regions []*string `json:"regions,omitempty" tf:"regions,omitempty"`
+}
+
+type IncludeInitParameters struct {
+
+	// List of S3 bucket ARNs.
+	Buckets []*string `json:"buckets,omitempty" tf:"buckets,omitempty"`
+
+	// List of AWS Regions.
 	Regions []*string `json:"regions,omitempty" tf:"regions,omitempty"`
 }
 
@@ -297,12 +403,16 @@ type IncludeObservation struct {
 type IncludeParameters struct {
 
 	// List of S3 bucket ARNs.
-	// +kubebuilder:validation:Optional
 	Buckets []*string `json:"buckets,omitempty" tf:"buckets,omitempty"`
 
 	// List of AWS Regions.
-	// +kubebuilder:validation:Optional
 	Regions []*string `json:"regions,omitempty" tf:"regions,omitempty"`
+}
+
+type PrefixLevelInitParameters struct {
+
+	// level storage metrics for S3 Storage Lens. See Prefix Level Storage Metrics below for more details.
+	StorageMetrics []StorageMetricsInitParameters `json:"storageMetrics,omitempty" tf:"storage_metrics,omitempty"`
 }
 
 type PrefixLevelObservation struct {
@@ -314,8 +424,34 @@ type PrefixLevelObservation struct {
 type PrefixLevelParameters struct {
 
 	// level storage metrics for S3 Storage Lens. See Prefix Level Storage Metrics below for more details.
-	// +kubebuilder:validation:Required
-	StorageMetrics []StorageMetricsParameters `json:"storageMetrics" tf:"storage_metrics,omitempty"`
+	StorageMetrics []StorageMetricsParameters `json:"storageMetrics,omitempty" tf:"storage_metrics,omitempty"`
+}
+
+type S3BucketDestinationInitParameters struct {
+
+	// The account ID of the owner of the S3 Storage Lens metrics export bucket.
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	Arn *string `json:"arn,omitempty" tf:"arn,omitempty"`
+
+	ArnRef *v1.Reference `json:"arnRef,omitempty" tf:"-"`
+
+	ArnSelector *v1.Selector `json:"arnSelector,omitempty" tf:"-"`
+
+	// Encryption of the metrics exports in this bucket. See Encryption below for more details.
+	Encryption []EncryptionInitParameters `json:"encryption,omitempty" tf:"encryption,omitempty"`
+
+	// The export format. Valid values: CSV, Parquet.
+	Format *string `json:"format,omitempty" tf:"format,omitempty"`
+
+	// The schema version of the export file. Valid values: V_1.
+	OutputSchemaVersion *string `json:"outputSchemaVersion,omitempty" tf:"output_schema_version,omitempty"`
+
+	// The prefix of the destination bucket where the metrics export will be delivered.
+	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
 }
 
 type S3BucketDestinationObservation struct {
@@ -342,13 +478,11 @@ type S3BucketDestinationObservation struct {
 type S3BucketDestinationParameters struct {
 
 	// The account ID of the owner of the S3 Storage Lens metrics export bucket.
-	// +kubebuilder:validation:Required
-	AccountID *string `json:"accountId" tf:"account_id,omitempty"`
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	Arn *string `json:"arn,omitempty" tf:"arn,omitempty"`
 
 	// Reference to a Bucket in s3 to populate arn.
@@ -360,20 +494,28 @@ type S3BucketDestinationParameters struct {
 	ArnSelector *v1.Selector `json:"arnSelector,omitempty" tf:"-"`
 
 	// Encryption of the metrics exports in this bucket. See Encryption below for more details.
-	// +kubebuilder:validation:Optional
 	Encryption []EncryptionParameters `json:"encryption,omitempty" tf:"encryption,omitempty"`
 
 	// The export format. Valid values: CSV, Parquet.
-	// +kubebuilder:validation:Required
-	Format *string `json:"format" tf:"format,omitempty"`
+	Format *string `json:"format,omitempty" tf:"format,omitempty"`
 
 	// The schema version of the export file. Valid values: V_1.
-	// +kubebuilder:validation:Required
-	OutputSchemaVersion *string `json:"outputSchemaVersion" tf:"output_schema_version,omitempty"`
+	OutputSchemaVersion *string `json:"outputSchemaVersion,omitempty" tf:"output_schema_version,omitempty"`
 
 	// The prefix of the destination bucket where the metrics export will be delivered.
-	// +kubebuilder:validation:Optional
 	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
+}
+
+type SelectionCriteriaInitParameters struct {
+
+	// The delimiter of the selection criteria being used.
+	Delimiter *string `json:"delimiter,omitempty" tf:"delimiter,omitempty"`
+
+	// The max depth of the selection criteria.
+	MaxDepth *float64 `json:"maxDepth,omitempty" tf:"max_depth,omitempty"`
+
+	// The minimum number of storage bytes percentage whose metrics will be selected.
+	MinStorageBytesPercentage *float64 `json:"minStorageBytesPercentage,omitempty" tf:"min_storage_bytes_percentage,omitempty"`
 }
 
 type SelectionCriteriaObservation struct {
@@ -391,16 +533,19 @@ type SelectionCriteriaObservation struct {
 type SelectionCriteriaParameters struct {
 
 	// The delimiter of the selection criteria being used.
-	// +kubebuilder:validation:Optional
 	Delimiter *string `json:"delimiter,omitempty" tf:"delimiter,omitempty"`
 
 	// The max depth of the selection criteria.
-	// +kubebuilder:validation:Optional
 	MaxDepth *float64 `json:"maxDepth,omitempty" tf:"max_depth,omitempty"`
 
 	// The minimum number of storage bytes percentage whose metrics will be selected.
-	// +kubebuilder:validation:Optional
 	MinStorageBytesPercentage *float64 `json:"minStorageBytesPercentage,omitempty" tf:"min_storage_bytes_percentage,omitempty"`
+}
+
+type SseKMSInitParameters struct {
+
+	// KMS key ARN.
+	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
 }
 
 type SseKMSObservation struct {
@@ -412,14 +557,35 @@ type SseKMSObservation struct {
 type SseKMSParameters struct {
 
 	// KMS key ARN.
-	// +kubebuilder:validation:Required
-	KeyID *string `json:"keyId" tf:"key_id,omitempty"`
+	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
+}
+
+type SseS3InitParameters struct {
 }
 
 type SseS3Observation struct {
 }
 
 type SseS3Parameters struct {
+}
+
+type StorageLensConfigurationInitParameters struct {
+
+	// The AWS account ID for the S3 Storage Lens configuration.
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	// The ID of the S3 Storage Lens configuration.
+	ConfigID *string `json:"configId,omitempty" tf:"config_id,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The S3 Storage Lens configuration. See Storage Lens Configuration below for more details.
+	StorageLensConfiguration []StorageLensConfigurationStorageLensConfigurationInitParameters `json:"storageLensConfiguration,omitempty" tf:"storage_lens_configuration,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type StorageLensConfigurationObservation struct {
@@ -448,25 +614,41 @@ type StorageLensConfigurationObservation struct {
 type StorageLensConfigurationParameters struct {
 
 	// The AWS account ID for the S3 Storage Lens configuration.
-	// +kubebuilder:validation:Optional
 	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// The ID of the S3 Storage Lens configuration.
-	// +kubebuilder:validation:Optional
 	ConfigID *string `json:"configId,omitempty" tf:"config_id,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The S3 Storage Lens configuration. See Storage Lens Configuration below for more details.
-	// +kubebuilder:validation:Optional
 	StorageLensConfiguration []StorageLensConfigurationStorageLensConfigurationParameters `json:"storageLensConfiguration,omitempty" tf:"storage_lens_configuration,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type StorageLensConfigurationStorageLensConfigurationInitParameters struct {
+
+	// level configurations of the S3 Storage Lens configuration. See Account Level below for more details.
+	AccountLevel []AccountLevelInitParameters `json:"accountLevel,omitempty" tf:"account_level,omitempty"`
+
+	// The Amazon Web Services organization for the S3 Storage Lens configuration. See AWS Org below for more details.
+	AwsOrg []AwsOrgInitParameters `json:"awsOrg,omitempty" tf:"aws_org,omitempty"`
+
+	// Properties of S3 Storage Lens metrics export including the destination, schema and format. See Data Export below for more details.
+	DataExport []DataExportInitParameters `json:"dataExport,omitempty" tf:"data_export,omitempty"`
+
+	// Whether the S3 Storage Lens configuration is enabled.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// What is excluded in this configuration. Conflicts with include. See Exclude below for more details.
+	Exclude []ExcludeInitParameters `json:"exclude,omitempty" tf:"exclude,omitempty"`
+
+	// What is included in this configuration. Conflicts with exclude. See Include below for more details.
+	Include []IncludeInitParameters `json:"include,omitempty" tf:"include,omitempty"`
 }
 
 type StorageLensConfigurationStorageLensConfigurationObservation struct {
@@ -493,28 +675,31 @@ type StorageLensConfigurationStorageLensConfigurationObservation struct {
 type StorageLensConfigurationStorageLensConfigurationParameters struct {
 
 	// level configurations of the S3 Storage Lens configuration. See Account Level below for more details.
-	// +kubebuilder:validation:Required
-	AccountLevel []AccountLevelParameters `json:"accountLevel" tf:"account_level,omitempty"`
+	AccountLevel []AccountLevelParameters `json:"accountLevel,omitempty" tf:"account_level,omitempty"`
 
 	// The Amazon Web Services organization for the S3 Storage Lens configuration. See AWS Org below for more details.
-	// +kubebuilder:validation:Optional
 	AwsOrg []AwsOrgParameters `json:"awsOrg,omitempty" tf:"aws_org,omitempty"`
 
 	// Properties of S3 Storage Lens metrics export including the destination, schema and format. See Data Export below for more details.
-	// +kubebuilder:validation:Optional
 	DataExport []DataExportParameters `json:"dataExport,omitempty" tf:"data_export,omitempty"`
 
 	// Whether the S3 Storage Lens configuration is enabled.
-	// +kubebuilder:validation:Required
-	Enabled *bool `json:"enabled" tf:"enabled,omitempty"`
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// What is excluded in this configuration. Conflicts with include. See Exclude below for more details.
-	// +kubebuilder:validation:Optional
 	Exclude []ExcludeParameters `json:"exclude,omitempty" tf:"exclude,omitempty"`
 
 	// What is included in this configuration. Conflicts with exclude. See Include below for more details.
-	// +kubebuilder:validation:Optional
 	Include []IncludeParameters `json:"include,omitempty" tf:"include,omitempty"`
+}
+
+type StorageMetricsInitParameters struct {
+
+	// Whether the S3 Storage Lens configuration is enabled.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// Selection criteria. See Selection Criteria below for more details.
+	SelectionCriteria []SelectionCriteriaInitParameters `json:"selectionCriteria,omitempty" tf:"selection_criteria,omitempty"`
 }
 
 type StorageMetricsObservation struct {
@@ -529,11 +714,9 @@ type StorageMetricsObservation struct {
 type StorageMetricsParameters struct {
 
 	// Whether the S3 Storage Lens configuration is enabled.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// Selection criteria. See Selection Criteria below for more details.
-	// +kubebuilder:validation:Optional
 	SelectionCriteria []SelectionCriteriaParameters `json:"selectionCriteria,omitempty" tf:"selection_criteria,omitempty"`
 }
 
@@ -541,6 +724,10 @@ type StorageMetricsParameters struct {
 type StorageLensConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     StorageLensConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider StorageLensConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // StorageLensConfigurationStatus defines the observed state of StorageLensConfiguration.
@@ -561,8 +748,8 @@ type StorageLensConfigurationStatus struct {
 type StorageLensConfiguration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.configId)",message="configId is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.storageLensConfiguration)",message="storageLensConfiguration is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.configId) || has(self.initProvider.configId)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.storageLensConfiguration) || has(self.initProvider.storageLensConfiguration)",message="%!s(MISSING) is a required parameter"
 	Spec   StorageLensConfigurationSpec   `json:"spec"`
 	Status StorageLensConfigurationStatus `json:"status,omitempty"`
 }

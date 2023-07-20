@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RuleInitParameters struct {
+
+	// The name or description for the Amazon CloudWatch metric of this rule.
+	MetricName *string `json:"metricName,omitempty" tf:"metric_name,omitempty"`
+
+	// The name or description of the rule.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The objects to include in a rule (documented below).
+	Predicate []RulePredicateInitParameters `json:"predicate,omitempty" tf:"predicate,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type RuleObservation struct {
 
 	// The ARN of the WAF Regional Rule.
@@ -40,25 +59,38 @@ type RuleObservation struct {
 type RuleParameters struct {
 
 	// The name or description for the Amazon CloudWatch metric of this rule.
-	// +kubebuilder:validation:Optional
 	MetricName *string `json:"metricName,omitempty" tf:"metric_name,omitempty"`
 
 	// The name or description of the rule.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The objects to include in a rule (documented below).
-	// +kubebuilder:validation:Optional
 	Predicate []RulePredicateParameters `json:"predicate,omitempty" tf:"predicate,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type RulePredicateInitParameters struct {
+
+	// The unique identifier of a predicate, such as the ID of a ByteMatchSet or IPSet.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/wafregional/v1beta1.IPSet
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DataID *string `json:"dataId,omitempty" tf:"data_id,omitempty"`
+
+	DataIDRef *v1.Reference `json:"dataIdRef,omitempty" tf:"-"`
+
+	DataIDSelector *v1.Selector `json:"dataIdSelector,omitempty" tf:"-"`
+
+	// Whether to use the settings or the negated settings that you specified in the objects.
+	Negated *bool `json:"negated,omitempty" tf:"negated,omitempty"`
+
+	// The type of predicate in a rule. Valid values: ByteMatch, GeoMatch, IPMatch, RegexMatch, SizeConstraint, SqlInjectionMatch, or XssMatch
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type RulePredicateObservation struct {
@@ -78,7 +110,6 @@ type RulePredicateParameters struct {
 	// The unique identifier of a predicate, such as the ID of a ByteMatchSet or IPSet.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/wafregional/v1beta1.IPSet
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DataID *string `json:"dataId,omitempty" tf:"data_id,omitempty"`
 
 	// Reference to a IPSet in wafregional to populate dataId.
@@ -90,18 +121,20 @@ type RulePredicateParameters struct {
 	DataIDSelector *v1.Selector `json:"dataIdSelector,omitempty" tf:"-"`
 
 	// Whether to use the settings or the negated settings that you specified in the objects.
-	// +kubebuilder:validation:Required
-	Negated *bool `json:"negated" tf:"negated,omitempty"`
+	Negated *bool `json:"negated,omitempty" tf:"negated,omitempty"`
 
 	// The type of predicate in a rule. Valid values: ByteMatch, GeoMatch, IPMatch, RegexMatch, SizeConstraint, SqlInjectionMatch, or XssMatch
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 // RuleSpec defines the desired state of Rule
 type RuleSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RuleParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RuleInitParameters `json:"initProvider,omitempty"`
 }
 
 // RuleStatus defines the observed state of Rule.
@@ -122,8 +155,8 @@ type RuleStatus struct {
 type Rule struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.metricName)",message="metricName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.metricName) || has(self.initProvider.metricName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   RuleSpec   `json:"spec"`
 	Status RuleStatus `json:"status,omitempty"`
 }

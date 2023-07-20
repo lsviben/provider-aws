@@ -85,10 +85,6 @@ spec:
                         zoneId:
                           description: The ID of the hosted zone to contain this record.
                           type: string
-                      required:
-                      - evaluateTargetHealth
-                      - name
-                      - zoneId
                       type: object
                     type: array
                   allowOverwrite:
@@ -112,9 +108,6 @@ spec:
                             a default CIDR record. collection_id is still required
                             for default record.
                           type: string
-                      required:
-                      - collectionId
-                      - locationName
                       type: object
                     type: array
                   failoverRoutingPolicy:
@@ -128,8 +121,6 @@ spec:
                             CAA, CNAME, DS, MX, NAPTR, NS, PTR, SOA, SPF, SRV and
                             TXT.
                           type: string
-                      required:
-                      - type
                       type: object
                     type: array
                   geolocationRoutingPolicy:
@@ -239,8 +230,6 @@ spec:
                           description: An AWS region from which to measure latency.
                             See http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html#routing-policy-latency
                           type: string
-                      required:
-                      - region
                       type: object
                     type: array
                   multivalueAnswerRoutingPolicy:
@@ -283,8 +272,6 @@ spec:
                           description: A numeric value indicating the relative weight
                             of the record. See http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html#routing-policy-weighted.
                           type: number
-                      required:
-                      - weight
                       type: object
                     type: array
                   zoneId:
@@ -363,8 +350,295 @@ spec:
                             type: string
                         type: object
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  alias:
+                    description: An alias block. Conflicts with ttl & records. Documented
+                      below.
+                    items:
+                      properties:
+                        evaluateTargetHealth:
+                          description: Set to true if you want Route 53 to determine
+                            whether to respond to DNS queries using this resource
+                            record set by checking the health of the resource record
+                            set. Some resources have special requirements, see related
+                            part of documentation.
+                          type: boolean
+                        name:
+                          description: The name of the record.
+                          type: string
+                        zoneId:
+                          description: The ID of the hosted zone to contain this record.
+                          type: string
+                      type: object
+                    type: array
+                  allowOverwrite:
+                    description: false by default. This configuration is not recommended
+                      for most environments.
+                    type: boolean
+                  cidrRoutingPolicy:
+                    description: A block indicating a routing policy based on the
+                      IP network ranges of requestors. Conflicts with any other routing
+                      policy. Documented below.
+                    items:
+                      properties:
+                        collectionId:
+                          description: The CIDR collection ID. See the aws_route53_cidr_collection
+                            resource for more details.
+                          type: string
+                        locationName:
+                          description: The CIDR collection location name. See the
+                            aws_route53_cidr_location resource for more details. A
+                            location_name with an asterisk "*" can be used to create
+                            a default CIDR record. collection_id is still required
+                            for default record.
+                          type: string
+                      type: object
+                    type: array
+                  failoverRoutingPolicy:
+                    description: A block indicating the routing behavior when associated
+                      health check fails. Conflicts with any other routing policy.
+                      Documented below.
+                    items:
+                      properties:
+                        type:
+                          description: The record type. Valid values are A, AAAA,
+                            CAA, CNAME, DS, MX, NAPTR, NS, PTR, SOA, SPF, SRV and
+                            TXT.
+                          type: string
+                      type: object
+                    type: array
+                  geolocationRoutingPolicy:
+                    description: A block indicating a routing policy based on the
+                      geolocation of the requestor. Conflicts with any other routing
+                      policy. Documented below.
+                    items:
+                      properties:
+                        continent:
+                          description: A two-letter continent code. See http://docs.aws.amazon.com/Route53/latest/APIReference/API_GetGeoLocation.html
+                            for code details. Either continent or country must be
+                            specified.
+                          type: string
+                        country:
+                          description: A two-character country code or * to indicate
+                            a default resource record set.
+                          type: string
+                        subdivision:
+                          description: A subdivision code for a country.
+                          type: string
+                      type: object
+                    type: array
+                  healthCheckId:
+                    description: The health check the record should be associated
+                      with.
+                    type: string
+                  healthCheckIdRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  healthCheckIdSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  latencyRoutingPolicy:
+                    description: A block indicating a routing policy based on the
+                      latency between the requestor and an AWS region. Conflicts with
+                      any other routing policy. Documented below.
+                    items:
+                      properties:
+                        region:
+                          description: An AWS region from which to measure latency.
+                            See http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html#routing-policy-latency
+                          type: string
+                      type: object
+                    type: array
+                  multivalueAnswerRoutingPolicy:
+                    description: Set to true to indicate a multivalue answer routing
+                      policy. Conflicts with any other routing policy.
+                    type: boolean
+                  name:
+                    description: The name of the record.
+                    type: string
+                  records:
+                    description: A string list of records.g., "first255characters\"\"morecharacters").
+                    items:
+                      type: string
+                    type: array
+                  region:
+                    description: An AWS region from which to measure latency. See
+                      http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html#routing-policy-latency
+                      Region is the region you'd like your resource to be created
+                      in.
+                    type: string
+                  setIdentifier:
+                    description: Unique identifier to differentiate records with routing
+                      policies from one another. Required if using cidr_routing_policy,
+                      failover_routing_policy, geolocation_routing_policy, latency_routing_policy,
+                      multivalue_answer_routing_policy, or weighted_routing_policy.
+                    type: string
+                  ttl:
+                    description: The TTL of the record.
+                    type: number
+                  type:
+                    description: The record type. Valid values are A, AAAA, CAA, CNAME,
+                      DS, MX, NAPTR, NS, PTR, SOA, SPF, SRV and TXT.
+                    type: string
+                  weightedRoutingPolicy:
+                    description: A block indicating a weighted routing policy. Conflicts
+                      with any other routing policy. Documented below.
+                    items:
+                      properties:
+                        weight:
+                          description: A numeric value indicating the relative weight
+                            of the record. See http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html#routing-policy-weighted.
+                          type: number
+                      type: object
+                    type: array
+                  zoneId:
+                    description: The ID of the hosted zone to contain this record.
+                    type: string
+                  zoneIdRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  zoneIdSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
                 type: object
               managementPolicies:
                 default:
@@ -564,12 +838,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: name is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)'
-            - message: type is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)
+                || has(self.initProvider.name)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.type)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.type)
+                || has(self.initProvider.type)'
           status:
             description: RecordStatus defines the observed state of Record.
             properties:

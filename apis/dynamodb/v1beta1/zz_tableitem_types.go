@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type TableItemInitParameters struct {
+
+	// Hash key to use for lookups and identification of the item
+	HashKey *string `json:"hashKey,omitempty" tf:"hash_key,omitempty"`
+
+	// JSON representation of a map of attribute name/value pairs, one for each attribute. Only the primary key attributes are required; you can optionally provide other attribute name-value pairs for the item.
+	Item *string `json:"item,omitempty" tf:"item,omitempty"`
+
+	// Range key to use for lookups and identification of the item. Required if there is range key defined in the table.
+	RangeKey *string `json:"rangeKey,omitempty" tf:"range_key,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Name of the table to contain the item.
+	// +crossplane:generate:reference:type=Table
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+
+	TableNameRef *v1.Reference `json:"tableNameRef,omitempty" tf:"-"`
+
+	TableNameSelector *v1.Selector `json:"tableNameSelector,omitempty" tf:"-"`
+}
+
 type TableItemObservation struct {
 
 	// Hash key to use for lookups and identification of the item
@@ -33,25 +57,20 @@ type TableItemObservation struct {
 type TableItemParameters struct {
 
 	// Hash key to use for lookups and identification of the item
-	// +kubebuilder:validation:Optional
 	HashKey *string `json:"hashKey,omitempty" tf:"hash_key,omitempty"`
 
 	// JSON representation of a map of attribute name/value pairs, one for each attribute. Only the primary key attributes are required; you can optionally provide other attribute name-value pairs for the item.
-	// +kubebuilder:validation:Optional
 	Item *string `json:"item,omitempty" tf:"item,omitempty"`
 
 	// Range key to use for lookups and identification of the item. Required if there is range key defined in the table.
-	// +kubebuilder:validation:Optional
 	RangeKey *string `json:"rangeKey,omitempty" tf:"range_key,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Name of the table to contain the item.
 	// +crossplane:generate:reference:type=Table
-	// +kubebuilder:validation:Optional
 	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
 
 	// Reference to a Table to populate tableName.
@@ -67,6 +86,10 @@ type TableItemParameters struct {
 type TableItemSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     TableItemParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider TableItemInitParameters `json:"initProvider,omitempty"`
 }
 
 // TableItemStatus defines the observed state of TableItem.
@@ -87,8 +110,8 @@ type TableItemStatus struct {
 type TableItem struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hashKey)",message="hashKey is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.item)",message="item is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hashKey) || has(self.initProvider.hashKey)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.item) || has(self.initProvider.item)",message="%!s(MISSING) is a required parameter"
 	Spec   TableItemSpec   `json:"spec"`
 	Status TableItemStatus `json:"status,omitempty"`
 }

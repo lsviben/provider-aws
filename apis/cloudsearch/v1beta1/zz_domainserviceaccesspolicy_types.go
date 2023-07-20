@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DomainServiceAccessPolicyInitParameters struct {
+
+	// The access rules you want to configure. These rules replace any existing rules. See the AWS documentation for details.
+	AccessPolicy *string `json:"accessPolicy,omitempty" tf:"access_policy,omitempty"`
+
+	// The CloudSearch domain name the policy applies to.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudsearch/v1beta1.Domain
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
+
+	DomainNameRef *v1.Reference `json:"domainNameRef,omitempty" tf:"-"`
+
+	DomainNameSelector *v1.Selector `json:"domainNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type DomainServiceAccessPolicyObservation struct {
 
 	// The access rules you want to configure. These rules replace any existing rules. See the AWS documentation for details.
@@ -27,13 +46,11 @@ type DomainServiceAccessPolicyObservation struct {
 type DomainServiceAccessPolicyParameters struct {
 
 	// The access rules you want to configure. These rules replace any existing rules. See the AWS documentation for details.
-	// +kubebuilder:validation:Optional
 	AccessPolicy *string `json:"accessPolicy,omitempty" tf:"access_policy,omitempty"`
 
 	// The CloudSearch domain name the policy applies to.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudsearch/v1beta1.Domain
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
 
 	// Reference to a Domain in cloudsearch to populate domainName.
@@ -46,14 +63,17 @@ type DomainServiceAccessPolicyParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // DomainServiceAccessPolicySpec defines the desired state of DomainServiceAccessPolicy
 type DomainServiceAccessPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DomainServiceAccessPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DomainServiceAccessPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // DomainServiceAccessPolicyStatus defines the observed state of DomainServiceAccessPolicy.
@@ -74,7 +94,7 @@ type DomainServiceAccessPolicyStatus struct {
 type DomainServiceAccessPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accessPolicy)",message="accessPolicy is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accessPolicy) || has(self.initProvider.accessPolicy)",message="%!s(MISSING) is a required parameter"
 	Spec   DomainServiceAccessPolicySpec   `json:"spec"`
 	Status DomainServiceAccessPolicyStatus `json:"status,omitempty"`
 }

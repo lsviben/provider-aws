@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type HostedZoneDNSSECInitParameters struct {
+
+	// Identifier of the Route 53 Hosted Zone.
+	// +crossplane:generate:reference:type=Zone
+	HostedZoneID *string `json:"hostedZoneId,omitempty" tf:"hosted_zone_id,omitempty"`
+
+	HostedZoneIDRef *v1.Reference `json:"hostedZoneIdRef,omitempty" tf:"-"`
+
+	HostedZoneIDSelector *v1.Selector `json:"hostedZoneIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Hosted Zone signing status. Valid values: SIGNING, NOT_SIGNING. Defaults to SIGNING.
+	SigningStatus *string `json:"signingStatus,omitempty" tf:"signing_status,omitempty"`
+}
+
 type HostedZoneDNSSECObservation struct {
 
 	// Identifier of the Route 53 Hosted Zone.
@@ -29,7 +47,6 @@ type HostedZoneDNSSECParameters struct {
 
 	// Identifier of the Route 53 Hosted Zone.
 	// +crossplane:generate:reference:type=Zone
-	// +kubebuilder:validation:Optional
 	HostedZoneID *string `json:"hostedZoneId,omitempty" tf:"hosted_zone_id,omitempty"`
 
 	// Reference to a Zone to populate hostedZoneId.
@@ -42,11 +59,9 @@ type HostedZoneDNSSECParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Hosted Zone signing status. Valid values: SIGNING, NOT_SIGNING. Defaults to SIGNING.
-	// +kubebuilder:validation:Optional
 	SigningStatus *string `json:"signingStatus,omitempty" tf:"signing_status,omitempty"`
 }
 
@@ -54,6 +69,10 @@ type HostedZoneDNSSECParameters struct {
 type HostedZoneDNSSECSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     HostedZoneDNSSECParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider HostedZoneDNSSECInitParameters `json:"initProvider,omitempty"`
 }
 
 // HostedZoneDNSSECStatus defines the observed state of HostedZoneDNSSEC.

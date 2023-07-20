@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DomainInitParameters struct {
+
+	// Domain endpoint options. Documented below.
+	EndpointOptions []EndpointOptionsInitParameters `json:"endpointOptions,omitempty" tf:"endpoint_options,omitempty"`
+
+	// The index fields for documents added to the domain. Documented below.
+	IndexField []IndexFieldInitParameters `json:"indexField,omitempty" tf:"index_field,omitempty"`
+
+	// Whether or not to maintain extra instances for the domain in a second Availability Zone to ensure high availability.
+	MultiAz *bool `json:"multiAz,omitempty" tf:"multi_az,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Domain scaling parameters. Documented below.
+	ScalingParameters []ScalingParametersInitParameters `json:"scalingParameters,omitempty" tf:"scaling_parameters,omitempty"`
+}
+
 type DomainObservation struct {
 
 	// The domain's ARN.
@@ -45,25 +64,29 @@ type DomainObservation struct {
 type DomainParameters struct {
 
 	// Domain endpoint options. Documented below.
-	// +kubebuilder:validation:Optional
 	EndpointOptions []EndpointOptionsParameters `json:"endpointOptions,omitempty" tf:"endpoint_options,omitempty"`
 
 	// The index fields for documents added to the domain. Documented below.
-	// +kubebuilder:validation:Optional
 	IndexField []IndexFieldParameters `json:"indexField,omitempty" tf:"index_field,omitempty"`
 
 	// Whether or not to maintain extra instances for the domain in a second Availability Zone to ensure high availability.
-	// +kubebuilder:validation:Optional
 	MultiAz *bool `json:"multiAz,omitempty" tf:"multi_az,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Domain scaling parameters. Documented below.
-	// +kubebuilder:validation:Optional
 	ScalingParameters []ScalingParametersParameters `json:"scalingParameters,omitempty" tf:"scaling_parameters,omitempty"`
+}
+
+type EndpointOptionsInitParameters struct {
+
+	// Enables or disables the requirement that all requests to the domain arrive over HTTPS.
+	EnforceHTTPS *bool `json:"enforceHttps,omitempty" tf:"enforce_https,omitempty"`
+
+	// The minimum required TLS version. See the AWS documentation for valid values.
+	TLSSecurityPolicy *string `json:"tlsSecurityPolicy,omitempty" tf:"tls_security_policy,omitempty"`
 }
 
 type EndpointOptionsObservation struct {
@@ -78,12 +101,43 @@ type EndpointOptionsObservation struct {
 type EndpointOptionsParameters struct {
 
 	// Enables or disables the requirement that all requests to the domain arrive over HTTPS.
-	// +kubebuilder:validation:Optional
 	EnforceHTTPS *bool `json:"enforceHttps,omitempty" tf:"enforce_https,omitempty"`
 
 	// The minimum required TLS version. See the AWS documentation for valid values.
-	// +kubebuilder:validation:Optional
 	TLSSecurityPolicy *string `json:"tlsSecurityPolicy,omitempty" tf:"tls_security_policy,omitempty"`
+}
+
+type IndexFieldInitParameters struct {
+
+	// The analysis scheme you want to use for a text field. The analysis scheme specifies the language-specific text processing options that are used during indexing.
+	AnalysisScheme *string `json:"analysisScheme,omitempty" tf:"analysis_scheme,omitempty"`
+
+	// The default value for the field. This value is used when no value is specified for the field in the document data.
+	DefaultValue *string `json:"defaultValue,omitempty" tf:"default_value,omitempty"`
+
+	// You can get facet information by enabling this.
+	Facet *bool `json:"facet,omitempty" tf:"facet,omitempty"`
+
+	// You can highlight information.
+	Highlight *bool `json:"highlight,omitempty" tf:"highlight,omitempty"`
+
+	// The name of the CloudSearch domain.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// You can enable returning the value of all searchable fields.
+	Return *bool `json:"return,omitempty" tf:"return,omitempty"`
+
+	// You can set whether this index should be searchable or not.
+	Search *bool `json:"search,omitempty" tf:"search,omitempty"`
+
+	// You can enable the property to be sortable.
+	Sort *bool `json:"sort,omitempty" tf:"sort,omitempty"`
+
+	// A comma-separated list of source fields to map to the field. Specifying a source field copies data from one field to another, enabling you to use the same source data in different ways by configuring different options for the fields.
+	SourceFields *string `json:"sourceFields,omitempty" tf:"source_fields,omitempty"`
+
+	// The field type. Valid values: date, date-array, double, double-array, int, int-array, literal, literal-array, text, text-array.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type IndexFieldObservation struct {
@@ -122,44 +176,46 @@ type IndexFieldObservation struct {
 type IndexFieldParameters struct {
 
 	// The analysis scheme you want to use for a text field. The analysis scheme specifies the language-specific text processing options that are used during indexing.
-	// +kubebuilder:validation:Optional
 	AnalysisScheme *string `json:"analysisScheme,omitempty" tf:"analysis_scheme,omitempty"`
 
 	// The default value for the field. This value is used when no value is specified for the field in the document data.
-	// +kubebuilder:validation:Optional
 	DefaultValue *string `json:"defaultValue,omitempty" tf:"default_value,omitempty"`
 
 	// You can get facet information by enabling this.
-	// +kubebuilder:validation:Optional
 	Facet *bool `json:"facet,omitempty" tf:"facet,omitempty"`
 
 	// You can highlight information.
-	// +kubebuilder:validation:Optional
 	Highlight *bool `json:"highlight,omitempty" tf:"highlight,omitempty"`
 
 	// The name of the CloudSearch domain.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// You can enable returning the value of all searchable fields.
-	// +kubebuilder:validation:Optional
 	Return *bool `json:"return,omitempty" tf:"return,omitempty"`
 
 	// You can set whether this index should be searchable or not.
-	// +kubebuilder:validation:Optional
 	Search *bool `json:"search,omitempty" tf:"search,omitempty"`
 
 	// You can enable the property to be sortable.
-	// +kubebuilder:validation:Optional
 	Sort *bool `json:"sort,omitempty" tf:"sort,omitempty"`
 
 	// A comma-separated list of source fields to map to the field. Specifying a source field copies data from one field to another, enabling you to use the same source data in different ways by configuring different options for the fields.
-	// +kubebuilder:validation:Optional
 	SourceFields *string `json:"sourceFields,omitempty" tf:"source_fields,omitempty"`
 
 	// The field type. Valid values: date, date-array, double, double-array, int, int-array, literal, literal-array, text, text-array.
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type ScalingParametersInitParameters struct {
+
+	// The instance type that you want to preconfigure for your domain. See the AWS documentation for valid values.
+	DesiredInstanceType *string `json:"desiredInstanceType,omitempty" tf:"desired_instance_type,omitempty"`
+
+	// The number of partitions you want to preconfigure for your domain. Only valid when you select search.2xlarge as the instance type.
+	DesiredPartitionCount *float64 `json:"desiredPartitionCount,omitempty" tf:"desired_partition_count,omitempty"`
+
+	// The number of replicas you want to preconfigure for each index partition.
+	DesiredReplicationCount *float64 `json:"desiredReplicationCount,omitempty" tf:"desired_replication_count,omitempty"`
 }
 
 type ScalingParametersObservation struct {
@@ -177,15 +233,12 @@ type ScalingParametersObservation struct {
 type ScalingParametersParameters struct {
 
 	// The instance type that you want to preconfigure for your domain. See the AWS documentation for valid values.
-	// +kubebuilder:validation:Optional
 	DesiredInstanceType *string `json:"desiredInstanceType,omitempty" tf:"desired_instance_type,omitempty"`
 
 	// The number of partitions you want to preconfigure for your domain. Only valid when you select search.2xlarge as the instance type.
-	// +kubebuilder:validation:Optional
 	DesiredPartitionCount *float64 `json:"desiredPartitionCount,omitempty" tf:"desired_partition_count,omitempty"`
 
 	// The number of replicas you want to preconfigure for each index partition.
-	// +kubebuilder:validation:Optional
 	DesiredReplicationCount *float64 `json:"desiredReplicationCount,omitempty" tf:"desired_replication_count,omitempty"`
 }
 
@@ -193,6 +246,10 @@ type ScalingParametersParameters struct {
 type DomainSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DomainParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DomainInitParameters `json:"initProvider,omitempty"`
 }
 
 // DomainStatus defines the observed state of Domain.

@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VPCEndpointServiceAllowedPrincipalInitParameters struct {
+
+	// The ARN of the principal to allow permissions.
+	PrincipalArn *string `json:"principalArn,omitempty" tf:"principal_arn,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ID of the VPC endpoint service to allow permission.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPCEndpointService
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	VPCEndpointServiceID *string `json:"vpcEndpointServiceId,omitempty" tf:"vpc_endpoint_service_id,omitempty"`
+
+	VPCEndpointServiceIDRef *v1.Reference `json:"vpcEndpointServiceIdRef,omitempty" tf:"-"`
+
+	VPCEndpointServiceIDSelector *v1.Selector `json:"vpcEndpointServiceIdSelector,omitempty" tf:"-"`
+}
+
 type VPCEndpointServiceAllowedPrincipalObservation struct {
 
 	// The ID of the association.
@@ -28,18 +47,15 @@ type VPCEndpointServiceAllowedPrincipalObservation struct {
 type VPCEndpointServiceAllowedPrincipalParameters struct {
 
 	// The ARN of the principal to allow permissions.
-	// +kubebuilder:validation:Optional
 	PrincipalArn *string `json:"principalArn,omitempty" tf:"principal_arn,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ID of the VPC endpoint service to allow permission.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPCEndpointService
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	VPCEndpointServiceID *string `json:"vpcEndpointServiceId,omitempty" tf:"vpc_endpoint_service_id,omitempty"`
 
 	// Reference to a VPCEndpointService in ec2 to populate vpcEndpointServiceId.
@@ -55,6 +71,10 @@ type VPCEndpointServiceAllowedPrincipalParameters struct {
 type VPCEndpointServiceAllowedPrincipalSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VPCEndpointServiceAllowedPrincipalParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VPCEndpointServiceAllowedPrincipalInitParameters `json:"initProvider,omitempty"`
 }
 
 // VPCEndpointServiceAllowedPrincipalStatus defines the observed state of VPCEndpointServiceAllowedPrincipal.
@@ -75,7 +95,7 @@ type VPCEndpointServiceAllowedPrincipalStatus struct {
 type VPCEndpointServiceAllowedPrincipal struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.principalArn)",message="principalArn is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.principalArn) || has(self.initProvider.principalArn)",message="%!s(MISSING) is a required parameter"
 	Spec   VPCEndpointServiceAllowedPrincipalSpec   `json:"spec"`
 	Status VPCEndpointServiceAllowedPrincipalStatus `json:"status,omitempty"`
 }

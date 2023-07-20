@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConnectionAssociationInitParameters struct {
+
+	// The ID of the connection.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/directconnect/v1beta1.Connection
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	ConnectionID *string `json:"connectionId,omitempty" tf:"connection_id,omitempty"`
+
+	ConnectionIDRef *v1.Reference `json:"connectionIdRef,omitempty" tf:"-"`
+
+	ConnectionIDSelector *v1.Selector `json:"connectionIdSelector,omitempty" tf:"-"`
+
+	// The ID of the LAG with which to associate the connection.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/directconnect/v1beta1.Lag
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	LagID *string `json:"lagId,omitempty" tf:"lag_id,omitempty"`
+
+	LagIDRef *v1.Reference `json:"lagIdRef,omitempty" tf:"-"`
+
+	LagIDSelector *v1.Selector `json:"lagIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type ConnectionAssociationObservation struct {
 
 	// The ID of the connection.
@@ -29,7 +54,6 @@ type ConnectionAssociationParameters struct {
 	// The ID of the connection.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/directconnect/v1beta1.Connection
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	ConnectionID *string `json:"connectionId,omitempty" tf:"connection_id,omitempty"`
 
 	// Reference to a Connection in directconnect to populate connectionId.
@@ -43,7 +67,6 @@ type ConnectionAssociationParameters struct {
 	// The ID of the LAG with which to associate the connection.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/directconnect/v1beta1.Lag
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	LagID *string `json:"lagId,omitempty" tf:"lag_id,omitempty"`
 
 	// Reference to a Lag in directconnect to populate lagId.
@@ -56,14 +79,17 @@ type ConnectionAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // ConnectionAssociationSpec defines the desired state of ConnectionAssociation
 type ConnectionAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ConnectionAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ConnectionAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // ConnectionAssociationStatus defines the observed state of ConnectionAssociation.

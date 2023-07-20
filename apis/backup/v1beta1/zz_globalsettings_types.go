@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type GlobalSettingsInitParameters struct {
+
+	// A list of resources along with the opt-in preferences for the account.
+	GlobalSettings map[string]*string `json:"globalSettings,omitempty" tf:"global_settings,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type GlobalSettingsObservation struct {
 
 	// A list of resources along with the opt-in preferences for the account.
@@ -25,19 +35,21 @@ type GlobalSettingsObservation struct {
 type GlobalSettingsParameters struct {
 
 	// A list of resources along with the opt-in preferences for the account.
-	// +kubebuilder:validation:Optional
 	GlobalSettings map[string]*string `json:"globalSettings,omitempty" tf:"global_settings,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // GlobalSettingsSpec defines the desired state of GlobalSettings
 type GlobalSettingsSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     GlobalSettingsParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider GlobalSettingsInitParameters `json:"initProvider,omitempty"`
 }
 
 // GlobalSettingsStatus defines the observed state of GlobalSettings.
@@ -58,7 +70,7 @@ type GlobalSettingsStatus struct {
 type GlobalSettings struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.globalSettings)",message="globalSettings is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.globalSettings) || has(self.initProvider.globalSettings)",message="%!s(MISSING) is a required parameter"
 	Spec   GlobalSettingsSpec   `json:"spec"`
 	Status GlobalSettingsStatus `json:"status,omitempty"`
 }

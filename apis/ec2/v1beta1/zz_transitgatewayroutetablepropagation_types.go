@@ -13,6 +13,29 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type TransitGatewayRouteTablePropagationInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Identifier of EC2 Transit Gateway Attachment.
+	// +crossplane:generate:reference:type=TransitGatewayVPCAttachment
+	TransitGatewayAttachmentID *string `json:"transitGatewayAttachmentId,omitempty" tf:"transit_gateway_attachment_id,omitempty"`
+
+	TransitGatewayAttachmentIDRef *v1.Reference `json:"transitGatewayAttachmentIdRef,omitempty" tf:"-"`
+
+	TransitGatewayAttachmentIDSelector *v1.Selector `json:"transitGatewayAttachmentIdSelector,omitempty" tf:"-"`
+
+	// Identifier of EC2 Transit Gateway Route Table.
+	// +crossplane:generate:reference:type=TransitGatewayRouteTable
+	TransitGatewayRouteTableID *string `json:"transitGatewayRouteTableId,omitempty" tf:"transit_gateway_route_table_id,omitempty"`
+
+	TransitGatewayRouteTableIDRef *v1.Reference `json:"transitGatewayRouteTableIdRef,omitempty" tf:"-"`
+
+	TransitGatewayRouteTableIDSelector *v1.Selector `json:"transitGatewayRouteTableIdSelector,omitempty" tf:"-"`
+}
+
 type TransitGatewayRouteTablePropagationObservation struct {
 
 	// EC2 Transit Gateway Route Table identifier combined with EC2 Transit Gateway Attachment identifier
@@ -35,12 +58,10 @@ type TransitGatewayRouteTablePropagationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Identifier of EC2 Transit Gateway Attachment.
 	// +crossplane:generate:reference:type=TransitGatewayVPCAttachment
-	// +kubebuilder:validation:Optional
 	TransitGatewayAttachmentID *string `json:"transitGatewayAttachmentId,omitempty" tf:"transit_gateway_attachment_id,omitempty"`
 
 	// Reference to a TransitGatewayVPCAttachment to populate transitGatewayAttachmentId.
@@ -53,7 +74,6 @@ type TransitGatewayRouteTablePropagationParameters struct {
 
 	// Identifier of EC2 Transit Gateway Route Table.
 	// +crossplane:generate:reference:type=TransitGatewayRouteTable
-	// +kubebuilder:validation:Optional
 	TransitGatewayRouteTableID *string `json:"transitGatewayRouteTableId,omitempty" tf:"transit_gateway_route_table_id,omitempty"`
 
 	// Reference to a TransitGatewayRouteTable to populate transitGatewayRouteTableId.
@@ -69,6 +89,10 @@ type TransitGatewayRouteTablePropagationParameters struct {
 type TransitGatewayRouteTablePropagationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     TransitGatewayRouteTablePropagationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider TransitGatewayRouteTablePropagationInitParameters `json:"initProvider,omitempty"`
 }
 
 // TransitGatewayRouteTablePropagationStatus defines the observed state of TransitGatewayRouteTablePropagation.

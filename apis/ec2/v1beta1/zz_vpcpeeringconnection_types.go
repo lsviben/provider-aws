@@ -13,6 +13,9 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AccepterInitParameters struct {
+}
+
 type AccepterObservation struct {
 
 	// Allow a local linked EC2-Classic instance to communicate
@@ -33,6 +36,9 @@ type AccepterObservation struct {
 type AccepterParameters struct {
 }
 
+type RequesterInitParameters struct {
+}
+
 type RequesterObservation struct {
 
 	// Allow a local linked EC2-Classic instance to communicate
@@ -51,6 +57,43 @@ type RequesterObservation struct {
 }
 
 type RequesterParameters struct {
+}
+
+type VPCPeeringConnectionInitParameters_2 struct {
+
+	// Accept the peering (both VPCs need to be in the same AWS account and region).
+	AutoAccept *bool `json:"autoAccept,omitempty" tf:"auto_accept,omitempty"`
+
+	// The AWS account ID of the owner of the peer VPC.
+	// Defaults to the account ID the AWS provider is currently connected to.
+	PeerOwnerID *string `json:"peerOwnerId,omitempty" tf:"peer_owner_id,omitempty"`
+
+	// The region of the accepter VPC of the VPC Peering Connection. auto_accept must be false,
+	// and use the aws_vpc_peering_connection_accepter to manage the accepter side.
+	PeerRegion *string `json:"peerRegion,omitempty" tf:"peer_region,omitempty"`
+
+	// The ID of the VPC with which you are creating the VPC Peering Connection.
+	// +crossplane:generate:reference:type=VPC
+	PeerVPCID *string `json:"peerVpcId,omitempty" tf:"peer_vpc_id,omitempty"`
+
+	PeerVPCIDRef *v1.Reference `json:"peerVpcIdRef,omitempty" tf:"-"`
+
+	PeerVPCIDSelector *v1.Selector `json:"peerVpcIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The ID of the requester VPC.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
+	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
+
+	VPCIDRef *v1.Reference `json:"vpcIdRef,omitempty" tf:"-"`
+
+	VPCIDSelector *v1.Selector `json:"vpcIdSelector,omitempty" tf:"-"`
 }
 
 type VPCPeeringConnectionObservation_2 struct {
@@ -96,22 +139,18 @@ type VPCPeeringConnectionObservation_2 struct {
 type VPCPeeringConnectionParameters_2 struct {
 
 	// Accept the peering (both VPCs need to be in the same AWS account and region).
-	// +kubebuilder:validation:Optional
 	AutoAccept *bool `json:"autoAccept,omitempty" tf:"auto_accept,omitempty"`
 
 	// The AWS account ID of the owner of the peer VPC.
 	// Defaults to the account ID the AWS provider is currently connected to.
-	// +kubebuilder:validation:Optional
 	PeerOwnerID *string `json:"peerOwnerId,omitempty" tf:"peer_owner_id,omitempty"`
 
 	// The region of the accepter VPC of the VPC Peering Connection. auto_accept must be false,
 	// and use the aws_vpc_peering_connection_accepter to manage the accepter side.
-	// +kubebuilder:validation:Optional
 	PeerRegion *string `json:"peerRegion,omitempty" tf:"peer_region,omitempty"`
 
 	// The ID of the VPC with which you are creating the VPC Peering Connection.
 	// +crossplane:generate:reference:type=VPC
-	// +kubebuilder:validation:Optional
 	PeerVPCID *string `json:"peerVpcId,omitempty" tf:"peer_vpc_id,omitempty"`
 
 	// Reference to a VPC to populate peerVpcId.
@@ -124,16 +163,13 @@ type VPCPeeringConnectionParameters_2 struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The ID of the requester VPC.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
-	// +kubebuilder:validation:Optional
 	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
 
 	// Reference to a VPC in ec2 to populate vpcId.
@@ -149,6 +185,10 @@ type VPCPeeringConnectionParameters_2 struct {
 type VPCPeeringConnectionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VPCPeeringConnectionParameters_2 `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VPCPeeringConnectionInitParameters_2 `json:"initProvider,omitempty"`
 }
 
 // VPCPeeringConnectionStatus defines the observed state of VPCPeeringConnection.

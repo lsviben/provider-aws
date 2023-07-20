@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ContainerPolicyInitParameters struct {
+
+	// The name of the container.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/mediastore/v1beta1.Container
+	ContainerName *string `json:"containerName,omitempty" tf:"container_name,omitempty"`
+
+	ContainerNameRef *v1.Reference `json:"containerNameRef,omitempty" tf:"-"`
+
+	ContainerNameSelector *v1.Selector `json:"containerNameSelector,omitempty" tf:"-"`
+
+	// The contents of the policy.
+	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type ContainerPolicyObservation struct {
 
 	// The name of the container.
@@ -28,7 +46,6 @@ type ContainerPolicyParameters struct {
 
 	// The name of the container.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/mediastore/v1beta1.Container
-	// +kubebuilder:validation:Optional
 	ContainerName *string `json:"containerName,omitempty" tf:"container_name,omitempty"`
 
 	// Reference to a Container in mediastore to populate containerName.
@@ -40,19 +57,21 @@ type ContainerPolicyParameters struct {
 	ContainerNameSelector *v1.Selector `json:"containerNameSelector,omitempty" tf:"-"`
 
 	// The contents of the policy.
-	// +kubebuilder:validation:Optional
 	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // ContainerPolicySpec defines the desired state of ContainerPolicy
 type ContainerPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ContainerPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ContainerPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // ContainerPolicyStatus defines the observed state of ContainerPolicy.
@@ -73,7 +92,7 @@ type ContainerPolicyStatus struct {
 type ContainerPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policy)",message="policy is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policy) || has(self.initProvider.policy)",message="%!s(MISSING) is a required parameter"
 	Spec   ContainerPolicySpec   `json:"spec"`
 	Status ContainerPolicyStatus `json:"status,omitempty"`
 }

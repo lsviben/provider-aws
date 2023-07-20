@@ -13,6 +13,22 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type InviteAccepterInitParameters struct {
+
+	// The account ID of the master Security Hub account whose invitation you're accepting.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/securityhub/v1beta1.Member
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("master_id",true)
+	MasterID *string `json:"masterId,omitempty" tf:"master_id,omitempty"`
+
+	MasterIDRef *v1.Reference `json:"masterIdRef,omitempty" tf:"-"`
+
+	MasterIDSelector *v1.Selector `json:"masterIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type InviteAccepterObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -28,7 +44,6 @@ type InviteAccepterParameters struct {
 	// The account ID of the master Security Hub account whose invitation you're accepting.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/securityhub/v1beta1.Member
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("master_id",true)
-	// +kubebuilder:validation:Optional
 	MasterID *string `json:"masterId,omitempty" tf:"master_id,omitempty"`
 
 	// Reference to a Member in securityhub to populate masterId.
@@ -41,14 +56,17 @@ type InviteAccepterParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // InviteAccepterSpec defines the desired state of InviteAccepter
 type InviteAccepterSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     InviteAccepterParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider InviteAccepterInitParameters `json:"initProvider,omitempty"`
 }
 
 // InviteAccepterStatus defines the observed state of InviteAccepter.

@@ -418,8 +418,359 @@ spec:
                           type: boolean
                       type: object
                     type: array
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  directoryId:
+                    description: The directory identifier for registration in WorkSpaces
+                      service.
+                    type: string
+                  directoryIdRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  directoryIdSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  ipGroupIds:
+                    description: The identifiers of the IP access control groups associated
+                      with the directory.
+                    items:
+                      type: string
+                    type: array
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  selfServicePermissions:
+                    description: service capabilities. Defined below.
+                    items:
+                      properties:
+                        changeComputeType:
+                          description: –  Whether WorkSpaces directory users can change
+                            the compute type (bundle) for their workspace. Default
+                            false.
+                          type: boolean
+                        increaseVolumeSize:
+                          description: –  Whether WorkSpaces directory users can increase
+                            the volume size of the drives on their workspace. Default
+                            false.
+                          type: boolean
+                        rebuildWorkspace:
+                          description: –  Whether WorkSpaces directory users can rebuild
+                            the operating system of a workspace to its original state.
+                            Default false.
+                          type: boolean
+                        restartWorkspace:
+                          description: –  Whether WorkSpaces directory users can restart
+                            their workspace. Default true.
+                          type: boolean
+                        switchRunningMode:
+                          description: –  Whether WorkSpaces directory users can switch
+                            the running mode of their workspace. Default false.
+                          type: boolean
+                      type: object
+                    type: array
+                  subnetIdRefs:
+                    items:
+                      description: A Reference to a named object.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: Resolution specifies whether resolution
+                                of this reference is required. The default is 'Required',
+                                which means the reconcile will fail if the reference
+                                cannot be resolved. 'Optional' means this reference
+                                will be a no-op if it cannot be resolved.
+                              enum:
+                              - Required
+                              - Optional
+                              type: string
+                            resolve:
+                              description: Resolve specifies when this reference should
+                                be resolved. The default is 'IfNotPresent', which
+                                will attempt to resolve the reference only when the
+                                corresponding field is not present. Use 'Always' to
+                                resolve the reference on every reconcile.
+                              enum:
+                              - Always
+                              - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  subnetIdSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  subnetIds:
+                    description: The identifiers of the subnets where the directory
+                      resides.
+                    items:
+                      type: string
+                    type: array
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
+                  workspaceAccessProperties:
+                    description: –  Specifies which devices and operating systems
+                      users can use to access their WorkSpaces. Defined below.
+                    items:
+                      properties:
+                        deviceTypeAndroid:
+                          description: –  Indicates whether users can use Android
+                            devices to access their WorkSpaces.
+                          type: string
+                        deviceTypeChromeos:
+                          description: –  Indicates whether users can use Chromebooks
+                            to access their WorkSpaces.
+                          type: string
+                        deviceTypeIos:
+                          description: –  Indicates whether users can use iOS devices
+                            to access their WorkSpaces.
+                          type: string
+                        deviceTypeLinux:
+                          description: –  Indicates whether users can use Linux clients
+                            to access their WorkSpaces.
+                          type: string
+                        deviceTypeOsx:
+                          description: –  Indicates whether users can use macOS clients
+                            to access their WorkSpaces.
+                          type: string
+                        deviceTypeWeb:
+                          description: –  Indicates whether users can access their
+                            WorkSpaces through a web browser.
+                          type: string
+                        deviceTypeWindows:
+                          description: –  Indicates whether users can use Windows
+                            clients to access their WorkSpaces.
+                          type: string
+                        deviceTypeZeroclient:
+                          description: –  Indicates whether users can use zero client
+                            devices to access their WorkSpaces.
+                          type: string
+                      type: object
+                    type: array
+                  workspaceCreationProperties:
+                    description: –  Default properties that are used for creating
+                      WorkSpaces. Defined below.
+                    items:
+                      properties:
+                        customSecurityGroupId:
+                          description: –  The identifier of your custom security group.
+                            Should relate to the same VPC, where workspaces reside
+                            in.
+                          type: string
+                        customSecurityGroupIdRef:
+                          description: A Reference to a named object.
+                          properties:
+                            name:
+                              description: Name of the referenced object.
+                              type: string
+                            policy:
+                              description: Policies for referencing.
+                              properties:
+                                resolution:
+                                  default: Required
+                                  description: Resolution specifies whether resolution
+                                    of this reference is required. The default is
+                                    'Required', which means the reconcile will fail
+                                    if the reference cannot be resolved. 'Optional'
+                                    means this reference will be a no-op if it cannot
+                                    be resolved.
+                                  enum:
+                                  - Required
+                                  - Optional
+                                  type: string
+                                resolve:
+                                  description: Resolve specifies when this reference
+                                    should be resolved. The default is 'IfNotPresent',
+                                    which will attempt to resolve the reference only
+                                    when the corresponding field is not present. Use
+                                    'Always' to resolve the reference on every reconcile.
+                                  enum:
+                                  - Always
+                                  - IfNotPresent
+                                  type: string
+                              type: object
+                          required:
+                          - name
+                          type: object
+                        customSecurityGroupIdSelector:
+                          description: A Selector selects an object.
+                          properties:
+                            matchControllerRef:
+                              description: MatchControllerRef ensures an object with
+                                the same controller reference as the selecting object
+                                is selected.
+                              type: boolean
+                            matchLabels:
+                              additionalProperties:
+                                type: string
+                              description: MatchLabels ensures an object with matching
+                                labels is selected.
+                              type: object
+                            policy:
+                              description: Policies for selection.
+                              properties:
+                                resolution:
+                                  default: Required
+                                  description: Resolution specifies whether resolution
+                                    of this reference is required. The default is
+                                    'Required', which means the reconcile will fail
+                                    if the reference cannot be resolved. 'Optional'
+                                    means this reference will be a no-op if it cannot
+                                    be resolved.
+                                  enum:
+                                  - Required
+                                  - Optional
+                                  type: string
+                                resolve:
+                                  description: Resolve specifies when this reference
+                                    should be resolved. The default is 'IfNotPresent',
+                                    which will attempt to resolve the reference only
+                                    when the corresponding field is not present. Use
+                                    'Always' to resolve the reference on every reconcile.
+                                  enum:
+                                  - Always
+                                  - IfNotPresent
+                                  type: string
+                              type: object
+                          type: object
+                        defaultOu:
+                          description: –  The default organizational unit (OU) for
+                            your WorkSpace directories. Should conform "OU=<value>,DC=<value>,...,DC=<value>"
+                            pattern.
+                          type: string
+                        enableInternetAccess:
+                          description: –  Indicates whether internet access is enabled
+                            for your WorkSpaces.
+                          type: boolean
+                        enableMaintenanceMode:
+                          description: –  Indicates whether maintenance mode is enabled
+                            for your WorkSpaces. For more information, see WorkSpace
+                            Maintenance..
+                          type: boolean
+                        userEnabledAsLocalAdministrator:
+                          description: –  Indicates whether users are local administrators
+                            of their WorkSpaces.
+                          type: boolean
+                      type: object
+                    type: array
                 type: object
               managementPolicies:
                 default:

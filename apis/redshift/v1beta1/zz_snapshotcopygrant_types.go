@@ -13,6 +13,27 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SnapshotCopyGrantInitParameters struct {
+
+	// The unique identifier for the customer master key (CMK) that the grant applies to. Specify the key ID or the Amazon Resource Name (ARN) of the CMK. To specify a CMK in a different AWS account, you must use the key ARN. If not specified, the default key is used.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
+
+	KMSKeyIDRef *v1.Reference `json:"kmsKeyIdRef,omitempty" tf:"-"`
+
+	KMSKeyIDSelector *v1.Selector `json:"kmsKeyIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A friendly name for identifying the grant.
+	SnapshotCopyGrantName *string `json:"snapshotCopyGrantName,omitempty" tf:"snapshot_copy_grant_name,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type SnapshotCopyGrantObservation struct {
 
 	// Amazon Resource Name (ARN) of snapshot copy grant
@@ -37,7 +58,6 @@ type SnapshotCopyGrantParameters struct {
 
 	// The unique identifier for the customer master key (CMK) that the grant applies to. Specify the key ID or the Amazon Resource Name (ARN) of the CMK. To specify a CMK in a different AWS account, you must use the key ARN. If not specified, the default key is used.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
-	// +kubebuilder:validation:Optional
 	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
 
 	// Reference to a Key in kms to populate kmsKeyId.
@@ -50,15 +70,12 @@ type SnapshotCopyGrantParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A friendly name for identifying the grant.
-	// +kubebuilder:validation:Optional
 	SnapshotCopyGrantName *string `json:"snapshotCopyGrantName,omitempty" tf:"snapshot_copy_grant_name,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -66,6 +83,10 @@ type SnapshotCopyGrantParameters struct {
 type SnapshotCopyGrantSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SnapshotCopyGrantParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SnapshotCopyGrantInitParameters `json:"initProvider,omitempty"`
 }
 
 // SnapshotCopyGrantStatus defines the observed state of SnapshotCopyGrant.
@@ -86,7 +107,7 @@ type SnapshotCopyGrantStatus struct {
 type SnapshotCopyGrant struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.snapshotCopyGrantName)",message="snapshotCopyGrantName is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.snapshotCopyGrantName) || has(self.initProvider.snapshotCopyGrantName)",message="%!s(MISSING) is a required parameter"
 	Spec   SnapshotCopyGrantSpec   `json:"spec"`
 	Status SnapshotCopyGrantStatus `json:"status,omitempty"`
 }

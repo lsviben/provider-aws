@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ResourceInitParameters struct {
+
+	// ID of the parent API resource
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("root_resource_id",true)
+	ParentID *string `json:"parentId,omitempty" tf:"parent_id,omitempty"`
+
+	ParentIDRef *v1.Reference `json:"parentIdRef,omitempty" tf:"-"`
+
+	ParentIDSelector *v1.Selector `json:"parentIdSelector,omitempty" tf:"-"`
+
+	// Last path segment of this API resource.
+	PathPart *string `json:"pathPart,omitempty" tf:"path_part,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// ID of the associated REST API
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	RestAPIID *string `json:"restApiId,omitempty" tf:"rest_api_id,omitempty"`
+
+	RestAPIIDRef *v1.Reference `json:"restApiIdRef,omitempty" tf:"-"`
+
+	RestAPIIDSelector *v1.Selector `json:"restApiIdSelector,omitempty" tf:"-"`
+}
+
 type ResourceObservation struct {
 
 	// Resource's identifier.
@@ -36,7 +64,6 @@ type ResourceParameters struct {
 	// ID of the parent API resource
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("root_resource_id",true)
-	// +kubebuilder:validation:Optional
 	ParentID *string `json:"parentId,omitempty" tf:"parent_id,omitempty"`
 
 	// Reference to a RestAPI in apigateway to populate parentId.
@@ -48,18 +75,15 @@ type ResourceParameters struct {
 	ParentIDSelector *v1.Selector `json:"parentIdSelector,omitempty" tf:"-"`
 
 	// Last path segment of this API resource.
-	// +kubebuilder:validation:Optional
 	PathPart *string `json:"pathPart,omitempty" tf:"path_part,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// ID of the associated REST API
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	RestAPIID *string `json:"restApiId,omitempty" tf:"rest_api_id,omitempty"`
 
 	// Reference to a RestAPI in apigateway to populate restApiId.
@@ -75,6 +99,10 @@ type ResourceParameters struct {
 type ResourceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ResourceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ResourceInitParameters `json:"initProvider,omitempty"`
 }
 
 // ResourceStatus defines the observed state of Resource.
@@ -95,7 +123,7 @@ type ResourceStatus struct {
 type Resource struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.pathPart)",message="pathPart is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.pathPart) || has(self.initProvider.pathPart)",message="%!s(MISSING) is a required parameter"
 	Spec   ResourceSpec   `json:"spec"`
 	Status ResourceStatus `json:"status,omitempty"`
 }

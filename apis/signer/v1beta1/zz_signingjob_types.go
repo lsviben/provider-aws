@@ -13,6 +13,12 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DestinationInitParameters struct {
+
+	// A configuration block describing the S3 Source object: See S3 Source below for details.
+	S3 []S3InitParameters `json:"s3,omitempty" tf:"s3,omitempty"`
+}
+
 type DestinationObservation struct {
 
 	// A configuration block describing the S3 Source object: See S3 Source below for details.
@@ -22,8 +28,10 @@ type DestinationObservation struct {
 type DestinationParameters struct {
 
 	// A configuration block describing the S3 Source object: See S3 Source below for details.
-	// +kubebuilder:validation:Required
-	S3 []S3Parameters `json:"s3" tf:"s3,omitempty"`
+	S3 []S3Parameters `json:"s3,omitempty" tf:"s3,omitempty"`
+}
+
+type RevocationRecordInitParameters struct {
 }
 
 type RevocationRecordObservation struct {
@@ -35,6 +43,15 @@ type RevocationRecordObservation struct {
 }
 
 type RevocationRecordParameters struct {
+}
+
+type S3InitParameters struct {
+
+	// Name of the S3 bucket.
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	// An Amazon S3 object key prefix that you can use to limit signed objects keys to begin with the specified prefix.
+	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
 }
 
 type S3Observation struct {
@@ -49,12 +66,13 @@ type S3Observation struct {
 type S3Parameters struct {
 
 	// Name of the S3 bucket.
-	// +kubebuilder:validation:Required
-	Bucket *string `json:"bucket" tf:"bucket,omitempty"`
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// An Amazon S3 object key prefix that you can use to limit signed objects keys to begin with the specified prefix.
-	// +kubebuilder:validation:Optional
 	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
+}
+
+type SignedObjectInitParameters struct {
 }
 
 type SignedObjectObservation struct {
@@ -64,6 +82,9 @@ type SignedObjectObservation struct {
 }
 
 type SignedObjectParameters struct {
+}
+
+type SignedObjectS3InitParameters struct {
 }
 
 type SignedObjectS3Observation struct {
@@ -76,6 +97,30 @@ type SignedObjectS3Observation struct {
 }
 
 type SignedObjectS3Parameters struct {
+}
+
+type SigningJobInitParameters struct {
+
+	// The S3 bucket in which to save your signed object. See Destination below for details.
+	Destination []DestinationInitParameters `json:"destination,omitempty" tf:"destination,omitempty"`
+
+	// Set this argument to true to ignore signing job failures and retrieve failed status and reason. Default false.
+	IgnoreSigningJobFailure *bool `json:"ignoreSigningJobFailure,omitempty" tf:"ignore_signing_job_failure,omitempty"`
+
+	// The name of the profile to initiate the signing operation.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/signer/v1beta1.SigningProfile
+	ProfileName *string `json:"profileName,omitempty" tf:"profile_name,omitempty"`
+
+	ProfileNameRef *v1.Reference `json:"profileNameRef,omitempty" tf:"-"`
+
+	ProfileNameSelector *v1.Selector `json:"profileNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The S3 bucket that contains the object to sign. See Source below for details.
+	Source []SourceInitParameters `json:"source,omitempty" tf:"source,omitempty"`
 }
 
 type SigningJobObservation struct {
@@ -140,16 +185,13 @@ type SigningJobObservation struct {
 type SigningJobParameters struct {
 
 	// The S3 bucket in which to save your signed object. See Destination below for details.
-	// +kubebuilder:validation:Optional
 	Destination []DestinationParameters `json:"destination,omitempty" tf:"destination,omitempty"`
 
 	// Set this argument to true to ignore signing job failures and retrieve failed status and reason. Default false.
-	// +kubebuilder:validation:Optional
 	IgnoreSigningJobFailure *bool `json:"ignoreSigningJobFailure,omitempty" tf:"ignore_signing_job_failure,omitempty"`
 
 	// The name of the profile to initiate the signing operation.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/signer/v1beta1.SigningProfile
-	// +kubebuilder:validation:Optional
 	ProfileName *string `json:"profileName,omitempty" tf:"profile_name,omitempty"`
 
 	// Reference to a SigningProfile in signer to populate profileName.
@@ -162,12 +204,16 @@ type SigningJobParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The S3 bucket that contains the object to sign. See Source below for details.
-	// +kubebuilder:validation:Optional
 	Source []SourceParameters `json:"source,omitempty" tf:"source,omitempty"`
+}
+
+type SourceInitParameters struct {
+
+	// A configuration block describing the S3 Source object: See S3 Source below for details.
+	S3 []SourceS3InitParameters `json:"s3,omitempty" tf:"s3,omitempty"`
 }
 
 type SourceObservation struct {
@@ -179,8 +225,19 @@ type SourceObservation struct {
 type SourceParameters struct {
 
 	// A configuration block describing the S3 Source object: See S3 Source below for details.
-	// +kubebuilder:validation:Required
-	S3 []SourceS3Parameters `json:"s3" tf:"s3,omitempty"`
+	S3 []SourceS3Parameters `json:"s3,omitempty" tf:"s3,omitempty"`
+}
+
+type SourceS3InitParameters struct {
+
+	// Name of the S3 bucket.
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	// Key name of the object that contains your unsigned code.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Version of your source image in your version enabled S3 bucket.
+	Version *string `json:"version,omitempty" tf:"version,omitempty"`
 }
 
 type SourceS3Observation struct {
@@ -198,22 +255,23 @@ type SourceS3Observation struct {
 type SourceS3Parameters struct {
 
 	// Name of the S3 bucket.
-	// +kubebuilder:validation:Required
-	Bucket *string `json:"bucket" tf:"bucket,omitempty"`
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Key name of the object that contains your unsigned code.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Version of your source image in your version enabled S3 bucket.
-	// +kubebuilder:validation:Required
-	Version *string `json:"version" tf:"version,omitempty"`
+	Version *string `json:"version,omitempty" tf:"version,omitempty"`
 }
 
 // SigningJobSpec defines the desired state of SigningJob
 type SigningJobSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SigningJobParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SigningJobInitParameters `json:"initProvider,omitempty"`
 }
 
 // SigningJobStatus defines the observed state of SigningJob.
@@ -234,8 +292,8 @@ type SigningJobStatus struct {
 type SigningJob struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.destination)",message="destination is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.source)",message="source is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.destination) || has(self.initProvider.destination)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.source) || has(self.initProvider.source)",message="%!s(MISSING) is a required parameter"
 	Spec   SigningJobSpec   `json:"spec"`
 	Status SigningJobStatus `json:"status,omitempty"`
 }

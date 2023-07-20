@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AddOnInitParameters struct {
+
+	// The daily time when an automatic snapshot will be created. Must be in HH:00 format, and in an hourly increment and specified in Coordinated Universal Time (UTC). The snapshot will be automatically created between the time specified and up to 45 minutes after.
+	SnapshotTime *string `json:"snapshotTime,omitempty" tf:"snapshot_time,omitempty"`
+
+	// The status of the add on. Valid Values: Enabled, Disabled.
+	Status *string `json:"status,omitempty" tf:"status,omitempty"`
+
+	// The add-on type. There is currently only one valid type AutoSnapshot.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type AddOnObservation struct {
 
 	// The daily time when an automatic snapshot will be created. Must be in HH:00 format, and in an hourly increment and specified in Coordinated Universal Time (UTC). The snapshot will be automatically created between the time specified and up to 45 minutes after.
@@ -28,16 +40,46 @@ type AddOnObservation struct {
 type AddOnParameters struct {
 
 	// The daily time when an automatic snapshot will be created. Must be in HH:00 format, and in an hourly increment and specified in Coordinated Universal Time (UTC). The snapshot will be automatically created between the time specified and up to 45 minutes after.
-	// +kubebuilder:validation:Required
-	SnapshotTime *string `json:"snapshotTime" tf:"snapshot_time,omitempty"`
+	SnapshotTime *string `json:"snapshotTime,omitempty" tf:"snapshot_time,omitempty"`
 
 	// The status of the add on. Valid Values: Enabled, Disabled.
-	// +kubebuilder:validation:Required
-	Status *string `json:"status" tf:"status,omitempty"`
+	Status *string `json:"status,omitempty" tf:"status,omitempty"`
 
 	// The add-on type. There is currently only one valid type AutoSnapshot.
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type InstanceInitParameters struct {
+
+	// The add on configuration for the instance. Detailed below.
+	AddOn []AddOnInitParameters `json:"addOn,omitempty" tf:"add_on,omitempty"`
+
+	// The Availability Zone in which to create your
+	// instance (see list below)
+	AvailabilityZone *string `json:"availabilityZone,omitempty" tf:"availability_zone,omitempty"`
+
+	// The ID for a virtual private server image. A list of available blueprint IDs can be obtained using the AWS CLI command: aws lightsail get-blueprints
+	BlueprintID *string `json:"blueprintId,omitempty" tf:"blueprint_id,omitempty"`
+
+	// The bundle of specification information (see list below)
+	BundleID *string `json:"bundleId,omitempty" tf:"bundle_id,omitempty"`
+
+	// The IP address type of the Lightsail Instance. Valid Values: dualstack | ipv4.
+	IPAddressType *string `json:"ipAddressType,omitempty" tf:"ip_address_type,omitempty"`
+
+	// The name of your key pair. Created in the
+	// Lightsail console (cannot use aws_key_pair at this time)
+	KeyPairName *string `json:"keyPairName,omitempty" tf:"key_pair_name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// launch script to configure server with additional user data
+	UserData *string `json:"userData,omitempty" tf:"user_data,omitempty"`
 }
 
 type InstanceObservation struct {
@@ -108,42 +150,33 @@ type InstanceObservation struct {
 type InstanceParameters struct {
 
 	// The add on configuration for the instance. Detailed below.
-	// +kubebuilder:validation:Optional
 	AddOn []AddOnParameters `json:"addOn,omitempty" tf:"add_on,omitempty"`
 
 	// The Availability Zone in which to create your
 	// instance (see list below)
-	// +kubebuilder:validation:Optional
 	AvailabilityZone *string `json:"availabilityZone,omitempty" tf:"availability_zone,omitempty"`
 
 	// The ID for a virtual private server image. A list of available blueprint IDs can be obtained using the AWS CLI command: aws lightsail get-blueprints
-	// +kubebuilder:validation:Optional
 	BlueprintID *string `json:"blueprintId,omitempty" tf:"blueprint_id,omitempty"`
 
 	// The bundle of specification information (see list below)
-	// +kubebuilder:validation:Optional
 	BundleID *string `json:"bundleId,omitempty" tf:"bundle_id,omitempty"`
 
 	// The IP address type of the Lightsail Instance. Valid Values: dualstack | ipv4.
-	// +kubebuilder:validation:Optional
 	IPAddressType *string `json:"ipAddressType,omitempty" tf:"ip_address_type,omitempty"`
 
 	// The name of your key pair. Created in the
 	// Lightsail console (cannot use aws_key_pair at this time)
-	// +kubebuilder:validation:Optional
 	KeyPairName *string `json:"keyPairName,omitempty" tf:"key_pair_name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// launch script to configure server with additional user data
-	// +kubebuilder:validation:Optional
 	UserData *string `json:"userData,omitempty" tf:"user_data,omitempty"`
 }
 
@@ -151,6 +184,10 @@ type InstanceParameters struct {
 type InstanceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     InstanceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider InstanceInitParameters `json:"initProvider,omitempty"`
 }
 
 // InstanceStatus defines the observed state of Instance.
@@ -171,9 +208,9 @@ type InstanceStatus struct {
 type Instance struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.availabilityZone)",message="availabilityZone is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.blueprintId)",message="blueprintId is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.bundleId)",message="bundleId is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.availabilityZone) || has(self.initProvider.availabilityZone)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.blueprintId) || has(self.initProvider.blueprintId)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.bundleId) || has(self.initProvider.bundleId)",message="%!s(MISSING) is a required parameter"
 	Spec   InstanceSpec   `json:"spec"`
 	Status InstanceStatus `json:"status,omitempty"`
 }

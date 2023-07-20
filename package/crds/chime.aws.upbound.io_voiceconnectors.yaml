@@ -80,8 +80,24 @@ spec:
                     description: When enabled, requires encryption for the Amazon
                       Chime Voice Connector.
                     type: boolean
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  awsRegion:
+                    description: 'The AWS Region in which the Amazon Chime Voice Connector
+                      is created. Default value: us-east-1'
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  requireEncryption:
+                    description: When enabled, requires encryption for the Amazon
+                      Chime Voice Connector.
+                    type: boolean
                 type: object
               managementPolicies:
                 default:
@@ -281,9 +297,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: requireEncryption is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.requireEncryption)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.requireEncryption)
+                || has(self.initProvider.requireEncryption)'
           status:
             description: VoiceConnectorStatus defines the observed state of VoiceConnector.
             properties:

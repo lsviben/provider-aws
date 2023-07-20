@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SMSChannelInitParameters struct {
+
+	// The application ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/pinpoint/v1beta1.App
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("application_id",true)
+	ApplicationID *string `json:"applicationId,omitempty" tf:"application_id,omitempty"`
+
+	ApplicationIDRef *v1.Reference `json:"applicationIdRef,omitempty" tf:"-"`
+
+	ApplicationIDSelector *v1.Selector `json:"applicationIdSelector,omitempty" tf:"-"`
+
+	// Whether the channel is enabled or disabled. Defaults to true.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Sender identifier of your messages.
+	SenderID *string `json:"senderId,omitempty" tf:"sender_id,omitempty"`
+
+	// The Short Code registered with the phone provider.
+	ShortCode *string `json:"shortCode,omitempty" tf:"short_code,omitempty"`
+}
+
 type SMSChannelObservation struct {
 
 	// The application ID.
@@ -41,7 +66,6 @@ type SMSChannelParameters struct {
 	// The application ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/pinpoint/v1beta1.App
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("application_id",true)
-	// +kubebuilder:validation:Optional
 	ApplicationID *string `json:"applicationId,omitempty" tf:"application_id,omitempty"`
 
 	// Reference to a App in pinpoint to populate applicationId.
@@ -53,20 +77,16 @@ type SMSChannelParameters struct {
 	ApplicationIDSelector *v1.Selector `json:"applicationIdSelector,omitempty" tf:"-"`
 
 	// Whether the channel is enabled or disabled. Defaults to true.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Sender identifier of your messages.
-	// +kubebuilder:validation:Optional
 	SenderID *string `json:"senderId,omitempty" tf:"sender_id,omitempty"`
 
 	// The Short Code registered with the phone provider.
-	// +kubebuilder:validation:Optional
 	ShortCode *string `json:"shortCode,omitempty" tf:"short_code,omitempty"`
 }
 
@@ -74,6 +94,10 @@ type SMSChannelParameters struct {
 type SMSChannelSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SMSChannelParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SMSChannelInitParameters `json:"initProvider,omitempty"`
 }
 
 // SMSChannelStatus defines the observed state of SMSChannel.

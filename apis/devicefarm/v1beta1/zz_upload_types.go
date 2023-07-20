@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type UploadInitParameters struct {
+
+	// The upload's content type (for example, application/octet-stream).
+	ContentType *string `json:"contentType,omitempty" tf:"content_type,omitempty"`
+
+	// The upload's file name. The name should not contain any forward slashes (/). If you are uploading an iOS app, the file name must end with the .ipa extension. If you are uploading an Android app, the file name must end with the .apk extension. For all others, the file name must end with the .zip file extension.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The ARN of the project for the upload.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/devicefarm/v1beta1.Project
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	ProjectArn *string `json:"projectArn,omitempty" tf:"project_arn,omitempty"`
+
+	ProjectArnRef *v1.Reference `json:"projectArnRef,omitempty" tf:"-"`
+
+	ProjectArnSelector *v1.Selector `json:"projectArnSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The upload's upload type. See AWS Docs for valid list of values.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type UploadObservation struct {
 
 	// The Amazon Resource Name of this upload.
@@ -45,17 +70,14 @@ type UploadObservation struct {
 type UploadParameters struct {
 
 	// The upload's content type (for example, application/octet-stream).
-	// +kubebuilder:validation:Optional
 	ContentType *string `json:"contentType,omitempty" tf:"content_type,omitempty"`
 
 	// The upload's file name. The name should not contain any forward slashes (/). If you are uploading an iOS app, the file name must end with the .ipa extension. If you are uploading an Android app, the file name must end with the .apk extension. For all others, the file name must end with the .zip file extension.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The ARN of the project for the upload.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/devicefarm/v1beta1.Project
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	ProjectArn *string `json:"projectArn,omitempty" tf:"project_arn,omitempty"`
 
 	// Reference to a Project in devicefarm to populate projectArn.
@@ -68,11 +90,9 @@ type UploadParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The upload's upload type. See AWS Docs for valid list of values.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -80,6 +100,10 @@ type UploadParameters struct {
 type UploadSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     UploadParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider UploadInitParameters `json:"initProvider,omitempty"`
 }
 
 // UploadStatus defines the observed state of Upload.
@@ -100,8 +124,8 @@ type UploadStatus struct {
 type Upload struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.type)",message="type is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.type) || has(self.initProvider.type)",message="%!s(MISSING) is a required parameter"
 	Spec   UploadSpec   `json:"spec"`
 	Status UploadStatus `json:"status,omitempty"`
 }

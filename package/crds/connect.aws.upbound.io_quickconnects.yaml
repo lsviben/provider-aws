@@ -167,8 +167,6 @@ spec:
                                 description: Specifies the phone number in in E.164
                                   format.
                                 type: string
-                            required:
-                            - phoneNumber
                             type: object
                           type: array
                         queueConfig:
@@ -184,9 +182,6 @@ spec:
                               queueId:
                                 description: Specifies the identifier for the queue.
                                 type: string
-                            required:
-                            - contactFlowId
-                            - queueId
                             type: object
                           type: array
                         quickConnectType:
@@ -206,13 +201,8 @@ spec:
                               userId:
                                 description: Specifies the identifier for the user.
                                 type: string
-                            required:
-                            - contactFlowId
-                            - userId
                             type: object
                           type: array
-                      required:
-                      - quickConnectType
                       type: object
                     type: array
                   region:
@@ -224,8 +214,159 @@ spec:
                       type: string
                     description: Key-value map of resource tags.
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  description:
+                    description: Specifies the description of the Quick Connect.
+                    type: string
+                  instanceId:
+                    description: Specifies the identifier of the hosting Amazon Connect
+                      Instance.
+                    type: string
+                  instanceIdRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  instanceIdSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  name:
+                    description: Specifies the name of the Quick Connect.
+                    type: string
+                  quickConnectConfig:
+                    description: 'A block that defines the configuration information
+                      for the Quick Connect: quick_connect_type and one of phone_config,
+                      queue_config, user_config . The Quick Connect Config block is
+                      documented below.'
+                    items:
+                      properties:
+                        phoneConfig:
+                          description: Specifies the phone configuration of the Quick
+                            Connect. This is required only if quick_connect_type is
+                            PHONE_NUMBER. The phone_config block is documented below.
+                          items:
+                            properties:
+                              phoneNumber:
+                                description: Specifies the phone number in in E.164
+                                  format.
+                                type: string
+                            type: object
+                          type: array
+                        queueConfig:
+                          description: Specifies the queue configuration of the Quick
+                            Connect. This is required only if quick_connect_type is
+                            QUEUE. The queue_config block is documented below.
+                          items:
+                            properties:
+                              contactFlowId:
+                                description: Specifies the identifier of the contact
+                                  flow.
+                                type: string
+                              queueId:
+                                description: Specifies the identifier for the queue.
+                                type: string
+                            type: object
+                          type: array
+                        quickConnectType:
+                          description: Specifies the configuration type of the quick
+                            connect. valid values are PHONE_NUMBER, QUEUE, USER.
+                          type: string
+                        userConfig:
+                          description: Specifies the user configuration of the Quick
+                            Connect. This is required only if quick_connect_type is
+                            USER. The user_config block is documented below.
+                          items:
+                            properties:
+                              contactFlowId:
+                                description: Specifies the identifier of the contact
+                                  flow.
+                                type: string
+                              userId:
+                                description: Specifies the identifier for the user.
+                                type: string
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
                 type: object
               managementPolicies:
                 default:
@@ -425,12 +566,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: name is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)'
-            - message: quickConnectConfig is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)
+                || has(self.initProvider.name)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.quickConnectConfig)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.quickConnectConfig)
+                || has(self.initProvider.quickConnectConfig)'
           status:
             description: QuickConnectStatus defines the observed state of QuickConnect.
             properties:

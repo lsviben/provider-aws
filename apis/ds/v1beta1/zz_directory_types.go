@@ -13,6 +13,32 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConnectSettingsInitParameters struct {
+
+	// The DNS IP addresses of the domain to connect to.
+	CustomerDNSIps []*string `json:"customerDnsIps,omitempty" tf:"customer_dns_ips,omitempty"`
+
+	// The username corresponding to the password provided.
+	CustomerUsername *string `json:"customerUsername,omitempty" tf:"customer_username,omitempty"`
+
+	// The identifiers of the subnets for the directory servers (2 subnets in 2 different AZs).
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
+	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
+
+	SubnetIdsRefs []v1.Reference `json:"subnetIdsRefs,omitempty" tf:"-"`
+
+	SubnetIdsSelector *v1.Selector `json:"subnetIdsSelector,omitempty" tf:"-"`
+
+	// The identifier of the VPC that the directory is in.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
+
+	VPCIDRef *v1.Reference `json:"vpcIdRef,omitempty" tf:"-"`
+
+	VPCIDSelector *v1.Selector `json:"vpcIdSelector,omitempty" tf:"-"`
+}
+
 type ConnectSettingsObservation struct {
 	AvailabilityZones []*string `json:"availabilityZones,omitempty" tf:"availability_zones,omitempty"`
 
@@ -35,16 +61,13 @@ type ConnectSettingsObservation struct {
 type ConnectSettingsParameters struct {
 
 	// The DNS IP addresses of the domain to connect to.
-	// +kubebuilder:validation:Required
-	CustomerDNSIps []*string `json:"customerDnsIps" tf:"customer_dns_ips,omitempty"`
+	CustomerDNSIps []*string `json:"customerDnsIps,omitempty" tf:"customer_dns_ips,omitempty"`
 
 	// The username corresponding to the password provided.
-	// +kubebuilder:validation:Required
-	CustomerUsername *string `json:"customerUsername" tf:"customer_username,omitempty"`
+	CustomerUsername *string `json:"customerUsername,omitempty" tf:"customer_username,omitempty"`
 
 	// The identifiers of the subnets for the directory servers (2 subnets in 2 different AZs).
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
-	// +kubebuilder:validation:Optional
 	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
 
 	// References to Subnet in ec2 to populate subnetIds.
@@ -58,7 +81,6 @@ type ConnectSettingsParameters struct {
 	// The identifier of the VPC that the directory is in.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
 
 	// Reference to a VPC in ec2 to populate vpcId.
@@ -68,6 +90,52 @@ type ConnectSettingsParameters struct {
 	// Selector for a VPC in ec2 to populate vpcId.
 	// +kubebuilder:validation:Optional
 	VPCIDSelector *v1.Selector `json:"vpcIdSelector,omitempty" tf:"-"`
+}
+
+type DirectoryInitParameters struct {
+
+	// The alias for the directory (must be unique amongst all aliases in AWS). Required for enable_sso.
+	Alias *string `json:"alias,omitempty" tf:"alias,omitempty"`
+
+	// Connector related information about the directory. Fields documented below.
+	ConnectSettings []ConnectSettingsInitParameters `json:"connectSettings,omitempty" tf:"connect_settings,omitempty"`
+
+	// A textual description for the directory.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The number of domain controllers desired in the directory. Minimum value of 2. Scaling of domain controllers is only supported for MicrosoftAD directories.
+	DesiredNumberOfDomainControllers *float64 `json:"desiredNumberOfDomainControllers,omitempty" tf:"desired_number_of_domain_controllers,omitempty"`
+
+	// The MicrosoftAD edition (Standard or Enterprise). Defaults to Enterprise.
+	Edition *string `json:"edition,omitempty" tf:"edition,omitempty"`
+
+	// Whether to enable single-sign on for the directory. Requires alias. Defaults to false.
+	EnableSso *bool `json:"enableSso,omitempty" tf:"enable_sso,omitempty"`
+
+	// The fully qualified name for the directory, such as corp.example.com
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The password for the directory administrator or connector user.
+	PasswordSecretRef v1.SecretKeySelector `json:"passwordSecretRef" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The short name of the directory, such as CORP.
+	ShortName *string `json:"shortName,omitempty" tf:"short_name,omitempty"`
+
+	// (For SimpleAD and ADConnector types) The size of the directory (Small or Large are accepted values). Large by default.
+	Size *string `json:"size,omitempty" tf:"size,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The directory type (SimpleAD, ADConnector or MicrosoftAD are accepted values). Defaults to SimpleAD.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+
+	// VPC related information about the directory. Fields documented below.
+	VPCSettings []VPCSettingsInitParameters `json:"vpcSettings,omitempty" tf:"vpc_settings,omitempty"`
 }
 
 type DirectoryObservation struct {
@@ -127,61 +195,67 @@ type DirectoryObservation struct {
 type DirectoryParameters struct {
 
 	// The alias for the directory (must be unique amongst all aliases in AWS). Required for enable_sso.
-	// +kubebuilder:validation:Optional
 	Alias *string `json:"alias,omitempty" tf:"alias,omitempty"`
 
 	// Connector related information about the directory. Fields documented below.
-	// +kubebuilder:validation:Optional
 	ConnectSettings []ConnectSettingsParameters `json:"connectSettings,omitempty" tf:"connect_settings,omitempty"`
 
 	// A textual description for the directory.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The number of domain controllers desired in the directory. Minimum value of 2. Scaling of domain controllers is only supported for MicrosoftAD directories.
-	// +kubebuilder:validation:Optional
 	DesiredNumberOfDomainControllers *float64 `json:"desiredNumberOfDomainControllers,omitempty" tf:"desired_number_of_domain_controllers,omitempty"`
 
 	// The MicrosoftAD edition (Standard or Enterprise). Defaults to Enterprise.
-	// +kubebuilder:validation:Optional
 	Edition *string `json:"edition,omitempty" tf:"edition,omitempty"`
 
 	// Whether to enable single-sign on for the directory. Requires alias. Defaults to false.
-	// +kubebuilder:validation:Optional
 	EnableSso *bool `json:"enableSso,omitempty" tf:"enable_sso,omitempty"`
 
 	// The fully qualified name for the directory, such as corp.example.com
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The password for the directory administrator or connector user.
-	// +kubebuilder:validation:Optional
 	PasswordSecretRef v1.SecretKeySelector `json:"passwordSecretRef" tf:"-"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The short name of the directory, such as CORP.
-	// +kubebuilder:validation:Optional
 	ShortName *string `json:"shortName,omitempty" tf:"short_name,omitempty"`
 
 	// (For SimpleAD and ADConnector types) The size of the directory (Small or Large are accepted values). Large by default.
-	// +kubebuilder:validation:Optional
 	Size *string `json:"size,omitempty" tf:"size,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The directory type (SimpleAD, ADConnector or MicrosoftAD are accepted values). Defaults to SimpleAD.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 
 	// VPC related information about the directory. Fields documented below.
-	// +kubebuilder:validation:Optional
 	VPCSettings []VPCSettingsParameters `json:"vpcSettings,omitempty" tf:"vpc_settings,omitempty"`
+}
+
+type VPCSettingsInitParameters struct {
+
+	// The identifiers of the subnets for the directory servers (2 subnets in 2 different AZs).
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
+	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
+
+	SubnetIdsRefs []v1.Reference `json:"subnetIdsRefs,omitempty" tf:"-"`
+
+	SubnetIdsSelector *v1.Selector `json:"subnetIdsSelector,omitempty" tf:"-"`
+
+	// The identifier of the VPC that the directory is in.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
+
+	VPCIDRef *v1.Reference `json:"vpcIdRef,omitempty" tf:"-"`
+
+	VPCIDSelector *v1.Selector `json:"vpcIdSelector,omitempty" tf:"-"`
 }
 
 type VPCSettingsObservation struct {
@@ -198,7 +272,6 @@ type VPCSettingsParameters struct {
 
 	// The identifiers of the subnets for the directory servers (2 subnets in 2 different AZs).
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
-	// +kubebuilder:validation:Optional
 	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
 
 	// References to Subnet in ec2 to populate subnetIds.
@@ -212,7 +285,6 @@ type VPCSettingsParameters struct {
 	// The identifier of the VPC that the directory is in.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
 
 	// Reference to a VPC in ec2 to populate vpcId.
@@ -228,6 +300,10 @@ type VPCSettingsParameters struct {
 type DirectorySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DirectoryParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DirectoryInitParameters `json:"initProvider,omitempty"`
 }
 
 // DirectoryStatus defines the observed state of Directory.
@@ -248,8 +324,8 @@ type DirectoryStatus struct {
 type Directory struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.passwordSecretRef)",message="passwordSecretRef is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.passwordSecretRef) || has(self.initProvider.passwordSecretRef)",message="%!s(MISSING) is a required parameter"
 	Spec   DirectorySpec   `json:"spec"`
 	Status DirectoryStatus `json:"status,omitempty"`
 }

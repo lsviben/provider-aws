@@ -13,6 +13,12 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PauseClusterInitParameters struct {
+
+	// The identifier of the cluster to be paused.
+	ClusterIdentifier *string `json:"clusterIdentifier,omitempty" tf:"cluster_identifier,omitempty"`
+}
+
 type PauseClusterObservation struct {
 
 	// The identifier of the cluster to be paused.
@@ -22,8 +28,25 @@ type PauseClusterObservation struct {
 type PauseClusterParameters struct {
 
 	// The identifier of the cluster to be paused.
-	// +kubebuilder:validation:Required
-	ClusterIdentifier *string `json:"clusterIdentifier" tf:"cluster_identifier,omitempty"`
+	ClusterIdentifier *string `json:"clusterIdentifier,omitempty" tf:"cluster_identifier,omitempty"`
+}
+
+type ResizeClusterInitParameters struct {
+
+	// A boolean value indicating whether the resize operation is using the classic resize process. Default: false.
+	Classic *bool `json:"classic,omitempty" tf:"classic,omitempty"`
+
+	// The unique identifier for the cluster to resize.
+	ClusterIdentifier *string `json:"clusterIdentifier,omitempty" tf:"cluster_identifier,omitempty"`
+
+	// The new cluster type for the specified cluster.
+	ClusterType *string `json:"clusterType,omitempty" tf:"cluster_type,omitempty"`
+
+	// The new node type for the nodes you are adding.
+	NodeType *string `json:"nodeType,omitempty" tf:"node_type,omitempty"`
+
+	// The new number of nodes for the cluster.
+	NumberOfNodes *float64 `json:"numberOfNodes,omitempty" tf:"number_of_nodes,omitempty"`
 }
 
 type ResizeClusterObservation struct {
@@ -47,24 +70,25 @@ type ResizeClusterObservation struct {
 type ResizeClusterParameters struct {
 
 	// A boolean value indicating whether the resize operation is using the classic resize process. Default: false.
-	// +kubebuilder:validation:Optional
 	Classic *bool `json:"classic,omitempty" tf:"classic,omitempty"`
 
 	// The unique identifier for the cluster to resize.
-	// +kubebuilder:validation:Required
-	ClusterIdentifier *string `json:"clusterIdentifier" tf:"cluster_identifier,omitempty"`
+	ClusterIdentifier *string `json:"clusterIdentifier,omitempty" tf:"cluster_identifier,omitempty"`
 
 	// The new cluster type for the specified cluster.
-	// +kubebuilder:validation:Optional
 	ClusterType *string `json:"clusterType,omitempty" tf:"cluster_type,omitempty"`
 
 	// The new node type for the nodes you are adding.
-	// +kubebuilder:validation:Optional
 	NodeType *string `json:"nodeType,omitempty" tf:"node_type,omitempty"`
 
 	// The new number of nodes for the cluster.
-	// +kubebuilder:validation:Optional
 	NumberOfNodes *float64 `json:"numberOfNodes,omitempty" tf:"number_of_nodes,omitempty"`
+}
+
+type ResumeClusterInitParameters struct {
+
+	// The identifier of the cluster to be resumed.
+	ClusterIdentifier *string `json:"clusterIdentifier,omitempty" tf:"cluster_identifier,omitempty"`
 }
 
 type ResumeClusterObservation struct {
@@ -76,8 +100,41 @@ type ResumeClusterObservation struct {
 type ResumeClusterParameters struct {
 
 	// The identifier of the cluster to be resumed.
-	// +kubebuilder:validation:Required
-	ClusterIdentifier *string `json:"clusterIdentifier" tf:"cluster_identifier,omitempty"`
+	ClusterIdentifier *string `json:"clusterIdentifier,omitempty" tf:"cluster_identifier,omitempty"`
+}
+
+type ScheduledActionInitParameters struct {
+
+	// The description of the scheduled action.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Whether to enable the scheduled action. Default is true .
+	Enable *bool `json:"enable,omitempty" tf:"enable,omitempty"`
+
+	// The end time in UTC when the schedule is active, in UTC RFC3339 format(for example, YYYY-MM-DDTHH:MM:SSZ).
+	EndTime *string `json:"endTime,omitempty" tf:"end_time,omitempty"`
+
+	// The IAM role to assume to run the scheduled action.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	IAMRole *string `json:"iamRole,omitempty" tf:"iam_role,omitempty"`
+
+	IAMRoleRef *v1.Reference `json:"iamRoleRef,omitempty" tf:"-"`
+
+	IAMRoleSelector *v1.Selector `json:"iamRoleSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The schedule of action. The schedule is defined format of "at expression" or "cron expression", for example at(2016-03-04T17:27:00) or cron(0 10 ? * MON *). See Scheduled Action for more information.
+	Schedule *string `json:"schedule,omitempty" tf:"schedule,omitempty"`
+
+	// The start time in UTC when the schedule is active, in UTC RFC3339 format(for example, YYYY-MM-DDTHH:MM:SSZ).
+	StartTime *string `json:"startTime,omitempty" tf:"start_time,omitempty"`
+
+	// Target action. Documented below.
+	TargetAction []TargetActionInitParameters `json:"targetAction,omitempty" tf:"target_action,omitempty"`
 }
 
 type ScheduledActionObservation struct {
@@ -110,21 +167,17 @@ type ScheduledActionObservation struct {
 type ScheduledActionParameters struct {
 
 	// The description of the scheduled action.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Whether to enable the scheduled action. Default is true .
-	// +kubebuilder:validation:Optional
 	Enable *bool `json:"enable,omitempty" tf:"enable,omitempty"`
 
 	// The end time in UTC when the schedule is active, in UTC RFC3339 format(for example, YYYY-MM-DDTHH:MM:SSZ).
-	// +kubebuilder:validation:Optional
 	EndTime *string `json:"endTime,omitempty" tf:"end_time,omitempty"`
 
 	// The IAM role to assume to run the scheduled action.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	IAMRole *string `json:"iamRole,omitempty" tf:"iam_role,omitempty"`
 
 	// Reference to a Role in iam to populate iamRole.
@@ -137,20 +190,28 @@ type ScheduledActionParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The schedule of action. The schedule is defined format of "at expression" or "cron expression", for example at(2016-03-04T17:27:00) or cron(0 10 ? * MON *). See Scheduled Action for more information.
-	// +kubebuilder:validation:Optional
 	Schedule *string `json:"schedule,omitempty" tf:"schedule,omitempty"`
 
 	// The start time in UTC when the schedule is active, in UTC RFC3339 format(for example, YYYY-MM-DDTHH:MM:SSZ).
-	// +kubebuilder:validation:Optional
 	StartTime *string `json:"startTime,omitempty" tf:"start_time,omitempty"`
 
 	// Target action. Documented below.
-	// +kubebuilder:validation:Optional
 	TargetAction []TargetActionParameters `json:"targetAction,omitempty" tf:"target_action,omitempty"`
+}
+
+type TargetActionInitParameters struct {
+
+	// An action that runs a PauseCluster API operation. Documented below.
+	PauseCluster []PauseClusterInitParameters `json:"pauseCluster,omitempty" tf:"pause_cluster,omitempty"`
+
+	// An action that runs a ResizeCluster API operation. Documented below.
+	ResizeCluster []ResizeClusterInitParameters `json:"resizeCluster,omitempty" tf:"resize_cluster,omitempty"`
+
+	// An action that runs a ResumeCluster API operation. Documented below.
+	ResumeCluster []ResumeClusterInitParameters `json:"resumeCluster,omitempty" tf:"resume_cluster,omitempty"`
 }
 
 type TargetActionObservation struct {
@@ -168,15 +229,12 @@ type TargetActionObservation struct {
 type TargetActionParameters struct {
 
 	// An action that runs a PauseCluster API operation. Documented below.
-	// +kubebuilder:validation:Optional
 	PauseCluster []PauseClusterParameters `json:"pauseCluster,omitempty" tf:"pause_cluster,omitempty"`
 
 	// An action that runs a ResizeCluster API operation. Documented below.
-	// +kubebuilder:validation:Optional
 	ResizeCluster []ResizeClusterParameters `json:"resizeCluster,omitempty" tf:"resize_cluster,omitempty"`
 
 	// An action that runs a ResumeCluster API operation. Documented below.
-	// +kubebuilder:validation:Optional
 	ResumeCluster []ResumeClusterParameters `json:"resumeCluster,omitempty" tf:"resume_cluster,omitempty"`
 }
 
@@ -184,6 +242,10 @@ type TargetActionParameters struct {
 type ScheduledActionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ScheduledActionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ScheduledActionInitParameters `json:"initProvider,omitempty"`
 }
 
 // ScheduledActionStatus defines the observed state of ScheduledAction.
@@ -204,8 +266,8 @@ type ScheduledActionStatus struct {
 type ScheduledAction struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.schedule)",message="schedule is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.targetAction)",message="targetAction is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.schedule) || has(self.initProvider.schedule)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.targetAction) || has(self.initProvider.targetAction)",message="%!s(MISSING) is a required parameter"
 	Spec   ScheduledActionSpec   `json:"spec"`
 	Status ScheduledActionStatus `json:"status,omitempty"`
 }

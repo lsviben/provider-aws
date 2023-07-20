@@ -13,6 +13,37 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type IdentityNotificationTopicInitParameters struct {
+
+	// The identity for which the Amazon SNS topic will be set. You can specify an identity by using its name or by using its Amazon Resource Name (ARN).
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ses/v1beta1.DomainIdentity
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("domain",false)
+	Identity *string `json:"identity,omitempty" tf:"identity,omitempty"`
+
+	IdentityRef *v1.Reference `json:"identityRef,omitempty" tf:"-"`
+
+	IdentitySelector *v1.Selector `json:"identitySelector,omitempty" tf:"-"`
+
+	// Whether SES should include original email headers in SNS notifications of this type. false by default.
+	IncludeOriginalHeaders *bool `json:"includeOriginalHeaders,omitempty" tf:"include_original_headers,omitempty"`
+
+	// The type of notifications that will be published to the specified Amazon SNS topic. Valid Values: Bounce, Complaint or Delivery.
+	NotificationType *string `json:"notificationType,omitempty" tf:"notification_type,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The Amazon Resource Name (ARN) of the Amazon SNS topic. Can be set to "" (an empty string) to disable publishing.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	TopicArn *string `json:"topicArn,omitempty" tf:"topic_arn,omitempty"`
+
+	TopicArnRef *v1.Reference `json:"topicArnRef,omitempty" tf:"-"`
+
+	TopicArnSelector *v1.Selector `json:"topicArnSelector,omitempty" tf:"-"`
+}
+
 type IdentityNotificationTopicObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -34,7 +65,6 @@ type IdentityNotificationTopicParameters struct {
 	// The identity for which the Amazon SNS topic will be set. You can specify an identity by using its name or by using its Amazon Resource Name (ARN).
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ses/v1beta1.DomainIdentity
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("domain",false)
-	// +kubebuilder:validation:Optional
 	Identity *string `json:"identity,omitempty" tf:"identity,omitempty"`
 
 	// Reference to a DomainIdentity in ses to populate identity.
@@ -46,22 +76,18 @@ type IdentityNotificationTopicParameters struct {
 	IdentitySelector *v1.Selector `json:"identitySelector,omitempty" tf:"-"`
 
 	// Whether SES should include original email headers in SNS notifications of this type. false by default.
-	// +kubebuilder:validation:Optional
 	IncludeOriginalHeaders *bool `json:"includeOriginalHeaders,omitempty" tf:"include_original_headers,omitempty"`
 
 	// The type of notifications that will be published to the specified Amazon SNS topic. Valid Values: Bounce, Complaint or Delivery.
-	// +kubebuilder:validation:Optional
 	NotificationType *string `json:"notificationType,omitempty" tf:"notification_type,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The Amazon Resource Name (ARN) of the Amazon SNS topic. Can be set to "" (an empty string) to disable publishing.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	TopicArn *string `json:"topicArn,omitempty" tf:"topic_arn,omitempty"`
 
 	// Reference to a Topic in sns to populate topicArn.
@@ -77,6 +103,10 @@ type IdentityNotificationTopicParameters struct {
 type IdentityNotificationTopicSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     IdentityNotificationTopicParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider IdentityNotificationTopicInitParameters `json:"initProvider,omitempty"`
 }
 
 // IdentityNotificationTopicStatus defines the observed state of IdentityNotificationTopic.
@@ -97,7 +127,7 @@ type IdentityNotificationTopicStatus struct {
 type IdentityNotificationTopic struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.notificationType)",message="notificationType is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.notificationType) || has(self.initProvider.notificationType)",message="%!s(MISSING) is a required parameter"
 	Spec   IdentityNotificationTopicSpec   `json:"spec"`
 	Status IdentityNotificationTopicStatus `json:"status,omitempty"`
 }

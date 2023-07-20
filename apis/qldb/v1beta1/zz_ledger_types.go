@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type LedgerInitParameters struct {
+
+	// The deletion protection for the QLDB Ledger instance. By default it is true.
+	DeletionProtection *bool `json:"deletionProtection,omitempty" tf:"deletion_protection,omitempty"`
+
+	// The key in AWS Key Management Service (AWS KMS) to use for encryption of data at rest in the ledger. For more information, see the AWS documentation. Valid values are "AWS_OWNED_KMS_KEY" to use an AWS KMS key that is owned and managed by AWS on your behalf, or the ARN of a valid symmetric customer managed KMS key.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	KMSKey *string `json:"kmsKey,omitempty" tf:"kms_key,omitempty"`
+
+	KMSKeyRef *v1.Reference `json:"kmsKeyRef,omitempty" tf:"-"`
+
+	KMSKeySelector *v1.Selector `json:"kmsKeySelector,omitempty" tf:"-"`
+
+	// The permissions mode for the QLDB ledger instance. Specify either ALLOW_ALL or STANDARD.
+	PermissionsMode *string `json:"permissionsMode,omitempty" tf:"permissions_mode,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type LedgerObservation struct {
 
 	// The ARN of the QLDB Ledger
@@ -40,12 +64,10 @@ type LedgerObservation struct {
 type LedgerParameters struct {
 
 	// The deletion protection for the QLDB Ledger instance. By default it is true.
-	// +kubebuilder:validation:Optional
 	DeletionProtection *bool `json:"deletionProtection,omitempty" tf:"deletion_protection,omitempty"`
 
 	// The key in AWS Key Management Service (AWS KMS) to use for encryption of data at rest in the ledger. For more information, see the AWS documentation. Valid values are "AWS_OWNED_KMS_KEY" to use an AWS KMS key that is owned and managed by AWS on your behalf, or the ARN of a valid symmetric customer managed KMS key.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
-	// +kubebuilder:validation:Optional
 	KMSKey *string `json:"kmsKey,omitempty" tf:"kms_key,omitempty"`
 
 	// Reference to a Key in kms to populate kmsKey.
@@ -57,16 +79,13 @@ type LedgerParameters struct {
 	KMSKeySelector *v1.Selector `json:"kmsKeySelector,omitempty" tf:"-"`
 
 	// The permissions mode for the QLDB ledger instance. Specify either ALLOW_ALL or STANDARD.
-	// +kubebuilder:validation:Optional
 	PermissionsMode *string `json:"permissionsMode,omitempty" tf:"permissions_mode,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -74,6 +93,10 @@ type LedgerParameters struct {
 type LedgerSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     LedgerParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider LedgerInitParameters `json:"initProvider,omitempty"`
 }
 
 // LedgerStatus defines the observed state of Ledger.
@@ -94,7 +117,7 @@ type LedgerStatus struct {
 type Ledger struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.permissionsMode)",message="permissionsMode is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.permissionsMode) || has(self.initProvider.permissionsMode)",message="%!s(MISSING) is a required parameter"
 	Spec   LedgerSpec   `json:"spec"`
 	Status LedgerStatus `json:"status,omitempty"`
 }

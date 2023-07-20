@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type MemberInitParameters struct {
+
+	// AWS account ID for the account.
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	// If set to true, then the root user of the invited account will not receive an email notification. This notification is in addition to an alert that the root user receives in AWS Personal Health Dashboard. By default, this is set to false.
+	DisableEmailNotification *bool `json:"disableEmailNotification,omitempty" tf:"disable_email_notification,omitempty"`
+
+	// Email address for the account.
+	EmailAddress *string `json:"emailAddress,omitempty" tf:"email_address,omitempty"`
+
+	// ARN of the behavior graph to invite the member accounts to contribute their data to.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/detective/v1beta1.Graph
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	GraphArn *string `json:"graphArn,omitempty" tf:"graph_arn,omitempty"`
+
+	GraphArnRef *v1.Reference `json:"graphArnRef,omitempty" tf:"-"`
+
+	GraphArnSelector *v1.Selector `json:"graphArnSelector,omitempty" tf:"-"`
+
+	// A custom message to include in the invitation. Amazon Detective adds this message to the standard content that it sends for an invitation.
+	Message *string `json:"message,omitempty" tf:"message,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type MemberObservation struct {
 
 	// AWS account ID for the account.
@@ -54,21 +82,17 @@ type MemberObservation struct {
 type MemberParameters struct {
 
 	// AWS account ID for the account.
-	// +kubebuilder:validation:Optional
 	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// If set to true, then the root user of the invited account will not receive an email notification. This notification is in addition to an alert that the root user receives in AWS Personal Health Dashboard. By default, this is set to false.
-	// +kubebuilder:validation:Optional
 	DisableEmailNotification *bool `json:"disableEmailNotification,omitempty" tf:"disable_email_notification,omitempty"`
 
 	// Email address for the account.
-	// +kubebuilder:validation:Optional
 	EmailAddress *string `json:"emailAddress,omitempty" tf:"email_address,omitempty"`
 
 	// ARN of the behavior graph to invite the member accounts to contribute their data to.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/detective/v1beta1.Graph
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	GraphArn *string `json:"graphArn,omitempty" tf:"graph_arn,omitempty"`
 
 	// Reference to a Graph in detective to populate graphArn.
@@ -80,19 +104,21 @@ type MemberParameters struct {
 	GraphArnSelector *v1.Selector `json:"graphArnSelector,omitempty" tf:"-"`
 
 	// A custom message to include in the invitation. Amazon Detective adds this message to the standard content that it sends for an invitation.
-	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty" tf:"message,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // MemberSpec defines the desired state of Member
 type MemberSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     MemberParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider MemberInitParameters `json:"initProvider,omitempty"`
 }
 
 // MemberStatus defines the observed state of Member.
@@ -113,8 +139,8 @@ type MemberStatus struct {
 type Member struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accountId)",message="accountId is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.emailAddress)",message="emailAddress is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accountId) || has(self.initProvider.accountId)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.emailAddress) || has(self.initProvider.emailAddress)",message="%!s(MISSING) is a required parameter"
 	Spec   MemberSpec   `json:"spec"`
 	Status MemberStatus `json:"status,omitempty"`
 }

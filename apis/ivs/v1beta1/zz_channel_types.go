@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ChannelInitParameters struct {
+
+	// If true, channel is private (enabled for playback authorization).
+	Authorized *bool `json:"authorized,omitempty" tf:"authorized,omitempty"`
+
+	// Channel latency mode. Valid values: NORMAL, LOW.
+	LatencyMode *string `json:"latencyMode,omitempty" tf:"latency_mode,omitempty"`
+
+	// Channel name.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Recording configuration ARN.
+	RecordingConfigurationArn *string `json:"recordingConfigurationArn,omitempty" tf:"recording_configuration_arn,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Channel type, which determines the allowable resolution and bitrate. Valid values: STANDARD, BASIC.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type ChannelObservation struct {
 
 	// ARN of the Channel.
@@ -51,32 +76,25 @@ type ChannelObservation struct {
 type ChannelParameters struct {
 
 	// If true, channel is private (enabled for playback authorization).
-	// +kubebuilder:validation:Optional
 	Authorized *bool `json:"authorized,omitempty" tf:"authorized,omitempty"`
 
 	// Channel latency mode. Valid values: NORMAL, LOW.
-	// +kubebuilder:validation:Optional
 	LatencyMode *string `json:"latencyMode,omitempty" tf:"latency_mode,omitempty"`
 
 	// Channel name.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Recording configuration ARN.
-	// +kubebuilder:validation:Optional
 	RecordingConfigurationArn *string `json:"recordingConfigurationArn,omitempty" tf:"recording_configuration_arn,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Channel type, which determines the allowable resolution and bitrate. Valid values: STANDARD, BASIC.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -84,6 +102,10 @@ type ChannelParameters struct {
 type ChannelSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ChannelParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ChannelInitParameters `json:"initProvider,omitempty"`
 }
 
 // ChannelStatus defines the observed state of Channel.

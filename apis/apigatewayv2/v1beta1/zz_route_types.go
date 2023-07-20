@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RequestParameterInitParameters struct {
+
+	// Request parameter key. This is a request data mapping parameter.
+	RequestParameterKey *string `json:"requestParameterKey,omitempty" tf:"request_parameter_key,omitempty"`
+
+	// Boolean whether or not the parameter is required.
+	Required *bool `json:"required,omitempty" tf:"required,omitempty"`
+}
+
 type RequestParameterObservation struct {
 
 	// Request parameter key. This is a request data mapping parameter.
@@ -25,12 +34,72 @@ type RequestParameterObservation struct {
 type RequestParameterParameters struct {
 
 	// Request parameter key. This is a request data mapping parameter.
-	// +kubebuilder:validation:Required
-	RequestParameterKey *string `json:"requestParameterKey" tf:"request_parameter_key,omitempty"`
+	RequestParameterKey *string `json:"requestParameterKey,omitempty" tf:"request_parameter_key,omitempty"`
 
 	// Boolean whether or not the parameter is required.
-	// +kubebuilder:validation:Required
-	Required *bool `json:"required" tf:"required,omitempty"`
+	Required *bool `json:"required,omitempty" tf:"required,omitempty"`
+}
+
+type RouteInitParameters struct {
+
+	// API identifier.
+	// +crossplane:generate:reference:type=API
+	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
+
+	APIIDRef *v1.Reference `json:"apiIdRef,omitempty" tf:"-"`
+
+	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
+
+	// Boolean whether an API key is required for the route. Defaults to false. Supported only for WebSocket APIs.
+	APIKeyRequired *bool `json:"apiKeyRequired,omitempty" tf:"api_key_required,omitempty"`
+
+	// Authorization scopes supported by this route. The scopes are used with a JWT authorizer to authorize the method invocation.
+	AuthorizationScopes []*string `json:"authorizationScopes,omitempty" tf:"authorization_scopes,omitempty"`
+
+	// Authorization type for the route.
+	// For WebSocket APIs, valid values are NONE for open access, AWS_IAM for using AWS IAM permissions, and CUSTOM for using a Lambda authorizer.
+	// For HTTP APIs, valid values are NONE for open access, JWT for using JSON Web Tokens, AWS_IAM for using AWS IAM permissions, and CUSTOM for using a Lambda authorizer.
+	// Defaults to NONE.
+	AuthorizationType *string `json:"authorizationType,omitempty" tf:"authorization_type,omitempty"`
+
+	// Identifier of the aws_apigatewayv2_authorizer resource to be associated with this route.
+	// +crossplane:generate:reference:type=Authorizer
+	AuthorizerID *string `json:"authorizerId,omitempty" tf:"authorizer_id,omitempty"`
+
+	AuthorizerIDRef *v1.Reference `json:"authorizerIdRef,omitempty" tf:"-"`
+
+	AuthorizerIDSelector *v1.Selector `json:"authorizerIdSelector,omitempty" tf:"-"`
+
+	// The model selection expression for the route. Supported only for WebSocket APIs.
+	ModelSelectionExpression *string `json:"modelSelectionExpression,omitempty" tf:"model_selection_expression,omitempty"`
+
+	// Operation name for the route. Must be between 1 and 64 characters in length.
+	OperationName *string `json:"operationName,omitempty" tf:"operation_name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Request models for the route. Supported only for WebSocket APIs.
+	RequestModels map[string]*string `json:"requestModels,omitempty" tf:"request_models,omitempty"`
+
+	// Request parameters for the route. Supported only for WebSocket APIs.
+	RequestParameter []RequestParameterInitParameters `json:"requestParameter,omitempty" tf:"request_parameter,omitempty"`
+
+	// Route key for the route. For HTTP APIs, the route key can be either $default, or a combination of an HTTP method and resource path, for example, GET /pets.
+	RouteKey *string `json:"routeKey,omitempty" tf:"route_key,omitempty"`
+
+	// The route response selection expression for the route. Supported only for WebSocket APIs.
+	RouteResponseSelectionExpression *string `json:"routeResponseSelectionExpression,omitempty" tf:"route_response_selection_expression,omitempty"`
+
+	// Target for the route, of the form integrations/IntegrationID, where IntegrationID is the identifier of an aws_apigatewayv2_integration resource.
+	// +crossplane:generate:reference:type=Integration
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/apis/apigatewayv2/v1beta1.IntegrationIDPrefixed()
+	Target *string `json:"target,omitempty" tf:"target,omitempty"`
+
+	TargetRef *v1.Reference `json:"targetRef,omitempty" tf:"-"`
+
+	TargetSelector *v1.Selector `json:"targetSelector,omitempty" tf:"-"`
 }
 
 type RouteObservation struct {
@@ -82,7 +151,6 @@ type RouteParameters struct {
 
 	// API identifier.
 	// +crossplane:generate:reference:type=API
-	// +kubebuilder:validation:Optional
 	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
 
 	// Reference to a API to populate apiId.
@@ -94,23 +162,19 @@ type RouteParameters struct {
 	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
 
 	// Boolean whether an API key is required for the route. Defaults to false. Supported only for WebSocket APIs.
-	// +kubebuilder:validation:Optional
 	APIKeyRequired *bool `json:"apiKeyRequired,omitempty" tf:"api_key_required,omitempty"`
 
 	// Authorization scopes supported by this route. The scopes are used with a JWT authorizer to authorize the method invocation.
-	// +kubebuilder:validation:Optional
 	AuthorizationScopes []*string `json:"authorizationScopes,omitempty" tf:"authorization_scopes,omitempty"`
 
 	// Authorization type for the route.
 	// For WebSocket APIs, valid values are NONE for open access, AWS_IAM for using AWS IAM permissions, and CUSTOM for using a Lambda authorizer.
 	// For HTTP APIs, valid values are NONE for open access, JWT for using JSON Web Tokens, AWS_IAM for using AWS IAM permissions, and CUSTOM for using a Lambda authorizer.
 	// Defaults to NONE.
-	// +kubebuilder:validation:Optional
 	AuthorizationType *string `json:"authorizationType,omitempty" tf:"authorization_type,omitempty"`
 
 	// Identifier of the aws_apigatewayv2_authorizer resource to be associated with this route.
 	// +crossplane:generate:reference:type=Authorizer
-	// +kubebuilder:validation:Optional
 	AuthorizerID *string `json:"authorizerId,omitempty" tf:"authorizer_id,omitempty"`
 
 	// Reference to a Authorizer to populate authorizerId.
@@ -122,38 +186,30 @@ type RouteParameters struct {
 	AuthorizerIDSelector *v1.Selector `json:"authorizerIdSelector,omitempty" tf:"-"`
 
 	// The model selection expression for the route. Supported only for WebSocket APIs.
-	// +kubebuilder:validation:Optional
 	ModelSelectionExpression *string `json:"modelSelectionExpression,omitempty" tf:"model_selection_expression,omitempty"`
 
 	// Operation name for the route. Must be between 1 and 64 characters in length.
-	// +kubebuilder:validation:Optional
 	OperationName *string `json:"operationName,omitempty" tf:"operation_name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Request models for the route. Supported only for WebSocket APIs.
-	// +kubebuilder:validation:Optional
 	RequestModels map[string]*string `json:"requestModels,omitempty" tf:"request_models,omitempty"`
 
 	// Request parameters for the route. Supported only for WebSocket APIs.
-	// +kubebuilder:validation:Optional
 	RequestParameter []RequestParameterParameters `json:"requestParameter,omitempty" tf:"request_parameter,omitempty"`
 
 	// Route key for the route. For HTTP APIs, the route key can be either $default, or a combination of an HTTP method and resource path, for example, GET /pets.
-	// +kubebuilder:validation:Optional
 	RouteKey *string `json:"routeKey,omitempty" tf:"route_key,omitempty"`
 
 	// The route response selection expression for the route. Supported only for WebSocket APIs.
-	// +kubebuilder:validation:Optional
 	RouteResponseSelectionExpression *string `json:"routeResponseSelectionExpression,omitempty" tf:"route_response_selection_expression,omitempty"`
 
 	// Target for the route, of the form integrations/IntegrationID, where IntegrationID is the identifier of an aws_apigatewayv2_integration resource.
 	// +crossplane:generate:reference:type=Integration
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/apis/apigatewayv2/v1beta1.IntegrationIDPrefixed()
-	// +kubebuilder:validation:Optional
 	Target *string `json:"target,omitempty" tf:"target,omitempty"`
 
 	// Reference to a Integration to populate target.
@@ -169,6 +225,10 @@ type RouteParameters struct {
 type RouteSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RouteParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RouteInitParameters `json:"initProvider,omitempty"`
 }
 
 // RouteStatus defines the observed state of Route.
@@ -189,7 +249,7 @@ type RouteStatus struct {
 type Route struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.routeKey)",message="routeKey is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.routeKey) || has(self.initProvider.routeKey)",message="%!s(MISSING) is a required parameter"
 	Spec   RouteSpec   `json:"spec"`
 	Status RouteStatus `json:"status,omitempty"`
 }

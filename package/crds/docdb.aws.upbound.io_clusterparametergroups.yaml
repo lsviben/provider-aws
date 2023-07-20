@@ -91,9 +91,6 @@ spec:
                         value:
                           description: The value of the documentDB parameter.
                           type: string
-                      required:
-                      - name
-                      - value
                       type: object
                     type: array
                   region:
@@ -105,8 +102,47 @@ spec:
                       type: string
                     description: Key-value map of resource tags.
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  description:
+                    description: The description of the documentDB cluster parameter
+                      group.
+                    type: string
+                  family:
+                    description: The family of the documentDB cluster parameter group.
+                    type: string
+                  parameter:
+                    description: A list of documentDB parameters to apply. Setting
+                      parameters to system default values may show a difference on
+                      imported resources.
+                    items:
+                      properties:
+                        applyMethod:
+                          description: Valid values are immediate and pending-reboot.
+                            Defaults to pending-reboot.
+                          type: string
+                        name:
+                          description: The name of the documentDB cluster parameter
+                            group.
+                          type: string
+                        value:
+                          description: The value of the documentDB parameter.
+                          type: string
+                      type: object
+                    type: array
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
                 type: object
               managementPolicies:
                 default:
@@ -306,9 +342,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: family is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.family)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.family)
+                || has(self.initProvider.family)'
           status:
             description: ClusterParameterGroupStatus defines the observed state of
               ClusterParameterGroup.

@@ -13,6 +13,13 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EgressFilterInitParameters struct {
+
+	// Egress filter type. By default, the type is DROP_ALL.
+	// Valid values are ALLOW_ALL and DROP_ALL.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type EgressFilterObservation struct {
 
 	// Egress filter type. By default, the type is DROP_ALL.
@@ -24,8 +31,20 @@ type EgressFilterParameters struct {
 
 	// Egress filter type. By default, the type is DROP_ALL.
 	// Valid values are ALLOW_ALL and DROP_ALL.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type MeshInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Service mesh specification to apply.
+	Spec []MeshSpecInitParameters `json:"spec,omitempty" tf:"spec,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type MeshObservation struct {
@@ -62,16 +81,19 @@ type MeshParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Service mesh specification to apply.
-	// +kubebuilder:validation:Optional
 	Spec []MeshSpecParameters `json:"spec,omitempty" tf:"spec,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type MeshSpecInitParameters struct {
+
+	// Egress filter rules for the service mesh.
+	EgressFilter []EgressFilterInitParameters `json:"egressFilter,omitempty" tf:"egress_filter,omitempty"`
 }
 
 type MeshSpecObservation struct {
@@ -83,7 +105,6 @@ type MeshSpecObservation struct {
 type MeshSpecParameters struct {
 
 	// Egress filter rules for the service mesh.
-	// +kubebuilder:validation:Optional
 	EgressFilter []EgressFilterParameters `json:"egressFilter,omitempty" tf:"egress_filter,omitempty"`
 }
 
@@ -91,6 +112,10 @@ type MeshSpecParameters struct {
 type MeshSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     MeshParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider MeshInitParameters `json:"initProvider,omitempty"`
 }
 
 // MeshStatus defines the observed state of Mesh.

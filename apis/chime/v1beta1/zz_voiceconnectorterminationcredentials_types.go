@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CredentialsInitParameters struct {
+
+	// RFC2617 compliant password associated with the SIP credentials.
+	PasswordSecretRef v1.SecretKeySelector `json:"passwordSecretRef" tf:"-"`
+
+	// RFC2617 compliant username associated with the SIP credentials.
+	Username *string `json:"username,omitempty" tf:"username,omitempty"`
+}
+
 type CredentialsObservation struct {
 
 	// RFC2617 compliant username associated with the SIP credentials.
@@ -22,12 +31,29 @@ type CredentialsObservation struct {
 type CredentialsParameters struct {
 
 	// RFC2617 compliant password associated with the SIP credentials.
-	// +kubebuilder:validation:Required
 	PasswordSecretRef v1.SecretKeySelector `json:"passwordSecretRef" tf:"-"`
 
 	// RFC2617 compliant username associated with the SIP credentials.
-	// +kubebuilder:validation:Required
-	Username *string `json:"username" tf:"username,omitempty"`
+	Username *string `json:"username,omitempty" tf:"username,omitempty"`
+}
+
+type VoiceConnectorTerminationCredentialsInitParameters struct {
+
+	// List of termination SIP credentials.
+	Credentials []CredentialsInitParameters `json:"credentials,omitempty" tf:"credentials,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Amazon Chime Voice Connector ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/chime/v1beta1.VoiceConnector
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	VoiceConnectorID *string `json:"voiceConnectorId,omitempty" tf:"voice_connector_id,omitempty"`
+
+	VoiceConnectorIDRef *v1.Reference `json:"voiceConnectorIdRef,omitempty" tf:"-"`
+
+	VoiceConnectorIDSelector *v1.Selector `json:"voiceConnectorIdSelector,omitempty" tf:"-"`
 }
 
 type VoiceConnectorTerminationCredentialsObservation struct {
@@ -45,18 +71,15 @@ type VoiceConnectorTerminationCredentialsObservation struct {
 type VoiceConnectorTerminationCredentialsParameters struct {
 
 	// List of termination SIP credentials.
-	// +kubebuilder:validation:Optional
 	Credentials []CredentialsParameters `json:"credentials,omitempty" tf:"credentials,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Amazon Chime Voice Connector ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/chime/v1beta1.VoiceConnector
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	VoiceConnectorID *string `json:"voiceConnectorId,omitempty" tf:"voice_connector_id,omitempty"`
 
 	// Reference to a VoiceConnector in chime to populate voiceConnectorId.
@@ -72,6 +95,10 @@ type VoiceConnectorTerminationCredentialsParameters struct {
 type VoiceConnectorTerminationCredentialsSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VoiceConnectorTerminationCredentialsParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VoiceConnectorTerminationCredentialsInitParameters `json:"initProvider,omitempty"`
 }
 
 // VoiceConnectorTerminationCredentialsStatus defines the observed state of VoiceConnectorTerminationCredentials.
@@ -92,7 +119,7 @@ type VoiceConnectorTerminationCredentialsStatus struct {
 type VoiceConnectorTerminationCredentials struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.credentials)",message="credentials is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.credentials) || has(self.initProvider.credentials)",message="%!s(MISSING) is a required parameter"
 	Spec   VoiceConnectorTerminationCredentialsSpec   `json:"spec"`
 	Status VoiceConnectorTerminationCredentialsStatus `json:"status,omitempty"`
 }

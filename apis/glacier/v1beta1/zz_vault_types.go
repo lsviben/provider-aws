@@ -13,6 +13,21 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type NotificationInitParameters struct {
+
+	// You can configure a vault to publish a notification for ArchiveRetrievalCompleted and InventoryRetrievalCompleted events.
+	Events []*string `json:"events,omitempty" tf:"events,omitempty"`
+
+	// The SNS Topic ARN.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	SnsTopic *string `json:"snsTopic,omitempty" tf:"sns_topic,omitempty"`
+
+	SnsTopicRef *v1.Reference `json:"snsTopicRef,omitempty" tf:"-"`
+
+	SnsTopicSelector *v1.Selector `json:"snsTopicSelector,omitempty" tf:"-"`
+}
+
 type NotificationObservation struct {
 
 	// You can configure a vault to publish a notification for ArchiveRetrievalCompleted and InventoryRetrievalCompleted events.
@@ -25,13 +40,11 @@ type NotificationObservation struct {
 type NotificationParameters struct {
 
 	// You can configure a vault to publish a notification for ArchiveRetrievalCompleted and InventoryRetrievalCompleted events.
-	// +kubebuilder:validation:Required
-	Events []*string `json:"events" tf:"events,omitempty"`
+	Events []*string `json:"events,omitempty" tf:"events,omitempty"`
 
 	// The SNS Topic ARN.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	SnsTopic *string `json:"snsTopic,omitempty" tf:"sns_topic,omitempty"`
 
 	// Reference to a Topic in sns to populate snsTopic.
@@ -41,6 +54,23 @@ type NotificationParameters struct {
 	// Selector for a Topic in sns to populate snsTopic.
 	// +kubebuilder:validation:Optional
 	SnsTopicSelector *v1.Selector `json:"snsTopicSelector,omitempty" tf:"-"`
+}
+
+type VaultInitParameters struct {
+
+	// The policy document. This is a JSON formatted string.
+	// The heredoc syntax or file function is helpful here. Use the Glacier Developer Guide for more information on Glacier Vault Policy
+	AccessPolicy *string `json:"accessPolicy,omitempty" tf:"access_policy,omitempty"`
+
+	// The notifications for the Vault. Fields documented below.
+	Notification []NotificationInitParameters `json:"notification,omitempty" tf:"notification,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type VaultObservation struct {
@@ -71,20 +101,16 @@ type VaultParameters struct {
 
 	// The policy document. This is a JSON formatted string.
 	// The heredoc syntax or file function is helpful here. Use the Glacier Developer Guide for more information on Glacier Vault Policy
-	// +kubebuilder:validation:Optional
 	AccessPolicy *string `json:"accessPolicy,omitempty" tf:"access_policy,omitempty"`
 
 	// The notifications for the Vault. Fields documented below.
-	// +kubebuilder:validation:Optional
 	Notification []NotificationParameters `json:"notification,omitempty" tf:"notification,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -92,6 +118,10 @@ type VaultParameters struct {
 type VaultSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VaultParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VaultInitParameters `json:"initProvider,omitempty"`
 }
 
 // VaultStatus defines the observed state of Vault.

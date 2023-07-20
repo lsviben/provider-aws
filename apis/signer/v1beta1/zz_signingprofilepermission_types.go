@@ -13,6 +13,42 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SigningProfilePermissionInitParameters struct {
+
+	// An AWS Signer action permitted as part of cross-account permissions. Valid values: signer:StartSigningJob, signer:GetSigningProfile, or signer:RevokeSignature.
+	Action *string `json:"action,omitempty" tf:"action,omitempty"`
+
+	// The AWS principal to be granted a cross-account permission.
+	Principal *string `json:"principal,omitempty" tf:"principal,omitempty"`
+
+	// Name of the signing profile to add the cross-account permissions.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/signer/v1beta1.SigningProfile
+	ProfileName *string `json:"profileName,omitempty" tf:"profile_name,omitempty"`
+
+	ProfileNameRef *v1.Reference `json:"profileNameRef,omitempty" tf:"-"`
+
+	ProfileNameSelector *v1.Selector `json:"profileNameSelector,omitempty" tf:"-"`
+
+	// The signing profile version that a permission applies to.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/signer/v1beta1.SigningProfile
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("version",true)
+	ProfileVersion *string `json:"profileVersion,omitempty" tf:"profile_version,omitempty"`
+
+	ProfileVersionRef *v1.Reference `json:"profileVersionRef,omitempty" tf:"-"`
+
+	ProfileVersionSelector *v1.Selector `json:"profileVersionSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A unique statement identifier.
+	StatementID *string `json:"statementId,omitempty" tf:"statement_id,omitempty"`
+
+	// A statement identifier prefix. Conflicts with statement_id.
+	StatementIDPrefix *string `json:"statementIdPrefix,omitempty" tf:"statement_id_prefix,omitempty"`
+}
+
 type SigningProfilePermissionObservation struct {
 
 	// An AWS Signer action permitted as part of cross-account permissions. Valid values: signer:StartSigningJob, signer:GetSigningProfile, or signer:RevokeSignature.
@@ -39,16 +75,13 @@ type SigningProfilePermissionObservation struct {
 type SigningProfilePermissionParameters struct {
 
 	// An AWS Signer action permitted as part of cross-account permissions. Valid values: signer:StartSigningJob, signer:GetSigningProfile, or signer:RevokeSignature.
-	// +kubebuilder:validation:Optional
 	Action *string `json:"action,omitempty" tf:"action,omitempty"`
 
 	// The AWS principal to be granted a cross-account permission.
-	// +kubebuilder:validation:Optional
 	Principal *string `json:"principal,omitempty" tf:"principal,omitempty"`
 
 	// Name of the signing profile to add the cross-account permissions.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/signer/v1beta1.SigningProfile
-	// +kubebuilder:validation:Optional
 	ProfileName *string `json:"profileName,omitempty" tf:"profile_name,omitempty"`
 
 	// Reference to a SigningProfile in signer to populate profileName.
@@ -62,7 +95,6 @@ type SigningProfilePermissionParameters struct {
 	// The signing profile version that a permission applies to.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/signer/v1beta1.SigningProfile
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("version",true)
-	// +kubebuilder:validation:Optional
 	ProfileVersion *string `json:"profileVersion,omitempty" tf:"profile_version,omitempty"`
 
 	// Reference to a SigningProfile in signer to populate profileVersion.
@@ -75,15 +107,12 @@ type SigningProfilePermissionParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A unique statement identifier.
-	// +kubebuilder:validation:Optional
 	StatementID *string `json:"statementId,omitempty" tf:"statement_id,omitempty"`
 
 	// A statement identifier prefix. Conflicts with statement_id.
-	// +kubebuilder:validation:Optional
 	StatementIDPrefix *string `json:"statementIdPrefix,omitempty" tf:"statement_id_prefix,omitempty"`
 }
 
@@ -91,6 +120,10 @@ type SigningProfilePermissionParameters struct {
 type SigningProfilePermissionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SigningProfilePermissionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SigningProfilePermissionInitParameters `json:"initProvider,omitempty"`
 }
 
 // SigningProfilePermissionStatus defines the observed state of SigningProfilePermission.
@@ -111,8 +144,8 @@ type SigningProfilePermissionStatus struct {
 type SigningProfilePermission struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.action)",message="action is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.principal)",message="principal is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.action) || has(self.initProvider.action)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.principal) || has(self.initProvider.principal)",message="%!s(MISSING) is a required parameter"
 	Spec   SigningProfilePermissionSpec   `json:"spec"`
 	Status SigningProfilePermissionStatus `json:"status,omitempty"`
 }

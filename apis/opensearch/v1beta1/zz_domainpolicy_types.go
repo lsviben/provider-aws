@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DomainPolicyInitParameters struct {
+
+	// IAM policy document specifying the access policies for the domain
+	AccessPolicies *string `json:"accessPolicies,omitempty" tf:"access_policies,omitempty"`
+
+	// Name of the domain.
+	// +crossplane:generate:reference:type=Domain
+	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
+
+	DomainNameRef *v1.Reference `json:"domainNameRef,omitempty" tf:"-"`
+
+	DomainNameSelector *v1.Selector `json:"domainNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type DomainPolicyObservation struct {
 
 	// IAM policy document specifying the access policies for the domain
@@ -27,12 +45,10 @@ type DomainPolicyObservation struct {
 type DomainPolicyParameters struct {
 
 	// IAM policy document specifying the access policies for the domain
-	// +kubebuilder:validation:Optional
 	AccessPolicies *string `json:"accessPolicies,omitempty" tf:"access_policies,omitempty"`
 
 	// Name of the domain.
 	// +crossplane:generate:reference:type=Domain
-	// +kubebuilder:validation:Optional
 	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
 
 	// Reference to a Domain to populate domainName.
@@ -45,14 +61,17 @@ type DomainPolicyParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // DomainPolicySpec defines the desired state of DomainPolicy
 type DomainPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DomainPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DomainPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // DomainPolicyStatus defines the observed state of DomainPolicy.
@@ -73,7 +92,7 @@ type DomainPolicyStatus struct {
 type DomainPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accessPolicies)",message="accessPolicies is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accessPolicies) || has(self.initProvider.accessPolicies)",message="%!s(MISSING) is a required parameter"
 	Spec   DomainPolicySpec   `json:"spec"`
 	Status DomainPolicyStatus `json:"status,omitempty"`
 }

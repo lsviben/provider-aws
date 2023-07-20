@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AppCookieStickinessPolicyInitParameters struct {
+
+	// Application cookie whose lifetime the ELB's cookie should follow.
+	CookieName *string `json:"cookieName,omitempty" tf:"cookie_name,omitempty"`
+
+	// Load balancer port to which the policy
+	// should be applied. This must be an active listener on the load
+	// balancer.
+	LBPort *float64 `json:"lbPort,omitempty" tf:"lb_port,omitempty"`
+
+	// Name of load balancer to which the policy
+	// should be attached.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.ELB
+	LoadBalancer *string `json:"loadBalancer,omitempty" tf:"load_balancer,omitempty"`
+
+	LoadBalancerRef *v1.Reference `json:"loadBalancerRef,omitempty" tf:"-"`
+
+	LoadBalancerSelector *v1.Selector `json:"loadBalancerSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type AppCookieStickinessPolicyObservation struct {
 
 	// Application cookie whose lifetime the ELB's cookie should follow.
@@ -34,19 +58,16 @@ type AppCookieStickinessPolicyObservation struct {
 type AppCookieStickinessPolicyParameters struct {
 
 	// Application cookie whose lifetime the ELB's cookie should follow.
-	// +kubebuilder:validation:Optional
 	CookieName *string `json:"cookieName,omitempty" tf:"cookie_name,omitempty"`
 
 	// Load balancer port to which the policy
 	// should be applied. This must be an active listener on the load
 	// balancer.
-	// +kubebuilder:validation:Required
-	LBPort *float64 `json:"lbPort" tf:"lb_port,omitempty"`
+	LBPort *float64 `json:"lbPort,omitempty" tf:"lb_port,omitempty"`
 
 	// Name of load balancer to which the policy
 	// should be attached.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.ELB
-	// +kubebuilder:validation:Optional
 	LoadBalancer *string `json:"loadBalancer,omitempty" tf:"load_balancer,omitempty"`
 
 	// Reference to a ELB in elb to populate loadBalancer.
@@ -59,14 +80,17 @@ type AppCookieStickinessPolicyParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // AppCookieStickinessPolicySpec defines the desired state of AppCookieStickinessPolicy
 type AppCookieStickinessPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AppCookieStickinessPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AppCookieStickinessPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // AppCookieStickinessPolicyStatus defines the observed state of AppCookieStickinessPolicy.
@@ -87,7 +111,7 @@ type AppCookieStickinessPolicyStatus struct {
 type AppCookieStickinessPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.cookieName)",message="cookieName is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.cookieName) || has(self.initProvider.cookieName)",message="%!s(MISSING) is a required parameter"
 	Spec   AppCookieStickinessPolicySpec   `json:"spec"`
 	Status AppCookieStickinessPolicyStatus `json:"status,omitempty"`
 }

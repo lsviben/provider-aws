@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ManagedPrefixListEntryInitParameters struct {
+
+	// CIDR block of this entry.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("cidr_block",false)
+	Cidr *string `json:"cidr,omitempty" tf:"cidr,omitempty"`
+
+	CidrRef *v1.Reference `json:"cidrRef,omitempty" tf:"-"`
+
+	CidrSelector *v1.Selector `json:"cidrSelector,omitempty" tf:"-"`
+
+	// Description of this entry. Due to API limitations, updating only the description of an entry requires recreating the entry.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// CIDR block of this entry.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.ManagedPrefixList
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	PrefixListID *string `json:"prefixListId,omitempty" tf:"prefix_list_id,omitempty"`
+
+	PrefixListIDRef *v1.Reference `json:"prefixListIdRef,omitempty" tf:"-"`
+
+	PrefixListIDSelector *v1.Selector `json:"prefixListIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type ManagedPrefixListEntryObservation struct {
 
 	// CIDR block of this entry.
@@ -33,7 +61,6 @@ type ManagedPrefixListEntryParameters struct {
 	// CIDR block of this entry.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("cidr_block",false)
-	// +kubebuilder:validation:Optional
 	Cidr *string `json:"cidr,omitempty" tf:"cidr,omitempty"`
 
 	// Reference to a VPC in ec2 to populate cidr.
@@ -45,13 +72,11 @@ type ManagedPrefixListEntryParameters struct {
 	CidrSelector *v1.Selector `json:"cidrSelector,omitempty" tf:"-"`
 
 	// Description of this entry. Due to API limitations, updating only the description of an entry requires recreating the entry.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// CIDR block of this entry.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.ManagedPrefixList
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	PrefixListID *string `json:"prefixListId,omitempty" tf:"prefix_list_id,omitempty"`
 
 	// Reference to a ManagedPrefixList in ec2 to populate prefixListId.
@@ -64,14 +89,17 @@ type ManagedPrefixListEntryParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // ManagedPrefixListEntrySpec defines the desired state of ManagedPrefixListEntry
 type ManagedPrefixListEntrySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ManagedPrefixListEntryParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ManagedPrefixListEntryInitParameters `json:"initProvider,omitempty"`
 }
 
 // ManagedPrefixListEntryStatus defines the observed state of ManagedPrefixListEntry.

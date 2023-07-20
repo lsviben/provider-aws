@@ -13,6 +13,43 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ActionsInitParameters struct {
+
+	// Arguments to be passed to the job. You can specify arguments here that your own job-execution script consumes, as well as arguments that AWS Glue itself consumes.
+	Arguments map[string]*string `json:"arguments,omitempty" tf:"arguments,omitempty"`
+
+	// The name of the crawler to be executed. Conflicts with job_name.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.Crawler
+	CrawlerName *string `json:"crawlerName,omitempty" tf:"crawler_name,omitempty"`
+
+	CrawlerNameRef *v1.Reference `json:"crawlerNameRef,omitempty" tf:"-"`
+
+	CrawlerNameSelector *v1.Selector `json:"crawlerNameSelector,omitempty" tf:"-"`
+
+	// The name of a job to be executed. Conflicts with crawler_name.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.Job
+	JobName *string `json:"jobName,omitempty" tf:"job_name,omitempty"`
+
+	JobNameRef *v1.Reference `json:"jobNameRef,omitempty" tf:"-"`
+
+	JobNameSelector *v1.Selector `json:"jobNameSelector,omitempty" tf:"-"`
+
+	// Specifies configuration properties of a job run notification. See Notification Property details below.
+	NotificationProperty []ActionsNotificationPropertyInitParameters `json:"notificationProperty,omitempty" tf:"notification_property,omitempty"`
+
+	// The name of the Security Configuration structure to be used with this action.
+	SecurityConfiguration *string `json:"securityConfiguration,omitempty" tf:"security_configuration,omitempty"`
+
+	// The job run timeout in minutes. It overrides the timeout value of the job.
+	Timeout *float64 `json:"timeout,omitempty" tf:"timeout,omitempty"`
+}
+
+type ActionsNotificationPropertyInitParameters struct {
+
+	// After a job run starts, the number of minutes to wait before sending a job run delay notification.
+	NotifyDelayAfter *float64 `json:"notifyDelayAfter,omitempty" tf:"notify_delay_after,omitempty"`
+}
+
 type ActionsNotificationPropertyObservation struct {
 
 	// After a job run starts, the number of minutes to wait before sending a job run delay notification.
@@ -22,7 +59,6 @@ type ActionsNotificationPropertyObservation struct {
 type ActionsNotificationPropertyParameters struct {
 
 	// After a job run starts, the number of minutes to wait before sending a job run delay notification.
-	// +kubebuilder:validation:Optional
 	NotifyDelayAfter *float64 `json:"notifyDelayAfter,omitempty" tf:"notify_delay_after,omitempty"`
 }
 
@@ -50,12 +86,10 @@ type ActionsObservation struct {
 type ActionsParameters struct {
 
 	// Arguments to be passed to the job. You can specify arguments here that your own job-execution script consumes, as well as arguments that AWS Glue itself consumes.
-	// +kubebuilder:validation:Optional
 	Arguments map[string]*string `json:"arguments,omitempty" tf:"arguments,omitempty"`
 
 	// The name of the crawler to be executed. Conflicts with job_name.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.Crawler
-	// +kubebuilder:validation:Optional
 	CrawlerName *string `json:"crawlerName,omitempty" tf:"crawler_name,omitempty"`
 
 	// Reference to a Crawler in glue to populate crawlerName.
@@ -68,7 +102,6 @@ type ActionsParameters struct {
 
 	// The name of a job to be executed. Conflicts with crawler_name.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.Job
-	// +kubebuilder:validation:Optional
 	JobName *string `json:"jobName,omitempty" tf:"job_name,omitempty"`
 
 	// Reference to a Job in glue to populate jobName.
@@ -80,16 +113,41 @@ type ActionsParameters struct {
 	JobNameSelector *v1.Selector `json:"jobNameSelector,omitempty" tf:"-"`
 
 	// Specifies configuration properties of a job run notification. See Notification Property details below.
-	// +kubebuilder:validation:Optional
 	NotificationProperty []ActionsNotificationPropertyParameters `json:"notificationProperty,omitempty" tf:"notification_property,omitempty"`
 
 	// The name of the Security Configuration structure to be used with this action.
-	// +kubebuilder:validation:Optional
 	SecurityConfiguration *string `json:"securityConfiguration,omitempty" tf:"security_configuration,omitempty"`
 
 	// The job run timeout in minutes. It overrides the timeout value of the job.
-	// +kubebuilder:validation:Optional
 	Timeout *float64 `json:"timeout,omitempty" tf:"timeout,omitempty"`
+}
+
+type ConditionsInitParameters struct {
+
+	// The condition crawl state. Currently, the values supported are RUNNING, SUCCEEDED, CANCELLED, and FAILED. If this is specified, crawler_name must also be specified. Conflicts with state.
+	CrawlState *string `json:"crawlState,omitempty" tf:"crawl_state,omitempty"`
+
+	// The name of the crawler to be executed. Conflicts with job_name.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.Crawler
+	CrawlerName *string `json:"crawlerName,omitempty" tf:"crawler_name,omitempty"`
+
+	CrawlerNameRef *v1.Reference `json:"crawlerNameRef,omitempty" tf:"-"`
+
+	CrawlerNameSelector *v1.Selector `json:"crawlerNameSelector,omitempty" tf:"-"`
+
+	// The name of a job to be executed. Conflicts with crawler_name.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.Job
+	JobName *string `json:"jobName,omitempty" tf:"job_name,omitempty"`
+
+	JobNameRef *v1.Reference `json:"jobNameRef,omitempty" tf:"-"`
+
+	JobNameSelector *v1.Selector `json:"jobNameSelector,omitempty" tf:"-"`
+
+	// A logical operator. Defaults to EQUALS.
+	LogicalOperator *string `json:"logicalOperator,omitempty" tf:"logical_operator,omitempty"`
+
+	// The condition job state. Currently, the values supported are SUCCEEDED, STOPPED, TIMEOUT and FAILED. If this is specified, job_name must also be specified. Conflicts with crawler_state.
+	State *string `json:"state,omitempty" tf:"state,omitempty"`
 }
 
 type ConditionsObservation struct {
@@ -113,12 +171,10 @@ type ConditionsObservation struct {
 type ConditionsParameters struct {
 
 	// The condition crawl state. Currently, the values supported are RUNNING, SUCCEEDED, CANCELLED, and FAILED. If this is specified, crawler_name must also be specified. Conflicts with state.
-	// +kubebuilder:validation:Optional
 	CrawlState *string `json:"crawlState,omitempty" tf:"crawl_state,omitempty"`
 
 	// The name of the crawler to be executed. Conflicts with job_name.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.Crawler
-	// +kubebuilder:validation:Optional
 	CrawlerName *string `json:"crawlerName,omitempty" tf:"crawler_name,omitempty"`
 
 	// Reference to a Crawler in glue to populate crawlerName.
@@ -131,7 +187,6 @@ type ConditionsParameters struct {
 
 	// The name of a job to be executed. Conflicts with crawler_name.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/glue/v1beta1.Job
-	// +kubebuilder:validation:Optional
 	JobName *string `json:"jobName,omitempty" tf:"job_name,omitempty"`
 
 	// Reference to a Job in glue to populate jobName.
@@ -143,12 +198,19 @@ type ConditionsParameters struct {
 	JobNameSelector *v1.Selector `json:"jobNameSelector,omitempty" tf:"-"`
 
 	// A logical operator. Defaults to EQUALS.
-	// +kubebuilder:validation:Optional
 	LogicalOperator *string `json:"logicalOperator,omitempty" tf:"logical_operator,omitempty"`
 
 	// The condition job state. Currently, the values supported are SUCCEEDED, STOPPED, TIMEOUT and FAILED. If this is specified, job_name must also be specified. Conflicts with crawler_state.
-	// +kubebuilder:validation:Optional
 	State *string `json:"state,omitempty" tf:"state,omitempty"`
+}
+
+type EventBatchingConditionInitParameters struct {
+
+	// Number of events that must be received from Amazon EventBridge before EventBridge  event trigger fires.
+	BatchSize *float64 `json:"batchSize,omitempty" tf:"batch_size,omitempty"`
+
+	// Window of time in seconds after which EventBridge event trigger fires. Window starts when first event is received. Default value is 900.
+	BatchWindow *float64 `json:"batchWindow,omitempty" tf:"batch_window,omitempty"`
 }
 
 type EventBatchingConditionObservation struct {
@@ -163,12 +225,19 @@ type EventBatchingConditionObservation struct {
 type EventBatchingConditionParameters struct {
 
 	// Number of events that must be received from Amazon EventBridge before EventBridge  event trigger fires.
-	// +kubebuilder:validation:Required
-	BatchSize *float64 `json:"batchSize" tf:"batch_size,omitempty"`
+	BatchSize *float64 `json:"batchSize,omitempty" tf:"batch_size,omitempty"`
 
 	// Window of time in seconds after which EventBridge event trigger fires. Window starts when first event is received. Default value is 900.
-	// +kubebuilder:validation:Optional
 	BatchWindow *float64 `json:"batchWindow,omitempty" tf:"batch_window,omitempty"`
+}
+
+type PredicateInitParameters struct {
+
+	// A list of the conditions that determine when the trigger will fire. See Conditions.
+	Conditions []ConditionsInitParameters `json:"conditions,omitempty" tf:"conditions,omitempty"`
+
+	// How to handle multiple conditions. Defaults to AND. Valid values are AND or ANY.
+	Logical *string `json:"logical,omitempty" tf:"logical,omitempty"`
 }
 
 type PredicateObservation struct {
@@ -183,12 +252,47 @@ type PredicateObservation struct {
 type PredicateParameters struct {
 
 	// A list of the conditions that determine when the trigger will fire. See Conditions.
-	// +kubebuilder:validation:Required
-	Conditions []ConditionsParameters `json:"conditions" tf:"conditions,omitempty"`
+	Conditions []ConditionsParameters `json:"conditions,omitempty" tf:"conditions,omitempty"`
 
 	// How to handle multiple conditions. Defaults to AND. Valid values are AND or ANY.
-	// +kubebuilder:validation:Optional
 	Logical *string `json:"logical,omitempty" tf:"logical,omitempty"`
+}
+
+type TriggerInitParameters struct {
+
+	// –  List of actions initiated by this trigger when it fires. See Actions Below.
+	Actions []ActionsInitParameters `json:"actions,omitempty" tf:"actions,omitempty"`
+
+	// –  A description of the new trigger.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// –  Start the trigger. Defaults to true.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// Batch condition that must be met (specified number of events received or batch time window expired) before EventBridge event trigger fires. See Event Batching Condition.
+	EventBatchingCondition []EventBatchingConditionInitParameters `json:"eventBatchingCondition,omitempty" tf:"event_batching_condition,omitempty"`
+
+	// –  A predicate to specify when the new trigger should fire. Required when trigger type is CONDITIONAL. See Predicate Below.
+	Predicate []PredicateInitParameters `json:"predicate,omitempty" tf:"predicate,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Based Schedules for Jobs and Crawlers
+	Schedule *string `json:"schedule,omitempty" tf:"schedule,omitempty"`
+
+	// –  Set to true to start SCHEDULED and CONDITIONAL triggers when created. True is not supported for ON_DEMAND triggers.
+	StartOnCreation *bool `json:"startOnCreation,omitempty" tf:"start_on_creation,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// –  The type of trigger. Valid values are CONDITIONAL, EVENT, ON_DEMAND, and SCHEDULED.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+
+	// A workflow to which the trigger should be associated to. Every workflow graph (DAG) needs a starting trigger (ON_DEMAND or SCHEDULED type) and can contain multiple additional CONDITIONAL triggers.
+	WorkflowName *string `json:"workflowName,omitempty" tf:"workflow_name,omitempty"`
 }
 
 type TriggerObservation struct {
@@ -239,48 +343,37 @@ type TriggerObservation struct {
 type TriggerParameters struct {
 
 	// –  List of actions initiated by this trigger when it fires. See Actions Below.
-	// +kubebuilder:validation:Optional
 	Actions []ActionsParameters `json:"actions,omitempty" tf:"actions,omitempty"`
 
 	// –  A description of the new trigger.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// –  Start the trigger. Defaults to true.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// Batch condition that must be met (specified number of events received or batch time window expired) before EventBridge event trigger fires. See Event Batching Condition.
-	// +kubebuilder:validation:Optional
 	EventBatchingCondition []EventBatchingConditionParameters `json:"eventBatchingCondition,omitempty" tf:"event_batching_condition,omitempty"`
 
 	// –  A predicate to specify when the new trigger should fire. Required when trigger type is CONDITIONAL. See Predicate Below.
-	// +kubebuilder:validation:Optional
 	Predicate []PredicateParameters `json:"predicate,omitempty" tf:"predicate,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Based Schedules for Jobs and Crawlers
-	// +kubebuilder:validation:Optional
 	Schedule *string `json:"schedule,omitempty" tf:"schedule,omitempty"`
 
 	// –  Set to true to start SCHEDULED and CONDITIONAL triggers when created. True is not supported for ON_DEMAND triggers.
-	// +kubebuilder:validation:Optional
 	StartOnCreation *bool `json:"startOnCreation,omitempty" tf:"start_on_creation,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// –  The type of trigger. Valid values are CONDITIONAL, EVENT, ON_DEMAND, and SCHEDULED.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 
 	// A workflow to which the trigger should be associated to. Every workflow graph (DAG) needs a starting trigger (ON_DEMAND or SCHEDULED type) and can contain multiple additional CONDITIONAL triggers.
-	// +kubebuilder:validation:Optional
 	WorkflowName *string `json:"workflowName,omitempty" tf:"workflow_name,omitempty"`
 }
 
@@ -288,6 +381,10 @@ type TriggerParameters struct {
 type TriggerSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     TriggerParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider TriggerInitParameters `json:"initProvider,omitempty"`
 }
 
 // TriggerStatus defines the observed state of Trigger.
@@ -308,8 +405,8 @@ type TriggerStatus struct {
 type Trigger struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.actions)",message="actions is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.type)",message="type is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.actions) || has(self.initProvider.actions)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.type) || has(self.initProvider.type)",message="%!s(MISSING) is a required parameter"
 	Spec   TriggerSpec   `json:"spec"`
 	Status TriggerStatus `json:"status,omitempty"`
 }

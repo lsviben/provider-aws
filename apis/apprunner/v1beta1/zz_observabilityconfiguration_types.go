@@ -13,6 +13,22 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ObservabilityConfigurationInitParameters struct {
+
+	// Name of the observability configuration.
+	ObservabilityConfigurationName *string `json:"observabilityConfigurationName,omitempty" tf:"observability_configuration_name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Configuration of the tracing feature within this observability configuration. If you don't specify it, App Runner doesn't enable tracing. See Trace Configuration below for more details.
+	TraceConfiguration []TraceConfigurationInitParameters `json:"traceConfiguration,omitempty" tf:"trace_configuration,omitempty"`
+}
+
 type ObservabilityConfigurationObservation struct {
 
 	// ARN of this observability configuration.
@@ -45,21 +61,23 @@ type ObservabilityConfigurationObservation struct {
 type ObservabilityConfigurationParameters struct {
 
 	// Name of the observability configuration.
-	// +kubebuilder:validation:Optional
 	ObservabilityConfigurationName *string `json:"observabilityConfigurationName,omitempty" tf:"observability_configuration_name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Configuration of the tracing feature within this observability configuration. If you don't specify it, App Runner doesn't enable tracing. See Trace Configuration below for more details.
-	// +kubebuilder:validation:Optional
 	TraceConfiguration []TraceConfigurationParameters `json:"traceConfiguration,omitempty" tf:"trace_configuration,omitempty"`
+}
+
+type TraceConfigurationInitParameters struct {
+
+	// Implementation provider chosen for tracing App Runner services. Valid values: AWSXRAY.
+	Vendor *string `json:"vendor,omitempty" tf:"vendor,omitempty"`
 }
 
 type TraceConfigurationObservation struct {
@@ -71,7 +89,6 @@ type TraceConfigurationObservation struct {
 type TraceConfigurationParameters struct {
 
 	// Implementation provider chosen for tracing App Runner services. Valid values: AWSXRAY.
-	// +kubebuilder:validation:Optional
 	Vendor *string `json:"vendor,omitempty" tf:"vendor,omitempty"`
 }
 
@@ -79,6 +96,10 @@ type TraceConfigurationParameters struct {
 type ObservabilityConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ObservabilityConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ObservabilityConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // ObservabilityConfigurationStatus defines the observed state of ObservabilityConfiguration.
@@ -99,7 +120,7 @@ type ObservabilityConfigurationStatus struct {
 type ObservabilityConfiguration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.observabilityConfigurationName)",message="observabilityConfigurationName is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.observabilityConfigurationName) || has(self.initProvider.observabilityConfigurationName)",message="%!s(MISSING) is a required parameter"
 	Spec   ObservabilityConfigurationSpec   `json:"spec"`
 	Status ObservabilityConfigurationStatus `json:"status,omitempty"`
 }

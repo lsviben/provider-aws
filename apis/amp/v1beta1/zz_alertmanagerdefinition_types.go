@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AlertManagerDefinitionInitParameters struct {
+
+	// the alert manager definition that you want to be applied. See more in AWS Docs.
+	Definition *string `json:"definition,omitempty" tf:"definition,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// ID of the prometheus workspace the alert manager definition should be linked to
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/amp/v1beta1.Workspace
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	WorkspaceID *string `json:"workspaceId,omitempty" tf:"workspace_id,omitempty"`
+
+	WorkspaceIDRef *v1.Reference `json:"workspaceIdRef,omitempty" tf:"-"`
+
+	WorkspaceIDSelector *v1.Selector `json:"workspaceIdSelector,omitempty" tf:"-"`
+}
+
 type AlertManagerDefinitionObservation struct {
 
 	// the alert manager definition that you want to be applied. See more in AWS Docs.
@@ -27,18 +46,15 @@ type AlertManagerDefinitionObservation struct {
 type AlertManagerDefinitionParameters struct {
 
 	// the alert manager definition that you want to be applied. See more in AWS Docs.
-	// +kubebuilder:validation:Optional
 	Definition *string `json:"definition,omitempty" tf:"definition,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// ID of the prometheus workspace the alert manager definition should be linked to
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/amp/v1beta1.Workspace
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	WorkspaceID *string `json:"workspaceId,omitempty" tf:"workspace_id,omitempty"`
 
 	// Reference to a Workspace in amp to populate workspaceId.
@@ -54,6 +70,10 @@ type AlertManagerDefinitionParameters struct {
 type AlertManagerDefinitionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AlertManagerDefinitionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AlertManagerDefinitionInitParameters `json:"initProvider,omitempty"`
 }
 
 // AlertManagerDefinitionStatus defines the observed state of AlertManagerDefinition.
@@ -74,7 +94,7 @@ type AlertManagerDefinitionStatus struct {
 type AlertManagerDefinition struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.definition)",message="definition is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.definition) || has(self.initProvider.definition)",message="%!s(MISSING) is a required parameter"
 	Spec   AlertManagerDefinitionSpec   `json:"spec"`
 	Status AlertManagerDefinitionStatus `json:"status,omitempty"`
 }

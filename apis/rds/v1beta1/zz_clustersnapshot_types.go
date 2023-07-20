@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ClusterSnapshotInitParameters struct {
+
+	// The DB Cluster Identifier from which to take the snapshot.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/rds/v1beta1.Cluster
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DBClusterIdentifier *string `json:"dbClusterIdentifier,omitempty" tf:"db_cluster_identifier,omitempty"`
+
+	DBClusterIdentifierRef *v1.Reference `json:"dbClusterIdentifierRef,omitempty" tf:"-"`
+
+	DBClusterIdentifierSelector *v1.Selector `json:"dbClusterIdentifierSelector,omitempty" tf:"-"`
+
+	// The Identifier for the snapshot.
+	DBClusterSnapshotIdentifier *string `json:"dbClusterSnapshotIdentifier,omitempty" tf:"db_cluster_snapshot_identifier,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ClusterSnapshotObservation struct {
 
 	// Allocated storage size in gigabytes (GB).
@@ -73,7 +95,6 @@ type ClusterSnapshotParameters struct {
 	// The DB Cluster Identifier from which to take the snapshot.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/rds/v1beta1.Cluster
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DBClusterIdentifier *string `json:"dbClusterIdentifier,omitempty" tf:"db_cluster_identifier,omitempty"`
 
 	// Reference to a Cluster in rds to populate dbClusterIdentifier.
@@ -85,16 +106,13 @@ type ClusterSnapshotParameters struct {
 	DBClusterIdentifierSelector *v1.Selector `json:"dbClusterIdentifierSelector,omitempty" tf:"-"`
 
 	// The Identifier for the snapshot.
-	// +kubebuilder:validation:Optional
 	DBClusterSnapshotIdentifier *string `json:"dbClusterSnapshotIdentifier,omitempty" tf:"db_cluster_snapshot_identifier,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -102,6 +120,10 @@ type ClusterSnapshotParameters struct {
 type ClusterSnapshotSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ClusterSnapshotParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ClusterSnapshotInitParameters `json:"initProvider,omitempty"`
 }
 
 // ClusterSnapshotStatus defines the observed state of ClusterSnapshot.
@@ -122,7 +144,7 @@ type ClusterSnapshotStatus struct {
 type ClusterSnapshot struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dbClusterSnapshotIdentifier)",message="dbClusterSnapshotIdentifier is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dbClusterSnapshotIdentifier) || has(self.initProvider.dbClusterSnapshotIdentifier)",message="%!s(MISSING) is a required parameter"
 	Spec   ClusterSnapshotSpec   `json:"spec"`
 	Status ClusterSnapshotStatus `json:"status,omitempty"`
 }

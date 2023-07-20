@@ -13,6 +13,57 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type WorkspaceSAMLConfigurationInitParameters struct {
+
+	// The admin role values.
+	AdminRoleValues []*string `json:"adminRoleValues,omitempty" tf:"admin_role_values,omitempty"`
+
+	// The allowed organizations.
+	AllowedOrganizations []*string `json:"allowedOrganizations,omitempty" tf:"allowed_organizations,omitempty"`
+
+	// The editor role values.
+	EditorRoleValues []*string `json:"editorRoleValues,omitempty" tf:"editor_role_values,omitempty"`
+
+	// The email assertion.
+	EmailAssertion *string `json:"emailAssertion,omitempty" tf:"email_assertion,omitempty"`
+
+	// The groups assertion.
+	GroupsAssertion *string `json:"groupsAssertion,omitempty" tf:"groups_assertion,omitempty"`
+
+	// The IDP Metadata URL. Note that either idp_metadata_url or idp_metadata_xml (but not both) must be specified.
+	IdpMetadataURL *string `json:"idpMetadataUrl,omitempty" tf:"idp_metadata_url,omitempty"`
+
+	// The IDP Metadata XML. Note that either idp_metadata_url or idp_metadata_xml (but not both) must be specified.
+	IdpMetadataXML *string `json:"idpMetadataXml,omitempty" tf:"idp_metadata_xml,omitempty"`
+
+	// The login assertion.
+	LoginAssertion *string `json:"loginAssertion,omitempty" tf:"login_assertion,omitempty"`
+
+	// The login validity duration.
+	LoginValidityDuration *float64 `json:"loginValidityDuration,omitempty" tf:"login_validity_duration,omitempty"`
+
+	// The name assertion.
+	NameAssertion *string `json:"nameAssertion,omitempty" tf:"name_assertion,omitempty"`
+
+	// The org assertion.
+	OrgAssertion *string `json:"orgAssertion,omitempty" tf:"org_assertion,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The role assertion.
+	RoleAssertion *string `json:"roleAssertion,omitempty" tf:"role_assertion,omitempty"`
+
+	// The workspace id.
+	// +crossplane:generate:reference:type=Workspace
+	WorkspaceID *string `json:"workspaceId,omitempty" tf:"workspace_id,omitempty"`
+
+	WorkspaceIDRef *v1.Reference `json:"workspaceIdRef,omitempty" tf:"-"`
+
+	WorkspaceIDSelector *v1.Selector `json:"workspaceIdSelector,omitempty" tf:"-"`
+}
+
 type WorkspaceSAMLConfigurationObservation struct {
 
 	// The admin role values.
@@ -63,61 +114,47 @@ type WorkspaceSAMLConfigurationObservation struct {
 type WorkspaceSAMLConfigurationParameters struct {
 
 	// The admin role values.
-	// +kubebuilder:validation:Optional
 	AdminRoleValues []*string `json:"adminRoleValues,omitempty" tf:"admin_role_values,omitempty"`
 
 	// The allowed organizations.
-	// +kubebuilder:validation:Optional
 	AllowedOrganizations []*string `json:"allowedOrganizations,omitempty" tf:"allowed_organizations,omitempty"`
 
 	// The editor role values.
-	// +kubebuilder:validation:Optional
 	EditorRoleValues []*string `json:"editorRoleValues,omitempty" tf:"editor_role_values,omitempty"`
 
 	// The email assertion.
-	// +kubebuilder:validation:Optional
 	EmailAssertion *string `json:"emailAssertion,omitempty" tf:"email_assertion,omitempty"`
 
 	// The groups assertion.
-	// +kubebuilder:validation:Optional
 	GroupsAssertion *string `json:"groupsAssertion,omitempty" tf:"groups_assertion,omitempty"`
 
 	// The IDP Metadata URL. Note that either idp_metadata_url or idp_metadata_xml (but not both) must be specified.
-	// +kubebuilder:validation:Optional
 	IdpMetadataURL *string `json:"idpMetadataUrl,omitempty" tf:"idp_metadata_url,omitempty"`
 
 	// The IDP Metadata XML. Note that either idp_metadata_url or idp_metadata_xml (but not both) must be specified.
-	// +kubebuilder:validation:Optional
 	IdpMetadataXML *string `json:"idpMetadataXml,omitempty" tf:"idp_metadata_xml,omitempty"`
 
 	// The login assertion.
-	// +kubebuilder:validation:Optional
 	LoginAssertion *string `json:"loginAssertion,omitempty" tf:"login_assertion,omitempty"`
 
 	// The login validity duration.
-	// +kubebuilder:validation:Optional
 	LoginValidityDuration *float64 `json:"loginValidityDuration,omitempty" tf:"login_validity_duration,omitempty"`
 
 	// The name assertion.
-	// +kubebuilder:validation:Optional
 	NameAssertion *string `json:"nameAssertion,omitempty" tf:"name_assertion,omitempty"`
 
 	// The org assertion.
-	// +kubebuilder:validation:Optional
 	OrgAssertion *string `json:"orgAssertion,omitempty" tf:"org_assertion,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The role assertion.
-	// +kubebuilder:validation:Optional
 	RoleAssertion *string `json:"roleAssertion,omitempty" tf:"role_assertion,omitempty"`
 
 	// The workspace id.
 	// +crossplane:generate:reference:type=Workspace
-	// +kubebuilder:validation:Optional
 	WorkspaceID *string `json:"workspaceId,omitempty" tf:"workspace_id,omitempty"`
 
 	// Reference to a Workspace to populate workspaceId.
@@ -133,6 +170,10 @@ type WorkspaceSAMLConfigurationParameters struct {
 type WorkspaceSAMLConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     WorkspaceSAMLConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider WorkspaceSAMLConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // WorkspaceSAMLConfigurationStatus defines the observed state of WorkspaceSAMLConfiguration.
@@ -153,7 +194,7 @@ type WorkspaceSAMLConfigurationStatus struct {
 type WorkspaceSAMLConfiguration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.editorRoleValues)",message="editorRoleValues is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.editorRoleValues) || has(self.initProvider.editorRoleValues)",message="%!s(MISSING) is a required parameter"
 	Spec   WorkspaceSAMLConfigurationSpec   `json:"spec"`
 	Status WorkspaceSAMLConfigurationStatus `json:"status,omitempty"`
 }

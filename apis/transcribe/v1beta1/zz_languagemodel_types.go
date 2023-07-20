@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type InputDataConfigInitParameters struct {
+
+	// IAM role with access to S3 bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	DataAccessRoleArn *string `json:"dataAccessRoleArn,omitempty" tf:"data_access_role_arn,omitempty"`
+
+	DataAccessRoleArnRef *v1.Reference `json:"dataAccessRoleArnRef,omitempty" tf:"-"`
+
+	DataAccessRoleArnSelector *v1.Selector `json:"dataAccessRoleArnSelector,omitempty" tf:"-"`
+
+	// S3 URI where training data is located.
+	S3URI *string `json:"s3Uri,omitempty" tf:"s3_uri,omitempty"`
+
+	// S3 URI where tuning data is located.
+	TuningDataS3URI *string `json:"tuningDataS3Uri,omitempty" tf:"tuning_data_s3_uri,omitempty"`
+}
+
 type InputDataConfigObservation struct {
 
 	// IAM role with access to S3 bucket.
@@ -30,7 +48,6 @@ type InputDataConfigParameters struct {
 	// IAM role with access to S3 bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	DataAccessRoleArn *string `json:"dataAccessRoleArn,omitempty" tf:"data_access_role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate dataAccessRoleArn.
@@ -42,12 +59,29 @@ type InputDataConfigParameters struct {
 	DataAccessRoleArnSelector *v1.Selector `json:"dataAccessRoleArnSelector,omitempty" tf:"-"`
 
 	// S3 URI where training data is located.
-	// +kubebuilder:validation:Required
-	S3URI *string `json:"s3Uri" tf:"s3_uri,omitempty"`
+	S3URI *string `json:"s3Uri,omitempty" tf:"s3_uri,omitempty"`
 
 	// S3 URI where tuning data is located.
-	// +kubebuilder:validation:Optional
 	TuningDataS3URI *string `json:"tuningDataS3Uri,omitempty" tf:"tuning_data_s3_uri,omitempty"`
+}
+
+type LanguageModelInitParameters struct {
+
+	// Name of reference base model.
+	BaseModelName *string `json:"baseModelName,omitempty" tf:"base_model_name,omitempty"`
+
+	// The input data config for the LanguageModel. See Input Data Config for more details.
+	InputDataConfig []InputDataConfigInitParameters `json:"inputDataConfig,omitempty" tf:"input_data_config,omitempty"`
+
+	// The language code you selected for your language model. Refer to the supported languages page for accepted codes.
+	LanguageCode *string `json:"languageCode,omitempty" tf:"language_code,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type LanguageModelObservation struct {
@@ -76,24 +110,19 @@ type LanguageModelObservation struct {
 type LanguageModelParameters struct {
 
 	// Name of reference base model.
-	// +kubebuilder:validation:Optional
 	BaseModelName *string `json:"baseModelName,omitempty" tf:"base_model_name,omitempty"`
 
 	// The input data config for the LanguageModel. See Input Data Config for more details.
-	// +kubebuilder:validation:Optional
 	InputDataConfig []InputDataConfigParameters `json:"inputDataConfig,omitempty" tf:"input_data_config,omitempty"`
 
 	// The language code you selected for your language model. Refer to the supported languages page for accepted codes.
-	// +kubebuilder:validation:Optional
 	LanguageCode *string `json:"languageCode,omitempty" tf:"language_code,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -101,6 +130,10 @@ type LanguageModelParameters struct {
 type LanguageModelSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     LanguageModelParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider LanguageModelInitParameters `json:"initProvider,omitempty"`
 }
 
 // LanguageModelStatus defines the observed state of LanguageModel.
@@ -121,9 +154,9 @@ type LanguageModelStatus struct {
 type LanguageModel struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.baseModelName)",message="baseModelName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.inputDataConfig)",message="inputDataConfig is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.languageCode)",message="languageCode is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.baseModelName) || has(self.initProvider.baseModelName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.inputDataConfig) || has(self.initProvider.inputDataConfig)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.languageCode) || has(self.initProvider.languageCode)",message="%!s(MISSING) is a required parameter"
 	Spec   LanguageModelSpec   `json:"spec"`
 	Status LanguageModelStatus `json:"status,omitempty"`
 }

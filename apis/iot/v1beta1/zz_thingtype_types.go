@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ThingTypeInitParameters struct {
+
+	// Whether the thing type is deprecated. If true, no new things could be associated with this type.
+	Deprecated *bool `json:"deprecated,omitempty" tf:"deprecated,omitempty"`
+
+	// The name of the thing type.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// , Configuration block that can contain the following properties of the thing type:
+	Properties []ThingTypePropertiesInitParameters `json:"properties,omitempty" tf:"properties,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ThingTypeObservation struct {
 
 	// The ARN of the created AWS IoT Thing Type.
@@ -39,25 +58,29 @@ type ThingTypeObservation struct {
 type ThingTypeParameters struct {
 
 	// Whether the thing type is deprecated. If true, no new things could be associated with this type.
-	// +kubebuilder:validation:Optional
 	Deprecated *bool `json:"deprecated,omitempty" tf:"deprecated,omitempty"`
 
 	// The name of the thing type.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// , Configuration block that can contain the following properties of the thing type:
-	// +kubebuilder:validation:Optional
 	Properties []ThingTypePropertiesParameters `json:"properties,omitempty" tf:"properties,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type ThingTypePropertiesInitParameters struct {
+
+	// The description of the thing type.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// A list of searchable thing attribute names.
+	SearchableAttributes []*string `json:"searchableAttributes,omitempty" tf:"searchable_attributes,omitempty"`
 }
 
 type ThingTypePropertiesObservation struct {
@@ -72,11 +95,9 @@ type ThingTypePropertiesObservation struct {
 type ThingTypePropertiesParameters struct {
 
 	// The description of the thing type.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// A list of searchable thing attribute names.
-	// +kubebuilder:validation:Optional
 	SearchableAttributes []*string `json:"searchableAttributes,omitempty" tf:"searchable_attributes,omitempty"`
 }
 
@@ -84,6 +105,10 @@ type ThingTypePropertiesParameters struct {
 type ThingTypeSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ThingTypeParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ThingTypeInitParameters `json:"initProvider,omitempty"`
 }
 
 // ThingTypeStatus defines the observed state of ThingType.
@@ -104,7 +129,7 @@ type ThingTypeStatus struct {
 type ThingType struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   ThingTypeSpec   `json:"spec"`
 	Status ThingTypeStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,29 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ResourceServerInitParameters struct {
+
+	// An identifier for the resource server.
+	Identifier *string `json:"identifier,omitempty" tf:"identifier,omitempty"`
+
+	// A name for the resource server.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A list of Authorization Scope.
+	Scope []ScopeInitParameters `json:"scope,omitempty" tf:"scope,omitempty"`
+
+	// +crossplane:generate:reference:type=UserPool
+	UserPoolID *string `json:"userPoolId,omitempty" tf:"user_pool_id,omitempty"`
+
+	UserPoolIDRef *v1.Reference `json:"userPoolIdRef,omitempty" tf:"-"`
+
+	UserPoolIDSelector *v1.Selector `json:"userPoolIdSelector,omitempty" tf:"-"`
+}
+
 type ResourceServerObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -34,24 +57,19 @@ type ResourceServerObservation struct {
 type ResourceServerParameters struct {
 
 	// An identifier for the resource server.
-	// +kubebuilder:validation:Optional
 	Identifier *string `json:"identifier,omitempty" tf:"identifier,omitempty"`
 
 	// A name for the resource server.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A list of Authorization Scope.
-	// +kubebuilder:validation:Optional
 	Scope []ScopeParameters `json:"scope,omitempty" tf:"scope,omitempty"`
 
 	// +crossplane:generate:reference:type=UserPool
-	// +kubebuilder:validation:Optional
 	UserPoolID *string `json:"userPoolId,omitempty" tf:"user_pool_id,omitempty"`
 
 	// Reference to a UserPool to populate userPoolId.
@@ -61,6 +79,15 @@ type ResourceServerParameters struct {
 	// Selector for a UserPool to populate userPoolId.
 	// +kubebuilder:validation:Optional
 	UserPoolIDSelector *v1.Selector `json:"userPoolIdSelector,omitempty" tf:"-"`
+}
+
+type ScopeInitParameters struct {
+
+	// The scope description.
+	ScopeDescription *string `json:"scopeDescription,omitempty" tf:"scope_description,omitempty"`
+
+	// The scope name.
+	ScopeName *string `json:"scopeName,omitempty" tf:"scope_name,omitempty"`
 }
 
 type ScopeObservation struct {
@@ -75,18 +102,20 @@ type ScopeObservation struct {
 type ScopeParameters struct {
 
 	// The scope description.
-	// +kubebuilder:validation:Required
-	ScopeDescription *string `json:"scopeDescription" tf:"scope_description,omitempty"`
+	ScopeDescription *string `json:"scopeDescription,omitempty" tf:"scope_description,omitempty"`
 
 	// The scope name.
-	// +kubebuilder:validation:Required
-	ScopeName *string `json:"scopeName" tf:"scope_name,omitempty"`
+	ScopeName *string `json:"scopeName,omitempty" tf:"scope_name,omitempty"`
 }
 
 // ResourceServerSpec defines the desired state of ResourceServer
 type ResourceServerSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ResourceServerParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ResourceServerInitParameters `json:"initProvider,omitempty"`
 }
 
 // ResourceServerStatus defines the observed state of ResourceServer.
@@ -107,8 +136,8 @@ type ResourceServerStatus struct {
 type ResourceServer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.identifier)",message="identifier is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.identifier) || has(self.initProvider.identifier)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   ResourceServerSpec   `json:"spec"`
 	Status ResourceServerStatus `json:"status,omitempty"`
 }

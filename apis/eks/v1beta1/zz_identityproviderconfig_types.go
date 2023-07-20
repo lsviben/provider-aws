@@ -13,6 +13,27 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type IdentityProviderConfigInitParameters struct {
+
+	// –  Name of the EKS Cluster.
+	// +crossplane:generate:reference:type=Cluster
+	ClusterName *string `json:"clusterName,omitempty" tf:"cluster_name,omitempty"`
+
+	ClusterNameRef *v1.Reference `json:"clusterNameRef,omitempty" tf:"-"`
+
+	ClusterNameSelector *v1.Selector `json:"clusterNameSelector,omitempty" tf:"-"`
+
+	// Nested attribute containing OpenID Connect identity provider information for the cluster. Detailed below.
+	Oidc []IdentityProviderConfigOidcInitParameters `json:"oidc,omitempty" tf:"oidc,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type IdentityProviderConfigObservation struct {
 
 	// Amazon Resource Name (ARN) of the EKS Identity Provider Configuration.
@@ -35,6 +56,30 @@ type IdentityProviderConfigObservation struct {
 
 	// A map of tags assigned to the resource, including those inherited from the provider default_tags configuration block.
 	TagsAll map[string]*string `json:"tagsAll,omitempty" tf:"tags_all,omitempty"`
+}
+
+type IdentityProviderConfigOidcInitParameters struct {
+
+	// –  Client ID for the OpenID Connect identity provider.
+	ClientID *string `json:"clientId,omitempty" tf:"client_id,omitempty"`
+
+	// The JWT claim that the provider will use to return groups.
+	GroupsClaim *string `json:"groupsClaim,omitempty" tf:"groups_claim,omitempty"`
+
+	// A prefix that is prepended to group claims e.g., oidc:.
+	GroupsPrefix *string `json:"groupsPrefix,omitempty" tf:"groups_prefix,omitempty"`
+
+	// Issuer URL for the OpenID Connect identity provider.
+	IssuerURL *string `json:"issuerUrl,omitempty" tf:"issuer_url,omitempty"`
+
+	// The key value pairs that describe required claims in the identity token.
+	RequiredClaims map[string]*string `json:"requiredClaims,omitempty" tf:"required_claims,omitempty"`
+
+	// The JWT claim that the provider will use as the username.
+	UsernameClaim *string `json:"usernameClaim,omitempty" tf:"username_claim,omitempty"`
+
+	// A prefix that is prepended to username claims.
+	UsernamePrefix *string `json:"usernamePrefix,omitempty" tf:"username_prefix,omitempty"`
 }
 
 type IdentityProviderConfigOidcObservation struct {
@@ -64,31 +109,24 @@ type IdentityProviderConfigOidcObservation struct {
 type IdentityProviderConfigOidcParameters struct {
 
 	// –  Client ID for the OpenID Connect identity provider.
-	// +kubebuilder:validation:Required
-	ClientID *string `json:"clientId" tf:"client_id,omitempty"`
+	ClientID *string `json:"clientId,omitempty" tf:"client_id,omitempty"`
 
 	// The JWT claim that the provider will use to return groups.
-	// +kubebuilder:validation:Optional
 	GroupsClaim *string `json:"groupsClaim,omitempty" tf:"groups_claim,omitempty"`
 
 	// A prefix that is prepended to group claims e.g., oidc:.
-	// +kubebuilder:validation:Optional
 	GroupsPrefix *string `json:"groupsPrefix,omitempty" tf:"groups_prefix,omitempty"`
 
 	// Issuer URL for the OpenID Connect identity provider.
-	// +kubebuilder:validation:Required
-	IssuerURL *string `json:"issuerUrl" tf:"issuer_url,omitempty"`
+	IssuerURL *string `json:"issuerUrl,omitempty" tf:"issuer_url,omitempty"`
 
 	// The key value pairs that describe required claims in the identity token.
-	// +kubebuilder:validation:Optional
 	RequiredClaims map[string]*string `json:"requiredClaims,omitempty" tf:"required_claims,omitempty"`
 
 	// The JWT claim that the provider will use as the username.
-	// +kubebuilder:validation:Optional
 	UsernameClaim *string `json:"usernameClaim,omitempty" tf:"username_claim,omitempty"`
 
 	// A prefix that is prepended to username claims.
-	// +kubebuilder:validation:Optional
 	UsernamePrefix *string `json:"usernamePrefix,omitempty" tf:"username_prefix,omitempty"`
 }
 
@@ -96,7 +134,6 @@ type IdentityProviderConfigParameters struct {
 
 	// –  Name of the EKS Cluster.
 	// +crossplane:generate:reference:type=Cluster
-	// +kubebuilder:validation:Optional
 	ClusterName *string `json:"clusterName,omitempty" tf:"cluster_name,omitempty"`
 
 	// Reference to a Cluster to populate clusterName.
@@ -108,16 +145,13 @@ type IdentityProviderConfigParameters struct {
 	ClusterNameSelector *v1.Selector `json:"clusterNameSelector,omitempty" tf:"-"`
 
 	// Nested attribute containing OpenID Connect identity provider information for the cluster. Detailed below.
-	// +kubebuilder:validation:Optional
 	Oidc []IdentityProviderConfigOidcParameters `json:"oidc,omitempty" tf:"oidc,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -125,6 +159,10 @@ type IdentityProviderConfigParameters struct {
 type IdentityProviderConfigSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     IdentityProviderConfigParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider IdentityProviderConfigInitParameters `json:"initProvider,omitempty"`
 }
 
 // IdentityProviderConfigStatus defines the observed state of IdentityProviderConfig.
@@ -145,7 +183,7 @@ type IdentityProviderConfigStatus struct {
 type IdentityProviderConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.oidc)",message="oidc is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.oidc) || has(self.initProvider.oidc)",message="%!s(MISSING) is a required parameter"
 	Spec   IdentityProviderConfigSpec   `json:"spec"`
 	Status IdentityProviderConfigStatus `json:"status,omitempty"`
 }

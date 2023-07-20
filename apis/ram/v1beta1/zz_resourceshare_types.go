@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ResourceShareInitParameters struct {
+
+	// Indicates whether principals outside your organization can be associated with a resource share.
+	AllowExternalPrincipals *bool `json:"allowExternalPrincipals,omitempty" tf:"allow_external_principals,omitempty"`
+
+	// The name of the resource share.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Specifies the Amazon Resource Names (ARNs) of the RAM permission to associate with the resource share. If you do not specify an ARN for the permission, RAM automatically attaches the default version of the permission for each resource type. You can associate only one permission with each resource type included in the resource share.
+	PermissionArns []*string `json:"permissionArns,omitempty" tf:"permission_arns,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ResourceShareObservation struct {
 
 	// Indicates whether principals outside your organization can be associated with a resource share.
@@ -40,24 +59,19 @@ type ResourceShareObservation struct {
 type ResourceShareParameters struct {
 
 	// Indicates whether principals outside your organization can be associated with a resource share.
-	// +kubebuilder:validation:Optional
 	AllowExternalPrincipals *bool `json:"allowExternalPrincipals,omitempty" tf:"allow_external_principals,omitempty"`
 
 	// The name of the resource share.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Specifies the Amazon Resource Names (ARNs) of the RAM permission to associate with the resource share. If you do not specify an ARN for the permission, RAM automatically attaches the default version of the permission for each resource type. You can associate only one permission with each resource type included in the resource share.
-	// +kubebuilder:validation:Optional
 	PermissionArns []*string `json:"permissionArns,omitempty" tf:"permission_arns,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -65,6 +79,10 @@ type ResourceShareParameters struct {
 type ResourceShareSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ResourceShareParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ResourceShareInitParameters `json:"initProvider,omitempty"`
 }
 
 // ResourceShareStatus defines the observed state of ResourceShare.
@@ -85,7 +103,7 @@ type ResourceShareStatus struct {
 type ResourceShare struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   ResourceShareSpec   `json:"spec"`
 	Status ResourceShareStatus `json:"status,omitempty"`
 }

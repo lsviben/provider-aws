@@ -86,8 +86,6 @@ spec:
                           description: 'The publishing interval in minutes. Valid
                             values: 5 and 60. Default: 60'
                           type: number
-                      required:
-                      - bucket
                       type: object
                     type: array
                   availabilityZones:
@@ -134,12 +132,6 @@ spec:
                           description: The number of checks before the instance is
                             declared unhealthy.
                           type: number
-                      required:
-                      - healthyThreshold
-                      - interval
-                      - target
-                      - timeout
-                      - unhealthyThreshold
                       type: object
                     type: array
                   idleTimeout:
@@ -254,11 +246,6 @@ spec:
                             to AWS IAM. Note ECDSA-specific restrictions below.  Only
                             valid when
                           type: string
-                      required:
-                      - instancePort
-                      - instanceProtocol
-                      - lbPort
-                      - lbProtocol
                       type: object
                     type: array
                   region:
@@ -363,8 +350,291 @@ spec:
                       type: string
                     description: Key-value map of resource tags.
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  accessLogs:
+                    description: An Access Logs block. Access Logs documented below.
+                    items:
+                      properties:
+                        bucket:
+                          description: The S3 bucket name to store the logs in.
+                          type: string
+                        bucketPrefix:
+                          description: The S3 bucket prefix. Logs are stored in the
+                            root if not configured.
+                          type: string
+                        enabled:
+                          description: Boolean to enable / disable access_logs. Default
+                            is true
+                          type: boolean
+                        interval:
+                          description: 'The publishing interval in minutes. Valid
+                            values: 5 and 60. Default: 60'
+                          type: number
+                      type: object
+                    type: array
+                  availabilityZones:
+                    description: The AZ's to serve traffic in.
+                    items:
+                      type: string
+                    type: array
+                  connectionDraining:
+                    description: 'Boolean to enable connection draining. Default:
+                      false'
+                    type: boolean
+                  connectionDrainingTimeout:
+                    description: 'The time in seconds to allow for connections to
+                      drain. Default: 300'
+                    type: number
+                  crossZoneLoadBalancing:
+                    description: 'Enable cross-zone load balancing. Default: true'
+                    type: boolean
+                  desyncMitigationMode:
+                    description: Determines how the load balancer handles requests
+                      that might pose a security risk to an application due to HTTP
+                      desync. Valid values are monitor, defensive (default), strictest.
+                    type: string
+                  healthCheck:
+                    description: A health_check block. Health Check documented below.
+                    items:
+                      properties:
+                        healthyThreshold:
+                          description: The number of checks before the instance is
+                            declared healthy.
+                          type: number
+                        interval:
+                          description: 'The publishing interval in minutes. Valid
+                            values: 5 and 60. Default: 60'
+                          type: number
+                        target:
+                          description: 'The target of the check. Valid pattern is
+                            "${PROTOCOL}:${PORT}${PATH}", where PROTOCOL values are:'
+                          type: string
+                        timeout:
+                          description: The length of time before the check times out.
+                          type: number
+                        unhealthyThreshold:
+                          description: The number of checks before the instance is
+                            declared unhealthy.
+                          type: number
+                      type: object
+                    type: array
+                  idleTimeout:
+                    description: 'The time in seconds that the connection is allowed
+                      to be idle. Default: 60'
+                    type: number
+                  instances:
+                    description: A list of instance ids to place in the ELB pool.
+                    items:
+                      type: string
+                    type: array
+                  instancesRefs:
+                    items:
+                      description: A Reference to a named object.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: Resolution specifies whether resolution
+                                of this reference is required. The default is 'Required',
+                                which means the reconcile will fail if the reference
+                                cannot be resolved. 'Optional' means this reference
+                                will be a no-op if it cannot be resolved.
+                              enum:
+                              - Required
+                              - Optional
+                              type: string
+                            resolve:
+                              description: Resolve specifies when this reference should
+                                be resolved. The default is 'IfNotPresent', which
+                                will attempt to resolve the reference only when the
+                                corresponding field is not present. Use 'Always' to
+                                resolve the reference on every reconcile.
+                              enum:
+                              - Always
+                              - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  instancesSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  internal:
+                    description: If true, ELB will be an internal ELB.
+                    type: boolean
+                  listener:
+                    description: A list of listener blocks. Listeners documented below.
+                    items:
+                      properties:
+                        instancePort:
+                          description: The port on the instance to route to
+                          type: number
+                        instanceProtocol:
+                          description: The protocol to use to the instance. Valid
+                            values are HTTP, HTTPS, TCP, or SSL
+                          type: string
+                        lbPort:
+                          description: The port to listen on for the load balancer
+                          type: number
+                        lbProtocol:
+                          description: The protocol to listen on. Valid values are
+                            HTTP, HTTPS, TCP, or SSL
+                          type: string
+                        sslCertificateId:
+                          description: The ARN of an SSL certificate you have uploaded
+                            to AWS IAM. Note ECDSA-specific restrictions below.  Only
+                            valid when
+                          type: string
+                      type: object
+                    type: array
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  securityGroups:
+                    description: A list of security group IDs to assign to the ELB.
+                      Only valid if creating an ELB within a VPC
+                    items:
+                      type: string
+                    type: array
+                  sourceSecurityGroup:
+                    description: The name of the security group that you can use as
+                      part of your inbound rules for your load balancer's back-end
+                      application instances. Use this for Classic or Default VPC only.
+                    type: string
+                  subnets:
+                    description: A list of subnet IDs to attach to the ELB.
+                    items:
+                      type: string
+                    type: array
+                  subnetsRefs:
+                    items:
+                      description: A Reference to a named object.
+                      properties:
+                        name:
+                          description: Name of the referenced object.
+                          type: string
+                        policy:
+                          description: Policies for referencing.
+                          properties:
+                            resolution:
+                              default: Required
+                              description: Resolution specifies whether resolution
+                                of this reference is required. The default is 'Required',
+                                which means the reconcile will fail if the reference
+                                cannot be resolved. 'Optional' means this reference
+                                will be a no-op if it cannot be resolved.
+                              enum:
+                              - Required
+                              - Optional
+                              type: string
+                            resolve:
+                              description: Resolve specifies when this reference should
+                                be resolved. The default is 'IfNotPresent', which
+                                will attempt to resolve the reference only when the
+                                corresponding field is not present. Use 'Always' to
+                                resolve the reference on every reconcile.
+                              enum:
+                              - Always
+                              - IfNotPresent
+                              type: string
+                          type: object
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  subnetsSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
                 type: object
               managementPolicies:
                 default:
@@ -564,9 +834,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: listener is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.listener)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.listener)
+                || has(self.initProvider.listener)'
           status:
             description: ELBStatus defines the observed state of ELB.
             properties:

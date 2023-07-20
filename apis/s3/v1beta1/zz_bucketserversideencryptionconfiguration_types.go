@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BucketServerSideEncryptionConfigurationInitParameters struct {
+
+	// ID (name) of the bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	BucketRef *v1.Reference `json:"bucketRef,omitempty" tf:"-"`
+
+	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
+
+	// Account ID of the expected bucket owner.
+	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Set of server-side encryption configuration rules. See below. Currently, only a single rule is supported.
+	Rule []BucketServerSideEncryptionConfigurationRuleInitParameters `json:"rule,omitempty" tf:"rule,omitempty"`
+}
+
 type BucketServerSideEncryptionConfigurationObservation struct {
 
 	// ID (name) of the bucket.
@@ -33,7 +55,6 @@ type BucketServerSideEncryptionConfigurationParameters struct {
 	// ID (name) of the bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucket.
@@ -45,17 +66,23 @@ type BucketServerSideEncryptionConfigurationParameters struct {
 	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
 
 	// Account ID of the expected bucket owner.
-	// +kubebuilder:validation:Optional
 	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Set of server-side encryption configuration rules. See below. Currently, only a single rule is supported.
-	// +kubebuilder:validation:Optional
 	Rule []BucketServerSideEncryptionConfigurationRuleParameters `json:"rule,omitempty" tf:"rule,omitempty"`
+}
+
+type BucketServerSideEncryptionConfigurationRuleInitParameters struct {
+
+	// Single object for setting server-side encryption by default. See below.
+	ApplyServerSideEncryptionByDefault []RuleApplyServerSideEncryptionByDefaultInitParameters `json:"applyServerSideEncryptionByDefault,omitempty" tf:"apply_server_side_encryption_by_default,omitempty"`
+
+	// Whether or not to use Amazon S3 Bucket Keys for SSE-KMS.
+	BucketKeyEnabled *bool `json:"bucketKeyEnabled,omitempty" tf:"bucket_key_enabled,omitempty"`
 }
 
 type BucketServerSideEncryptionConfigurationRuleObservation struct {
@@ -70,12 +97,25 @@ type BucketServerSideEncryptionConfigurationRuleObservation struct {
 type BucketServerSideEncryptionConfigurationRuleParameters struct {
 
 	// Single object for setting server-side encryption by default. See below.
-	// +kubebuilder:validation:Optional
 	ApplyServerSideEncryptionByDefault []RuleApplyServerSideEncryptionByDefaultParameters `json:"applyServerSideEncryptionByDefault,omitempty" tf:"apply_server_side_encryption_by_default,omitempty"`
 
 	// Whether or not to use Amazon S3 Bucket Keys for SSE-KMS.
-	// +kubebuilder:validation:Optional
 	BucketKeyEnabled *bool `json:"bucketKeyEnabled,omitempty" tf:"bucket_key_enabled,omitempty"`
+}
+
+type RuleApplyServerSideEncryptionByDefaultInitParameters struct {
+
+	// AWS KMS master key ID used for the SSE-KMS encryption. This can only be used when you set the value of sse_algorithm as aws:kms. The default aws/s3 AWS KMS master key is used if this element is absent while the sse_algorithm is aws:kms.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	KMSMasterKeyID *string `json:"kmsMasterKeyId,omitempty" tf:"kms_master_key_id,omitempty"`
+
+	KMSMasterKeyIDRef *v1.Reference `json:"kmsMasterKeyIdRef,omitempty" tf:"-"`
+
+	KMSMasterKeyIDSelector *v1.Selector `json:"kmsMasterKeyIdSelector,omitempty" tf:"-"`
+
+	// Server-side encryption algorithm to use. Valid values are AES256 and aws:kms
+	SseAlgorithm *string `json:"sseAlgorithm,omitempty" tf:"sse_algorithm,omitempty"`
 }
 
 type RuleApplyServerSideEncryptionByDefaultObservation struct {
@@ -92,7 +132,6 @@ type RuleApplyServerSideEncryptionByDefaultParameters struct {
 	// AWS KMS master key ID used for the SSE-KMS encryption. This can only be used when you set the value of sse_algorithm as aws:kms. The default aws/s3 AWS KMS master key is used if this element is absent while the sse_algorithm is aws:kms.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	KMSMasterKeyID *string `json:"kmsMasterKeyId,omitempty" tf:"kms_master_key_id,omitempty"`
 
 	// Reference to a Key in kms to populate kmsMasterKeyId.
@@ -104,14 +143,17 @@ type RuleApplyServerSideEncryptionByDefaultParameters struct {
 	KMSMasterKeyIDSelector *v1.Selector `json:"kmsMasterKeyIdSelector,omitempty" tf:"-"`
 
 	// Server-side encryption algorithm to use. Valid values are AES256 and aws:kms
-	// +kubebuilder:validation:Required
-	SseAlgorithm *string `json:"sseAlgorithm" tf:"sse_algorithm,omitempty"`
+	SseAlgorithm *string `json:"sseAlgorithm,omitempty" tf:"sse_algorithm,omitempty"`
 }
 
 // BucketServerSideEncryptionConfigurationSpec defines the desired state of BucketServerSideEncryptionConfiguration
 type BucketServerSideEncryptionConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BucketServerSideEncryptionConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BucketServerSideEncryptionConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // BucketServerSideEncryptionConfigurationStatus defines the observed state of BucketServerSideEncryptionConfiguration.
@@ -132,7 +174,7 @@ type BucketServerSideEncryptionConfigurationStatus struct {
 type BucketServerSideEncryptionConfiguration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rule)",message="rule is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rule) || has(self.initProvider.rule)",message="%!s(MISSING) is a required parameter"
 	Spec   BucketServerSideEncryptionConfigurationSpec   `json:"spec"`
 	Status BucketServerSideEncryptionConfigurationStatus `json:"status,omitempty"`
 }

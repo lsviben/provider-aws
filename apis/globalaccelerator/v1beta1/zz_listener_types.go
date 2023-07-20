@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ListenerInitParameters struct {
+
+	// The Amazon Resource Name (ARN) of your accelerator.
+	// +crossplane:generate:reference:type=Accelerator
+	AcceleratorArn *string `json:"acceleratorArn,omitempty" tf:"accelerator_arn,omitempty"`
+
+	AcceleratorArnRef *v1.Reference `json:"acceleratorArnRef,omitempty" tf:"-"`
+
+	AcceleratorArnSelector *v1.Selector `json:"acceleratorArnSelector,omitempty" tf:"-"`
+
+	// Direct all requests from a user to the same endpoint. Valid values are NONE, SOURCE_IP. Default: NONE. If NONE, Global Accelerator uses the "five-tuple" properties of source IP address, source port, destination IP address, destination port, and protocol to select the hash value. If SOURCE_IP, Global Accelerator uses the "two-tuple" properties of source (client) IP address and destination IP address to select the hash value.
+	ClientAffinity *string `json:"clientAffinity,omitempty" tf:"client_affinity,omitempty"`
+
+	// The list of port ranges for the connections from clients to the accelerator. Fields documented below.
+	PortRange []PortRangeInitParameters `json:"portRange,omitempty" tf:"port_range,omitempty"`
+
+	// The protocol for the connections from clients to the accelerator. Valid values are TCP, UDP.
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type ListenerObservation struct {
 
 	// The Amazon Resource Name (ARN) of your accelerator.
@@ -35,7 +59,6 @@ type ListenerParameters struct {
 
 	// The Amazon Resource Name (ARN) of your accelerator.
 	// +crossplane:generate:reference:type=Accelerator
-	// +kubebuilder:validation:Optional
 	AcceleratorArn *string `json:"acceleratorArn,omitempty" tf:"accelerator_arn,omitempty"`
 
 	// Reference to a Accelerator to populate acceleratorArn.
@@ -47,21 +70,26 @@ type ListenerParameters struct {
 	AcceleratorArnSelector *v1.Selector `json:"acceleratorArnSelector,omitempty" tf:"-"`
 
 	// Direct all requests from a user to the same endpoint. Valid values are NONE, SOURCE_IP. Default: NONE. If NONE, Global Accelerator uses the "five-tuple" properties of source IP address, source port, destination IP address, destination port, and protocol to select the hash value. If SOURCE_IP, Global Accelerator uses the "two-tuple" properties of source (client) IP address and destination IP address to select the hash value.
-	// +kubebuilder:validation:Optional
 	ClientAffinity *string `json:"clientAffinity,omitempty" tf:"client_affinity,omitempty"`
 
 	// The list of port ranges for the connections from clients to the accelerator. Fields documented below.
-	// +kubebuilder:validation:Optional
 	PortRange []PortRangeParameters `json:"portRange,omitempty" tf:"port_range,omitempty"`
 
 	// The protocol for the connections from clients to the accelerator. Valid values are TCP, UDP.
-	// +kubebuilder:validation:Optional
 	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type PortRangeInitParameters struct {
+
+	// The first port in the range of ports, inclusive.
+	FromPort *float64 `json:"fromPort,omitempty" tf:"from_port,omitempty"`
+
+	// The last port in the range of ports, inclusive.
+	ToPort *float64 `json:"toPort,omitempty" tf:"to_port,omitempty"`
 }
 
 type PortRangeObservation struct {
@@ -76,11 +104,9 @@ type PortRangeObservation struct {
 type PortRangeParameters struct {
 
 	// The first port in the range of ports, inclusive.
-	// +kubebuilder:validation:Optional
 	FromPort *float64 `json:"fromPort,omitempty" tf:"from_port,omitempty"`
 
 	// The last port in the range of ports, inclusive.
-	// +kubebuilder:validation:Optional
 	ToPort *float64 `json:"toPort,omitempty" tf:"to_port,omitempty"`
 }
 
@@ -88,6 +114,10 @@ type PortRangeParameters struct {
 type ListenerSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ListenerParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ListenerInitParameters `json:"initProvider,omitempty"`
 }
 
 // ListenerStatus defines the observed state of Listener.
@@ -108,8 +138,8 @@ type ListenerStatus struct {
 type Listener struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.portRange)",message="portRange is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.protocol)",message="protocol is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.portRange) || has(self.initProvider.portRange)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.protocol) || has(self.initProvider.protocol)",message="%!s(MISSING) is a required parameter"
 	Spec   ListenerSpec   `json:"spec"`
 	Status ListenerStatus `json:"status,omitempty"`
 }

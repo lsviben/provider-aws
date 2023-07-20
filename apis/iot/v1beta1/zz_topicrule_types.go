@@ -13,6 +13,21 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CloudwatchAlarmInitParameters struct {
+
+	// The CloudWatch alarm name.
+	AlarmName *string `json:"alarmName,omitempty" tf:"alarm_name,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The reason for the alarm change.
+	StateReason *string `json:"stateReason,omitempty" tf:"state_reason,omitempty"`
+
+	// The value of the alarm state. Acceptable values are: OK, ALARM, INSUFFICIENT_DATA.
+	StateValue *string `json:"stateValue,omitempty" tf:"state_value,omitempty"`
+}
+
 type CloudwatchAlarmObservation struct {
 
 	// The CloudWatch alarm name.
@@ -31,20 +46,25 @@ type CloudwatchAlarmObservation struct {
 type CloudwatchAlarmParameters struct {
 
 	// The CloudWatch alarm name.
-	// +kubebuilder:validation:Required
-	AlarmName *string `json:"alarmName" tf:"alarm_name,omitempty"`
+	AlarmName *string `json:"alarmName,omitempty" tf:"alarm_name,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The reason for the alarm change.
-	// +kubebuilder:validation:Required
-	StateReason *string `json:"stateReason" tf:"state_reason,omitempty"`
+	StateReason *string `json:"stateReason,omitempty" tf:"state_reason,omitempty"`
 
 	// The value of the alarm state. Acceptable values are: OK, ALARM, INSUFFICIENT_DATA.
-	// +kubebuilder:validation:Required
-	StateValue *string `json:"stateValue" tf:"state_value,omitempty"`
+	StateValue *string `json:"stateValue,omitempty" tf:"state_value,omitempty"`
+}
+
+type CloudwatchLogsInitParameters struct {
+
+	// The CloudWatch log group name.
+	LogGroupName *string `json:"logGroupName,omitempty" tf:"log_group_name,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type CloudwatchLogsObservation struct {
@@ -59,12 +79,31 @@ type CloudwatchLogsObservation struct {
 type CloudwatchLogsParameters struct {
 
 	// The CloudWatch log group name.
-	// +kubebuilder:validation:Required
-	LogGroupName *string `json:"logGroupName" tf:"log_group_name,omitempty"`
+	LogGroupName *string `json:"logGroupName,omitempty" tf:"log_group_name,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type CloudwatchMetricInitParameters struct {
+
+	// The CloudWatch metric name.
+	MetricName *string `json:"metricName,omitempty" tf:"metric_name,omitempty"`
+
+	// The CloudWatch metric namespace name.
+	MetricNamespace *string `json:"metricNamespace,omitempty" tf:"metric_namespace,omitempty"`
+
+	// An optional Unix timestamp (http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_concepts.html#about_timestamp).
+	MetricTimestamp *string `json:"metricTimestamp,omitempty" tf:"metric_timestamp,omitempty"`
+
+	// The metric unit (supported units can be found here: http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_concepts.html#Unit)
+	MetricUnit *string `json:"metricUnit,omitempty" tf:"metric_unit,omitempty"`
+
+	// The CloudWatch metric value.
+	MetricValue *string `json:"metricValue,omitempty" tf:"metric_value,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type CloudwatchMetricObservation struct {
@@ -91,28 +130,31 @@ type CloudwatchMetricObservation struct {
 type CloudwatchMetricParameters struct {
 
 	// The CloudWatch metric name.
-	// +kubebuilder:validation:Required
-	MetricName *string `json:"metricName" tf:"metric_name,omitempty"`
+	MetricName *string `json:"metricName,omitempty" tf:"metric_name,omitempty"`
 
 	// The CloudWatch metric namespace name.
-	// +kubebuilder:validation:Required
-	MetricNamespace *string `json:"metricNamespace" tf:"metric_namespace,omitempty"`
+	MetricNamespace *string `json:"metricNamespace,omitempty" tf:"metric_namespace,omitempty"`
 
 	// An optional Unix timestamp (http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_concepts.html#about_timestamp).
-	// +kubebuilder:validation:Optional
 	MetricTimestamp *string `json:"metricTimestamp,omitempty" tf:"metric_timestamp,omitempty"`
 
 	// The metric unit (supported units can be found here: http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_concepts.html#Unit)
-	// +kubebuilder:validation:Required
-	MetricUnit *string `json:"metricUnit" tf:"metric_unit,omitempty"`
+	MetricUnit *string `json:"metricUnit,omitempty" tf:"metric_unit,omitempty"`
 
 	// The CloudWatch metric value.
-	// +kubebuilder:validation:Required
-	MetricValue *string `json:"metricValue" tf:"metric_value,omitempty"`
+	MetricValue *string `json:"metricValue,omitempty" tf:"metric_value,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type DimensionInitParameters struct {
+
+	// The name of the rule.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The value of the HTTP header.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type DimensionObservation struct {
@@ -127,12 +169,43 @@ type DimensionObservation struct {
 type DimensionParameters struct {
 
 	// The name of the rule.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The value of the HTTP header.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type DynamodbInitParameters struct {
+
+	// The hash key name.
+	HashKeyField *string `json:"hashKeyField,omitempty" tf:"hash_key_field,omitempty"`
+
+	// The hash key type. Valid values are "STRING" or "NUMBER".
+	HashKeyType *string `json:"hashKeyType,omitempty" tf:"hash_key_type,omitempty"`
+
+	// The hash key value.
+	HashKeyValue *string `json:"hashKeyValue,omitempty" tf:"hash_key_value,omitempty"`
+
+	// The operation. Valid values are "INSERT", "UPDATE", or "DELETE".
+	Operation *string `json:"operation,omitempty" tf:"operation,omitempty"`
+
+	// The action payload.
+	PayloadField *string `json:"payloadField,omitempty" tf:"payload_field,omitempty"`
+
+	// The range key name.
+	RangeKeyField *string `json:"rangeKeyField,omitempty" tf:"range_key_field,omitempty"`
+
+	// The range key type. Valid values are "STRING" or "NUMBER".
+	RangeKeyType *string `json:"rangeKeyType,omitempty" tf:"range_key_type,omitempty"`
+
+	// The range key value.
+	RangeKeyValue *string `json:"rangeKeyValue,omitempty" tf:"range_key_value,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The name of the DynamoDB table.
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
 }
 
 type DynamodbObservation struct {
@@ -171,44 +244,43 @@ type DynamodbObservation struct {
 type DynamodbParameters struct {
 
 	// The hash key name.
-	// +kubebuilder:validation:Required
-	HashKeyField *string `json:"hashKeyField" tf:"hash_key_field,omitempty"`
+	HashKeyField *string `json:"hashKeyField,omitempty" tf:"hash_key_field,omitempty"`
 
 	// The hash key type. Valid values are "STRING" or "NUMBER".
-	// +kubebuilder:validation:Optional
 	HashKeyType *string `json:"hashKeyType,omitempty" tf:"hash_key_type,omitempty"`
 
 	// The hash key value.
-	// +kubebuilder:validation:Required
-	HashKeyValue *string `json:"hashKeyValue" tf:"hash_key_value,omitempty"`
+	HashKeyValue *string `json:"hashKeyValue,omitempty" tf:"hash_key_value,omitempty"`
 
 	// The operation. Valid values are "INSERT", "UPDATE", or "DELETE".
-	// +kubebuilder:validation:Optional
 	Operation *string `json:"operation,omitempty" tf:"operation,omitempty"`
 
 	// The action payload.
-	// +kubebuilder:validation:Optional
 	PayloadField *string `json:"payloadField,omitempty" tf:"payload_field,omitempty"`
 
 	// The range key name.
-	// +kubebuilder:validation:Optional
 	RangeKeyField *string `json:"rangeKeyField,omitempty" tf:"range_key_field,omitempty"`
 
 	// The range key type. Valid values are "STRING" or "NUMBER".
-	// +kubebuilder:validation:Optional
 	RangeKeyType *string `json:"rangeKeyType,omitempty" tf:"range_key_type,omitempty"`
 
 	// The range key value.
-	// +kubebuilder:validation:Optional
 	RangeKeyValue *string `json:"rangeKeyValue,omitempty" tf:"range_key_value,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The name of the DynamoDB table.
-	// +kubebuilder:validation:Required
-	TableName *string `json:"tableName" tf:"table_name,omitempty"`
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+}
+
+type Dynamodbv2InitParameters struct {
+
+	// Configuration block with DynamoDB Table to which the message will be written. Nested arguments below.
+	PutItem []PutItemInitParameters `json:"putItem,omitempty" tf:"put_item,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type Dynamodbv2Observation struct {
@@ -223,12 +295,16 @@ type Dynamodbv2Observation struct {
 type Dynamodbv2Parameters struct {
 
 	// Configuration block with DynamoDB Table to which the message will be written. Nested arguments below.
-	// +kubebuilder:validation:Optional
 	PutItem []PutItemParameters `json:"putItem,omitempty" tf:"put_item,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type Dynamodbv2PutItemInitParameters struct {
+
+	// The name of the DynamoDB table.
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
 }
 
 type Dynamodbv2PutItemObservation struct {
@@ -240,8 +316,25 @@ type Dynamodbv2PutItemObservation struct {
 type Dynamodbv2PutItemParameters struct {
 
 	// The name of the DynamoDB table.
-	// +kubebuilder:validation:Required
-	TableName *string `json:"tableName" tf:"table_name,omitempty"`
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+}
+
+type ElasticsearchInitParameters struct {
+
+	// The endpoint of your Elasticsearch domain.
+	Endpoint *string `json:"endpoint,omitempty" tf:"endpoint,omitempty"`
+
+	// The unique identifier for the document you are storing.
+	ID *string `json:"id,omitempty" tf:"id,omitempty"`
+
+	// The Elasticsearch index where you want to store your data.
+	Index *string `json:"index,omitempty" tf:"index,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The type of document you are storing.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type ElasticsearchObservation struct {
@@ -265,24 +358,34 @@ type ElasticsearchObservation struct {
 type ElasticsearchParameters struct {
 
 	// The endpoint of your Elasticsearch domain.
-	// +kubebuilder:validation:Required
-	Endpoint *string `json:"endpoint" tf:"endpoint,omitempty"`
+	Endpoint *string `json:"endpoint,omitempty" tf:"endpoint,omitempty"`
 
 	// The unique identifier for the document you are storing.
-	// +kubebuilder:validation:Required
-	ID *string `json:"id" tf:"id,omitempty"`
+	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
 	// The Elasticsearch index where you want to store your data.
-	// +kubebuilder:validation:Required
-	Index *string `json:"index" tf:"index,omitempty"`
+	Index *string `json:"index,omitempty" tf:"index,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The type of document you are storing.
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type ErrorActionCloudwatchAlarmInitParameters struct {
+
+	// The CloudWatch alarm name.
+	AlarmName *string `json:"alarmName,omitempty" tf:"alarm_name,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The reason for the alarm change.
+	StateReason *string `json:"stateReason,omitempty" tf:"state_reason,omitempty"`
+
+	// The value of the alarm state. Acceptable values are: OK, ALARM, INSUFFICIENT_DATA.
+	StateValue *string `json:"stateValue,omitempty" tf:"state_value,omitempty"`
 }
 
 type ErrorActionCloudwatchAlarmObservation struct {
@@ -303,20 +406,25 @@ type ErrorActionCloudwatchAlarmObservation struct {
 type ErrorActionCloudwatchAlarmParameters struct {
 
 	// The CloudWatch alarm name.
-	// +kubebuilder:validation:Required
-	AlarmName *string `json:"alarmName" tf:"alarm_name,omitempty"`
+	AlarmName *string `json:"alarmName,omitempty" tf:"alarm_name,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The reason for the alarm change.
-	// +kubebuilder:validation:Required
-	StateReason *string `json:"stateReason" tf:"state_reason,omitempty"`
+	StateReason *string `json:"stateReason,omitempty" tf:"state_reason,omitempty"`
 
 	// The value of the alarm state. Acceptable values are: OK, ALARM, INSUFFICIENT_DATA.
-	// +kubebuilder:validation:Required
-	StateValue *string `json:"stateValue" tf:"state_value,omitempty"`
+	StateValue *string `json:"stateValue,omitempty" tf:"state_value,omitempty"`
+}
+
+type ErrorActionCloudwatchLogsInitParameters struct {
+
+	// The CloudWatch log group name.
+	LogGroupName *string `json:"logGroupName,omitempty" tf:"log_group_name,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type ErrorActionCloudwatchLogsObservation struct {
@@ -331,12 +439,31 @@ type ErrorActionCloudwatchLogsObservation struct {
 type ErrorActionCloudwatchLogsParameters struct {
 
 	// The CloudWatch log group name.
-	// +kubebuilder:validation:Required
-	LogGroupName *string `json:"logGroupName" tf:"log_group_name,omitempty"`
+	LogGroupName *string `json:"logGroupName,omitempty" tf:"log_group_name,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type ErrorActionCloudwatchMetricInitParameters struct {
+
+	// The CloudWatch metric name.
+	MetricName *string `json:"metricName,omitempty" tf:"metric_name,omitempty"`
+
+	// The CloudWatch metric namespace name.
+	MetricNamespace *string `json:"metricNamespace,omitempty" tf:"metric_namespace,omitempty"`
+
+	// An optional Unix timestamp (http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_concepts.html#about_timestamp).
+	MetricTimestamp *string `json:"metricTimestamp,omitempty" tf:"metric_timestamp,omitempty"`
+
+	// The metric unit (supported units can be found here: http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_concepts.html#Unit)
+	MetricUnit *string `json:"metricUnit,omitempty" tf:"metric_unit,omitempty"`
+
+	// The CloudWatch metric value.
+	MetricValue *string `json:"metricValue,omitempty" tf:"metric_value,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type ErrorActionCloudwatchMetricObservation struct {
@@ -363,28 +490,55 @@ type ErrorActionCloudwatchMetricObservation struct {
 type ErrorActionCloudwatchMetricParameters struct {
 
 	// The CloudWatch metric name.
-	// +kubebuilder:validation:Required
-	MetricName *string `json:"metricName" tf:"metric_name,omitempty"`
+	MetricName *string `json:"metricName,omitempty" tf:"metric_name,omitempty"`
 
 	// The CloudWatch metric namespace name.
-	// +kubebuilder:validation:Required
-	MetricNamespace *string `json:"metricNamespace" tf:"metric_namespace,omitempty"`
+	MetricNamespace *string `json:"metricNamespace,omitempty" tf:"metric_namespace,omitempty"`
 
 	// An optional Unix timestamp (http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_concepts.html#about_timestamp).
-	// +kubebuilder:validation:Optional
 	MetricTimestamp *string `json:"metricTimestamp,omitempty" tf:"metric_timestamp,omitempty"`
 
 	// The metric unit (supported units can be found here: http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_concepts.html#Unit)
-	// +kubebuilder:validation:Required
-	MetricUnit *string `json:"metricUnit" tf:"metric_unit,omitempty"`
+	MetricUnit *string `json:"metricUnit,omitempty" tf:"metric_unit,omitempty"`
 
 	// The CloudWatch metric value.
-	// +kubebuilder:validation:Required
-	MetricValue *string `json:"metricValue" tf:"metric_value,omitempty"`
+	MetricValue *string `json:"metricValue,omitempty" tf:"metric_value,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type ErrorActionDynamodbInitParameters struct {
+
+	// The hash key name.
+	HashKeyField *string `json:"hashKeyField,omitempty" tf:"hash_key_field,omitempty"`
+
+	// The hash key type. Valid values are "STRING" or "NUMBER".
+	HashKeyType *string `json:"hashKeyType,omitempty" tf:"hash_key_type,omitempty"`
+
+	// The hash key value.
+	HashKeyValue *string `json:"hashKeyValue,omitempty" tf:"hash_key_value,omitempty"`
+
+	// The operation. Valid values are "INSERT", "UPDATE", or "DELETE".
+	Operation *string `json:"operation,omitempty" tf:"operation,omitempty"`
+
+	// The action payload.
+	PayloadField *string `json:"payloadField,omitempty" tf:"payload_field,omitempty"`
+
+	// The range key name.
+	RangeKeyField *string `json:"rangeKeyField,omitempty" tf:"range_key_field,omitempty"`
+
+	// The range key type. Valid values are "STRING" or "NUMBER".
+	RangeKeyType *string `json:"rangeKeyType,omitempty" tf:"range_key_type,omitempty"`
+
+	// The range key value.
+	RangeKeyValue *string `json:"rangeKeyValue,omitempty" tf:"range_key_value,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The name of the DynamoDB table.
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
 }
 
 type ErrorActionDynamodbObservation struct {
@@ -423,44 +577,43 @@ type ErrorActionDynamodbObservation struct {
 type ErrorActionDynamodbParameters struct {
 
 	// The hash key name.
-	// +kubebuilder:validation:Required
-	HashKeyField *string `json:"hashKeyField" tf:"hash_key_field,omitempty"`
+	HashKeyField *string `json:"hashKeyField,omitempty" tf:"hash_key_field,omitempty"`
 
 	// The hash key type. Valid values are "STRING" or "NUMBER".
-	// +kubebuilder:validation:Optional
 	HashKeyType *string `json:"hashKeyType,omitempty" tf:"hash_key_type,omitempty"`
 
 	// The hash key value.
-	// +kubebuilder:validation:Required
-	HashKeyValue *string `json:"hashKeyValue" tf:"hash_key_value,omitempty"`
+	HashKeyValue *string `json:"hashKeyValue,omitempty" tf:"hash_key_value,omitempty"`
 
 	// The operation. Valid values are "INSERT", "UPDATE", or "DELETE".
-	// +kubebuilder:validation:Optional
 	Operation *string `json:"operation,omitempty" tf:"operation,omitempty"`
 
 	// The action payload.
-	// +kubebuilder:validation:Optional
 	PayloadField *string `json:"payloadField,omitempty" tf:"payload_field,omitempty"`
 
 	// The range key name.
-	// +kubebuilder:validation:Optional
 	RangeKeyField *string `json:"rangeKeyField,omitempty" tf:"range_key_field,omitempty"`
 
 	// The range key type. Valid values are "STRING" or "NUMBER".
-	// +kubebuilder:validation:Optional
 	RangeKeyType *string `json:"rangeKeyType,omitempty" tf:"range_key_type,omitempty"`
 
 	// The range key value.
-	// +kubebuilder:validation:Optional
 	RangeKeyValue *string `json:"rangeKeyValue,omitempty" tf:"range_key_value,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The name of the DynamoDB table.
-	// +kubebuilder:validation:Required
-	TableName *string `json:"tableName" tf:"table_name,omitempty"`
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+}
+
+type ErrorActionDynamodbv2InitParameters struct {
+
+	// Configuration block with DynamoDB Table to which the message will be written. Nested arguments below.
+	PutItem []Dynamodbv2PutItemInitParameters `json:"putItem,omitempty" tf:"put_item,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type ErrorActionDynamodbv2Observation struct {
@@ -475,12 +628,28 @@ type ErrorActionDynamodbv2Observation struct {
 type ErrorActionDynamodbv2Parameters struct {
 
 	// Configuration block with DynamoDB Table to which the message will be written. Nested arguments below.
-	// +kubebuilder:validation:Optional
 	PutItem []Dynamodbv2PutItemParameters `json:"putItem,omitempty" tf:"put_item,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type ErrorActionElasticsearchInitParameters struct {
+
+	// The endpoint of your Elasticsearch domain.
+	Endpoint *string `json:"endpoint,omitempty" tf:"endpoint,omitempty"`
+
+	// The unique identifier for the document you are storing.
+	ID *string `json:"id,omitempty" tf:"id,omitempty"`
+
+	// The Elasticsearch index where you want to store your data.
+	Index *string `json:"index,omitempty" tf:"index,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The type of document you are storing.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type ErrorActionElasticsearchObservation struct {
@@ -504,24 +673,59 @@ type ErrorActionElasticsearchObservation struct {
 type ErrorActionElasticsearchParameters struct {
 
 	// The endpoint of your Elasticsearch domain.
-	// +kubebuilder:validation:Required
-	Endpoint *string `json:"endpoint" tf:"endpoint,omitempty"`
+	Endpoint *string `json:"endpoint,omitempty" tf:"endpoint,omitempty"`
 
 	// The unique identifier for the document you are storing.
-	// +kubebuilder:validation:Required
-	ID *string `json:"id" tf:"id,omitempty"`
+	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
 	// The Elasticsearch index where you want to store your data.
-	// +kubebuilder:validation:Required
-	Index *string `json:"index" tf:"index,omitempty"`
+	Index *string `json:"index,omitempty" tf:"index,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The type of document you are storing.
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type ErrorActionInitParameters struct {
+	CloudwatchAlarm []ErrorActionCloudwatchAlarmInitParameters `json:"cloudwatchAlarm,omitempty" tf:"cloudwatch_alarm,omitempty"`
+
+	CloudwatchLogs []ErrorActionCloudwatchLogsInitParameters `json:"cloudwatchLogs,omitempty" tf:"cloudwatch_logs,omitempty"`
+
+	CloudwatchMetric []ErrorActionCloudwatchMetricInitParameters `json:"cloudwatchMetric,omitempty" tf:"cloudwatch_metric,omitempty"`
+
+	Dynamodb []ErrorActionDynamodbInitParameters `json:"dynamodb,omitempty" tf:"dynamodb,omitempty"`
+
+	Dynamodbv2 []ErrorActionDynamodbv2InitParameters `json:"dynamodbv2,omitempty" tf:"dynamodbv2,omitempty"`
+
+	Elasticsearch []ErrorActionElasticsearchInitParameters `json:"elasticsearch,omitempty" tf:"elasticsearch,omitempty"`
+
+	Firehose []FirehoseInitParameters `json:"firehose,omitempty" tf:"firehose,omitempty"`
+
+	HTTP []HTTPInitParameters `json:"http,omitempty" tf:"http,omitempty"`
+
+	IotAnalytics []IotAnalyticsInitParameters `json:"iotAnalytics,omitempty" tf:"iot_analytics,omitempty"`
+
+	IotEvents []IotEventsInitParameters `json:"iotEvents,omitempty" tf:"iot_events,omitempty"`
+
+	Kafka []KafkaInitParameters `json:"kafka,omitempty" tf:"kafka,omitempty"`
+
+	Kinesis []KinesisInitParameters `json:"kinesis,omitempty" tf:"kinesis,omitempty"`
+
+	Lambda []LambdaInitParameters `json:"lambda,omitempty" tf:"lambda,omitempty"`
+
+	Republish []RepublishInitParameters `json:"republish,omitempty" tf:"republish,omitempty"`
+
+	S3 []S3InitParameters `json:"s3,omitempty" tf:"s3,omitempty"`
+
+	Sns []SnsInitParameters `json:"sns,omitempty" tf:"sns,omitempty"`
+
+	Sqs []SqsInitParameters `json:"sqs,omitempty" tf:"sqs,omitempty"`
+
+	StepFunctions []StepFunctionsInitParameters `json:"stepFunctions,omitempty" tf:"step_functions,omitempty"`
+
+	Timestream []TimestreamInitParameters `json:"timestream,omitempty" tf:"timestream,omitempty"`
 }
 
 type ErrorActionObservation struct {
@@ -565,63 +769,55 @@ type ErrorActionObservation struct {
 }
 
 type ErrorActionParameters struct {
-
-	// +kubebuilder:validation:Optional
 	CloudwatchAlarm []ErrorActionCloudwatchAlarmParameters `json:"cloudwatchAlarm,omitempty" tf:"cloudwatch_alarm,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	CloudwatchLogs []ErrorActionCloudwatchLogsParameters `json:"cloudwatchLogs,omitempty" tf:"cloudwatch_logs,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	CloudwatchMetric []ErrorActionCloudwatchMetricParameters `json:"cloudwatchMetric,omitempty" tf:"cloudwatch_metric,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Dynamodb []ErrorActionDynamodbParameters `json:"dynamodb,omitempty" tf:"dynamodb,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Dynamodbv2 []ErrorActionDynamodbv2Parameters `json:"dynamodbv2,omitempty" tf:"dynamodbv2,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Elasticsearch []ErrorActionElasticsearchParameters `json:"elasticsearch,omitempty" tf:"elasticsearch,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Firehose []FirehoseParameters `json:"firehose,omitempty" tf:"firehose,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	HTTP []HTTPParameters `json:"http,omitempty" tf:"http,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	IotAnalytics []IotAnalyticsParameters `json:"iotAnalytics,omitempty" tf:"iot_analytics,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	IotEvents []IotEventsParameters `json:"iotEvents,omitempty" tf:"iot_events,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Kafka []KafkaParameters `json:"kafka,omitempty" tf:"kafka,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Kinesis []KinesisParameters `json:"kinesis,omitempty" tf:"kinesis,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Lambda []LambdaParameters `json:"lambda,omitempty" tf:"lambda,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Republish []RepublishParameters `json:"republish,omitempty" tf:"republish,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	S3 []S3Parameters `json:"s3,omitempty" tf:"s3,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Sns []SnsParameters `json:"sns,omitempty" tf:"sns,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Sqs []SqsParameters `json:"sqs,omitempty" tf:"sqs,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	StepFunctions []StepFunctionsParameters `json:"stepFunctions,omitempty" tf:"step_functions,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Timestream []TimestreamParameters `json:"timestream,omitempty" tf:"timestream,omitempty"`
+}
+
+type FirehoseInitParameters struct {
+
+	// The delivery stream name.
+	DeliveryStreamName *string `json:"deliveryStreamName,omitempty" tf:"delivery_stream_name,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// A character separator that is used to separate records written to the Firehose stream. Valid values are: '\n' (newline), '\t' (tab), '\r\n' (Windows newline), ',' (comma).
+	Separator *string `json:"separator,omitempty" tf:"separator,omitempty"`
 }
 
 type FirehoseObservation struct {
@@ -639,16 +835,22 @@ type FirehoseObservation struct {
 type FirehoseParameters struct {
 
 	// The delivery stream name.
-	// +kubebuilder:validation:Required
-	DeliveryStreamName *string `json:"deliveryStreamName" tf:"delivery_stream_name,omitempty"`
+	DeliveryStreamName *string `json:"deliveryStreamName,omitempty" tf:"delivery_stream_name,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// A character separator that is used to separate records written to the Firehose stream. Valid values are: '\n' (newline), '\t' (tab), '\r\n' (Windows newline), ',' (comma).
-	// +kubebuilder:validation:Optional
 	Separator *string `json:"separator,omitempty" tf:"separator,omitempty"`
+}
+
+type HTTPHTTPHeaderInitParameters struct {
+
+	// The name of the HTTP header.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The value of the HTTP header.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type HTTPHTTPHeaderObservation struct {
@@ -663,12 +865,19 @@ type HTTPHTTPHeaderObservation struct {
 type HTTPHTTPHeaderParameters struct {
 
 	// The name of the HTTP header.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The value of the HTTP header.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type HTTPHeaderInitParameters struct {
+
+	// The name of the HTTP header.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The value of the HTTP header.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type HTTPHeaderObservation struct {
@@ -683,12 +892,22 @@ type HTTPHeaderObservation struct {
 type HTTPHeaderParameters struct {
 
 	// The name of the HTTP header.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The value of the HTTP header.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type HTTPInitParameters struct {
+
+	// The HTTPS URL used to verify ownership of url.
+	ConfirmationURL *string `json:"confirmationUrl,omitempty" tf:"confirmation_url,omitempty"`
+
+	// Custom HTTP header IoT Core should send. It is possible to define more than one custom header.
+	HTTPHeader []HTTPHeaderInitParameters `json:"httpHeader,omitempty" tf:"http_header,omitempty"`
+
+	// The HTTPS URL.
+	URL *string `json:"url,omitempty" tf:"url,omitempty"`
 }
 
 type HTTPObservation struct {
@@ -706,16 +925,22 @@ type HTTPObservation struct {
 type HTTPParameters struct {
 
 	// The HTTPS URL used to verify ownership of url.
-	// +kubebuilder:validation:Optional
 	ConfirmationURL *string `json:"confirmationUrl,omitempty" tf:"confirmation_url,omitempty"`
 
 	// Custom HTTP header IoT Core should send. It is possible to define more than one custom header.
-	// +kubebuilder:validation:Optional
 	HTTPHeader []HTTPHeaderParameters `json:"httpHeader,omitempty" tf:"http_header,omitempty"`
 
 	// The HTTPS URL.
-	// +kubebuilder:validation:Required
-	URL *string `json:"url" tf:"url,omitempty"`
+	URL *string `json:"url,omitempty" tf:"url,omitempty"`
+}
+
+type IotAnalyticsInitParameters struct {
+
+	// Name of AWS IOT Analytics channel.
+	ChannelName *string `json:"channelName,omitempty" tf:"channel_name,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type IotAnalyticsObservation struct {
@@ -730,12 +955,22 @@ type IotAnalyticsObservation struct {
 type IotAnalyticsParameters struct {
 
 	// Name of AWS IOT Analytics channel.
-	// +kubebuilder:validation:Required
-	ChannelName *string `json:"channelName" tf:"channel_name,omitempty"`
+	ChannelName *string `json:"channelName,omitempty" tf:"channel_name,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type IotEventsInitParameters struct {
+
+	// The name of the AWS IoT Events input.
+	InputName *string `json:"inputName,omitempty" tf:"input_name,omitempty"`
+
+	// Use this to ensure that only one input (message) with a given messageId is processed by an AWS IoT Events detector.
+	MessageID *string `json:"messageId,omitempty" tf:"message_id,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type IotEventsObservation struct {
@@ -753,16 +988,31 @@ type IotEventsObservation struct {
 type IotEventsParameters struct {
 
 	// The name of the AWS IoT Events input.
-	// +kubebuilder:validation:Required
-	InputName *string `json:"inputName" tf:"input_name,omitempty"`
+	InputName *string `json:"inputName,omitempty" tf:"input_name,omitempty"`
 
 	// Use this to ensure that only one input (message) with a given messageId is processed by an AWS IoT Events detector.
-	// +kubebuilder:validation:Optional
 	MessageID *string `json:"messageId,omitempty" tf:"message_id,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type KafkaInitParameters struct {
+
+	// Properties of the Apache Kafka producer client. For more info, see the AWS documentation.
+	ClientProperties map[string]*string `json:"clientProperties,omitempty" tf:"client_properties,omitempty"`
+
+	// The ARN of Kafka action's VPC aws_iot_topic_rule_destination .
+	DestinationArn *string `json:"destinationArn,omitempty" tf:"destination_arn,omitempty"`
+
+	// The name of the HTTP header.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The Kafka message partition.
+	Partition *string `json:"partition,omitempty" tf:"partition,omitempty"`
+
+	// The Kafka topic for messages to be sent to the Kafka broker.
+	Topic *string `json:"topic,omitempty" tf:"topic,omitempty"`
 }
 
 type KafkaObservation struct {
@@ -786,24 +1036,31 @@ type KafkaObservation struct {
 type KafkaParameters struct {
 
 	// Properties of the Apache Kafka producer client. For more info, see the AWS documentation.
-	// +kubebuilder:validation:Required
-	ClientProperties map[string]*string `json:"clientProperties" tf:"client_properties,omitempty"`
+	ClientProperties map[string]*string `json:"clientProperties,omitempty" tf:"client_properties,omitempty"`
 
 	// The ARN of Kafka action's VPC aws_iot_topic_rule_destination .
-	// +kubebuilder:validation:Required
-	DestinationArn *string `json:"destinationArn" tf:"destination_arn,omitempty"`
+	DestinationArn *string `json:"destinationArn,omitempty" tf:"destination_arn,omitempty"`
 
 	// The name of the HTTP header.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The Kafka message partition.
-	// +kubebuilder:validation:Optional
 	Partition *string `json:"partition,omitempty" tf:"partition,omitempty"`
 
 	// The Kafka topic for messages to be sent to the Kafka broker.
-	// +kubebuilder:validation:Required
-	Topic *string `json:"topic" tf:"topic,omitempty"`
+	Topic *string `json:"topic,omitempty" tf:"topic,omitempty"`
+}
+
+type KinesisInitParameters struct {
+
+	// The partition key.
+	PartitionKey *string `json:"partitionKey,omitempty" tf:"partition_key,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The name of the Amazon Kinesis stream.
+	StreamName *string `json:"streamName,omitempty" tf:"stream_name,omitempty"`
 }
 
 type KinesisObservation struct {
@@ -821,16 +1078,19 @@ type KinesisObservation struct {
 type KinesisParameters struct {
 
 	// The partition key.
-	// +kubebuilder:validation:Optional
 	PartitionKey *string `json:"partitionKey,omitempty" tf:"partition_key,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The name of the Amazon Kinesis stream.
-	// +kubebuilder:validation:Required
-	StreamName *string `json:"streamName" tf:"stream_name,omitempty"`
+	StreamName *string `json:"streamName,omitempty" tf:"stream_name,omitempty"`
+}
+
+type LambdaInitParameters struct {
+
+	// The ARN of the Lambda function.
+	FunctionArn *string `json:"functionArn,omitempty" tf:"function_arn,omitempty"`
 }
 
 type LambdaObservation struct {
@@ -842,8 +1102,13 @@ type LambdaObservation struct {
 type LambdaParameters struct {
 
 	// The ARN of the Lambda function.
-	// +kubebuilder:validation:Required
-	FunctionArn *string `json:"functionArn" tf:"function_arn,omitempty"`
+	FunctionArn *string `json:"functionArn,omitempty" tf:"function_arn,omitempty"`
+}
+
+type PutItemInitParameters struct {
+
+	// The name of the DynamoDB table.
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
 }
 
 type PutItemObservation struct {
@@ -855,8 +1120,19 @@ type PutItemObservation struct {
 type PutItemParameters struct {
 
 	// The name of the DynamoDB table.
-	// +kubebuilder:validation:Required
-	TableName *string `json:"tableName" tf:"table_name,omitempty"`
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+}
+
+type RepublishInitParameters struct {
+
+	// The Quality of Service (QoS) level to use when republishing messages. Valid values are 0 or 1. The default value is 0.
+	Qos *float64 `json:"qos,omitempty" tf:"qos,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The Kafka topic for messages to be sent to the Kafka broker.
+	Topic *string `json:"topic,omitempty" tf:"topic,omitempty"`
 }
 
 type RepublishObservation struct {
@@ -874,16 +1150,28 @@ type RepublishObservation struct {
 type RepublishParameters struct {
 
 	// The Quality of Service (QoS) level to use when republishing messages. Valid values are 0 or 1. The default value is 0.
-	// +kubebuilder:validation:Optional
 	Qos *float64 `json:"qos,omitempty" tf:"qos,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The Kafka topic for messages to be sent to the Kafka broker.
-	// +kubebuilder:validation:Required
-	Topic *string `json:"topic" tf:"topic,omitempty"`
+	Topic *string `json:"topic,omitempty" tf:"topic,omitempty"`
+}
+
+type S3InitParameters struct {
+
+	// The Amazon S3 bucket name.
+	BucketName *string `json:"bucketName,omitempty" tf:"bucket_name,omitempty"`
+
+	// The Amazon S3 canned ACL that controls access to the object identified by the object key. Valid values.
+	CannedACL *string `json:"cannedAcl,omitempty" tf:"canned_acl,omitempty"`
+
+	// The name of the HTTP header.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type S3Observation struct {
@@ -904,20 +1192,40 @@ type S3Observation struct {
 type S3Parameters struct {
 
 	// The Amazon S3 bucket name.
-	// +kubebuilder:validation:Required
-	BucketName *string `json:"bucketName" tf:"bucket_name,omitempty"`
+	BucketName *string `json:"bucketName,omitempty" tf:"bucket_name,omitempty"`
 
 	// The Amazon S3 canned ACL that controls access to the object identified by the object key. Valid values.
-	// +kubebuilder:validation:Optional
 	CannedACL *string `json:"cannedAcl,omitempty" tf:"canned_acl,omitempty"`
 
 	// The name of the HTTP header.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type SnsInitParameters struct {
+
+	// The message format of the message to publish. Accepted values are "JSON" and "RAW".
+	MessageFormat *string `json:"messageFormat,omitempty" tf:"message_format,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
+
+	// The ARN of the SNS topic.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	TargetArn *string `json:"targetArn,omitempty" tf:"target_arn,omitempty"`
+
+	TargetArnRef *v1.Reference `json:"targetArnRef,omitempty" tf:"-"`
+
+	TargetArnSelector *v1.Selector `json:"targetArnSelector,omitempty" tf:"-"`
 }
 
 type SnsObservation struct {
@@ -935,13 +1243,11 @@ type SnsObservation struct {
 type SnsParameters struct {
 
 	// The message format of the message to publish. Accepted values are "JSON" and "RAW".
-	// +kubebuilder:validation:Optional
 	MessageFormat *string `json:"messageFormat,omitempty" tf:"message_format,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -955,7 +1261,6 @@ type SnsParameters struct {
 	// The ARN of the SNS topic.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	TargetArn *string `json:"targetArn,omitempty" tf:"target_arn,omitempty"`
 
 	// Reference to a Topic in sns to populate targetArn.
@@ -965,6 +1270,18 @@ type SnsParameters struct {
 	// Selector for a Topic in sns to populate targetArn.
 	// +kubebuilder:validation:Optional
 	TargetArnSelector *v1.Selector `json:"targetArnSelector,omitempty" tf:"-"`
+}
+
+type SqsInitParameters struct {
+
+	// The URL of the Amazon SQS queue.
+	QueueURL *string `json:"queueUrl,omitempty" tf:"queue_url,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// Specifies whether to use Base64 encoding.
+	UseBase64 *bool `json:"useBase64,omitempty" tf:"use_base64,omitempty"`
 }
 
 type SqsObservation struct {
@@ -982,16 +1299,25 @@ type SqsObservation struct {
 type SqsParameters struct {
 
 	// The URL of the Amazon SQS queue.
-	// +kubebuilder:validation:Required
-	QueueURL *string `json:"queueUrl" tf:"queue_url,omitempty"`
+	QueueURL *string `json:"queueUrl,omitempty" tf:"queue_url,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Specifies whether to use Base64 encoding.
-	// +kubebuilder:validation:Required
-	UseBase64 *bool `json:"useBase64" tf:"use_base64,omitempty"`
+	UseBase64 *bool `json:"useBase64,omitempty" tf:"use_base64,omitempty"`
+}
+
+type StepFunctionsInitParameters struct {
+
+	// The prefix used to generate, along with a UUID, the unique state machine execution name.
+	ExecutionNamePrefix *string `json:"executionNamePrefix,omitempty" tf:"execution_name_prefix,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The name of the Step Functions state machine whose execution will be started.
+	StateMachineName *string `json:"stateMachineName,omitempty" tf:"state_machine_name,omitempty"`
 }
 
 type StepFunctionsObservation struct {
@@ -1009,16 +1335,22 @@ type StepFunctionsObservation struct {
 type StepFunctionsParameters struct {
 
 	// The prefix used to generate, along with a UUID, the unique state machine execution name.
-	// +kubebuilder:validation:Optional
 	ExecutionNamePrefix *string `json:"executionNamePrefix,omitempty" tf:"execution_name_prefix,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The name of the Step Functions state machine whose execution will be started.
-	// +kubebuilder:validation:Required
-	StateMachineName *string `json:"stateMachineName" tf:"state_machine_name,omitempty"`
+	StateMachineName *string `json:"stateMachineName,omitempty" tf:"state_machine_name,omitempty"`
+}
+
+type TimestampInitParameters struct {
+
+	// The precision of the timestamp value that results from the expression described in value. Valid values: SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+
+	// The value of the HTTP header.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type TimestampObservation struct {
@@ -1033,12 +1365,19 @@ type TimestampObservation struct {
 type TimestampParameters struct {
 
 	// The precision of the timestamp value that results from the expression described in value. Valid values: SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS.
-	// +kubebuilder:validation:Required
-	Unit *string `json:"unit" tf:"unit,omitempty"`
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
 
 	// The value of the HTTP header.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type TimestreamDimensionInitParameters struct {
+
+	// The name of the rule.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The value of the HTTP header.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type TimestreamDimensionObservation struct {
@@ -1053,12 +1392,28 @@ type TimestreamDimensionObservation struct {
 type TimestreamDimensionParameters struct {
 
 	// The name of the rule.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The value of the HTTP header.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type TimestreamInitParameters struct {
+
+	// The name of an Amazon Timestream database.
+	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
+
+	// Configuration blocks with metadata attributes of the time series that are written in each measure record. Nested arguments below.
+	Dimension []DimensionInitParameters `json:"dimension,omitempty" tf:"dimension,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The name of the DynamoDB table.
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+
+	// Configuration block specifying an application-defined value to replace the default value assigned to the Timestream record's timestamp in the time column. Nested arguments below.
+	Timestamp []TimestampInitParameters `json:"timestamp,omitempty" tf:"timestamp,omitempty"`
 }
 
 type TimestreamObservation struct {
@@ -1082,24 +1437,28 @@ type TimestreamObservation struct {
 type TimestreamParameters struct {
 
 	// The name of an Amazon Timestream database.
-	// +kubebuilder:validation:Required
-	DatabaseName *string `json:"databaseName" tf:"database_name,omitempty"`
+	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
 
 	// Configuration blocks with metadata attributes of the time series that are written in each measure record. Nested arguments below.
-	// +kubebuilder:validation:Required
-	Dimension []DimensionParameters `json:"dimension" tf:"dimension,omitempty"`
+	Dimension []DimensionParameters `json:"dimension,omitempty" tf:"dimension,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The name of the DynamoDB table.
-	// +kubebuilder:validation:Required
-	TableName *string `json:"tableName" tf:"table_name,omitempty"`
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
 
 	// Configuration block specifying an application-defined value to replace the default value assigned to the Timestream record's timestamp in the time column. Nested arguments below.
-	// +kubebuilder:validation:Optional
 	Timestamp []TimestampParameters `json:"timestamp,omitempty" tf:"timestamp,omitempty"`
+}
+
+type TimestreamTimestampInitParameters struct {
+
+	// The precision of the timestamp value that results from the expression described in value. Valid values: SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+
+	// The value of the HTTP header.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type TimestreamTimestampObservation struct {
@@ -1114,12 +1473,22 @@ type TimestreamTimestampObservation struct {
 type TimestreamTimestampParameters struct {
 
 	// The precision of the timestamp value that results from the expression described in value. Valid values: SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS.
-	// +kubebuilder:validation:Required
-	Unit *string `json:"unit" tf:"unit,omitempty"`
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
 
 	// The value of the HTTP header.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type TopicRuleFirehoseInitParameters struct {
+
+	// The delivery stream name.
+	DeliveryStreamName *string `json:"deliveryStreamName,omitempty" tf:"delivery_stream_name,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// A character separator that is used to separate records written to the Firehose stream. Valid values are: '\n' (newline), '\t' (tab), '\r\n' (Windows newline), ',' (comma).
+	Separator *string `json:"separator,omitempty" tf:"separator,omitempty"`
 }
 
 type TopicRuleFirehoseObservation struct {
@@ -1137,16 +1506,25 @@ type TopicRuleFirehoseObservation struct {
 type TopicRuleFirehoseParameters struct {
 
 	// The delivery stream name.
-	// +kubebuilder:validation:Required
-	DeliveryStreamName *string `json:"deliveryStreamName" tf:"delivery_stream_name,omitempty"`
+	DeliveryStreamName *string `json:"deliveryStreamName,omitempty" tf:"delivery_stream_name,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// A character separator that is used to separate records written to the Firehose stream. Valid values are: '\n' (newline), '\t' (tab), '\r\n' (Windows newline), ',' (comma).
-	// +kubebuilder:validation:Optional
 	Separator *string `json:"separator,omitempty" tf:"separator,omitempty"`
+}
+
+type TopicRuleHTTPInitParameters struct {
+
+	// The HTTPS URL used to verify ownership of url.
+	ConfirmationURL *string `json:"confirmationUrl,omitempty" tf:"confirmation_url,omitempty"`
+
+	// Custom HTTP header IoT Core should send. It is possible to define more than one custom header.
+	HTTPHeader []HTTPHTTPHeaderInitParameters `json:"httpHeader,omitempty" tf:"http_header,omitempty"`
+
+	// The HTTPS URL.
+	URL *string `json:"url,omitempty" tf:"url,omitempty"`
 }
 
 type TopicRuleHTTPObservation struct {
@@ -1164,16 +1542,84 @@ type TopicRuleHTTPObservation struct {
 type TopicRuleHTTPParameters struct {
 
 	// The HTTPS URL used to verify ownership of url.
-	// +kubebuilder:validation:Optional
 	ConfirmationURL *string `json:"confirmationUrl,omitempty" tf:"confirmation_url,omitempty"`
 
 	// Custom HTTP header IoT Core should send. It is possible to define more than one custom header.
-	// +kubebuilder:validation:Optional
 	HTTPHeader []HTTPHTTPHeaderParameters `json:"httpHeader,omitempty" tf:"http_header,omitempty"`
 
 	// The HTTPS URL.
-	// +kubebuilder:validation:Required
-	URL *string `json:"url" tf:"url,omitempty"`
+	URL *string `json:"url,omitempty" tf:"url,omitempty"`
+}
+
+type TopicRuleInitParameters struct {
+	CloudwatchAlarm []CloudwatchAlarmInitParameters `json:"cloudwatchAlarm,omitempty" tf:"cloudwatch_alarm,omitempty"`
+
+	CloudwatchLogs []CloudwatchLogsInitParameters `json:"cloudwatchLogs,omitempty" tf:"cloudwatch_logs,omitempty"`
+
+	CloudwatchMetric []CloudwatchMetricInitParameters `json:"cloudwatchMetric,omitempty" tf:"cloudwatch_metric,omitempty"`
+
+	// The description of the rule.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	Dynamodb []DynamodbInitParameters `json:"dynamodb,omitempty" tf:"dynamodb,omitempty"`
+
+	Dynamodbv2 []Dynamodbv2InitParameters `json:"dynamodbv2,omitempty" tf:"dynamodbv2,omitempty"`
+
+	Elasticsearch []ElasticsearchInitParameters `json:"elasticsearch,omitempty" tf:"elasticsearch,omitempty"`
+
+	// Specifies whether the rule is enabled.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// Configuration block with error action to be associated with the rule. See the documentation for cloudwatch_alarm, cloudwatch_logs, cloudwatch_metric, dynamodb, dynamodbv2, elasticsearch, firehose, http, iot_analytics, iot_events, kafka, kinesis, lambda, republish, s3, sns, sqs, step_functions, timestream configuration blocks for further configuration details.
+	ErrorAction []ErrorActionInitParameters `json:"errorAction,omitempty" tf:"error_action,omitempty"`
+
+	Firehose []TopicRuleFirehoseInitParameters `json:"firehose,omitempty" tf:"firehose,omitempty"`
+
+	HTTP []TopicRuleHTTPInitParameters `json:"http,omitempty" tf:"http,omitempty"`
+
+	IotAnalytics []TopicRuleIotAnalyticsInitParameters `json:"iotAnalytics,omitempty" tf:"iot_analytics,omitempty"`
+
+	IotEvents []TopicRuleIotEventsInitParameters `json:"iotEvents,omitempty" tf:"iot_events,omitempty"`
+
+	Kafka []TopicRuleKafkaInitParameters `json:"kafka,omitempty" tf:"kafka,omitempty"`
+
+	Kinesis []TopicRuleKinesisInitParameters `json:"kinesis,omitempty" tf:"kinesis,omitempty"`
+
+	Lambda []TopicRuleLambdaInitParameters `json:"lambda,omitempty" tf:"lambda,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	Republish []TopicRuleRepublishInitParameters `json:"republish,omitempty" tf:"republish,omitempty"`
+
+	S3 []TopicRuleS3InitParameters `json:"s3,omitempty" tf:"s3,omitempty"`
+
+	// The SQL statement used to query the topic. For more information, see AWS IoT SQL Reference (http://docs.aws.amazon.com/iot/latest/developerguide/iot-rules.html#aws-iot-sql-reference) in the AWS IoT Developer Guide.
+	SQL *string `json:"sql,omitempty" tf:"sql,omitempty"`
+
+	// The version of the SQL rules engine to use when evaluating the rule.
+	SQLVersion *string `json:"sqlVersion,omitempty" tf:"sql_version,omitempty"`
+
+	Sns []TopicRuleSnsInitParameters `json:"sns,omitempty" tf:"sns,omitempty"`
+
+	Sqs []TopicRuleSqsInitParameters `json:"sqs,omitempty" tf:"sqs,omitempty"`
+
+	StepFunctions []TopicRuleStepFunctionsInitParameters `json:"stepFunctions,omitempty" tf:"step_functions,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	Timestream []TopicRuleTimestreamInitParameters `json:"timestream,omitempty" tf:"timestream,omitempty"`
+}
+
+type TopicRuleIotAnalyticsInitParameters struct {
+
+	// Name of AWS IOT Analytics channel.
+	ChannelName *string `json:"channelName,omitempty" tf:"channel_name,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type TopicRuleIotAnalyticsObservation struct {
@@ -1188,12 +1634,22 @@ type TopicRuleIotAnalyticsObservation struct {
 type TopicRuleIotAnalyticsParameters struct {
 
 	// Name of AWS IOT Analytics channel.
-	// +kubebuilder:validation:Required
-	ChannelName *string `json:"channelName" tf:"channel_name,omitempty"`
+	ChannelName *string `json:"channelName,omitempty" tf:"channel_name,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type TopicRuleIotEventsInitParameters struct {
+
+	// The name of the AWS IoT Events input.
+	InputName *string `json:"inputName,omitempty" tf:"input_name,omitempty"`
+
+	// Use this to ensure that only one input (message) with a given messageId is processed by an AWS IoT Events detector.
+	MessageID *string `json:"messageId,omitempty" tf:"message_id,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type TopicRuleIotEventsObservation struct {
@@ -1211,16 +1667,31 @@ type TopicRuleIotEventsObservation struct {
 type TopicRuleIotEventsParameters struct {
 
 	// The name of the AWS IoT Events input.
-	// +kubebuilder:validation:Required
-	InputName *string `json:"inputName" tf:"input_name,omitempty"`
+	InputName *string `json:"inputName,omitempty" tf:"input_name,omitempty"`
 
 	// Use this to ensure that only one input (message) with a given messageId is processed by an AWS IoT Events detector.
-	// +kubebuilder:validation:Optional
 	MessageID *string `json:"messageId,omitempty" tf:"message_id,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type TopicRuleKafkaInitParameters struct {
+
+	// Properties of the Apache Kafka producer client. For more info, see the AWS documentation.
+	ClientProperties map[string]*string `json:"clientProperties,omitempty" tf:"client_properties,omitempty"`
+
+	// The ARN of Kafka action's VPC aws_iot_topic_rule_destination .
+	DestinationArn *string `json:"destinationArn,omitempty" tf:"destination_arn,omitempty"`
+
+	// The name of the HTTP header.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The Kafka message partition.
+	Partition *string `json:"partition,omitempty" tf:"partition,omitempty"`
+
+	// The Kafka topic for messages to be sent to the Kafka broker.
+	Topic *string `json:"topic,omitempty" tf:"topic,omitempty"`
 }
 
 type TopicRuleKafkaObservation struct {
@@ -1244,24 +1715,31 @@ type TopicRuleKafkaObservation struct {
 type TopicRuleKafkaParameters struct {
 
 	// Properties of the Apache Kafka producer client. For more info, see the AWS documentation.
-	// +kubebuilder:validation:Required
-	ClientProperties map[string]*string `json:"clientProperties" tf:"client_properties,omitempty"`
+	ClientProperties map[string]*string `json:"clientProperties,omitempty" tf:"client_properties,omitempty"`
 
 	// The ARN of Kafka action's VPC aws_iot_topic_rule_destination .
-	// +kubebuilder:validation:Required
-	DestinationArn *string `json:"destinationArn" tf:"destination_arn,omitempty"`
+	DestinationArn *string `json:"destinationArn,omitempty" tf:"destination_arn,omitempty"`
 
 	// The name of the HTTP header.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The Kafka message partition.
-	// +kubebuilder:validation:Optional
 	Partition *string `json:"partition,omitempty" tf:"partition,omitempty"`
 
 	// The Kafka topic for messages to be sent to the Kafka broker.
-	// +kubebuilder:validation:Required
-	Topic *string `json:"topic" tf:"topic,omitempty"`
+	Topic *string `json:"topic,omitempty" tf:"topic,omitempty"`
+}
+
+type TopicRuleKinesisInitParameters struct {
+
+	// The partition key.
+	PartitionKey *string `json:"partitionKey,omitempty" tf:"partition_key,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The name of the Amazon Kinesis stream.
+	StreamName *string `json:"streamName,omitempty" tf:"stream_name,omitempty"`
 }
 
 type TopicRuleKinesisObservation struct {
@@ -1279,16 +1757,19 @@ type TopicRuleKinesisObservation struct {
 type TopicRuleKinesisParameters struct {
 
 	// The partition key.
-	// +kubebuilder:validation:Optional
 	PartitionKey *string `json:"partitionKey,omitempty" tf:"partition_key,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The name of the Amazon Kinesis stream.
-	// +kubebuilder:validation:Required
-	StreamName *string `json:"streamName" tf:"stream_name,omitempty"`
+	StreamName *string `json:"streamName,omitempty" tf:"stream_name,omitempty"`
+}
+
+type TopicRuleLambdaInitParameters struct {
+
+	// The ARN of the Lambda function.
+	FunctionArn *string `json:"functionArn,omitempty" tf:"function_arn,omitempty"`
 }
 
 type TopicRuleLambdaObservation struct {
@@ -1300,8 +1781,7 @@ type TopicRuleLambdaObservation struct {
 type TopicRuleLambdaParameters struct {
 
 	// The ARN of the Lambda function.
-	// +kubebuilder:validation:Required
-	FunctionArn *string `json:"functionArn" tf:"function_arn,omitempty"`
+	FunctionArn *string `json:"functionArn,omitempty" tf:"function_arn,omitempty"`
 }
 
 type TopicRuleObservation struct {
@@ -1373,92 +1853,77 @@ type TopicRuleObservation struct {
 }
 
 type TopicRuleParameters struct {
-
-	// +kubebuilder:validation:Optional
 	CloudwatchAlarm []CloudwatchAlarmParameters `json:"cloudwatchAlarm,omitempty" tf:"cloudwatch_alarm,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	CloudwatchLogs []CloudwatchLogsParameters `json:"cloudwatchLogs,omitempty" tf:"cloudwatch_logs,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	CloudwatchMetric []CloudwatchMetricParameters `json:"cloudwatchMetric,omitempty" tf:"cloudwatch_metric,omitempty"`
 
 	// The description of the rule.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Dynamodb []DynamodbParameters `json:"dynamodb,omitempty" tf:"dynamodb,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Dynamodbv2 []Dynamodbv2Parameters `json:"dynamodbv2,omitempty" tf:"dynamodbv2,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Elasticsearch []ElasticsearchParameters `json:"elasticsearch,omitempty" tf:"elasticsearch,omitempty"`
 
 	// Specifies whether the rule is enabled.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// Configuration block with error action to be associated with the rule. See the documentation for cloudwatch_alarm, cloudwatch_logs, cloudwatch_metric, dynamodb, dynamodbv2, elasticsearch, firehose, http, iot_analytics, iot_events, kafka, kinesis, lambda, republish, s3, sns, sqs, step_functions, timestream configuration blocks for further configuration details.
-	// +kubebuilder:validation:Optional
 	ErrorAction []ErrorActionParameters `json:"errorAction,omitempty" tf:"error_action,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Firehose []TopicRuleFirehoseParameters `json:"firehose,omitempty" tf:"firehose,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	HTTP []TopicRuleHTTPParameters `json:"http,omitempty" tf:"http,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	IotAnalytics []TopicRuleIotAnalyticsParameters `json:"iotAnalytics,omitempty" tf:"iot_analytics,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	IotEvents []TopicRuleIotEventsParameters `json:"iotEvents,omitempty" tf:"iot_events,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Kafka []TopicRuleKafkaParameters `json:"kafka,omitempty" tf:"kafka,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Kinesis []TopicRuleKinesisParameters `json:"kinesis,omitempty" tf:"kinesis,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Lambda []TopicRuleLambdaParameters `json:"lambda,omitempty" tf:"lambda,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
-	// +kubebuilder:validation:Optional
 	Republish []TopicRuleRepublishParameters `json:"republish,omitempty" tf:"republish,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	S3 []TopicRuleS3Parameters `json:"s3,omitempty" tf:"s3,omitempty"`
 
 	// The SQL statement used to query the topic. For more information, see AWS IoT SQL Reference (http://docs.aws.amazon.com/iot/latest/developerguide/iot-rules.html#aws-iot-sql-reference) in the AWS IoT Developer Guide.
-	// +kubebuilder:validation:Optional
 	SQL *string `json:"sql,omitempty" tf:"sql,omitempty"`
 
 	// The version of the SQL rules engine to use when evaluating the rule.
-	// +kubebuilder:validation:Optional
 	SQLVersion *string `json:"sqlVersion,omitempty" tf:"sql_version,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Sns []TopicRuleSnsParameters `json:"sns,omitempty" tf:"sns,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Sqs []TopicRuleSqsParameters `json:"sqs,omitempty" tf:"sqs,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	StepFunctions []TopicRuleStepFunctionsParameters `json:"stepFunctions,omitempty" tf:"step_functions,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Timestream []TopicRuleTimestreamParameters `json:"timestream,omitempty" tf:"timestream,omitempty"`
+}
+
+type TopicRuleRepublishInitParameters struct {
+
+	// The Quality of Service (QoS) level to use when republishing messages. Valid values are 0 or 1. The default value is 0.
+	Qos *float64 `json:"qos,omitempty" tf:"qos,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The Kafka topic for messages to be sent to the Kafka broker.
+	Topic *string `json:"topic,omitempty" tf:"topic,omitempty"`
 }
 
 type TopicRuleRepublishObservation struct {
@@ -1476,16 +1941,28 @@ type TopicRuleRepublishObservation struct {
 type TopicRuleRepublishParameters struct {
 
 	// The Quality of Service (QoS) level to use when republishing messages. Valid values are 0 or 1. The default value is 0.
-	// +kubebuilder:validation:Optional
 	Qos *float64 `json:"qos,omitempty" tf:"qos,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The Kafka topic for messages to be sent to the Kafka broker.
-	// +kubebuilder:validation:Required
-	Topic *string `json:"topic" tf:"topic,omitempty"`
+	Topic *string `json:"topic,omitempty" tf:"topic,omitempty"`
+}
+
+type TopicRuleS3InitParameters struct {
+
+	// The Amazon S3 bucket name.
+	BucketName *string `json:"bucketName,omitempty" tf:"bucket_name,omitempty"`
+
+	// The Amazon S3 canned ACL that controls access to the object identified by the object key. Valid values.
+	CannedACL *string `json:"cannedAcl,omitempty" tf:"canned_acl,omitempty"`
+
+	// The name of the HTTP header.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 }
 
 type TopicRuleS3Observation struct {
@@ -1506,20 +1983,40 @@ type TopicRuleS3Observation struct {
 type TopicRuleS3Parameters struct {
 
 	// The Amazon S3 bucket name.
-	// +kubebuilder:validation:Required
-	BucketName *string `json:"bucketName" tf:"bucket_name,omitempty"`
+	BucketName *string `json:"bucketName,omitempty" tf:"bucket_name,omitempty"`
 
 	// The Amazon S3 canned ACL that controls access to the object identified by the object key. Valid values.
-	// +kubebuilder:validation:Optional
 	CannedACL *string `json:"cannedAcl,omitempty" tf:"canned_acl,omitempty"`
 
 	// The name of the HTTP header.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+}
+
+type TopicRuleSnsInitParameters struct {
+
+	// The message format of the message to publish. Accepted values are "JSON" and "RAW".
+	MessageFormat *string `json:"messageFormat,omitempty" tf:"message_format,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
+
+	// The ARN of the SNS topic.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	TargetArn *string `json:"targetArn,omitempty" tf:"target_arn,omitempty"`
+
+	TargetArnRef *v1.Reference `json:"targetArnRef,omitempty" tf:"-"`
+
+	TargetArnSelector *v1.Selector `json:"targetArnSelector,omitempty" tf:"-"`
 }
 
 type TopicRuleSnsObservation struct {
@@ -1537,13 +2034,11 @@ type TopicRuleSnsObservation struct {
 type TopicRuleSnsParameters struct {
 
 	// The message format of the message to publish. Accepted values are "JSON" and "RAW".
-	// +kubebuilder:validation:Optional
 	MessageFormat *string `json:"messageFormat,omitempty" tf:"message_format,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -1557,7 +2052,6 @@ type TopicRuleSnsParameters struct {
 	// The ARN of the SNS topic.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	TargetArn *string `json:"targetArn,omitempty" tf:"target_arn,omitempty"`
 
 	// Reference to a Topic in sns to populate targetArn.
@@ -1567,6 +2061,18 @@ type TopicRuleSnsParameters struct {
 	// Selector for a Topic in sns to populate targetArn.
 	// +kubebuilder:validation:Optional
 	TargetArnSelector *v1.Selector `json:"targetArnSelector,omitempty" tf:"-"`
+}
+
+type TopicRuleSqsInitParameters struct {
+
+	// The URL of the Amazon SQS queue.
+	QueueURL *string `json:"queueUrl,omitempty" tf:"queue_url,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// Specifies whether to use Base64 encoding.
+	UseBase64 *bool `json:"useBase64,omitempty" tf:"use_base64,omitempty"`
 }
 
 type TopicRuleSqsObservation struct {
@@ -1584,16 +2090,25 @@ type TopicRuleSqsObservation struct {
 type TopicRuleSqsParameters struct {
 
 	// The URL of the Amazon SQS queue.
-	// +kubebuilder:validation:Required
-	QueueURL *string `json:"queueUrl" tf:"queue_url,omitempty"`
+	QueueURL *string `json:"queueUrl,omitempty" tf:"queue_url,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Specifies whether to use Base64 encoding.
-	// +kubebuilder:validation:Required
-	UseBase64 *bool `json:"useBase64" tf:"use_base64,omitempty"`
+	UseBase64 *bool `json:"useBase64,omitempty" tf:"use_base64,omitempty"`
+}
+
+type TopicRuleStepFunctionsInitParameters struct {
+
+	// The prefix used to generate, along with a UUID, the unique state machine execution name.
+	ExecutionNamePrefix *string `json:"executionNamePrefix,omitempty" tf:"execution_name_prefix,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The name of the Step Functions state machine whose execution will be started.
+	StateMachineName *string `json:"stateMachineName,omitempty" tf:"state_machine_name,omitempty"`
 }
 
 type TopicRuleStepFunctionsObservation struct {
@@ -1611,16 +2126,31 @@ type TopicRuleStepFunctionsObservation struct {
 type TopicRuleStepFunctionsParameters struct {
 
 	// The prefix used to generate, along with a UUID, the unique state machine execution name.
-	// +kubebuilder:validation:Optional
 	ExecutionNamePrefix *string `json:"executionNamePrefix,omitempty" tf:"execution_name_prefix,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The name of the Step Functions state machine whose execution will be started.
-	// +kubebuilder:validation:Required
-	StateMachineName *string `json:"stateMachineName" tf:"state_machine_name,omitempty"`
+	StateMachineName *string `json:"stateMachineName,omitempty" tf:"state_machine_name,omitempty"`
+}
+
+type TopicRuleTimestreamInitParameters struct {
+
+	// The name of an Amazon Timestream database.
+	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
+
+	// Configuration blocks with metadata attributes of the time series that are written in each measure record. Nested arguments below.
+	Dimension []TimestreamDimensionInitParameters `json:"dimension,omitempty" tf:"dimension,omitempty"`
+
+	// The IAM role ARN that allows access to the CloudWatch alarm.
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	// The name of the DynamoDB table.
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+
+	// Configuration block specifying an application-defined value to replace the default value assigned to the Timestream record's timestamp in the time column. Nested arguments below.
+	Timestamp []TimestreamTimestampInitParameters `json:"timestamp,omitempty" tf:"timestamp,omitempty"`
 }
 
 type TopicRuleTimestreamObservation struct {
@@ -1644,23 +2174,18 @@ type TopicRuleTimestreamObservation struct {
 type TopicRuleTimestreamParameters struct {
 
 	// The name of an Amazon Timestream database.
-	// +kubebuilder:validation:Required
-	DatabaseName *string `json:"databaseName" tf:"database_name,omitempty"`
+	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
 
 	// Configuration blocks with metadata attributes of the time series that are written in each measure record. Nested arguments below.
-	// +kubebuilder:validation:Required
-	Dimension []TimestreamDimensionParameters `json:"dimension" tf:"dimension,omitempty"`
+	Dimension []TimestreamDimensionParameters `json:"dimension,omitempty" tf:"dimension,omitempty"`
 
 	// The IAM role ARN that allows access to the CloudWatch alarm.
-	// +kubebuilder:validation:Required
-	RoleArn *string `json:"roleArn" tf:"role_arn,omitempty"`
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// The name of the DynamoDB table.
-	// +kubebuilder:validation:Required
-	TableName *string `json:"tableName" tf:"table_name,omitempty"`
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
 
 	// Configuration block specifying an application-defined value to replace the default value assigned to the Timestream record's timestamp in the time column. Nested arguments below.
-	// +kubebuilder:validation:Optional
 	Timestamp []TimestreamTimestampParameters `json:"timestamp,omitempty" tf:"timestamp,omitempty"`
 }
 
@@ -1668,6 +2193,10 @@ type TopicRuleTimestreamParameters struct {
 type TopicRuleSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     TopicRuleParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider TopicRuleInitParameters `json:"initProvider,omitempty"`
 }
 
 // TopicRuleStatus defines the observed state of TopicRule.
@@ -1688,9 +2217,9 @@ type TopicRuleStatus struct {
 type TopicRule struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.enabled)",message="enabled is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.sql)",message="sql is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.sqlVersion)",message="sqlVersion is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.enabled) || has(self.initProvider.enabled)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.sql) || has(self.initProvider.sql)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.sqlVersion) || has(self.initProvider.sqlVersion)",message="%!s(MISSING) is a required parameter"
 	Spec   TopicRuleSpec   `json:"spec"`
 	Status TopicRuleStatus `json:"status,omitempty"`
 }

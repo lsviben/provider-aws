@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AccessLogSettingsInitParameters struct {
+
+	// ARN of the CloudWatch Logs log group or Kinesis Data Firehose delivery stream to receive access logs. If you specify a Kinesis Data Firehose delivery stream, the stream name must begin with amazon-apigateway-. Automatically removes trailing :* if present.
+	DestinationArn *string `json:"destinationArn,omitempty" tf:"destination_arn,omitempty"`
+
+	// Formatting and values recorded in the logs.
+	// For more information on configuring the log format rules visit the AWS documentation
+	Format *string `json:"format,omitempty" tf:"format,omitempty"`
+}
+
 type AccessLogSettingsObservation struct {
 
 	// ARN of the CloudWatch Logs log group or Kinesis Data Firehose delivery stream to receive access logs. If you specify a Kinesis Data Firehose delivery stream, the stream name must begin with amazon-apigateway-. Automatically removes trailing :* if present.
@@ -26,13 +36,23 @@ type AccessLogSettingsObservation struct {
 type AccessLogSettingsParameters struct {
 
 	// ARN of the CloudWatch Logs log group or Kinesis Data Firehose delivery stream to receive access logs. If you specify a Kinesis Data Firehose delivery stream, the stream name must begin with amazon-apigateway-. Automatically removes trailing :* if present.
-	// +kubebuilder:validation:Required
-	DestinationArn *string `json:"destinationArn" tf:"destination_arn,omitempty"`
+	DestinationArn *string `json:"destinationArn,omitempty" tf:"destination_arn,omitempty"`
 
 	// Formatting and values recorded in the logs.
 	// For more information on configuring the log format rules visit the AWS documentation
-	// +kubebuilder:validation:Required
-	Format *string `json:"format" tf:"format,omitempty"`
+	Format *string `json:"format,omitempty" tf:"format,omitempty"`
+}
+
+type CanarySettingsInitParameters struct {
+
+	// Percent 0.0 - 100.0 of traffic to divert to the canary deployment.
+	PercentTraffic *float64 `json:"percentTraffic,omitempty" tf:"percent_traffic,omitempty"`
+
+	// Map of overridden stage variables (including new variables) for the canary deployment.
+	StageVariableOverrides map[string]*string `json:"stageVariableOverrides,omitempty" tf:"stage_variable_overrides,omitempty"`
+
+	// Whether the canary deployment uses the stage cache. Defaults to false.
+	UseStageCache *bool `json:"useStageCache,omitempty" tf:"use_stage_cache,omitempty"`
 }
 
 type CanarySettingsObservation struct {
@@ -50,16 +70,71 @@ type CanarySettingsObservation struct {
 type CanarySettingsParameters struct {
 
 	// Percent 0.0 - 100.0 of traffic to divert to the canary deployment.
-	// +kubebuilder:validation:Optional
 	PercentTraffic *float64 `json:"percentTraffic,omitempty" tf:"percent_traffic,omitempty"`
 
 	// Map of overridden stage variables (including new variables) for the canary deployment.
-	// +kubebuilder:validation:Optional
 	StageVariableOverrides map[string]*string `json:"stageVariableOverrides,omitempty" tf:"stage_variable_overrides,omitempty"`
 
 	// Whether the canary deployment uses the stage cache. Defaults to false.
-	// +kubebuilder:validation:Optional
 	UseStageCache *bool `json:"useStageCache,omitempty" tf:"use_stage_cache,omitempty"`
+}
+
+type StageInitParameters struct {
+
+	// Enables access logs for the API stage. See Access Log Settings below.
+	AccessLogSettings []AccessLogSettingsInitParameters `json:"accessLogSettings,omitempty" tf:"access_log_settings,omitempty"`
+
+	// Whether a cache cluster is enabled for the stage
+	CacheClusterEnabled *bool `json:"cacheClusterEnabled,omitempty" tf:"cache_cluster_enabled,omitempty"`
+
+	// Size of the cache cluster for the stage, if enabled. Allowed values include 0.5, 1.6, 6.1, 13.5, 28.4, 58.2, 118 and 237.
+	CacheClusterSize *string `json:"cacheClusterSize,omitempty" tf:"cache_cluster_size,omitempty"`
+
+	// Configuration settings of a canary deployment. See Canary Settings below.
+	CanarySettings []CanarySettingsInitParameters `json:"canarySettings,omitempty" tf:"canary_settings,omitempty"`
+
+	// Identifier of a client certificate for the stage.
+	ClientCertificateID *string `json:"clientCertificateId,omitempty" tf:"client_certificate_id,omitempty"`
+
+	// ID of the deployment that the stage points to
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.Deployment
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DeploymentID *string `json:"deploymentId,omitempty" tf:"deployment_id,omitempty"`
+
+	DeploymentIDRef *v1.Reference `json:"deploymentIdRef,omitempty" tf:"-"`
+
+	DeploymentIDSelector *v1.Selector `json:"deploymentIdSelector,omitempty" tf:"-"`
+
+	// Description of the stage.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Version of the associated API documentation
+	DocumentationVersion *string `json:"documentationVersion,omitempty" tf:"documentation_version,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// ID of the associated REST API
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	RestAPIID *string `json:"restApiId,omitempty" tf:"rest_api_id,omitempty"`
+
+	RestAPIIDRef *v1.Reference `json:"restApiIdRef,omitempty" tf:"-"`
+
+	RestAPIIDSelector *v1.Selector `json:"restApiIdSelector,omitempty" tf:"-"`
+
+	// Name of the stage
+	StageName *string `json:"stageName,omitempty" tf:"stage_name,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Map that defines the stage variables
+	Variables map[string]*string `json:"variables,omitempty" tf:"variables,omitempty"`
+
+	// Whether active tracing with X-ray is enabled. Defaults to false.
+	XrayTracingEnabled *bool `json:"xrayTracingEnabled,omitempty" tf:"xray_tracing_enabled,omitempty"`
 }
 
 type StageObservation struct {
@@ -128,29 +203,23 @@ type StageObservation struct {
 type StageParameters struct {
 
 	// Enables access logs for the API stage. See Access Log Settings below.
-	// +kubebuilder:validation:Optional
 	AccessLogSettings []AccessLogSettingsParameters `json:"accessLogSettings,omitempty" tf:"access_log_settings,omitempty"`
 
 	// Whether a cache cluster is enabled for the stage
-	// +kubebuilder:validation:Optional
 	CacheClusterEnabled *bool `json:"cacheClusterEnabled,omitempty" tf:"cache_cluster_enabled,omitempty"`
 
 	// Size of the cache cluster for the stage, if enabled. Allowed values include 0.5, 1.6, 6.1, 13.5, 28.4, 58.2, 118 and 237.
-	// +kubebuilder:validation:Optional
 	CacheClusterSize *string `json:"cacheClusterSize,omitempty" tf:"cache_cluster_size,omitempty"`
 
 	// Configuration settings of a canary deployment. See Canary Settings below.
-	// +kubebuilder:validation:Optional
 	CanarySettings []CanarySettingsParameters `json:"canarySettings,omitempty" tf:"canary_settings,omitempty"`
 
 	// Identifier of a client certificate for the stage.
-	// +kubebuilder:validation:Optional
 	ClientCertificateID *string `json:"clientCertificateId,omitempty" tf:"client_certificate_id,omitempty"`
 
 	// ID of the deployment that the stage points to
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.Deployment
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DeploymentID *string `json:"deploymentId,omitempty" tf:"deployment_id,omitempty"`
 
 	// Reference to a Deployment in apigateway to populate deploymentId.
@@ -162,22 +231,18 @@ type StageParameters struct {
 	DeploymentIDSelector *v1.Selector `json:"deploymentIdSelector,omitempty" tf:"-"`
 
 	// Description of the stage.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Version of the associated API documentation
-	// +kubebuilder:validation:Optional
 	DocumentationVersion *string `json:"documentationVersion,omitempty" tf:"documentation_version,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// ID of the associated REST API
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	RestAPIID *string `json:"restApiId,omitempty" tf:"rest_api_id,omitempty"`
 
 	// Reference to a RestAPI in apigateway to populate restApiId.
@@ -189,19 +254,15 @@ type StageParameters struct {
 	RestAPIIDSelector *v1.Selector `json:"restApiIdSelector,omitempty" tf:"-"`
 
 	// Name of the stage
-	// +kubebuilder:validation:Optional
 	StageName *string `json:"stageName,omitempty" tf:"stage_name,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Map that defines the stage variables
-	// +kubebuilder:validation:Optional
 	Variables map[string]*string `json:"variables,omitempty" tf:"variables,omitempty"`
 
 	// Whether active tracing with X-ray is enabled. Defaults to false.
-	// +kubebuilder:validation:Optional
 	XrayTracingEnabled *bool `json:"xrayTracingEnabled,omitempty" tf:"xray_tracing_enabled,omitempty"`
 }
 
@@ -209,6 +270,10 @@ type StageParameters struct {
 type StageSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     StageParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider StageInitParameters `json:"initProvider,omitempty"`
 }
 
 // StageStatus defines the observed state of Stage.
@@ -229,7 +294,7 @@ type StageStatus struct {
 type Stage struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.stageName)",message="stageName is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.stageName) || has(self.initProvider.stageName)",message="%!s(MISSING) is a required parameter"
 	Spec   StageSpec   `json:"spec"`
 	Status StageStatus `json:"status,omitempty"`
 }

@@ -173,8 +173,114 @@ spec:
                             type: string
                         type: object
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  callingRegions:
+                    description: The countries to which calls are allowed, in ISO
+                      3166-1 alpha-2 format.
+                    items:
+                      type: string
+                    type: array
+                  cidrAllowList:
+                    description: The IP addresses allowed to make calls, in CIDR format.
+                    items:
+                      type: string
+                    type: array
+                  cpsLimit:
+                    description: The limit on calls per second. Max value based on
+                      account service quota. Default value of 1.
+                    type: number
+                  defaultPhoneNumber:
+                    description: The default caller ID phone number.
+                    type: string
+                  disabled:
+                    description: When termination settings are disabled, outbound
+                      calls can not be made.
+                    type: boolean
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  voiceConnectorId:
+                    description: The Amazon Chime Voice Connector ID.
+                    type: string
+                  voiceConnectorIdRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  voiceConnectorIdSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
                 type: object
               managementPolicies:
                 default:
@@ -374,12 +480,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: callingRegions is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.callingRegions)'
-            - message: cidrAllowList is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.callingRegions)
+                || has(self.initProvider.callingRegions)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.cidrAllowList)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.cidrAllowList)
+                || has(self.initProvider.cidrAllowList)'
           status:
             description: VoiceConnectorTerminationStatus defines the observed state
               of VoiceConnectorTermination.

@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CachePolicyInitParameters struct {
+
+	// A comment to describe the cache policy.
+	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
+
+	// The default amount of time, in seconds, that you want objects to stay in the CloudFront cache before CloudFront sends another request to the origin to see if the object has been updated.
+	DefaultTTL *float64 `json:"defaultTtl,omitempty" tf:"default_ttl,omitempty"`
+
+	// The maximum amount of time, in seconds, that objects stay in the CloudFront cache before CloudFront sends another request to the origin to see if the object has been updated.
+	MaxTTL *float64 `json:"maxTtl,omitempty" tf:"max_ttl,omitempty"`
+
+	// The minimum amount of time, in seconds, that you want objects to stay in the CloudFront cache before CloudFront sends another request to the origin to see if the object has been updated.
+	MinTTL *float64 `json:"minTtl,omitempty" tf:"min_ttl,omitempty"`
+
+	// A unique name to identify the cache policy.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The HTTP headers, cookies, and URL query strings to include in the cache key. See Parameters In Cache Key And Forwarded To Origin for more information.
+	ParametersInCacheKeyAndForwardedToOrigin []ParametersInCacheKeyAndForwardedToOriginInitParameters `json:"parametersInCacheKeyAndForwardedToOrigin,omitempty" tf:"parameters_in_cache_key_and_forwarded_to_origin,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type CachePolicyObservation struct {
 
 	// A comment to describe the cache policy.
@@ -43,33 +68,35 @@ type CachePolicyObservation struct {
 type CachePolicyParameters struct {
 
 	// A comment to describe the cache policy.
-	// +kubebuilder:validation:Optional
 	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
 
 	// The default amount of time, in seconds, that you want objects to stay in the CloudFront cache before CloudFront sends another request to the origin to see if the object has been updated.
-	// +kubebuilder:validation:Optional
 	DefaultTTL *float64 `json:"defaultTtl,omitempty" tf:"default_ttl,omitempty"`
 
 	// The maximum amount of time, in seconds, that objects stay in the CloudFront cache before CloudFront sends another request to the origin to see if the object has been updated.
-	// +kubebuilder:validation:Optional
 	MaxTTL *float64 `json:"maxTtl,omitempty" tf:"max_ttl,omitempty"`
 
 	// The minimum amount of time, in seconds, that you want objects to stay in the CloudFront cache before CloudFront sends another request to the origin to see if the object has been updated.
-	// +kubebuilder:validation:Optional
 	MinTTL *float64 `json:"minTtl,omitempty" tf:"min_ttl,omitempty"`
 
 	// A unique name to identify the cache policy.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The HTTP headers, cookies, and URL query strings to include in the cache key. See Parameters In Cache Key And Forwarded To Origin for more information.
-	// +kubebuilder:validation:Optional
 	ParametersInCacheKeyAndForwardedToOrigin []ParametersInCacheKeyAndForwardedToOriginParameters `json:"parametersInCacheKeyAndForwardedToOrigin,omitempty" tf:"parameters_in_cache_key_and_forwarded_to_origin,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type CookiesConfigInitParameters struct {
+
+	// Determines whether any cookies in viewer requests are included in the cache key and automatically included in requests that CloudFront sends to the origin. Valid values are none, whitelist, allExcept, all.
+	CookieBehavior *string `json:"cookieBehavior,omitempty" tf:"cookie_behavior,omitempty"`
+
+	// Object that contains a list of cookie names. See Items for more information.
+	Cookies []CookiesInitParameters `json:"cookies,omitempty" tf:"cookies,omitempty"`
 }
 
 type CookiesConfigObservation struct {
@@ -84,12 +111,16 @@ type CookiesConfigObservation struct {
 type CookiesConfigParameters struct {
 
 	// Determines whether any cookies in viewer requests are included in the cache key and automatically included in requests that CloudFront sends to the origin. Valid values are none, whitelist, allExcept, all.
-	// +kubebuilder:validation:Required
-	CookieBehavior *string `json:"cookieBehavior" tf:"cookie_behavior,omitempty"`
+	CookieBehavior *string `json:"cookieBehavior,omitempty" tf:"cookie_behavior,omitempty"`
 
 	// Object that contains a list of cookie names. See Items for more information.
-	// +kubebuilder:validation:Optional
 	Cookies []CookiesParameters `json:"cookies,omitempty" tf:"cookies,omitempty"`
+}
+
+type CookiesInitParameters struct {
+
+	// A list of item names (cookies, headers, or query strings).
+	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
 }
 
 type CookiesObservation struct {
@@ -101,8 +132,16 @@ type CookiesObservation struct {
 type CookiesParameters struct {
 
 	// A list of item names (cookies, headers, or query strings).
-	// +kubebuilder:validation:Optional
 	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
+}
+
+type HeadersConfigInitParameters struct {
+
+	// Determines whether any HTTP headers are included in the cache key and automatically included in requests that CloudFront sends to the origin. Valid values are none, whitelist.
+	HeaderBehavior *string `json:"headerBehavior,omitempty" tf:"header_behavior,omitempty"`
+
+	// Object that contains a list of header names. See Items for more information.
+	Headers []HeadersInitParameters `json:"headers,omitempty" tf:"headers,omitempty"`
 }
 
 type HeadersConfigObservation struct {
@@ -117,12 +156,16 @@ type HeadersConfigObservation struct {
 type HeadersConfigParameters struct {
 
 	// Determines whether any HTTP headers are included in the cache key and automatically included in requests that CloudFront sends to the origin. Valid values are none, whitelist.
-	// +kubebuilder:validation:Optional
 	HeaderBehavior *string `json:"headerBehavior,omitempty" tf:"header_behavior,omitempty"`
 
 	// Object that contains a list of header names. See Items for more information.
-	// +kubebuilder:validation:Optional
 	Headers []HeadersParameters `json:"headers,omitempty" tf:"headers,omitempty"`
+}
+
+type HeadersInitParameters struct {
+
+	// A list of item names (cookies, headers, or query strings).
+	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
 }
 
 type HeadersObservation struct {
@@ -134,8 +177,25 @@ type HeadersObservation struct {
 type HeadersParameters struct {
 
 	// A list of item names (cookies, headers, or query strings).
-	// +kubebuilder:validation:Optional
 	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
+}
+
+type ParametersInCacheKeyAndForwardedToOriginInitParameters struct {
+
+	// Object that determines whether any cookies in viewer requests (and if so, which cookies) are included in the cache key and automatically included in requests that CloudFront sends to the origin. See Cookies Config for more information.
+	CookiesConfig []CookiesConfigInitParameters `json:"cookiesConfig,omitempty" tf:"cookies_config,omitempty"`
+
+	// A flag that can affect whether the Accept-Encoding HTTP header is included in the cache key and included in requests that CloudFront sends to the origin.
+	EnableAcceptEncodingBrotli *bool `json:"enableAcceptEncodingBrotli,omitempty" tf:"enable_accept_encoding_brotli,omitempty"`
+
+	// A flag that can affect whether the Accept-Encoding HTTP header is included in the cache key and included in requests that CloudFront sends to the origin.
+	EnableAcceptEncodingGzip *bool `json:"enableAcceptEncodingGzip,omitempty" tf:"enable_accept_encoding_gzip,omitempty"`
+
+	// Object that determines whether any HTTP headers (and if so, which headers) are included in the cache key and automatically included in requests that CloudFront sends to the origin. See Headers Config for more information.
+	HeadersConfig []HeadersConfigInitParameters `json:"headersConfig,omitempty" tf:"headers_config,omitempty"`
+
+	// Object that determines whether any URL query strings in viewer requests (and if so, which query strings) are included in the cache key and automatically included in requests that CloudFront sends to the origin. See Query String Config for more information.
+	QueryStringsConfig []QueryStringsConfigInitParameters `json:"queryStringsConfig,omitempty" tf:"query_strings_config,omitempty"`
 }
 
 type ParametersInCacheKeyAndForwardedToOriginObservation struct {
@@ -159,24 +219,28 @@ type ParametersInCacheKeyAndForwardedToOriginObservation struct {
 type ParametersInCacheKeyAndForwardedToOriginParameters struct {
 
 	// Object that determines whether any cookies in viewer requests (and if so, which cookies) are included in the cache key and automatically included in requests that CloudFront sends to the origin. See Cookies Config for more information.
-	// +kubebuilder:validation:Required
-	CookiesConfig []CookiesConfigParameters `json:"cookiesConfig" tf:"cookies_config,omitempty"`
+	CookiesConfig []CookiesConfigParameters `json:"cookiesConfig,omitempty" tf:"cookies_config,omitempty"`
 
 	// A flag that can affect whether the Accept-Encoding HTTP header is included in the cache key and included in requests that CloudFront sends to the origin.
-	// +kubebuilder:validation:Optional
 	EnableAcceptEncodingBrotli *bool `json:"enableAcceptEncodingBrotli,omitempty" tf:"enable_accept_encoding_brotli,omitempty"`
 
 	// A flag that can affect whether the Accept-Encoding HTTP header is included in the cache key and included in requests that CloudFront sends to the origin.
-	// +kubebuilder:validation:Optional
 	EnableAcceptEncodingGzip *bool `json:"enableAcceptEncodingGzip,omitempty" tf:"enable_accept_encoding_gzip,omitempty"`
 
 	// Object that determines whether any HTTP headers (and if so, which headers) are included in the cache key and automatically included in requests that CloudFront sends to the origin. See Headers Config for more information.
-	// +kubebuilder:validation:Required
-	HeadersConfig []HeadersConfigParameters `json:"headersConfig" tf:"headers_config,omitempty"`
+	HeadersConfig []HeadersConfigParameters `json:"headersConfig,omitempty" tf:"headers_config,omitempty"`
 
 	// Object that determines whether any URL query strings in viewer requests (and if so, which query strings) are included in the cache key and automatically included in requests that CloudFront sends to the origin. See Query String Config for more information.
-	// +kubebuilder:validation:Required
-	QueryStringsConfig []QueryStringsConfigParameters `json:"queryStringsConfig" tf:"query_strings_config,omitempty"`
+	QueryStringsConfig []QueryStringsConfigParameters `json:"queryStringsConfig,omitempty" tf:"query_strings_config,omitempty"`
+}
+
+type QueryStringsConfigInitParameters struct {
+
+	// Determines whether any URL query strings in viewer requests are included in the cache key and automatically included in requests that CloudFront sends to the origin. Valid values are none, whitelist, allExcept, all.
+	QueryStringBehavior *string `json:"queryStringBehavior,omitempty" tf:"query_string_behavior,omitempty"`
+
+	// Object that contains a list of query string names. See Items for more information.
+	QueryStrings []QueryStringsInitParameters `json:"queryStrings,omitempty" tf:"query_strings,omitempty"`
 }
 
 type QueryStringsConfigObservation struct {
@@ -191,12 +255,16 @@ type QueryStringsConfigObservation struct {
 type QueryStringsConfigParameters struct {
 
 	// Determines whether any URL query strings in viewer requests are included in the cache key and automatically included in requests that CloudFront sends to the origin. Valid values are none, whitelist, allExcept, all.
-	// +kubebuilder:validation:Required
-	QueryStringBehavior *string `json:"queryStringBehavior" tf:"query_string_behavior,omitempty"`
+	QueryStringBehavior *string `json:"queryStringBehavior,omitempty" tf:"query_string_behavior,omitempty"`
 
 	// Object that contains a list of query string names. See Items for more information.
-	// +kubebuilder:validation:Optional
 	QueryStrings []QueryStringsParameters `json:"queryStrings,omitempty" tf:"query_strings,omitempty"`
+}
+
+type QueryStringsInitParameters struct {
+
+	// A list of item names (cookies, headers, or query strings).
+	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
 }
 
 type QueryStringsObservation struct {
@@ -208,7 +276,6 @@ type QueryStringsObservation struct {
 type QueryStringsParameters struct {
 
 	// A list of item names (cookies, headers, or query strings).
-	// +kubebuilder:validation:Optional
 	Items []*string `json:"items,omitempty" tf:"items,omitempty"`
 }
 
@@ -216,6 +283,10 @@ type QueryStringsParameters struct {
 type CachePolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     CachePolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider CachePolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // CachePolicyStatus defines the observed state of CachePolicy.
@@ -236,8 +307,8 @@ type CachePolicyStatus struct {
 type CachePolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.parametersInCacheKeyAndForwardedToOrigin)",message="parametersInCacheKeyAndForwardedToOrigin is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.parametersInCacheKeyAndForwardedToOrigin) || has(self.initProvider.parametersInCacheKeyAndForwardedToOrigin)",message="%!s(MISSING) is a required parameter"
 	Spec   CachePolicySpec   `json:"spec"`
 	Status CachePolicyStatus `json:"status,omitempty"`
 }

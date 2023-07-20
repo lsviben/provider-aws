@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ContentSourceConfigurationInitParameters struct {
+
+	// The identifiers of the data sources you want to use for your Amazon Kendra experience. Maximum number of 100 items.
+	DataSourceIds []*string `json:"dataSourceIds,omitempty" tf:"data_source_ids,omitempty"`
+
+	// Whether to use documents you indexed directly using the BatchPutDocument API. Defaults to false.
+	DirectPutContent *bool `json:"directPutContent,omitempty" tf:"direct_put_content,omitempty"`
+
+	// The identifier of the FAQs that you want to use for your Amazon Kendra experience. Maximum number of 100 items.
+	FaqIds []*string `json:"faqIds,omitempty" tf:"faq_ids,omitempty"`
+}
+
 type ContentSourceConfigurationObservation struct {
 
 	// The identifiers of the data sources you want to use for your Amazon Kendra experience. Maximum number of 100 items.
@@ -28,16 +40,16 @@ type ContentSourceConfigurationObservation struct {
 type ContentSourceConfigurationParameters struct {
 
 	// The identifiers of the data sources you want to use for your Amazon Kendra experience. Maximum number of 100 items.
-	// +kubebuilder:validation:Optional
 	DataSourceIds []*string `json:"dataSourceIds,omitempty" tf:"data_source_ids,omitempty"`
 
 	// Whether to use documents you indexed directly using the BatchPutDocument API. Defaults to false.
-	// +kubebuilder:validation:Optional
 	DirectPutContent *bool `json:"directPutContent,omitempty" tf:"direct_put_content,omitempty"`
 
 	// The identifier of the FAQs that you want to use for your Amazon Kendra experience. Maximum number of 100 items.
-	// +kubebuilder:validation:Optional
 	FaqIds []*string `json:"faqIds,omitempty" tf:"faq_ids,omitempty"`
+}
+
+type EndpointsInitParameters struct {
 }
 
 type EndpointsObservation struct {
@@ -52,6 +64,15 @@ type EndpointsObservation struct {
 type EndpointsParameters struct {
 }
 
+type ExperienceConfigurationInitParameters struct {
+
+	// The identifiers of your data sources and FAQs. Or, you can specify that you want to use documents indexed via the BatchPutDocument API. Detailed below.
+	ContentSourceConfiguration []ContentSourceConfigurationInitParameters `json:"contentSourceConfiguration,omitempty" tf:"content_source_configuration,omitempty"`
+
+	// The AWS SSO field name that contains the identifiers of your users, such as their emails. Detailed below.
+	UserIdentityConfiguration []UserIdentityConfigurationInitParameters `json:"userIdentityConfiguration,omitempty" tf:"user_identity_configuration,omitempty"`
+}
+
 type ExperienceConfigurationObservation struct {
 
 	// The identifiers of your data sources and FAQs. Or, you can specify that you want to use documents indexed via the BatchPutDocument API. Detailed below.
@@ -64,12 +85,44 @@ type ExperienceConfigurationObservation struct {
 type ExperienceConfigurationParameters struct {
 
 	// The identifiers of your data sources and FAQs. Or, you can specify that you want to use documents indexed via the BatchPutDocument API. Detailed below.
-	// +kubebuilder:validation:Optional
 	ContentSourceConfiguration []ContentSourceConfigurationParameters `json:"contentSourceConfiguration,omitempty" tf:"content_source_configuration,omitempty"`
 
 	// The AWS SSO field name that contains the identifiers of your users, such as their emails. Detailed below.
-	// +kubebuilder:validation:Optional
 	UserIdentityConfiguration []UserIdentityConfigurationParameters `json:"userIdentityConfiguration,omitempty" tf:"user_identity_configuration,omitempty"`
+}
+
+type ExperienceInitParameters struct {
+
+	// Configuration information for your Amazon Kendra experience. Detailed below.
+	Configuration []ExperienceConfigurationInitParameters `json:"configuration,omitempty" tf:"configuration,omitempty"`
+
+	// A description for your Amazon Kendra experience.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The identifier of the index for your Amazon Kendra experience.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kendra/v1beta1.Index
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	IndexID *string `json:"indexId,omitempty" tf:"index_id,omitempty"`
+
+	IndexIDRef *v1.Reference `json:"indexIdRef,omitempty" tf:"-"`
+
+	IndexIDSelector *v1.Selector `json:"indexIdSelector,omitempty" tf:"-"`
+
+	// A name for your Amazon Kendra experience.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The Amazon Resource Name (ARN) of a role with permission to access Query API, QuerySuggestions API, SubmitFeedback API, and AWS SSO that stores your user and group information. For more information, see IAM roles for Amazon Kendra.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
 }
 
 type ExperienceObservation struct {
@@ -108,17 +161,14 @@ type ExperienceObservation struct {
 type ExperienceParameters struct {
 
 	// Configuration information for your Amazon Kendra experience. Detailed below.
-	// +kubebuilder:validation:Optional
 	Configuration []ExperienceConfigurationParameters `json:"configuration,omitempty" tf:"configuration,omitempty"`
 
 	// A description for your Amazon Kendra experience.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The identifier of the index for your Amazon Kendra experience.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kendra/v1beta1.Index
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	IndexID *string `json:"indexId,omitempty" tf:"index_id,omitempty"`
 
 	// Reference to a Index in kendra to populate indexId.
@@ -130,18 +180,15 @@ type ExperienceParameters struct {
 	IndexIDSelector *v1.Selector `json:"indexIdSelector,omitempty" tf:"-"`
 
 	// A name for your Amazon Kendra experience.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The Amazon Resource Name (ARN) of a role with permission to access Query API, QuerySuggestions API, SubmitFeedback API, and AWS SSO that stores your user and group information. For more information, see IAM roles for Amazon Kendra.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -153,6 +200,12 @@ type ExperienceParameters struct {
 	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
 }
 
+type UserIdentityConfigurationInitParameters struct {
+
+	// The AWS SSO field name that contains the identifiers of your users, such as their emails.
+	IdentityAttributeName *string `json:"identityAttributeName,omitempty" tf:"identity_attribute_name,omitempty"`
+}
+
 type UserIdentityConfigurationObservation struct {
 
 	// The AWS SSO field name that contains the identifiers of your users, such as their emails.
@@ -162,14 +215,17 @@ type UserIdentityConfigurationObservation struct {
 type UserIdentityConfigurationParameters struct {
 
 	// The AWS SSO field name that contains the identifiers of your users, such as their emails.
-	// +kubebuilder:validation:Required
-	IdentityAttributeName *string `json:"identityAttributeName" tf:"identity_attribute_name,omitempty"`
+	IdentityAttributeName *string `json:"identityAttributeName,omitempty" tf:"identity_attribute_name,omitempty"`
 }
 
 // ExperienceSpec defines the desired state of Experience
 type ExperienceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ExperienceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ExperienceInitParameters `json:"initProvider,omitempty"`
 }
 
 // ExperienceStatus defines the observed state of Experience.
@@ -190,7 +246,7 @@ type ExperienceStatus struct {
 type Experience struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   ExperienceSpec   `json:"spec"`
 	Status ExperienceStatus `json:"status,omitempty"`
 }

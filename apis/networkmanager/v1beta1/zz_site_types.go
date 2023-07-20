@@ -13,6 +13,43 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SiteInitParameters struct {
+
+	// Description of the Site.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The ID of the Global Network to create the site in.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.GlobalNetwork
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	GlobalNetworkID *string `json:"globalNetworkId,omitempty" tf:"global_network_id,omitempty"`
+
+	GlobalNetworkIDRef *v1.Reference `json:"globalNetworkIdRef,omitempty" tf:"-"`
+
+	GlobalNetworkIDSelector *v1.Selector `json:"globalNetworkIdSelector,omitempty" tf:"-"`
+
+	// The site location as documented below.
+	Location []SiteLocationInitParameters `json:"location,omitempty" tf:"location,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type SiteLocationInitParameters struct {
+
+	// Address of the location.
+	Address *string `json:"address,omitempty" tf:"address,omitempty"`
+
+	// Latitude of the location.
+	Latitude *string `json:"latitude,omitempty" tf:"latitude,omitempty"`
+
+	// Longitude of the location.
+	Longitude *string `json:"longitude,omitempty" tf:"longitude,omitempty"`
+}
+
 type SiteLocationObservation struct {
 
 	// Address of the location.
@@ -28,15 +65,12 @@ type SiteLocationObservation struct {
 type SiteLocationParameters struct {
 
 	// Address of the location.
-	// +kubebuilder:validation:Optional
 	Address *string `json:"address,omitempty" tf:"address,omitempty"`
 
 	// Latitude of the location.
-	// +kubebuilder:validation:Optional
 	Latitude *string `json:"latitude,omitempty" tf:"latitude,omitempty"`
 
 	// Longitude of the location.
-	// +kubebuilder:validation:Optional
 	Longitude *string `json:"longitude,omitempty" tf:"longitude,omitempty"`
 }
 
@@ -66,13 +100,11 @@ type SiteObservation struct {
 type SiteParameters struct {
 
 	// Description of the Site.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The ID of the Global Network to create the site in.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.GlobalNetwork
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	GlobalNetworkID *string `json:"globalNetworkId,omitempty" tf:"global_network_id,omitempty"`
 
 	// Reference to a GlobalNetwork in networkmanager to populate globalNetworkId.
@@ -84,16 +116,13 @@ type SiteParameters struct {
 	GlobalNetworkIDSelector *v1.Selector `json:"globalNetworkIdSelector,omitempty" tf:"-"`
 
 	// The site location as documented below.
-	// +kubebuilder:validation:Optional
 	Location []SiteLocationParameters `json:"location,omitempty" tf:"location,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -101,6 +130,10 @@ type SiteParameters struct {
 type SiteSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SiteParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SiteInitParameters `json:"initProvider,omitempty"`
 }
 
 // SiteStatus defines the observed state of Site.

@@ -13,6 +13,39 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type LinkAssociationInitParameters struct {
+
+	// The ID of the device.
+	// +crossplane:generate:reference:type=Device
+	DeviceID *string `json:"deviceId,omitempty" tf:"device_id,omitempty"`
+
+	DeviceIDRef *v1.Reference `json:"deviceIdRef,omitempty" tf:"-"`
+
+	DeviceIDSelector *v1.Selector `json:"deviceIdSelector,omitempty" tf:"-"`
+
+	// The ID of the global network.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.GlobalNetwork
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	GlobalNetworkID *string `json:"globalNetworkId,omitempty" tf:"global_network_id,omitempty"`
+
+	GlobalNetworkIDRef *v1.Reference `json:"globalNetworkIdRef,omitempty" tf:"-"`
+
+	GlobalNetworkIDSelector *v1.Selector `json:"globalNetworkIdSelector,omitempty" tf:"-"`
+
+	// The ID of the link.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.Link
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	LinkID *string `json:"linkId,omitempty" tf:"link_id,omitempty"`
+
+	LinkIDRef *v1.Reference `json:"linkIdRef,omitempty" tf:"-"`
+
+	LinkIDSelector *v1.Selector `json:"linkIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type LinkAssociationObservation struct {
 
 	// The ID of the device.
@@ -31,7 +64,6 @@ type LinkAssociationParameters struct {
 
 	// The ID of the device.
 	// +crossplane:generate:reference:type=Device
-	// +kubebuilder:validation:Optional
 	DeviceID *string `json:"deviceId,omitempty" tf:"device_id,omitempty"`
 
 	// Reference to a Device to populate deviceId.
@@ -45,7 +77,6 @@ type LinkAssociationParameters struct {
 	// The ID of the global network.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.GlobalNetwork
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	GlobalNetworkID *string `json:"globalNetworkId,omitempty" tf:"global_network_id,omitempty"`
 
 	// Reference to a GlobalNetwork in networkmanager to populate globalNetworkId.
@@ -59,7 +90,6 @@ type LinkAssociationParameters struct {
 	// The ID of the link.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.Link
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	LinkID *string `json:"linkId,omitempty" tf:"link_id,omitempty"`
 
 	// Reference to a Link in networkmanager to populate linkId.
@@ -72,14 +102,17 @@ type LinkAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // LinkAssociationSpec defines the desired state of LinkAssociation
 type LinkAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     LinkAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider LinkAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // LinkAssociationStatus defines the observed state of LinkAssociation.

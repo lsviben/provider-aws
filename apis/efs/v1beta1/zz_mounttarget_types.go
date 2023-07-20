@@ -13,6 +13,42 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type MountTargetInitParameters struct {
+
+	// The ID of the file system for which the mount target is intended.
+	// +crossplane:generate:reference:type=FileSystem
+	FileSystemID *string `json:"fileSystemId,omitempty" tf:"file_system_id,omitempty"`
+
+	FileSystemIDRef *v1.Reference `json:"fileSystemIdRef,omitempty" tf:"-"`
+
+	FileSystemIDSelector *v1.Selector `json:"fileSystemIdSelector,omitempty" tf:"-"`
+
+	// The address (within the address range of the specified subnet) at
+	// which the file system may be mounted via the mount target.
+	IPAddress *string `json:"ipAddress,omitempty" tf:"ip_address,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A list of up to 5 VPC security group IDs (that must
+	// be for the same VPC as subnet specified) in effect for the mount target.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.SecurityGroup
+	SecurityGroups []*string `json:"securityGroups,omitempty" tf:"security_groups,omitempty"`
+
+	SecurityGroupsRefs []v1.Reference `json:"securityGroupsRefs,omitempty" tf:"-"`
+
+	SecurityGroupsSelector *v1.Selector `json:"securityGroupsSelector,omitempty" tf:"-"`
+
+	// The ID of the subnet to add the mount target in.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
+	SubnetID *string `json:"subnetId,omitempty" tf:"subnet_id,omitempty"`
+
+	SubnetIDRef *v1.Reference `json:"subnetIdRef,omitempty" tf:"-"`
+
+	SubnetIDSelector *v1.Selector `json:"subnetIdSelector,omitempty" tf:"-"`
+}
+
 type MountTargetObservation struct {
 
 	// The unique and consistent identifier of the Availability Zone (AZ) that the mount target resides in.
@@ -58,7 +94,6 @@ type MountTargetParameters struct {
 
 	// The ID of the file system for which the mount target is intended.
 	// +crossplane:generate:reference:type=FileSystem
-	// +kubebuilder:validation:Optional
 	FileSystemID *string `json:"fileSystemId,omitempty" tf:"file_system_id,omitempty"`
 
 	// Reference to a FileSystem to populate fileSystemId.
@@ -71,18 +106,15 @@ type MountTargetParameters struct {
 
 	// The address (within the address range of the specified subnet) at
 	// which the file system may be mounted via the mount target.
-	// +kubebuilder:validation:Optional
 	IPAddress *string `json:"ipAddress,omitempty" tf:"ip_address,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A list of up to 5 VPC security group IDs (that must
 	// be for the same VPC as subnet specified) in effect for the mount target.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.SecurityGroup
-	// +kubebuilder:validation:Optional
 	SecurityGroups []*string `json:"securityGroups,omitempty" tf:"security_groups,omitempty"`
 
 	// References to SecurityGroup in ec2 to populate securityGroups.
@@ -95,7 +127,6 @@ type MountTargetParameters struct {
 
 	// The ID of the subnet to add the mount target in.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
-	// +kubebuilder:validation:Optional
 	SubnetID *string `json:"subnetId,omitempty" tf:"subnet_id,omitempty"`
 
 	// Reference to a Subnet in ec2 to populate subnetId.
@@ -111,6 +142,10 @@ type MountTargetParameters struct {
 type MountTargetSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     MountTargetParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider MountTargetInitParameters `json:"initProvider,omitempty"`
 }
 
 // MountTargetStatus defines the observed state of MountTarget.

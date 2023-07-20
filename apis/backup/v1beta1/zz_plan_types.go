@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AdvancedBackupSettingInitParameters struct {
+
+	// Specifies the backup option for a selected resource. This option is only available for Windows VSS backup jobs. Set to { WindowsVSS = "enabled" } to enable Windows VSS backup option and create a VSS Windows backup.
+	BackupOptions map[string]*string `json:"backupOptions,omitempty" tf:"backup_options,omitempty"`
+
+	// The type of AWS resource to be backed up. For VSS Windows backups, the only supported resource type is Amazon EC2. Valid values: EC2.
+	ResourceType *string `json:"resourceType,omitempty" tf:"resource_type,omitempty"`
+}
+
 type AdvancedBackupSettingObservation struct {
 
 	// Specifies the backup option for a selected resource. This option is only available for Windows VSS backup jobs. Set to { WindowsVSS = "enabled" } to enable Windows VSS backup option and create a VSS Windows backup.
@@ -25,12 +34,19 @@ type AdvancedBackupSettingObservation struct {
 type AdvancedBackupSettingParameters struct {
 
 	// Specifies the backup option for a selected resource. This option is only available for Windows VSS backup jobs. Set to { WindowsVSS = "enabled" } to enable Windows VSS backup option and create a VSS Windows backup.
-	// +kubebuilder:validation:Required
-	BackupOptions map[string]*string `json:"backupOptions" tf:"backup_options,omitempty"`
+	BackupOptions map[string]*string `json:"backupOptions,omitempty" tf:"backup_options,omitempty"`
 
 	// The type of AWS resource to be backed up. For VSS Windows backups, the only supported resource type is Amazon EC2. Valid values: EC2.
-	// +kubebuilder:validation:Required
-	ResourceType *string `json:"resourceType" tf:"resource_type,omitempty"`
+	ResourceType *string `json:"resourceType,omitempty" tf:"resource_type,omitempty"`
+}
+
+type CopyActionInitParameters struct {
+
+	// An Amazon Resource Name (ARN) that uniquely identifies the destination backup vault for the copied backup.
+	DestinationVaultArn *string `json:"destinationVaultArn,omitempty" tf:"destination_vault_arn,omitempty"`
+
+	// The lifecycle defines when a protected resource is transitioned to cold storage and when it expires.  Fields documented below.
+	Lifecycle []LifecycleInitParameters `json:"lifecycle,omitempty" tf:"lifecycle,omitempty"`
 }
 
 type CopyActionObservation struct {
@@ -45,12 +61,19 @@ type CopyActionObservation struct {
 type CopyActionParameters struct {
 
 	// An Amazon Resource Name (ARN) that uniquely identifies the destination backup vault for the copied backup.
-	// +kubebuilder:validation:Required
-	DestinationVaultArn *string `json:"destinationVaultArn" tf:"destination_vault_arn,omitempty"`
+	DestinationVaultArn *string `json:"destinationVaultArn,omitempty" tf:"destination_vault_arn,omitempty"`
 
 	// The lifecycle defines when a protected resource is transitioned to cold storage and when it expires.  Fields documented below.
-	// +kubebuilder:validation:Optional
 	Lifecycle []LifecycleParameters `json:"lifecycle,omitempty" tf:"lifecycle,omitempty"`
+}
+
+type LifecycleInitParameters struct {
+
+	// Specifies the number of days after creation that a recovery point is moved to cold storage.
+	ColdStorageAfter *float64 `json:"coldStorageAfter,omitempty" tf:"cold_storage_after,omitempty"`
+
+	// Specifies the number of days after creation that a recovery point is deleted. Must be 90 days greater than cold_storage_after.
+	DeleteAfter *float64 `json:"deleteAfter,omitempty" tf:"delete_after,omitempty"`
 }
 
 type LifecycleObservation struct {
@@ -65,12 +88,29 @@ type LifecycleObservation struct {
 type LifecycleParameters struct {
 
 	// Specifies the number of days after creation that a recovery point is moved to cold storage.
-	// +kubebuilder:validation:Optional
 	ColdStorageAfter *float64 `json:"coldStorageAfter,omitempty" tf:"cold_storage_after,omitempty"`
 
 	// Specifies the number of days after creation that a recovery point is deleted. Must be 90 days greater than cold_storage_after.
-	// +kubebuilder:validation:Optional
 	DeleteAfter *float64 `json:"deleteAfter,omitempty" tf:"delete_after,omitempty"`
+}
+
+type PlanInitParameters struct {
+
+	// An object that specifies backup options for each resource type.
+	AdvancedBackupSetting []AdvancedBackupSettingInitParameters `json:"advancedBackupSetting,omitempty" tf:"advanced_backup_setting,omitempty"`
+
+	// The display name of a backup plan.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A rule object that specifies a scheduled task that is used to back up a selection of resources.
+	Rule []RuleInitParameters `json:"rule,omitempty" tf:"rule,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type PlanObservation struct {
@@ -103,25 +143,64 @@ type PlanObservation struct {
 type PlanParameters struct {
 
 	// An object that specifies backup options for each resource type.
-	// +kubebuilder:validation:Optional
 	AdvancedBackupSetting []AdvancedBackupSettingParameters `json:"advancedBackupSetting,omitempty" tf:"advanced_backup_setting,omitempty"`
 
 	// The display name of a backup plan.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A rule object that specifies a scheduled task that is used to back up a selection of resources.
-	// +kubebuilder:validation:Optional
 	Rule []RuleParameters `json:"rule,omitempty" tf:"rule,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type RuleInitParameters struct {
+
+	// The amount of time in minutes AWS Backup attempts a backup before canceling the job and returning an error.
+	CompletionWindow *float64 `json:"completionWindow,omitempty" tf:"completion_window,omitempty"`
+
+	// Configuration block(s) with copy operation settings. Detailed below.
+	CopyAction []CopyActionInitParameters `json:"copyAction,omitempty" tf:"copy_action,omitempty"`
+
+	// Enable continuous backups for supported resources.
+	EnableContinuousBackup *bool `json:"enableContinuousBackup,omitempty" tf:"enable_continuous_backup,omitempty"`
+
+	// The lifecycle defines when a protected resource is transitioned to cold storage and when it expires.  Fields documented below.
+	Lifecycle []RuleLifecycleInitParameters `json:"lifecycle,omitempty" tf:"lifecycle,omitempty"`
+
+	// Metadata that you can assign to help organize the resources that you create.
+	RecoveryPointTags map[string]*string `json:"recoveryPointTags,omitempty" tf:"recovery_point_tags,omitempty"`
+
+	// An display name for a backup rule.
+	RuleName *string `json:"ruleName,omitempty" tf:"rule_name,omitempty"`
+
+	// A CRON expression specifying when AWS Backup initiates a backup job.
+	Schedule *string `json:"schedule,omitempty" tf:"schedule,omitempty"`
+
+	// The amount of time in minutes before beginning a backup.
+	StartWindow *float64 `json:"startWindow,omitempty" tf:"start_window,omitempty"`
+
+	// The name of a logical container where backups are stored.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/backup/v1beta1.Vault
+	TargetVaultName *string `json:"targetVaultName,omitempty" tf:"target_vault_name,omitempty"`
+
+	TargetVaultNameRef *v1.Reference `json:"targetVaultNameRef,omitempty" tf:"-"`
+
+	TargetVaultNameSelector *v1.Selector `json:"targetVaultNameSelector,omitempty" tf:"-"`
+}
+
+type RuleLifecycleInitParameters struct {
+
+	// Specifies the number of days after creation that a recovery point is moved to cold storage.
+	ColdStorageAfter *float64 `json:"coldStorageAfter,omitempty" tf:"cold_storage_after,omitempty"`
+
+	// Specifies the number of days after creation that a recovery point is deleted. Must be 90 days greater than cold_storage_after.
+	DeleteAfter *float64 `json:"deleteAfter,omitempty" tf:"delete_after,omitempty"`
 }
 
 type RuleLifecycleObservation struct {
@@ -136,11 +215,9 @@ type RuleLifecycleObservation struct {
 type RuleLifecycleParameters struct {
 
 	// Specifies the number of days after creation that a recovery point is moved to cold storage.
-	// +kubebuilder:validation:Optional
 	ColdStorageAfter *float64 `json:"coldStorageAfter,omitempty" tf:"cold_storage_after,omitempty"`
 
 	// Specifies the number of days after creation that a recovery point is deleted. Must be 90 days greater than cold_storage_after.
-	// +kubebuilder:validation:Optional
 	DeleteAfter *float64 `json:"deleteAfter,omitempty" tf:"delete_after,omitempty"`
 }
 
@@ -177,40 +254,31 @@ type RuleObservation struct {
 type RuleParameters struct {
 
 	// The amount of time in minutes AWS Backup attempts a backup before canceling the job and returning an error.
-	// +kubebuilder:validation:Optional
 	CompletionWindow *float64 `json:"completionWindow,omitempty" tf:"completion_window,omitempty"`
 
 	// Configuration block(s) with copy operation settings. Detailed below.
-	// +kubebuilder:validation:Optional
 	CopyAction []CopyActionParameters `json:"copyAction,omitempty" tf:"copy_action,omitempty"`
 
 	// Enable continuous backups for supported resources.
-	// +kubebuilder:validation:Optional
 	EnableContinuousBackup *bool `json:"enableContinuousBackup,omitempty" tf:"enable_continuous_backup,omitempty"`
 
 	// The lifecycle defines when a protected resource is transitioned to cold storage and when it expires.  Fields documented below.
-	// +kubebuilder:validation:Optional
 	Lifecycle []RuleLifecycleParameters `json:"lifecycle,omitempty" tf:"lifecycle,omitempty"`
 
 	// Metadata that you can assign to help organize the resources that you create.
-	// +kubebuilder:validation:Optional
 	RecoveryPointTags map[string]*string `json:"recoveryPointTags,omitempty" tf:"recovery_point_tags,omitempty"`
 
 	// An display name for a backup rule.
-	// +kubebuilder:validation:Required
-	RuleName *string `json:"ruleName" tf:"rule_name,omitempty"`
+	RuleName *string `json:"ruleName,omitempty" tf:"rule_name,omitempty"`
 
 	// A CRON expression specifying when AWS Backup initiates a backup job.
-	// +kubebuilder:validation:Optional
 	Schedule *string `json:"schedule,omitempty" tf:"schedule,omitempty"`
 
 	// The amount of time in minutes before beginning a backup.
-	// +kubebuilder:validation:Optional
 	StartWindow *float64 `json:"startWindow,omitempty" tf:"start_window,omitempty"`
 
 	// The name of a logical container where backups are stored.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/backup/v1beta1.Vault
-	// +kubebuilder:validation:Optional
 	TargetVaultName *string `json:"targetVaultName,omitempty" tf:"target_vault_name,omitempty"`
 
 	// Reference to a Vault in backup to populate targetVaultName.
@@ -226,6 +294,10 @@ type RuleParameters struct {
 type PlanSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PlanParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PlanInitParameters `json:"initProvider,omitempty"`
 }
 
 // PlanStatus defines the observed state of Plan.
@@ -246,8 +318,8 @@ type PlanStatus struct {
 type Plan struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rule)",message="rule is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rule) || has(self.initProvider.rule)",message="%!s(MISSING) is a required parameter"
 	Spec   PlanSpec   `json:"spec"`
 	Status PlanStatus `json:"status,omitempty"`
 }

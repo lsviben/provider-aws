@@ -77,8 +77,22 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  globalSettings:
+                    additionalProperties:
+                      type: string
+                    description: A list of resources along with the opt-in preferences
+                      for the account.
+                    type: object
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -278,9 +292,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: globalSettings is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.globalSettings)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.globalSettings)
+                || has(self.initProvider.globalSettings)'
           status:
             description: GlobalSettingsStatus defines the observed state of GlobalSettings.
             properties:

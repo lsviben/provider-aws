@@ -13,6 +13,12 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BucketInventoryDestinationInitParameters struct {
+
+	// Name of the source bucket that inventory lists the objects for.
+	Bucket []DestinationBucketInitParameters `json:"bucket,omitempty" tf:"bucket,omitempty"`
+}
+
 type BucketInventoryDestinationObservation struct {
 
 	// Name of the source bucket that inventory lists the objects for.
@@ -22,8 +28,13 @@ type BucketInventoryDestinationObservation struct {
 type BucketInventoryDestinationParameters struct {
 
 	// Name of the source bucket that inventory lists the objects for.
-	// +kubebuilder:validation:Required
-	Bucket []DestinationBucketParameters `json:"bucket" tf:"bucket,omitempty"`
+	Bucket []DestinationBucketParameters `json:"bucket,omitempty" tf:"bucket,omitempty"`
+}
+
+type BucketInventoryFilterInitParameters struct {
+
+	// Prefix that an object must have to be included in the inventory results.
+	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
 }
 
 type BucketInventoryFilterObservation struct {
@@ -35,8 +46,44 @@ type BucketInventoryFilterObservation struct {
 type BucketInventoryFilterParameters struct {
 
 	// Prefix that an object must have to be included in the inventory results.
-	// +kubebuilder:validation:Optional
 	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
+}
+
+type BucketInventoryInitParameters struct {
+
+	// Name of the source bucket that inventory lists the objects for.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	BucketRef *v1.Reference `json:"bucketRef,omitempty" tf:"-"`
+
+	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
+
+	// Contains information about where to publish the inventory results (documented below).
+	Destination []BucketInventoryDestinationInitParameters `json:"destination,omitempty" tf:"destination,omitempty"`
+
+	// Specifies whether the inventory is enabled or disabled.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// Specifies an inventory filter. The inventory only includes objects that meet the filter's criteria (documented below).
+	Filter []BucketInventoryFilterInitParameters `json:"filter,omitempty" tf:"filter,omitempty"`
+
+	// Object versions to include in the inventory list. Valid values: All, Current.
+	IncludedObjectVersions *string `json:"includedObjectVersions,omitempty" tf:"included_object_versions,omitempty"`
+
+	// Unique identifier of the inventory configuration for the bucket.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// List of optional fields that are included in the inventory results. Please refer to the S3 documentation for more details.
+	OptionalFields []*string `json:"optionalFields,omitempty" tf:"optional_fields,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Specifies the schedule for generating inventory results (documented below).
+	Schedule []ScheduleInitParameters `json:"schedule,omitempty" tf:"schedule,omitempty"`
 }
 
 type BucketInventoryObservation struct {
@@ -73,7 +120,6 @@ type BucketInventoryParameters struct {
 	// Name of the source bucket that inventory lists the objects for.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucket.
@@ -85,37 +131,53 @@ type BucketInventoryParameters struct {
 	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
 
 	// Contains information about where to publish the inventory results (documented below).
-	// +kubebuilder:validation:Optional
 	Destination []BucketInventoryDestinationParameters `json:"destination,omitempty" tf:"destination,omitempty"`
 
 	// Specifies whether the inventory is enabled or disabled.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// Specifies an inventory filter. The inventory only includes objects that meet the filter's criteria (documented below).
-	// +kubebuilder:validation:Optional
 	Filter []BucketInventoryFilterParameters `json:"filter,omitempty" tf:"filter,omitempty"`
 
 	// Object versions to include in the inventory list. Valid values: All, Current.
-	// +kubebuilder:validation:Optional
 	IncludedObjectVersions *string `json:"includedObjectVersions,omitempty" tf:"included_object_versions,omitempty"`
 
 	// Unique identifier of the inventory configuration for the bucket.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// List of optional fields that are included in the inventory results. Please refer to the S3 documentation for more details.
-	// +kubebuilder:validation:Optional
 	OptionalFields []*string `json:"optionalFields,omitempty" tf:"optional_fields,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Specifies the schedule for generating inventory results (documented below).
-	// +kubebuilder:validation:Optional
 	Schedule []ScheduleParameters `json:"schedule,omitempty" tf:"schedule,omitempty"`
+}
+
+type DestinationBucketInitParameters struct {
+
+	// ID of the account that owns the destination bucket. Recommended to be set to prevent problems if the destination bucket ownership changes.
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	// Amazon S3 bucket ARN of the destination.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	BucketArn *string `json:"bucketArn,omitempty" tf:"bucket_arn,omitempty"`
+
+	BucketArnRef *v1.Reference `json:"bucketArnRef,omitempty" tf:"-"`
+
+	BucketArnSelector *v1.Selector `json:"bucketArnSelector,omitempty" tf:"-"`
+
+	// Contains the type of server-side encryption to use to encrypt the inventory (documented below).
+	Encryption []EncryptionInitParameters `json:"encryption,omitempty" tf:"encryption,omitempty"`
+
+	// Specifies the output format of the inventory results. Can be CSV, ORC or Parquet.
+	Format *string `json:"format,omitempty" tf:"format,omitempty"`
+
+	// Prefix that an object must have to be included in the inventory results.
+	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
 }
 
 type DestinationBucketObservation struct {
@@ -139,13 +201,11 @@ type DestinationBucketObservation struct {
 type DestinationBucketParameters struct {
 
 	// ID of the account that owns the destination bucket. Recommended to be set to prevent problems if the destination bucket ownership changes.
-	// +kubebuilder:validation:Optional
 	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// Amazon S3 bucket ARN of the destination.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	BucketArn *string `json:"bucketArn,omitempty" tf:"bucket_arn,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucketArn.
@@ -157,16 +217,22 @@ type DestinationBucketParameters struct {
 	BucketArnSelector *v1.Selector `json:"bucketArnSelector,omitempty" tf:"-"`
 
 	// Contains the type of server-side encryption to use to encrypt the inventory (documented below).
-	// +kubebuilder:validation:Optional
 	Encryption []EncryptionParameters `json:"encryption,omitempty" tf:"encryption,omitempty"`
 
 	// Specifies the output format of the inventory results. Can be CSV, ORC or Parquet.
-	// +kubebuilder:validation:Required
-	Format *string `json:"format" tf:"format,omitempty"`
+	Format *string `json:"format,omitempty" tf:"format,omitempty"`
 
 	// Prefix that an object must have to be included in the inventory results.
-	// +kubebuilder:validation:Optional
 	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
+}
+
+type EncryptionInitParameters struct {
+
+	// Specifies to use server-side encryption with AWS KMS-managed keys to encrypt the inventory file (documented below).
+	SseKMS []SseKMSInitParameters `json:"sseKms,omitempty" tf:"sse_kms,omitempty"`
+
+	// Specifies to use server-side encryption with Amazon S3-managed keys (SSE-S3) to encrypt the inventory file.
+	SseS3 []SseS3InitParameters `json:"sseS3,omitempty" tf:"sse_s3,omitempty"`
 }
 
 type EncryptionObservation struct {
@@ -181,12 +247,16 @@ type EncryptionObservation struct {
 type EncryptionParameters struct {
 
 	// Specifies to use server-side encryption with AWS KMS-managed keys to encrypt the inventory file (documented below).
-	// +kubebuilder:validation:Optional
 	SseKMS []SseKMSParameters `json:"sseKms,omitempty" tf:"sse_kms,omitempty"`
 
 	// Specifies to use server-side encryption with Amazon S3-managed keys (SSE-S3) to encrypt the inventory file.
-	// +kubebuilder:validation:Optional
 	SseS3 []SseS3Parameters `json:"sseS3,omitempty" tf:"sse_s3,omitempty"`
+}
+
+type ScheduleInitParameters struct {
+
+	// Specifies how frequently inventory results are produced. Valid values: Daily, Weekly.
+	Frequency *string `json:"frequency,omitempty" tf:"frequency,omitempty"`
 }
 
 type ScheduleObservation struct {
@@ -198,8 +268,13 @@ type ScheduleObservation struct {
 type ScheduleParameters struct {
 
 	// Specifies how frequently inventory results are produced. Valid values: Daily, Weekly.
-	// +kubebuilder:validation:Required
-	Frequency *string `json:"frequency" tf:"frequency,omitempty"`
+	Frequency *string `json:"frequency,omitempty" tf:"frequency,omitempty"`
+}
+
+type SseKMSInitParameters struct {
+
+	// ARN of the KMS customer master key (CMK) used to encrypt the inventory file.
+	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
 }
 
 type SseKMSObservation struct {
@@ -211,8 +286,10 @@ type SseKMSObservation struct {
 type SseKMSParameters struct {
 
 	// ARN of the KMS customer master key (CMK) used to encrypt the inventory file.
-	// +kubebuilder:validation:Required
-	KeyID *string `json:"keyId" tf:"key_id,omitempty"`
+	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
+}
+
+type SseS3InitParameters struct {
 }
 
 type SseS3Observation struct {
@@ -225,6 +302,10 @@ type SseS3Parameters struct {
 type BucketInventorySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BucketInventoryParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BucketInventoryInitParameters `json:"initProvider,omitempty"`
 }
 
 // BucketInventoryStatus defines the observed state of BucketInventory.
@@ -245,10 +326,10 @@ type BucketInventoryStatus struct {
 type BucketInventory struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.destination)",message="destination is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.includedObjectVersions)",message="includedObjectVersions is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.schedule)",message="schedule is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.destination) || has(self.initProvider.destination)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.includedObjectVersions) || has(self.initProvider.includedObjectVersions)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.schedule) || has(self.initProvider.schedule)",message="%!s(MISSING) is a required parameter"
 	Spec   BucketInventorySpec   `json:"spec"`
 	Status BucketInventoryStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,33 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RuleAssociationInitParameters struct {
+
+	// A name for the association that you're creating between a resolver rule and a VPC.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ID of the resolver rule that you want to associate with the VPC.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53resolver/v1beta1.Rule
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	ResolverRuleID *string `json:"resolverRuleId,omitempty" tf:"resolver_rule_id,omitempty"`
+
+	ResolverRuleIDRef *v1.Reference `json:"resolverRuleIdRef,omitempty" tf:"-"`
+
+	ResolverRuleIDSelector *v1.Selector `json:"resolverRuleIdSelector,omitempty" tf:"-"`
+
+	// The ID of the VPC that you want to associate the resolver rule with.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
+	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
+
+	VPCIDRef *v1.Reference `json:"vpcIdRef,omitempty" tf:"-"`
+
+	VPCIDSelector *v1.Selector `json:"vpcIdSelector,omitempty" tf:"-"`
+}
+
 type RuleAssociationObservation struct {
 
 	// The ID of the resolver rule association.
@@ -31,18 +58,15 @@ type RuleAssociationObservation struct {
 type RuleAssociationParameters struct {
 
 	// A name for the association that you're creating between a resolver rule and a VPC.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ID of the resolver rule that you want to associate with the VPC.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53resolver/v1beta1.Rule
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	ResolverRuleID *string `json:"resolverRuleId,omitempty" tf:"resolver_rule_id,omitempty"`
 
 	// Reference to a Rule in route53resolver to populate resolverRuleId.
@@ -55,7 +79,6 @@ type RuleAssociationParameters struct {
 
 	// The ID of the VPC that you want to associate the resolver rule with.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
-	// +kubebuilder:validation:Optional
 	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
 
 	// Reference to a VPC in ec2 to populate vpcId.
@@ -71,6 +94,10 @@ type RuleAssociationParameters struct {
 type RuleAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RuleAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RuleAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // RuleAssociationStatus defines the observed state of RuleAssociation.

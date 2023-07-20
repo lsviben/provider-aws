@@ -13,6 +13,47 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DirectoryInitParameters struct {
+
+	// The directory identifier for registration in WorkSpaces service.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ds/v1beta1.Directory
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DirectoryID *string `json:"directoryId,omitempty" tf:"directory_id,omitempty"`
+
+	DirectoryIDRef *v1.Reference `json:"directoryIdRef,omitempty" tf:"-"`
+
+	DirectoryIDSelector *v1.Selector `json:"directoryIdSelector,omitempty" tf:"-"`
+
+	// The identifiers of the IP access control groups associated with the directory.
+	IPGroupIds []*string `json:"ipGroupIds,omitempty" tf:"ip_group_ids,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// service capabilities. Defined below.
+	SelfServicePermissions []SelfServicePermissionsInitParameters `json:"selfServicePermissions,omitempty" tf:"self_service_permissions,omitempty"`
+
+	SubnetIDRefs []v1.Reference `json:"subnetIdRefs,omitempty" tf:"-"`
+
+	SubnetIDSelector *v1.Selector `json:"subnetIdSelector,omitempty" tf:"-"`
+
+	// The identifiers of the subnets where the directory resides.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
+	// +crossplane:generate:reference:refFieldName=SubnetIDRefs
+	// +crossplane:generate:reference:selectorFieldName=SubnetIDSelector
+	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// –  Specifies which devices and operating systems users can use to access their WorkSpaces. Defined below.
+	WorkspaceAccessProperties []WorkspaceAccessPropertiesInitParameters `json:"workspaceAccessProperties,omitempty" tf:"workspace_access_properties,omitempty"`
+
+	// –  Default properties that are used for creating WorkSpaces. Defined below.
+	WorkspaceCreationProperties []WorkspaceCreationPropertiesInitParameters `json:"workspaceCreationProperties,omitempty" tf:"workspace_creation_properties,omitempty"`
+}
+
 type DirectoryObservation struct {
 
 	// The directory alias.
@@ -72,7 +113,6 @@ type DirectoryParameters struct {
 	// The directory identifier for registration in WorkSpaces service.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ds/v1beta1.Directory
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DirectoryID *string `json:"directoryId,omitempty" tf:"directory_id,omitempty"`
 
 	// Reference to a Directory in ds to populate directoryId.
@@ -84,16 +124,13 @@ type DirectoryParameters struct {
 	DirectoryIDSelector *v1.Selector `json:"directoryIdSelector,omitempty" tf:"-"`
 
 	// The identifiers of the IP access control groups associated with the directory.
-	// +kubebuilder:validation:Optional
 	IPGroupIds []*string `json:"ipGroupIds,omitempty" tf:"ip_group_ids,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// service capabilities. Defined below.
-	// +kubebuilder:validation:Optional
 	SelfServicePermissions []SelfServicePermissionsParameters `json:"selfServicePermissions,omitempty" tf:"self_service_permissions,omitempty"`
 
 	// References to Subnet in ec2 to populate subnetIds.
@@ -108,20 +145,34 @@ type DirectoryParameters struct {
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
 	// +crossplane:generate:reference:refFieldName=SubnetIDRefs
 	// +crossplane:generate:reference:selectorFieldName=SubnetIDSelector
-	// +kubebuilder:validation:Optional
 	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// –  Specifies which devices and operating systems users can use to access their WorkSpaces. Defined below.
-	// +kubebuilder:validation:Optional
 	WorkspaceAccessProperties []WorkspaceAccessPropertiesParameters `json:"workspaceAccessProperties,omitempty" tf:"workspace_access_properties,omitempty"`
 
 	// –  Default properties that are used for creating WorkSpaces. Defined below.
-	// +kubebuilder:validation:Optional
 	WorkspaceCreationProperties []WorkspaceCreationPropertiesParameters `json:"workspaceCreationProperties,omitempty" tf:"workspace_creation_properties,omitempty"`
+}
+
+type SelfServicePermissionsInitParameters struct {
+
+	// –  Whether WorkSpaces directory users can change the compute type (bundle) for their workspace. Default false.
+	ChangeComputeType *bool `json:"changeComputeType,omitempty" tf:"change_compute_type,omitempty"`
+
+	// –  Whether WorkSpaces directory users can increase the volume size of the drives on their workspace. Default false.
+	IncreaseVolumeSize *bool `json:"increaseVolumeSize,omitempty" tf:"increase_volume_size,omitempty"`
+
+	// –  Whether WorkSpaces directory users can rebuild the operating system of a workspace to its original state. Default false.
+	RebuildWorkspace *bool `json:"rebuildWorkspace,omitempty" tf:"rebuild_workspace,omitempty"`
+
+	// –  Whether WorkSpaces directory users can restart their workspace. Default true.
+	RestartWorkspace *bool `json:"restartWorkspace,omitempty" tf:"restart_workspace,omitempty"`
+
+	// –  Whether WorkSpaces directory users can switch the running mode of their workspace. Default false.
+	SwitchRunningMode *bool `json:"switchRunningMode,omitempty" tf:"switch_running_mode,omitempty"`
 }
 
 type SelfServicePermissionsObservation struct {
@@ -145,24 +196,46 @@ type SelfServicePermissionsObservation struct {
 type SelfServicePermissionsParameters struct {
 
 	// –  Whether WorkSpaces directory users can change the compute type (bundle) for their workspace. Default false.
-	// +kubebuilder:validation:Optional
 	ChangeComputeType *bool `json:"changeComputeType,omitempty" tf:"change_compute_type,omitempty"`
 
 	// –  Whether WorkSpaces directory users can increase the volume size of the drives on their workspace. Default false.
-	// +kubebuilder:validation:Optional
 	IncreaseVolumeSize *bool `json:"increaseVolumeSize,omitempty" tf:"increase_volume_size,omitempty"`
 
 	// –  Whether WorkSpaces directory users can rebuild the operating system of a workspace to its original state. Default false.
-	// +kubebuilder:validation:Optional
 	RebuildWorkspace *bool `json:"rebuildWorkspace,omitempty" tf:"rebuild_workspace,omitempty"`
 
 	// –  Whether WorkSpaces directory users can restart their workspace. Default true.
-	// +kubebuilder:validation:Optional
 	RestartWorkspace *bool `json:"restartWorkspace,omitempty" tf:"restart_workspace,omitempty"`
 
 	// –  Whether WorkSpaces directory users can switch the running mode of their workspace. Default false.
-	// +kubebuilder:validation:Optional
 	SwitchRunningMode *bool `json:"switchRunningMode,omitempty" tf:"switch_running_mode,omitempty"`
+}
+
+type WorkspaceAccessPropertiesInitParameters struct {
+
+	// –  Indicates whether users can use Android devices to access their WorkSpaces.
+	DeviceTypeAndroid *string `json:"deviceTypeAndroid,omitempty" tf:"device_type_android,omitempty"`
+
+	// –  Indicates whether users can use Chromebooks to access their WorkSpaces.
+	DeviceTypeChromeos *string `json:"deviceTypeChromeos,omitempty" tf:"device_type_chromeos,omitempty"`
+
+	// –  Indicates whether users can use iOS devices to access their WorkSpaces.
+	DeviceTypeIos *string `json:"deviceTypeIos,omitempty" tf:"device_type_ios,omitempty"`
+
+	// –  Indicates whether users can use Linux clients to access their WorkSpaces.
+	DeviceTypeLinux *string `json:"deviceTypeLinux,omitempty" tf:"device_type_linux,omitempty"`
+
+	// –  Indicates whether users can use macOS clients to access their WorkSpaces.
+	DeviceTypeOsx *string `json:"deviceTypeOsx,omitempty" tf:"device_type_osx,omitempty"`
+
+	// –  Indicates whether users can access their WorkSpaces through a web browser.
+	DeviceTypeWeb *string `json:"deviceTypeWeb,omitempty" tf:"device_type_web,omitempty"`
+
+	// –  Indicates whether users can use Windows clients to access their WorkSpaces.
+	DeviceTypeWindows *string `json:"deviceTypeWindows,omitempty" tf:"device_type_windows,omitempty"`
+
+	// –  Indicates whether users can use zero client devices to access their WorkSpaces.
+	DeviceTypeZeroclient *string `json:"deviceTypeZeroclient,omitempty" tf:"device_type_zeroclient,omitempty"`
 }
 
 type WorkspaceAccessPropertiesObservation struct {
@@ -195,36 +268,52 @@ type WorkspaceAccessPropertiesObservation struct {
 type WorkspaceAccessPropertiesParameters struct {
 
 	// –  Indicates whether users can use Android devices to access their WorkSpaces.
-	// +kubebuilder:validation:Optional
 	DeviceTypeAndroid *string `json:"deviceTypeAndroid,omitempty" tf:"device_type_android,omitempty"`
 
 	// –  Indicates whether users can use Chromebooks to access their WorkSpaces.
-	// +kubebuilder:validation:Optional
 	DeviceTypeChromeos *string `json:"deviceTypeChromeos,omitempty" tf:"device_type_chromeos,omitempty"`
 
 	// –  Indicates whether users can use iOS devices to access their WorkSpaces.
-	// +kubebuilder:validation:Optional
 	DeviceTypeIos *string `json:"deviceTypeIos,omitempty" tf:"device_type_ios,omitempty"`
 
 	// –  Indicates whether users can use Linux clients to access their WorkSpaces.
-	// +kubebuilder:validation:Optional
 	DeviceTypeLinux *string `json:"deviceTypeLinux,omitempty" tf:"device_type_linux,omitempty"`
 
 	// –  Indicates whether users can use macOS clients to access their WorkSpaces.
-	// +kubebuilder:validation:Optional
 	DeviceTypeOsx *string `json:"deviceTypeOsx,omitempty" tf:"device_type_osx,omitempty"`
 
 	// –  Indicates whether users can access their WorkSpaces through a web browser.
-	// +kubebuilder:validation:Optional
 	DeviceTypeWeb *string `json:"deviceTypeWeb,omitempty" tf:"device_type_web,omitempty"`
 
 	// –  Indicates whether users can use Windows clients to access their WorkSpaces.
-	// +kubebuilder:validation:Optional
 	DeviceTypeWindows *string `json:"deviceTypeWindows,omitempty" tf:"device_type_windows,omitempty"`
 
 	// –  Indicates whether users can use zero client devices to access their WorkSpaces.
-	// +kubebuilder:validation:Optional
 	DeviceTypeZeroclient *string `json:"deviceTypeZeroclient,omitempty" tf:"device_type_zeroclient,omitempty"`
+}
+
+type WorkspaceCreationPropertiesInitParameters struct {
+
+	// –  The identifier of your custom security group. Should relate to the same VPC, where workspaces reside in.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.SecurityGroup
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	CustomSecurityGroupID *string `json:"customSecurityGroupId,omitempty" tf:"custom_security_group_id,omitempty"`
+
+	CustomSecurityGroupIDRef *v1.Reference `json:"customSecurityGroupIdRef,omitempty" tf:"-"`
+
+	CustomSecurityGroupIDSelector *v1.Selector `json:"customSecurityGroupIdSelector,omitempty" tf:"-"`
+
+	// –  The default organizational unit (OU) for your WorkSpace directories. Should conform "OU=<value>,DC=<value>,...,DC=<value>" pattern.
+	DefaultOu *string `json:"defaultOu,omitempty" tf:"default_ou,omitempty"`
+
+	// –  Indicates whether internet access is enabled for your WorkSpaces.
+	EnableInternetAccess *bool `json:"enableInternetAccess,omitempty" tf:"enable_internet_access,omitempty"`
+
+	// –  Indicates whether maintenance mode is enabled for your WorkSpaces. For more information, see WorkSpace Maintenance..
+	EnableMaintenanceMode *bool `json:"enableMaintenanceMode,omitempty" tf:"enable_maintenance_mode,omitempty"`
+
+	// –  Indicates whether users are local administrators of their WorkSpaces.
+	UserEnabledAsLocalAdministrator *bool `json:"userEnabledAsLocalAdministrator,omitempty" tf:"user_enabled_as_local_administrator,omitempty"`
 }
 
 type WorkspaceCreationPropertiesObservation struct {
@@ -250,7 +339,6 @@ type WorkspaceCreationPropertiesParameters struct {
 	// –  The identifier of your custom security group. Should relate to the same VPC, where workspaces reside in.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.SecurityGroup
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	CustomSecurityGroupID *string `json:"customSecurityGroupId,omitempty" tf:"custom_security_group_id,omitempty"`
 
 	// Reference to a SecurityGroup in ec2 to populate customSecurityGroupId.
@@ -262,19 +350,15 @@ type WorkspaceCreationPropertiesParameters struct {
 	CustomSecurityGroupIDSelector *v1.Selector `json:"customSecurityGroupIdSelector,omitempty" tf:"-"`
 
 	// –  The default organizational unit (OU) for your WorkSpace directories. Should conform "OU=<value>,DC=<value>,...,DC=<value>" pattern.
-	// +kubebuilder:validation:Optional
 	DefaultOu *string `json:"defaultOu,omitempty" tf:"default_ou,omitempty"`
 
 	// –  Indicates whether internet access is enabled for your WorkSpaces.
-	// +kubebuilder:validation:Optional
 	EnableInternetAccess *bool `json:"enableInternetAccess,omitempty" tf:"enable_internet_access,omitempty"`
 
 	// –  Indicates whether maintenance mode is enabled for your WorkSpaces. For more information, see WorkSpace Maintenance..
-	// +kubebuilder:validation:Optional
 	EnableMaintenanceMode *bool `json:"enableMaintenanceMode,omitempty" tf:"enable_maintenance_mode,omitempty"`
 
 	// –  Indicates whether users are local administrators of their WorkSpaces.
-	// +kubebuilder:validation:Optional
 	UserEnabledAsLocalAdministrator *bool `json:"userEnabledAsLocalAdministrator,omitempty" tf:"user_enabled_as_local_administrator,omitempty"`
 }
 
@@ -282,6 +366,10 @@ type WorkspaceCreationPropertiesParameters struct {
 type DirectorySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DirectoryParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DirectoryInitParameters `json:"initProvider,omitempty"`
 }
 
 // DirectoryStatus defines the observed state of Directory.

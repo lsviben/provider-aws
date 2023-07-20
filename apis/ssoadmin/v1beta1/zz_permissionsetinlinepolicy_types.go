@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PermissionSetInlinePolicyInitParameters struct {
+
+	// The IAM inline policy to attach to a Permission Set.
+	InlinePolicy *string `json:"inlinePolicy,omitempty" tf:"inline_policy,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the SSO Instance under which the operation will be executed.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssoadmin/v1beta1.PermissionSet
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("instance_arn",false)
+	InstanceArn *string `json:"instanceArn,omitempty" tf:"instance_arn,omitempty"`
+
+	InstanceArnRef *v1.Reference `json:"instanceArnRef,omitempty" tf:"-"`
+
+	InstanceArnSelector *v1.Selector `json:"instanceArnSelector,omitempty" tf:"-"`
+
+	// The Amazon Resource Name (ARN) of the Permission Set.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssoadmin/v1beta1.PermissionSet
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	PermissionSetArn *string `json:"permissionSetArn,omitempty" tf:"permission_set_arn,omitempty"`
+
+	PermissionSetArnRef *v1.Reference `json:"permissionSetArnRef,omitempty" tf:"-"`
+
+	PermissionSetArnSelector *v1.Selector `json:"permissionSetArnSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type PermissionSetInlinePolicyObservation struct {
 
 	// The Amazon Resource Names (ARNs) of the Permission Set and SSO Instance, separated by a comma (,).
@@ -31,13 +59,11 @@ type PermissionSetInlinePolicyObservation struct {
 type PermissionSetInlinePolicyParameters struct {
 
 	// The IAM inline policy to attach to a Permission Set.
-	// +kubebuilder:validation:Optional
 	InlinePolicy *string `json:"inlinePolicy,omitempty" tf:"inline_policy,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the SSO Instance under which the operation will be executed.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssoadmin/v1beta1.PermissionSet
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("instance_arn",false)
-	// +kubebuilder:validation:Optional
 	InstanceArn *string `json:"instanceArn,omitempty" tf:"instance_arn,omitempty"`
 
 	// Reference to a PermissionSet in ssoadmin to populate instanceArn.
@@ -51,7 +77,6 @@ type PermissionSetInlinePolicyParameters struct {
 	// The Amazon Resource Name (ARN) of the Permission Set.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ssoadmin/v1beta1.PermissionSet
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	PermissionSetArn *string `json:"permissionSetArn,omitempty" tf:"permission_set_arn,omitempty"`
 
 	// Reference to a PermissionSet in ssoadmin to populate permissionSetArn.
@@ -64,14 +89,17 @@ type PermissionSetInlinePolicyParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // PermissionSetInlinePolicySpec defines the desired state of PermissionSetInlinePolicy
 type PermissionSetInlinePolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PermissionSetInlinePolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PermissionSetInlinePolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // PermissionSetInlinePolicyStatus defines the observed state of PermissionSetInlinePolicy.
@@ -92,7 +120,7 @@ type PermissionSetInlinePolicyStatus struct {
 type PermissionSetInlinePolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.inlinePolicy)",message="inlinePolicy is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.inlinePolicy) || has(self.initProvider.inlinePolicy)",message="%!s(MISSING) is a required parameter"
 	Spec   PermissionSetInlinePolicySpec   `json:"spec"`
 	Status PermissionSetInlinePolicyStatus `json:"status,omitempty"`
 }

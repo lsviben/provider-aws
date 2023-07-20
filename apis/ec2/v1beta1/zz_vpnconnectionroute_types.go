@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VPNConnectionRouteInitParameters struct {
+
+	// The CIDR block associated with the local subnet of the customer network.
+	DestinationCidrBlock *string `json:"destinationCidrBlock,omitempty" tf:"destination_cidr_block,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ID of the VPN connection.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPNConnection
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	VPNConnectionID *string `json:"vpnConnectionId,omitempty" tf:"vpn_connection_id,omitempty"`
+
+	VPNConnectionIDRef *v1.Reference `json:"vpnConnectionIdRef,omitempty" tf:"-"`
+
+	VPNConnectionIDSelector *v1.Selector `json:"vpnConnectionIdSelector,omitempty" tf:"-"`
+}
+
 type VPNConnectionRouteObservation struct {
 
 	// The CIDR block associated with the local subnet of the customer network.
@@ -27,18 +46,15 @@ type VPNConnectionRouteObservation struct {
 type VPNConnectionRouteParameters struct {
 
 	// The CIDR block associated with the local subnet of the customer network.
-	// +kubebuilder:validation:Optional
 	DestinationCidrBlock *string `json:"destinationCidrBlock,omitempty" tf:"destination_cidr_block,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ID of the VPN connection.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPNConnection
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	VPNConnectionID *string `json:"vpnConnectionId,omitempty" tf:"vpn_connection_id,omitempty"`
 
 	// Reference to a VPNConnection in ec2 to populate vpnConnectionId.
@@ -54,6 +70,10 @@ type VPNConnectionRouteParameters struct {
 type VPNConnectionRouteSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VPNConnectionRouteParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VPNConnectionRouteInitParameters `json:"initProvider,omitempty"`
 }
 
 // VPNConnectionRouteStatus defines the observed state of VPNConnectionRoute.
@@ -74,7 +94,7 @@ type VPNConnectionRouteStatus struct {
 type VPNConnectionRoute struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.destinationCidrBlock)",message="destinationCidrBlock is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.destinationCidrBlock) || has(self.initProvider.destinationCidrBlock)",message="%!s(MISSING) is a required parameter"
 	Spec   VPNConnectionRouteSpec   `json:"spec"`
 	Status VPNConnectionRouteStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PolicyAttachmentInitParameters struct {
+
+	// The name of the policy to attach.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iot/v1beta1.Policy
+	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
+
+	PolicyRef *v1.Reference `json:"policyRef,omitempty" tf:"-"`
+
+	PolicySelector *v1.Selector `json:"policySelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The identity to which the policy is attached.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iot/v1beta1.Certificate
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	Target *string `json:"target,omitempty" tf:"target,omitempty"`
+
+	TargetRef *v1.Reference `json:"targetRef,omitempty" tf:"-"`
+
+	TargetSelector *v1.Selector `json:"targetSelector,omitempty" tf:"-"`
+}
+
 type PolicyAttachmentObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -27,7 +51,6 @@ type PolicyAttachmentParameters struct {
 
 	// The name of the policy to attach.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iot/v1beta1.Policy
-	// +kubebuilder:validation:Optional
 	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
 
 	// Reference to a Policy in iot to populate policy.
@@ -40,13 +63,11 @@ type PolicyAttachmentParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The identity to which the policy is attached.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iot/v1beta1.Certificate
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	Target *string `json:"target,omitempty" tf:"target,omitempty"`
 
 	// Reference to a Certificate in iot to populate target.
@@ -62,6 +83,10 @@ type PolicyAttachmentParameters struct {
 type PolicyAttachmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PolicyAttachmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PolicyAttachmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // PolicyAttachmentStatus defines the observed state of PolicyAttachment.

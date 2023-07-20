@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CustomFieldInitParameters struct {
+
+	// The name of the field.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The data type of the field. Valid values: Number, String, Boolean.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type CustomFieldObservation struct {
 
 	// The name of the field.
@@ -25,12 +34,23 @@ type CustomFieldObservation struct {
 type CustomFieldParameters struct {
 
 	// The name of the field.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The data type of the field. Valid values: Number, String, Boolean.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type IndexingConfigurationInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Thing group indexing configuration. See below.
+	ThingGroupIndexingConfiguration []ThingGroupIndexingConfigurationInitParameters `json:"thingGroupIndexingConfiguration,omitempty" tf:"thing_group_indexing_configuration,omitempty"`
+
+	// Thing indexing configuration. See below.
+	ThingIndexingConfiguration []ThingIndexingConfigurationInitParameters `json:"thingIndexingConfiguration,omitempty" tf:"thing_indexing_configuration,omitempty"`
 }
 
 type IndexingConfigurationObservation struct {
@@ -47,16 +67,22 @@ type IndexingConfigurationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Thing group indexing configuration. See below.
-	// +kubebuilder:validation:Optional
 	ThingGroupIndexingConfiguration []ThingGroupIndexingConfigurationParameters `json:"thingGroupIndexingConfiguration,omitempty" tf:"thing_group_indexing_configuration,omitempty"`
 
 	// Thing indexing configuration. See below.
-	// +kubebuilder:validation:Optional
 	ThingIndexingConfiguration []ThingIndexingConfigurationParameters `json:"thingIndexingConfiguration,omitempty" tf:"thing_indexing_configuration,omitempty"`
+}
+
+type ManagedFieldInitParameters struct {
+
+	// The name of the field.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The data type of the field. Valid values: Number, String, Boolean.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type ManagedFieldObservation struct {
@@ -71,12 +97,22 @@ type ManagedFieldObservation struct {
 type ManagedFieldParameters struct {
 
 	// The name of the field.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The data type of the field. Valid values: Number, String, Boolean.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type ThingGroupIndexingConfigurationInitParameters struct {
+
+	// A list of thing group fields to index. This list cannot contain any managed fields. See below.
+	CustomField []CustomFieldInitParameters `json:"customField,omitempty" tf:"custom_field,omitempty"`
+
+	// Contains fields that are indexed and whose types are already known by the Fleet Indexing service. See below.
+	ManagedField []ManagedFieldInitParameters `json:"managedField,omitempty" tf:"managed_field,omitempty"`
+
+	// Thing group indexing mode. Valid values: OFF, ON.
+	ThingGroupIndexingMode *string `json:"thingGroupIndexingMode,omitempty" tf:"thing_group_indexing_mode,omitempty"`
 }
 
 type ThingGroupIndexingConfigurationObservation struct {
@@ -94,16 +130,22 @@ type ThingGroupIndexingConfigurationObservation struct {
 type ThingGroupIndexingConfigurationParameters struct {
 
 	// A list of thing group fields to index. This list cannot contain any managed fields. See below.
-	// +kubebuilder:validation:Optional
 	CustomField []CustomFieldParameters `json:"customField,omitempty" tf:"custom_field,omitempty"`
 
 	// Contains fields that are indexed and whose types are already known by the Fleet Indexing service. See below.
-	// +kubebuilder:validation:Optional
 	ManagedField []ManagedFieldParameters `json:"managedField,omitempty" tf:"managed_field,omitempty"`
 
 	// Thing group indexing mode. Valid values: OFF, ON.
-	// +kubebuilder:validation:Required
-	ThingGroupIndexingMode *string `json:"thingGroupIndexingMode" tf:"thing_group_indexing_mode,omitempty"`
+	ThingGroupIndexingMode *string `json:"thingGroupIndexingMode,omitempty" tf:"thing_group_indexing_mode,omitempty"`
+}
+
+type ThingIndexingConfigurationCustomFieldInitParameters struct {
+
+	// The name of the field.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The data type of the field. Valid values: Number, String, Boolean.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type ThingIndexingConfigurationCustomFieldObservation struct {
@@ -118,11 +160,39 @@ type ThingIndexingConfigurationCustomFieldObservation struct {
 type ThingIndexingConfigurationCustomFieldParameters struct {
 
 	// The name of the field.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The data type of the field. Valid values: Number, String, Boolean.
-	// +kubebuilder:validation:Optional
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type ThingIndexingConfigurationInitParameters struct {
+
+	// Contains custom field names and their data type. See below.
+	CustomField []ThingIndexingConfigurationCustomFieldInitParameters `json:"customField,omitempty" tf:"custom_field,omitempty"`
+
+	// Device Defender indexing mode. Valid values: VIOLATIONS, OFF. Default: OFF.
+	DeviceDefenderIndexingMode *string `json:"deviceDefenderIndexingMode,omitempty" tf:"device_defender_indexing_mode,omitempty"`
+
+	// Contains fields that are indexed and whose types are already known by the Fleet Indexing service. See below.
+	ManagedField []ThingIndexingConfigurationManagedFieldInitParameters `json:"managedField,omitempty" tf:"managed_field,omitempty"`
+
+	// Named shadow indexing mode. Valid values: ON, OFF. Default: OFF.
+	NamedShadowIndexingMode *string `json:"namedShadowIndexingMode,omitempty" tf:"named_shadow_indexing_mode,omitempty"`
+
+	// Thing connectivity indexing mode. Valid values: STATUS, OFF. Default: OFF.
+	ThingConnectivityIndexingMode *string `json:"thingConnectivityIndexingMode,omitempty" tf:"thing_connectivity_indexing_mode,omitempty"`
+
+	// Thing indexing mode. Valid values: REGISTRY, REGISTRY_AND_SHADOW, OFF.
+	ThingIndexingMode *string `json:"thingIndexingMode,omitempty" tf:"thing_indexing_mode,omitempty"`
+}
+
+type ThingIndexingConfigurationManagedFieldInitParameters struct {
+
+	// The name of the field.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The data type of the field. Valid values: Number, String, Boolean.
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -138,11 +208,9 @@ type ThingIndexingConfigurationManagedFieldObservation struct {
 type ThingIndexingConfigurationManagedFieldParameters struct {
 
 	// The name of the field.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The data type of the field. Valid values: Number, String, Boolean.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -170,34 +238,32 @@ type ThingIndexingConfigurationObservation struct {
 type ThingIndexingConfigurationParameters struct {
 
 	// Contains custom field names and their data type. See below.
-	// +kubebuilder:validation:Optional
 	CustomField []ThingIndexingConfigurationCustomFieldParameters `json:"customField,omitempty" tf:"custom_field,omitempty"`
 
 	// Device Defender indexing mode. Valid values: VIOLATIONS, OFF. Default: OFF.
-	// +kubebuilder:validation:Optional
 	DeviceDefenderIndexingMode *string `json:"deviceDefenderIndexingMode,omitempty" tf:"device_defender_indexing_mode,omitempty"`
 
 	// Contains fields that are indexed and whose types are already known by the Fleet Indexing service. See below.
-	// +kubebuilder:validation:Optional
 	ManagedField []ThingIndexingConfigurationManagedFieldParameters `json:"managedField,omitempty" tf:"managed_field,omitempty"`
 
 	// Named shadow indexing mode. Valid values: ON, OFF. Default: OFF.
-	// +kubebuilder:validation:Optional
 	NamedShadowIndexingMode *string `json:"namedShadowIndexingMode,omitempty" tf:"named_shadow_indexing_mode,omitempty"`
 
 	// Thing connectivity indexing mode. Valid values: STATUS, OFF. Default: OFF.
-	// +kubebuilder:validation:Optional
 	ThingConnectivityIndexingMode *string `json:"thingConnectivityIndexingMode,omitempty" tf:"thing_connectivity_indexing_mode,omitempty"`
 
 	// Thing indexing mode. Valid values: REGISTRY, REGISTRY_AND_SHADOW, OFF.
-	// +kubebuilder:validation:Required
-	ThingIndexingMode *string `json:"thingIndexingMode" tf:"thing_indexing_mode,omitempty"`
+	ThingIndexingMode *string `json:"thingIndexingMode,omitempty" tf:"thing_indexing_mode,omitempty"`
 }
 
 // IndexingConfigurationSpec defines the desired state of IndexingConfiguration
 type IndexingConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     IndexingConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider IndexingConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // IndexingConfigurationStatus defines the observed state of IndexingConfiguration.

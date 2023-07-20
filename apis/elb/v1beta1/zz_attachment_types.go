@@ -13,6 +13,29 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AttachmentInitParameters struct {
+
+	// The name of the ELB.
+	// +crossplane:generate:reference:type=ELB
+	ELB *string `json:"elb,omitempty" tf:"elb,omitempty"`
+
+	ELBRef *v1.Reference `json:"elbRef,omitempty" tf:"-"`
+
+	ELBSelector *v1.Selector `json:"elbSelector,omitempty" tf:"-"`
+
+	// Instance ID to place in the ELB pool.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Instance
+	Instance *string `json:"instance,omitempty" tf:"instance,omitempty"`
+
+	InstanceRef *v1.Reference `json:"instanceRef,omitempty" tf:"-"`
+
+	InstanceSelector *v1.Selector `json:"instanceSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type AttachmentObservation struct {
 
 	// The name of the ELB.
@@ -28,7 +51,6 @@ type AttachmentParameters struct {
 
 	// The name of the ELB.
 	// +crossplane:generate:reference:type=ELB
-	// +kubebuilder:validation:Optional
 	ELB *string `json:"elb,omitempty" tf:"elb,omitempty"`
 
 	// Reference to a ELB to populate elb.
@@ -41,7 +63,6 @@ type AttachmentParameters struct {
 
 	// Instance ID to place in the ELB pool.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Instance
-	// +kubebuilder:validation:Optional
 	Instance *string `json:"instance,omitempty" tf:"instance,omitempty"`
 
 	// Reference to a Instance in ec2 to populate instance.
@@ -54,14 +75,17 @@ type AttachmentParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // AttachmentSpec defines the desired state of Attachment
 type AttachmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AttachmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AttachmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // AttachmentStatus defines the observed state of Attachment.

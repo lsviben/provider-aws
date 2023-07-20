@@ -81,10 +81,26 @@ spec:
                   value:
                     description: Tag value.
                     type: string
-                required:
-                - key
-                - region
-                - resourceArn
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  key:
+                    description: Tag name.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  resourceArn:
+                    description: Amazon Resource Name (ARN) of the DynamoDB resource
+                      to tag.
+                    type: string
+                  value:
+                    description: Tag value.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -284,9 +300,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: value is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.value)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.value)
+                || has(self.initProvider.value)'
           status:
             description: TagStatus defines the observed state of Tag.
             properties:

@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type LambdaFunctionAssociationInitParameters struct {
+
+	// Amazon Resource Name (ARN) of the Lambda Function, omitting any version or alias qualifier.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lambda/v1beta1.Function
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	FunctionArn *string `json:"functionArn,omitempty" tf:"function_arn,omitempty"`
+
+	FunctionArnRef *v1.Reference `json:"functionArnRef,omitempty" tf:"-"`
+
+	FunctionArnSelector *v1.Selector `json:"functionArnSelector,omitempty" tf:"-"`
+
+	// The identifier of the Amazon Connect instance. You can find the instanceId in the ARN of the instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
+
+	InstanceIDRef *v1.Reference `json:"instanceIdRef,omitempty" tf:"-"`
+
+	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type LambdaFunctionAssociationObservation struct {
 
 	// Amazon Resource Name (ARN) of the Lambda Function, omitting any version or alias qualifier.
@@ -30,7 +55,6 @@ type LambdaFunctionAssociationParameters struct {
 	// Amazon Resource Name (ARN) of the Lambda Function, omitting any version or alias qualifier.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lambda/v1beta1.Function
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	FunctionArn *string `json:"functionArn,omitempty" tf:"function_arn,omitempty"`
 
 	// Reference to a Function in lambda to populate functionArn.
@@ -44,7 +68,6 @@ type LambdaFunctionAssociationParameters struct {
 	// The identifier of the Amazon Connect instance. You can find the instanceId in the ARN of the instance.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
 
 	// Reference to a Instance in connect to populate instanceId.
@@ -57,14 +80,17 @@ type LambdaFunctionAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // LambdaFunctionAssociationSpec defines the desired state of LambdaFunctionAssociation
 type LambdaFunctionAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     LambdaFunctionAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider LambdaFunctionAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // LambdaFunctionAssociationStatus defines the observed state of LambdaFunctionAssociation.

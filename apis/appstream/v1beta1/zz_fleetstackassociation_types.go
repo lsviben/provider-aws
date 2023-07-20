@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type FleetStackAssociationInitParameters struct {
+
+	// Name of the fleet.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appstream/v1beta1.Fleet
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
+	FleetName *string `json:"fleetName,omitempty" tf:"fleet_name,omitempty"`
+
+	FleetNameRef *v1.Reference `json:"fleetNameRef,omitempty" tf:"-"`
+
+	FleetNameSelector *v1.Selector `json:"fleetNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Name of the stack.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appstream/v1beta1.Stack
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
+	StackName *string `json:"stackName,omitempty" tf:"stack_name,omitempty"`
+
+	StackNameRef *v1.Reference `json:"stackNameRef,omitempty" tf:"-"`
+
+	StackNameSelector *v1.Selector `json:"stackNameSelector,omitempty" tf:"-"`
+}
+
 type FleetStackAssociationObservation struct {
 
 	// Name of the fleet.
@@ -30,7 +55,6 @@ type FleetStackAssociationParameters struct {
 	// Name of the fleet.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appstream/v1beta1.Fleet
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
-	// +kubebuilder:validation:Optional
 	FleetName *string `json:"fleetName,omitempty" tf:"fleet_name,omitempty"`
 
 	// Reference to a Fleet in appstream to populate fleetName.
@@ -43,13 +67,11 @@ type FleetStackAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Name of the stack.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appstream/v1beta1.Stack
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
-	// +kubebuilder:validation:Optional
 	StackName *string `json:"stackName,omitempty" tf:"stack_name,omitempty"`
 
 	// Reference to a Stack in appstream to populate stackName.
@@ -65,6 +87,10 @@ type FleetStackAssociationParameters struct {
 type FleetStackAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     FleetStackAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider FleetStackAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // FleetStackAssociationStatus defines the observed state of FleetStackAssociation.

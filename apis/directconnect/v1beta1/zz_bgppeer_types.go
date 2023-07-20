@@ -13,6 +13,39 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BGPPeerInitParameters struct {
+
+	// The address family for the BGP peer. ipv4  or ipv6.
+	AddressFamily *string `json:"addressFamily,omitempty" tf:"address_family,omitempty"`
+
+	// The IPv4 CIDR address to use to send traffic to Amazon.
+	// Required for IPv4 BGP peers on public virtual interfaces.
+	AmazonAddress *string `json:"amazonAddress,omitempty" tf:"amazon_address,omitempty"`
+
+	// The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration.
+	BGPAsn *float64 `json:"bgpAsn,omitempty" tf:"bgp_asn,omitempty"`
+
+	// The authentication key for BGP configuration.
+	BGPAuthKey *string `json:"bgpAuthKey,omitempty" tf:"bgp_auth_key,omitempty"`
+
+	// The IPv4 CIDR destination address to which Amazon should send traffic.
+	// Required for IPv4 BGP peers on public virtual interfaces.
+	CustomerAddress *string `json:"customerAddress,omitempty" tf:"customer_address,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ID of the Direct Connect virtual interface on which to create the BGP peer.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/directconnect/v1beta1.PrivateVirtualInterface
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	VirtualInterfaceID *string `json:"virtualInterfaceId,omitempty" tf:"virtual_interface_id,omitempty"`
+
+	VirtualInterfaceIDRef *v1.Reference `json:"virtualInterfaceIdRef,omitempty" tf:"-"`
+
+	VirtualInterfaceIDSelector *v1.Selector `json:"virtualInterfaceIdSelector,omitempty" tf:"-"`
+}
+
 type BGPPeerObservation struct {
 
 	// The address family for the BGP peer. ipv4  or ipv6.
@@ -51,36 +84,29 @@ type BGPPeerObservation struct {
 type BGPPeerParameters struct {
 
 	// The address family for the BGP peer. ipv4  or ipv6.
-	// +kubebuilder:validation:Optional
 	AddressFamily *string `json:"addressFamily,omitempty" tf:"address_family,omitempty"`
 
 	// The IPv4 CIDR address to use to send traffic to Amazon.
 	// Required for IPv4 BGP peers on public virtual interfaces.
-	// +kubebuilder:validation:Optional
 	AmazonAddress *string `json:"amazonAddress,omitempty" tf:"amazon_address,omitempty"`
 
 	// The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration.
-	// +kubebuilder:validation:Optional
 	BGPAsn *float64 `json:"bgpAsn,omitempty" tf:"bgp_asn,omitempty"`
 
 	// The authentication key for BGP configuration.
-	// +kubebuilder:validation:Optional
 	BGPAuthKey *string `json:"bgpAuthKey,omitempty" tf:"bgp_auth_key,omitempty"`
 
 	// The IPv4 CIDR destination address to which Amazon should send traffic.
 	// Required for IPv4 BGP peers on public virtual interfaces.
-	// +kubebuilder:validation:Optional
 	CustomerAddress *string `json:"customerAddress,omitempty" tf:"customer_address,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ID of the Direct Connect virtual interface on which to create the BGP peer.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/directconnect/v1beta1.PrivateVirtualInterface
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	VirtualInterfaceID *string `json:"virtualInterfaceId,omitempty" tf:"virtual_interface_id,omitempty"`
 
 	// Reference to a PrivateVirtualInterface in directconnect to populate virtualInterfaceId.
@@ -96,6 +122,10 @@ type BGPPeerParameters struct {
 type BGPPeerSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BGPPeerParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BGPPeerInitParameters `json:"initProvider,omitempty"`
 }
 
 // BGPPeerStatus defines the observed state of BGPPeer.
@@ -116,8 +146,8 @@ type BGPPeerStatus struct {
 type BGPPeer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.addressFamily)",message="addressFamily is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.bgpAsn)",message="bgpAsn is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.addressFamily) || has(self.initProvider.addressFamily)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.bgpAsn) || has(self.initProvider.bgpAsn)",message="%!s(MISSING) is a required parameter"
 	Spec   BGPPeerSpec   `json:"spec"`
 	Status BGPPeerStatus `json:"status,omitempty"`
 }

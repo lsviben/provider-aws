@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DNSTargetResourceInitParameters struct {
+
+	// DNS Name that acts as the ingress point to a portion of application.
+	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
+
+	// Hosted Zone ARN that contains the DNS record with the provided name of target resource.
+	HostedZoneArn *string `json:"hostedZoneArn,omitempty" tf:"hosted_zone_arn,omitempty"`
+
+	// Route53 record set id to uniquely identify a record given a domain_name and a record_type.
+	RecordSetID *string `json:"recordSetId,omitempty" tf:"record_set_id,omitempty"`
+
+	// Type of DNS Record of target resource.
+	RecordType *string `json:"recordType,omitempty" tf:"record_type,omitempty"`
+
+	// Target resource the R53 record specified with the above params points to.
+	TargetResource []TargetResourceInitParameters `json:"targetResource,omitempty" tf:"target_resource,omitempty"`
+}
+
 type DNSTargetResourceObservation struct {
 
 	// DNS Name that acts as the ingress point to a portion of application.
@@ -34,24 +52,25 @@ type DNSTargetResourceObservation struct {
 type DNSTargetResourceParameters struct {
 
 	// DNS Name that acts as the ingress point to a portion of application.
-	// +kubebuilder:validation:Required
-	DomainName *string `json:"domainName" tf:"domain_name,omitempty"`
+	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
 
 	// Hosted Zone ARN that contains the DNS record with the provided name of target resource.
-	// +kubebuilder:validation:Optional
 	HostedZoneArn *string `json:"hostedZoneArn,omitempty" tf:"hosted_zone_arn,omitempty"`
 
 	// Route53 record set id to uniquely identify a record given a domain_name and a record_type.
-	// +kubebuilder:validation:Optional
 	RecordSetID *string `json:"recordSetId,omitempty" tf:"record_set_id,omitempty"`
 
 	// Type of DNS Record of target resource.
-	// +kubebuilder:validation:Optional
 	RecordType *string `json:"recordType,omitempty" tf:"record_type,omitempty"`
 
 	// Target resource the R53 record specified with the above params points to.
-	// +kubebuilder:validation:Optional
 	TargetResource []TargetResourceParameters `json:"targetResource,omitempty" tf:"target_resource,omitempty"`
+}
+
+type NlbResourceInitParameters struct {
+
+	// NLB resource ARN.
+	Arn *string `json:"arn,omitempty" tf:"arn,omitempty"`
 }
 
 type NlbResourceObservation struct {
@@ -63,8 +82,16 @@ type NlbResourceObservation struct {
 type NlbResourceParameters struct {
 
 	// NLB resource ARN.
-	// +kubebuilder:validation:Optional
 	Arn *string `json:"arn,omitempty" tf:"arn,omitempty"`
+}
+
+type R53ResourceInitParameters struct {
+
+	// Domain name that is targeted.
+	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
+
+	// Resource record set ID that is targeted.
+	RecordSetID *string `json:"recordSetId,omitempty" tf:"record_set_id,omitempty"`
 }
 
 type R53ResourceObservation struct {
@@ -79,12 +106,26 @@ type R53ResourceObservation struct {
 type R53ResourceParameters struct {
 
 	// Domain name that is targeted.
-	// +kubebuilder:validation:Optional
 	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
 
 	// Resource record set ID that is targeted.
-	// +kubebuilder:validation:Optional
 	RecordSetID *string `json:"recordSetId,omitempty" tf:"record_set_id,omitempty"`
+}
+
+type ResourceSetInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Type of the resources in the resource set.
+	ResourceSetType *string `json:"resourceSetType,omitempty" tf:"resource_set_type,omitempty"`
+
+	// List of resources to add to this resource set. See below.
+	Resources []ResourcesInitParameters `json:"resources,omitempty" tf:"resources,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type ResourceSetObservation struct {
@@ -111,20 +152,34 @@ type ResourceSetParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Type of the resources in the resource set.
-	// +kubebuilder:validation:Optional
 	ResourceSetType *string `json:"resourceSetType,omitempty" tf:"resource_set_type,omitempty"`
 
 	// List of resources to add to this resource set. See below.
-	// +kubebuilder:validation:Optional
 	Resources []ResourcesParameters `json:"resources,omitempty" tf:"resources,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type ResourcesInitParameters struct {
+
+	// Component for DNS/Routing Control Readiness Checks.
+	DNSTargetResource []DNSTargetResourceInitParameters `json:"dnsTargetResource,omitempty" tf:"dns_target_resource,omitempty"`
+
+	// Recovery group ARN or cell ARN that contains this resource set.
+	ReadinessScopes []*string `json:"readinessScopes,omitempty" tf:"readiness_scopes,omitempty"`
+
+	// ARN of the resource.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudwatch/v1beta1.MetricAlarm
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
+
+	ResourceArnRef *v1.Reference `json:"resourceArnRef,omitempty" tf:"-"`
+
+	ResourceArnSelector *v1.Selector `json:"resourceArnSelector,omitempty" tf:"-"`
 }
 
 type ResourcesObservation struct {
@@ -145,17 +200,14 @@ type ResourcesObservation struct {
 type ResourcesParameters struct {
 
 	// Component for DNS/Routing Control Readiness Checks.
-	// +kubebuilder:validation:Optional
 	DNSTargetResource []DNSTargetResourceParameters `json:"dnsTargetResource,omitempty" tf:"dns_target_resource,omitempty"`
 
 	// Recovery group ARN or cell ARN that contains this resource set.
-	// +kubebuilder:validation:Optional
 	ReadinessScopes []*string `json:"readinessScopes,omitempty" tf:"readiness_scopes,omitempty"`
 
 	// ARN of the resource.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudwatch/v1beta1.MetricAlarm
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
 
 	// Reference to a MetricAlarm in cloudwatch to populate resourceArn.
@@ -165,6 +217,15 @@ type ResourcesParameters struct {
 	// Selector for a MetricAlarm in cloudwatch to populate resourceArn.
 	// +kubebuilder:validation:Optional
 	ResourceArnSelector *v1.Selector `json:"resourceArnSelector,omitempty" tf:"-"`
+}
+
+type TargetResourceInitParameters struct {
+
+	// NLB resource a DNS Target Resource points to. Required if r53_resource is not set.
+	NlbResource []NlbResourceInitParameters `json:"nlbResource,omitempty" tf:"nlb_resource,omitempty"`
+
+	// Route53 resource a DNS Target Resource record points to.
+	R53Resource []R53ResourceInitParameters `json:"r53Resource,omitempty" tf:"r53_resource,omitempty"`
 }
 
 type TargetResourceObservation struct {
@@ -179,11 +240,9 @@ type TargetResourceObservation struct {
 type TargetResourceParameters struct {
 
 	// NLB resource a DNS Target Resource points to. Required if r53_resource is not set.
-	// +kubebuilder:validation:Optional
 	NlbResource []NlbResourceParameters `json:"nlbResource,omitempty" tf:"nlb_resource,omitempty"`
 
 	// Route53 resource a DNS Target Resource record points to.
-	// +kubebuilder:validation:Optional
 	R53Resource []R53ResourceParameters `json:"r53Resource,omitempty" tf:"r53_resource,omitempty"`
 }
 
@@ -191,6 +250,10 @@ type TargetResourceParameters struct {
 type ResourceSetSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ResourceSetParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ResourceSetInitParameters `json:"initProvider,omitempty"`
 }
 
 // ResourceSetStatus defines the observed state of ResourceSet.
@@ -211,8 +274,8 @@ type ResourceSetStatus struct {
 type ResourceSet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceSetType)",message="resourceSetType is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resources)",message="resources is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceSetType) || has(self.initProvider.resourceSetType)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resources) || has(self.initProvider.resources)",message="%!s(MISSING) is a required parameter"
 	Spec   ResourceSetSpec   `json:"spec"`
 	Status ResourceSetStatus `json:"status,omitempty"`
 }

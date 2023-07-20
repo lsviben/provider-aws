@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DedicatedIPPoolInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// IP pool scaling mode. Valid values: STANDARD, MANAGED. If omitted, the AWS API will default to a standard pool.
+	ScalingMode *string `json:"scalingMode,omitempty" tf:"scaling_mode,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type DedicatedIPPoolObservation struct {
 
 	// ARN of the Dedicated IP Pool.
@@ -33,15 +46,12 @@ type DedicatedIPPoolParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// IP pool scaling mode. Valid values: STANDARD, MANAGED. If omitted, the AWS API will default to a standard pool.
-	// +kubebuilder:validation:Optional
 	ScalingMode *string `json:"scalingMode,omitempty" tf:"scaling_mode,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -49,6 +59,10 @@ type DedicatedIPPoolParameters struct {
 type DedicatedIPPoolSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DedicatedIPPoolParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DedicatedIPPoolInitParameters `json:"initProvider,omitempty"`
 }
 
 // DedicatedIPPoolStatus defines the observed state of DedicatedIPPool.

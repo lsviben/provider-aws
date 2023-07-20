@@ -102,7 +102,47 @@ spec:
                       cloudfront-js-1.0 is valid.
                     type: string
                 required:
-                - region
+                - codeSecretRef
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  codeSecretRef:
+                    description: Source code of the function
+                    properties:
+                      key:
+                        description: The key to select.
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                      namespace:
+                        description: Namespace of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    - namespace
+                    type: object
+                  comment:
+                    description: Comment.
+                    type: string
+                  publish:
+                    description: Whether to publish creation/change as Live CloudFront
+                      Function Version. Defaults to true.
+                    type: boolean
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  runtime:
+                    description: Identifier of the function's runtime. Currently only
+                      cloudfront-js-1.0 is valid.
+                    type: string
+                required:
+                - codeSecretRef
                 type: object
               managementPolicies:
                 default:
@@ -302,12 +342,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: codeSecretRef is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.codeSecretRef)'
-            - message: runtime is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.codeSecretRef)
+                || has(self.initProvider.codeSecretRef)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.runtime)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.runtime)
+                || has(self.initProvider.runtime)'
           status:
             description: FunctionStatus defines the observed state of Function.
             properties:

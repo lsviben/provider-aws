@@ -13,6 +13,45 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VPCAttachmentInitParameters struct {
+
+	// The ID of a core network for the VPC attachment.
+	// +crossplane:generate:reference:type=CoreNetwork
+	CoreNetworkID *string `json:"coreNetworkId,omitempty" tf:"core_network_id,omitempty"`
+
+	CoreNetworkIDRef *v1.Reference `json:"coreNetworkIdRef,omitempty" tf:"-"`
+
+	CoreNetworkIDSelector *v1.Selector `json:"coreNetworkIdSelector,omitempty" tf:"-"`
+
+	// Options for the VPC attachment.
+	Options []VPCAttachmentOptionsInitParameters `json:"options,omitempty" tf:"options,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The subnet ARN of the VPC attachment.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	SubnetArns []*string `json:"subnetArns,omitempty" tf:"subnet_arns,omitempty"`
+
+	SubnetArnsRefs []v1.Reference `json:"subnetArnsRefs,omitempty" tf:"-"`
+
+	SubnetArnsSelector *v1.Selector `json:"subnetArnsSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The ARN of the VPC.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	VPCArn *string `json:"vpcArn,omitempty" tf:"vpc_arn,omitempty"`
+
+	VPCArnRef *v1.Reference `json:"vpcArnRef,omitempty" tf:"-"`
+
+	VPCArnSelector *v1.Selector `json:"vpcArnSelector,omitempty" tf:"-"`
+}
+
 type VPCAttachmentObservation struct {
 
 	// The ARN of the attachment.
@@ -64,6 +103,15 @@ type VPCAttachmentObservation struct {
 	VPCArn *string `json:"vpcArn,omitempty" tf:"vpc_arn,omitempty"`
 }
 
+type VPCAttachmentOptionsInitParameters struct {
+
+	// Indicates whether appliance mode is supported. If enabled, traffic flow between a source and destination use the same Availability Zone for the VPC attachment for the lifetime of that flow.
+	ApplianceModeSupport *bool `json:"applianceModeSupport,omitempty" tf:"appliance_mode_support,omitempty"`
+
+	// Indicates whether IPv6 is supported.
+	IPv6Support *bool `json:"ipv6Support,omitempty" tf:"ipv6_support,omitempty"`
+}
+
 type VPCAttachmentOptionsObservation struct {
 
 	// Indicates whether appliance mode is supported. If enabled, traffic flow between a source and destination use the same Availability Zone for the VPC attachment for the lifetime of that flow.
@@ -76,11 +124,9 @@ type VPCAttachmentOptionsObservation struct {
 type VPCAttachmentOptionsParameters struct {
 
 	// Indicates whether appliance mode is supported. If enabled, traffic flow between a source and destination use the same Availability Zone for the VPC attachment for the lifetime of that flow.
-	// +kubebuilder:validation:Optional
 	ApplianceModeSupport *bool `json:"applianceModeSupport,omitempty" tf:"appliance_mode_support,omitempty"`
 
 	// Indicates whether IPv6 is supported.
-	// +kubebuilder:validation:Optional
 	IPv6Support *bool `json:"ipv6Support,omitempty" tf:"ipv6_support,omitempty"`
 }
 
@@ -88,7 +134,6 @@ type VPCAttachmentParameters struct {
 
 	// The ID of a core network for the VPC attachment.
 	// +crossplane:generate:reference:type=CoreNetwork
-	// +kubebuilder:validation:Optional
 	CoreNetworkID *string `json:"coreNetworkId,omitempty" tf:"core_network_id,omitempty"`
 
 	// Reference to a CoreNetwork to populate coreNetworkId.
@@ -100,18 +145,15 @@ type VPCAttachmentParameters struct {
 	CoreNetworkIDSelector *v1.Selector `json:"coreNetworkIdSelector,omitempty" tf:"-"`
 
 	// Options for the VPC attachment.
-	// +kubebuilder:validation:Optional
 	Options []VPCAttachmentOptionsParameters `json:"options,omitempty" tf:"options,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The subnet ARN of the VPC attachment.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	SubnetArns []*string `json:"subnetArns,omitempty" tf:"subnet_arns,omitempty"`
 
 	// References to Subnet in ec2 to populate subnetArns.
@@ -123,13 +165,11 @@ type VPCAttachmentParameters struct {
 	SubnetArnsSelector *v1.Selector `json:"subnetArnsSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The ARN of the VPC.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	VPCArn *string `json:"vpcArn,omitempty" tf:"vpc_arn,omitempty"`
 
 	// Reference to a VPC in ec2 to populate vpcArn.
@@ -145,6 +185,10 @@ type VPCAttachmentParameters struct {
 type VPCAttachmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VPCAttachmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VPCAttachmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // VPCAttachmentStatus defines the observed state of VPCAttachment.

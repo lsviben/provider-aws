@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type MultiRegionAccessPointPolicyDetailsInitParameters struct {
+
+	// The name of the Multi-Region Access Point.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// A valid JSON document that specifies the policy that you want to associate with this Multi-Region Access Point. Once applied, the policy can be edited, but not deleted. For more information, see the documentation on Multi-Region Access Point Permissions.
+	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
+}
+
 type MultiRegionAccessPointPolicyDetailsObservation struct {
 
 	// The name of the Multi-Region Access Point.
@@ -25,12 +34,23 @@ type MultiRegionAccessPointPolicyDetailsObservation struct {
 type MultiRegionAccessPointPolicyDetailsParameters struct {
 
 	// The name of the Multi-Region Access Point.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// A valid JSON document that specifies the policy that you want to associate with this Multi-Region Access Point. Once applied, the policy can be edited, but not deleted. For more information, see the documentation on Multi-Region Access Point Permissions.
-	// +kubebuilder:validation:Required
-	Policy *string `json:"policy" tf:"policy,omitempty"`
+	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
+}
+
+type MultiRegionAccessPointPolicyInitParameters struct {
+
+	// The AWS account ID for the owner of the Multi-Region Access Point.
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	// A configuration block containing details about the policy for the Multi-Region Access Point. See Details Configuration Block below for more details
+	Details []MultiRegionAccessPointPolicyDetailsInitParameters `json:"details,omitempty" tf:"details,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type MultiRegionAccessPointPolicyObservation struct {
@@ -54,23 +74,24 @@ type MultiRegionAccessPointPolicyObservation struct {
 type MultiRegionAccessPointPolicyParameters struct {
 
 	// The AWS account ID for the owner of the Multi-Region Access Point.
-	// +kubebuilder:validation:Optional
 	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// A configuration block containing details about the policy for the Multi-Region Access Point. See Details Configuration Block below for more details
-	// +kubebuilder:validation:Optional
 	Details []MultiRegionAccessPointPolicyDetailsParameters `json:"details,omitempty" tf:"details,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // MultiRegionAccessPointPolicySpec defines the desired state of MultiRegionAccessPointPolicy
 type MultiRegionAccessPointPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     MultiRegionAccessPointPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider MultiRegionAccessPointPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // MultiRegionAccessPointPolicyStatus defines the observed state of MultiRegionAccessPointPolicy.
@@ -91,7 +112,7 @@ type MultiRegionAccessPointPolicyStatus struct {
 type MultiRegionAccessPointPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.details)",message="details is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.details) || has(self.initProvider.details)",message="%!s(MISSING) is a required parameter"
 	Spec   MultiRegionAccessPointPolicySpec   `json:"spec"`
 	Status MultiRegionAccessPointPolicyStatus `json:"status,omitempty"`
 }

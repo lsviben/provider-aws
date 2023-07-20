@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AccessEndpointInitParameters struct {
+
+	// Type of interface endpoint.
+	EndpointType *string `json:"endpointType,omitempty" tf:"endpoint_type,omitempty"`
+
+	// Identifier (ID) of the VPC in which the interface endpoint is used.
+	VpceID *string `json:"vpceId,omitempty" tf:"vpce_id,omitempty"`
+}
+
 type AccessEndpointObservation struct {
 
 	// Type of interface endpoint.
@@ -25,12 +34,19 @@ type AccessEndpointObservation struct {
 type AccessEndpointParameters struct {
 
 	// Type of interface endpoint.
-	// +kubebuilder:validation:Required
-	EndpointType *string `json:"endpointType" tf:"endpoint_type,omitempty"`
+	EndpointType *string `json:"endpointType,omitempty" tf:"endpoint_type,omitempty"`
 
 	// Identifier (ID) of the VPC in which the interface endpoint is used.
-	// +kubebuilder:validation:Optional
 	VpceID *string `json:"vpceId,omitempty" tf:"vpce_id,omitempty"`
+}
+
+type ImageBuilderDomainJoinInfoInitParameters struct {
+
+	// Fully qualified name of the directory (for example, corp.example.com).
+	DirectoryName *string `json:"directoryName,omitempty" tf:"directory_name,omitempty"`
+
+	// Distinguished name of the organizational unit for computer accounts.
+	OrganizationalUnitDistinguishedName *string `json:"organizationalUnitDistinguishedName,omitempty" tf:"organizational_unit_distinguished_name,omitempty"`
 }
 
 type ImageBuilderDomainJoinInfoObservation struct {
@@ -45,12 +61,56 @@ type ImageBuilderDomainJoinInfoObservation struct {
 type ImageBuilderDomainJoinInfoParameters struct {
 
 	// Fully qualified name of the directory (for example, corp.example.com).
-	// +kubebuilder:validation:Optional
 	DirectoryName *string `json:"directoryName,omitempty" tf:"directory_name,omitempty"`
 
 	// Distinguished name of the organizational unit for computer accounts.
-	// +kubebuilder:validation:Optional
 	OrganizationalUnitDistinguishedName *string `json:"organizationalUnitDistinguishedName,omitempty" tf:"organizational_unit_distinguished_name,omitempty"`
+}
+
+type ImageBuilderInitParameters struct {
+
+	// Set of interface VPC endpoint (interface endpoint) objects. Maximum of 4. See below.
+	AccessEndpoint []AccessEndpointInitParameters `json:"accessEndpoint,omitempty" tf:"access_endpoint,omitempty"`
+
+	// Version of the AppStream 2.0 agent to use for this image builder.
+	AppstreamAgentVersion *string `json:"appstreamAgentVersion,omitempty" tf:"appstream_agent_version,omitempty"`
+
+	// Description to display.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Human-readable friendly name for the AppStream image builder.
+	DisplayName *string `json:"displayName,omitempty" tf:"display_name,omitempty"`
+
+	// Configuration block for the name of the directory and organizational unit (OU) to use to join the image builder to a Microsoft Active Directory domain. See below.
+	DomainJoinInfo []ImageBuilderDomainJoinInfoInitParameters `json:"domainJoinInfo,omitempty" tf:"domain_join_info,omitempty"`
+
+	// Enables or disables default internet access for the image builder.
+	EnableDefaultInternetAccess *bool `json:"enableDefaultInternetAccess,omitempty" tf:"enable_default_internet_access,omitempty"`
+
+	// ARN of the IAM role to apply to the image builder.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	IAMRoleArn *string `json:"iamRoleArn,omitempty" tf:"iam_role_arn,omitempty"`
+
+	IAMRoleArnRef *v1.Reference `json:"iamRoleArnRef,omitempty" tf:"-"`
+
+	IAMRoleArnSelector *v1.Selector `json:"iamRoleArnSelector,omitempty" tf:"-"`
+
+	// ARN of the public, private, or shared image to use.
+	ImageArn *string `json:"imageArn,omitempty" tf:"image_arn,omitempty"`
+
+	// Instance type to use when launching the image builder.
+	InstanceType *string `json:"instanceType,omitempty" tf:"instance_type,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Configuration block for the VPC configuration for the image builder. See below.
+	VPCConfig []ImageBuilderVPCConfigInitParameters `json:"vpcConfig,omitempty" tf:"vpc_config,omitempty"`
 }
 
 type ImageBuilderObservation struct {
@@ -110,33 +170,26 @@ type ImageBuilderObservation struct {
 type ImageBuilderParameters struct {
 
 	// Set of interface VPC endpoint (interface endpoint) objects. Maximum of 4. See below.
-	// +kubebuilder:validation:Optional
 	AccessEndpoint []AccessEndpointParameters `json:"accessEndpoint,omitempty" tf:"access_endpoint,omitempty"`
 
 	// Version of the AppStream 2.0 agent to use for this image builder.
-	// +kubebuilder:validation:Optional
 	AppstreamAgentVersion *string `json:"appstreamAgentVersion,omitempty" tf:"appstream_agent_version,omitempty"`
 
 	// Description to display.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Human-readable friendly name for the AppStream image builder.
-	// +kubebuilder:validation:Optional
 	DisplayName *string `json:"displayName,omitempty" tf:"display_name,omitempty"`
 
 	// Configuration block for the name of the directory and organizational unit (OU) to use to join the image builder to a Microsoft Active Directory domain. See below.
-	// +kubebuilder:validation:Optional
 	DomainJoinInfo []ImageBuilderDomainJoinInfoParameters `json:"domainJoinInfo,omitempty" tf:"domain_join_info,omitempty"`
 
 	// Enables or disables default internet access for the image builder.
-	// +kubebuilder:validation:Optional
 	EnableDefaultInternetAccess *bool `json:"enableDefaultInternetAccess,omitempty" tf:"enable_default_internet_access,omitempty"`
 
 	// ARN of the IAM role to apply to the image builder.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	IAMRoleArn *string `json:"iamRoleArn,omitempty" tf:"iam_role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate iamRoleArn.
@@ -148,25 +201,36 @@ type ImageBuilderParameters struct {
 	IAMRoleArnSelector *v1.Selector `json:"iamRoleArnSelector,omitempty" tf:"-"`
 
 	// ARN of the public, private, or shared image to use.
-	// +kubebuilder:validation:Optional
 	ImageArn *string `json:"imageArn,omitempty" tf:"image_arn,omitempty"`
 
 	// Instance type to use when launching the image builder.
-	// +kubebuilder:validation:Optional
 	InstanceType *string `json:"instanceType,omitempty" tf:"instance_type,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Configuration block for the VPC configuration for the image builder. See below.
-	// +kubebuilder:validation:Optional
 	VPCConfig []ImageBuilderVPCConfigParameters `json:"vpcConfig,omitempty" tf:"vpc_config,omitempty"`
+}
+
+type ImageBuilderVPCConfigInitParameters struct {
+
+	// Identifiers of the security groups for the image builder or image builder.
+	SecurityGroupIds []*string `json:"securityGroupIds,omitempty" tf:"security_group_ids,omitempty"`
+
+	SubnetIDRefs []v1.Reference `json:"subnetIdRefs,omitempty" tf:"-"`
+
+	SubnetIDSelector *v1.Selector `json:"subnetIdSelector,omitempty" tf:"-"`
+
+	// Identifiers of the subnets to which a network interface is attached from the image builder instance or image builder instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
+	// +crossplane:generate:reference:refFieldName=SubnetIDRefs
+	// +crossplane:generate:reference:selectorFieldName=SubnetIDSelector
+	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
 }
 
 type ImageBuilderVPCConfigObservation struct {
@@ -181,7 +245,6 @@ type ImageBuilderVPCConfigObservation struct {
 type ImageBuilderVPCConfigParameters struct {
 
 	// Identifiers of the security groups for the image builder or image builder.
-	// +kubebuilder:validation:Optional
 	SecurityGroupIds []*string `json:"securityGroupIds,omitempty" tf:"security_group_ids,omitempty"`
 
 	// References to Subnet in ec2 to populate subnetIds.
@@ -196,7 +259,6 @@ type ImageBuilderVPCConfigParameters struct {
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
 	// +crossplane:generate:reference:refFieldName=SubnetIDRefs
 	// +crossplane:generate:reference:selectorFieldName=SubnetIDSelector
-	// +kubebuilder:validation:Optional
 	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
 }
 
@@ -204,6 +266,10 @@ type ImageBuilderVPCConfigParameters struct {
 type ImageBuilderSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ImageBuilderParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ImageBuilderInitParameters `json:"initProvider,omitempty"`
 }
 
 // ImageBuilderStatus defines the observed state of ImageBuilder.
@@ -224,7 +290,7 @@ type ImageBuilderStatus struct {
 type ImageBuilder struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.instanceType)",message="instanceType is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.instanceType) || has(self.initProvider.instanceType)",message="%!s(MISSING) is a required parameter"
 	Spec   ImageBuilderSpec   `json:"spec"`
 	Status ImageBuilderStatus `json:"status,omitempty"`
 }

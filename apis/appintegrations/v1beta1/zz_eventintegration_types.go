@@ -13,6 +13,12 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EventFilterInitParameters struct {
+
+	// Source of the events.
+	Source *string `json:"source,omitempty" tf:"source,omitempty"`
+}
+
 type EventFilterObservation struct {
 
 	// Source of the events.
@@ -22,8 +28,26 @@ type EventFilterObservation struct {
 type EventFilterParameters struct {
 
 	// Source of the events.
-	// +kubebuilder:validation:Required
-	Source *string `json:"source" tf:"source,omitempty"`
+	Source *string `json:"source,omitempty" tf:"source,omitempty"`
+}
+
+type EventIntegrationInitParameters struct {
+
+	// Description of the Event Integration.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Block that defines the configuration information for the event filter. The Event Filter block is documented below.
+	EventFilter []EventFilterInitParameters `json:"eventFilter,omitempty" tf:"event_filter,omitempty"`
+
+	// EventBridge bus.
+	EventbridgeBus *string `json:"eventbridgeBus,omitempty" tf:"eventbridge_bus,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type EventIntegrationObservation struct {
@@ -53,24 +77,19 @@ type EventIntegrationObservation struct {
 type EventIntegrationParameters struct {
 
 	// Description of the Event Integration.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Block that defines the configuration information for the event filter. The Event Filter block is documented below.
-	// +kubebuilder:validation:Optional
 	EventFilter []EventFilterParameters `json:"eventFilter,omitempty" tf:"event_filter,omitempty"`
 
 	// EventBridge bus.
-	// +kubebuilder:validation:Optional
 	EventbridgeBus *string `json:"eventbridgeBus,omitempty" tf:"eventbridge_bus,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -78,6 +97,10 @@ type EventIntegrationParameters struct {
 type EventIntegrationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EventIntegrationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EventIntegrationInitParameters `json:"initProvider,omitempty"`
 }
 
 // EventIntegrationStatus defines the observed state of EventIntegration.
@@ -98,8 +121,8 @@ type EventIntegrationStatus struct {
 type EventIntegration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.eventFilter)",message="eventFilter is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.eventbridgeBus)",message="eventbridgeBus is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.eventFilter) || has(self.initProvider.eventFilter)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.eventbridgeBus) || has(self.initProvider.eventbridgeBus)",message="%!s(MISSING) is a required parameter"
 	Spec   EventIntegrationSpec   `json:"spec"`
 	Status EventIntegrationStatus `json:"status,omitempty"`
 }

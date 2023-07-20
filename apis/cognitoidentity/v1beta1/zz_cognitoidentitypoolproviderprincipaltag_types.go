@@ -13,6 +13,37 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CognitoIdentityPoolProviderPrincipalTagInitParameters struct {
+
+	// An identity pool ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cognitoidentity/v1beta1.Pool
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	IdentityPoolID *string `json:"identityPoolId,omitempty" tf:"identity_pool_id,omitempty"`
+
+	IdentityPoolIDRef *v1.Reference `json:"identityPoolIdRef,omitempty" tf:"-"`
+
+	IdentityPoolIDSelector *v1.Selector `json:"identityPoolIdSelector,omitempty" tf:"-"`
+
+	// The name of the identity provider.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cognitoidp/v1beta1.UserPool
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("endpoint",true)
+	IdentityProviderName *string `json:"identityProviderName,omitempty" tf:"identity_provider_name,omitempty"`
+
+	IdentityProviderNameRef *v1.Reference `json:"identityProviderNameRef,omitempty" tf:"-"`
+
+	IdentityProviderNameSelector *v1.Selector `json:"identityProviderNameSelector,omitempty" tf:"-"`
+
+	// String to string map of variables.
+	PrincipalTags map[string]*string `json:"principalTags,omitempty" tf:"principal_tags,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// :  use default (username and clientID) attribute mappings.
+	UseDefaults *bool `json:"useDefaults,omitempty" tf:"use_defaults,omitempty"`
+}
+
 type CognitoIdentityPoolProviderPrincipalTagObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -34,7 +65,6 @@ type CognitoIdentityPoolProviderPrincipalTagParameters struct {
 	// An identity pool ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cognitoidentity/v1beta1.Pool
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	IdentityPoolID *string `json:"identityPoolId,omitempty" tf:"identity_pool_id,omitempty"`
 
 	// Reference to a Pool in cognitoidentity to populate identityPoolId.
@@ -48,7 +78,6 @@ type CognitoIdentityPoolProviderPrincipalTagParameters struct {
 	// The name of the identity provider.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cognitoidp/v1beta1.UserPool
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("endpoint",true)
-	// +kubebuilder:validation:Optional
 	IdentityProviderName *string `json:"identityProviderName,omitempty" tf:"identity_provider_name,omitempty"`
 
 	// Reference to a UserPool in cognitoidp to populate identityProviderName.
@@ -60,16 +89,13 @@ type CognitoIdentityPoolProviderPrincipalTagParameters struct {
 	IdentityProviderNameSelector *v1.Selector `json:"identityProviderNameSelector,omitempty" tf:"-"`
 
 	// String to string map of variables.
-	// +kubebuilder:validation:Optional
 	PrincipalTags map[string]*string `json:"principalTags,omitempty" tf:"principal_tags,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// :  use default (username and clientID) attribute mappings.
-	// +kubebuilder:validation:Optional
 	UseDefaults *bool `json:"useDefaults,omitempty" tf:"use_defaults,omitempty"`
 }
 
@@ -77,6 +103,10 @@ type CognitoIdentityPoolProviderPrincipalTagParameters struct {
 type CognitoIdentityPoolProviderPrincipalTagSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     CognitoIdentityPoolProviderPrincipalTagParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider CognitoIdentityPoolProviderPrincipalTagInitParameters `json:"initProvider,omitempty"`
 }
 
 // CognitoIdentityPoolProviderPrincipalTagStatus defines the observed state of CognitoIdentityPoolProviderPrincipalTag.

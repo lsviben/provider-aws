@@ -13,6 +13,22 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EBSDefaultKMSKeyInitParameters struct {
+
+	// The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use to encrypt the EBS volume.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	KeyArn *string `json:"keyArn,omitempty" tf:"key_arn,omitempty"`
+
+	KeyArnRef *v1.Reference `json:"keyArnRef,omitempty" tf:"-"`
+
+	KeyArnSelector *v1.Selector `json:"keyArnSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type EBSDefaultKMSKeyObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -25,7 +41,6 @@ type EBSDefaultKMSKeyParameters struct {
 	// The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use to encrypt the EBS volume.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	KeyArn *string `json:"keyArn,omitempty" tf:"key_arn,omitempty"`
 
 	// Reference to a Key in kms to populate keyArn.
@@ -38,14 +53,17 @@ type EBSDefaultKMSKeyParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // EBSDefaultKMSKeySpec defines the desired state of EBSDefaultKMSKey
 type EBSDefaultKMSKeySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EBSDefaultKMSKeyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EBSDefaultKMSKeyInitParameters `json:"initProvider,omitempty"`
 }
 
 // EBSDefaultKMSKeyStatus defines the observed state of EBSDefaultKMSKey.

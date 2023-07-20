@@ -13,6 +13,37 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DeploymentInitParameters struct {
+
+	// Description of the deployment
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// REST API identifier.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	RestAPIID *string `json:"restApiId,omitempty" tf:"rest_api_id,omitempty"`
+
+	RestAPIIDRef *v1.Reference `json:"restApiIdRef,omitempty" tf:"-"`
+
+	RestAPIIDSelector *v1.Selector `json:"restApiIdSelector,omitempty" tf:"-"`
+
+	// Description to set on the stage managed by the stage_name argument.
+	StageDescription *string `json:"stageDescription,omitempty" tf:"stage_description,omitempty"`
+
+	// Name of the stage to create with this deployment. If the specified stage already exists, it will be updated to point to the new deployment. We recommend using the aws_api_gateway_stage resource instead to manage stages.
+	StageName *string `json:"stageName,omitempty" tf:"stage_name,omitempty"`
+
+	// argument or explicit resource references using the resource . The triggers argument should be preferred over depends_on, since depends_on can only capture dependency ordering and will not cause the resource to recreate (redeploy the REST API) with upstream configuration changes.
+	Triggers map[string]*string `json:"triggers,omitempty" tf:"triggers,omitempty"`
+
+	// Map to set on the stage managed by the stage_name argument.
+	Variables map[string]*string `json:"variables,omitempty" tf:"variables,omitempty"`
+}
+
 type DeploymentObservation struct {
 
 	// Creation date of the deployment
@@ -52,18 +83,15 @@ type DeploymentObservation struct {
 type DeploymentParameters struct {
 
 	// Description of the deployment
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// REST API identifier.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	RestAPIID *string `json:"restApiId,omitempty" tf:"rest_api_id,omitempty"`
 
 	// Reference to a RestAPI in apigateway to populate restApiId.
@@ -75,19 +103,15 @@ type DeploymentParameters struct {
 	RestAPIIDSelector *v1.Selector `json:"restApiIdSelector,omitempty" tf:"-"`
 
 	// Description to set on the stage managed by the stage_name argument.
-	// +kubebuilder:validation:Optional
 	StageDescription *string `json:"stageDescription,omitempty" tf:"stage_description,omitempty"`
 
 	// Name of the stage to create with this deployment. If the specified stage already exists, it will be updated to point to the new deployment. We recommend using the aws_api_gateway_stage resource instead to manage stages.
-	// +kubebuilder:validation:Optional
 	StageName *string `json:"stageName,omitempty" tf:"stage_name,omitempty"`
 
 	// argument or explicit resource references using the resource . The triggers argument should be preferred over depends_on, since depends_on can only capture dependency ordering and will not cause the resource to recreate (redeploy the REST API) with upstream configuration changes.
-	// +kubebuilder:validation:Optional
 	Triggers map[string]*string `json:"triggers,omitempty" tf:"triggers,omitempty"`
 
 	// Map to set on the stage managed by the stage_name argument.
-	// +kubebuilder:validation:Optional
 	Variables map[string]*string `json:"variables,omitempty" tf:"variables,omitempty"`
 }
 
@@ -95,6 +119,10 @@ type DeploymentParameters struct {
 type DeploymentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DeploymentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DeploymentInitParameters `json:"initProvider,omitempty"`
 }
 
 // DeploymentStatus defines the observed state of Deployment.

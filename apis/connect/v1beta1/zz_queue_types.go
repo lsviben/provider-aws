@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type OutboundCallerConfigInitParameters struct {
+
+	// Specifies the caller ID name.
+	OutboundCallerIDName *string `json:"outboundCallerIdName,omitempty" tf:"outbound_caller_id_name,omitempty"`
+
+	// Specifies the caller ID number.
+	OutboundCallerIDNumberID *string `json:"outboundCallerIdNumberId,omitempty" tf:"outbound_caller_id_number_id,omitempty"`
+
+	// Specifies outbound whisper flow to be used during an outbound call.
+	OutboundFlowID *string `json:"outboundFlowId,omitempty" tf:"outbound_flow_id,omitempty"`
+}
+
 type OutboundCallerConfigObservation struct {
 
 	// Specifies the caller ID name.
@@ -28,16 +40,59 @@ type OutboundCallerConfigObservation struct {
 type OutboundCallerConfigParameters struct {
 
 	// Specifies the caller ID name.
-	// +kubebuilder:validation:Optional
 	OutboundCallerIDName *string `json:"outboundCallerIdName,omitempty" tf:"outbound_caller_id_name,omitempty"`
 
 	// Specifies the caller ID number.
-	// +kubebuilder:validation:Optional
 	OutboundCallerIDNumberID *string `json:"outboundCallerIdNumberId,omitempty" tf:"outbound_caller_id_number_id,omitempty"`
 
 	// Specifies outbound whisper flow to be used during an outbound call.
-	// +kubebuilder:validation:Optional
 	OutboundFlowID *string `json:"outboundFlowId,omitempty" tf:"outbound_flow_id,omitempty"`
+}
+
+type QueueInitParameters struct {
+
+	// Specifies the description of the Queue.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Specifies the identifier of the Hours of Operation.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.HoursOfOperation
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("hours_of_operation_id",true)
+	HoursOfOperationID *string `json:"hoursOfOperationId,omitempty" tf:"hours_of_operation_id,omitempty"`
+
+	HoursOfOperationIDRef *v1.Reference `json:"hoursOfOperationIdRef,omitempty" tf:"-"`
+
+	HoursOfOperationIDSelector *v1.Selector `json:"hoursOfOperationIdSelector,omitempty" tf:"-"`
+
+	// Specifies the identifier of the hosting Amazon Connect Instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
+
+	InstanceIDRef *v1.Reference `json:"instanceIdRef,omitempty" tf:"-"`
+
+	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
+
+	// Specifies the maximum number of contacts that can be in the queue before it is considered full. Minimum value of 0.
+	MaxContacts *float64 `json:"maxContacts,omitempty" tf:"max_contacts,omitempty"`
+
+	// Specifies the name of the Queue.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// A block that defines the outbound caller ID name, number, and outbound whisper flow. The Outbound Caller Config block is documented below.
+	OutboundCallerConfig []OutboundCallerConfigInitParameters `json:"outboundCallerConfig,omitempty" tf:"outbound_caller_config,omitempty"`
+
+	// Specifies a list of quick connects ids that determine the quick connects available to agents who are working the queue.
+	QuickConnectIds []*string `json:"quickConnectIds,omitempty" tf:"quick_connect_ids,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Specifies the description of the Queue. Valid values are ENABLED, DISABLED.
+	Status *string `json:"status,omitempty" tf:"status,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type QueueObservation struct {
@@ -87,13 +142,11 @@ type QueueObservation struct {
 type QueueParameters struct {
 
 	// Specifies the description of the Queue.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Specifies the identifier of the Hours of Operation.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.HoursOfOperation
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("hours_of_operation_id",true)
-	// +kubebuilder:validation:Optional
 	HoursOfOperationID *string `json:"hoursOfOperationId,omitempty" tf:"hours_of_operation_id,omitempty"`
 
 	// Reference to a HoursOfOperation in connect to populate hoursOfOperationId.
@@ -107,7 +160,6 @@ type QueueParameters struct {
 	// Specifies the identifier of the hosting Amazon Connect Instance.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
 
 	// Reference to a Instance in connect to populate instanceId.
@@ -119,32 +171,25 @@ type QueueParameters struct {
 	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
 
 	// Specifies the maximum number of contacts that can be in the queue before it is considered full. Minimum value of 0.
-	// +kubebuilder:validation:Optional
 	MaxContacts *float64 `json:"maxContacts,omitempty" tf:"max_contacts,omitempty"`
 
 	// Specifies the name of the Queue.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// A block that defines the outbound caller ID name, number, and outbound whisper flow. The Outbound Caller Config block is documented below.
-	// +kubebuilder:validation:Optional
 	OutboundCallerConfig []OutboundCallerConfigParameters `json:"outboundCallerConfig,omitempty" tf:"outbound_caller_config,omitempty"`
 
 	// Specifies a list of quick connects ids that determine the quick connects available to agents who are working the queue.
-	// +kubebuilder:validation:Optional
 	QuickConnectIds []*string `json:"quickConnectIds,omitempty" tf:"quick_connect_ids,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Specifies the description of the Queue. Valid values are ENABLED, DISABLED.
-	// +kubebuilder:validation:Optional
 	Status *string `json:"status,omitempty" tf:"status,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -152,6 +197,10 @@ type QueueParameters struct {
 type QueueSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     QueueParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider QueueInitParameters `json:"initProvider,omitempty"`
 }
 
 // QueueStatus defines the observed state of Queue.
@@ -172,7 +221,7 @@ type QueueStatus struct {
 type Queue struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   QueueSpec   `json:"spec"`
 	Status QueueStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConnectionInitParameters struct {
+
+	// –  The ID of the Data Catalog in which to create the connection. If none is supplied, the AWS account ID is used by default.
+	CatalogID *string `json:"catalogId,omitempty" tf:"catalog_id,omitempty"`
+
+	// value pairs used as parameters for this connection.
+	ConnectionPropertiesSecretRef *v1.SecretReference `json:"connectionPropertiesSecretRef,omitempty" tf:"-"`
+
+	// –  The type of the connection. Supported are: CUSTOM, JDBC, KAFKA, MARKETPLACE, MONGODB, and NETWORK. Defaults to JBDC.
+	ConnectionType *string `json:"connectionType,omitempty" tf:"connection_type,omitempty"`
+
+	// –  Description of the connection.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// –  A list of criteria that can be used in selecting this connection.
+	MatchCriteria []*string `json:"matchCriteria,omitempty" tf:"match_criteria,omitempty"`
+
+	// A map of physical connection requirements, such as VPC and SecurityGroup. Defined below.
+	PhysicalConnectionRequirements []PhysicalConnectionRequirementsInitParameters `json:"physicalConnectionRequirements,omitempty" tf:"physical_connection_requirements,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ConnectionObservation struct {
 
 	// The ARN of the Glue Connection.
@@ -46,37 +74,53 @@ type ConnectionObservation struct {
 type ConnectionParameters struct {
 
 	// –  The ID of the Data Catalog in which to create the connection. If none is supplied, the AWS account ID is used by default.
-	// +kubebuilder:validation:Required
-	CatalogID *string `json:"catalogId" tf:"catalog_id,omitempty"`
+	CatalogID *string `json:"catalogId,omitempty" tf:"catalog_id,omitempty"`
 
 	// value pairs used as parameters for this connection.
-	// +kubebuilder:validation:Optional
 	ConnectionPropertiesSecretRef *v1.SecretReference `json:"connectionPropertiesSecretRef,omitempty" tf:"-"`
 
 	// –  The type of the connection. Supported are: CUSTOM, JDBC, KAFKA, MARKETPLACE, MONGODB, and NETWORK. Defaults to JBDC.
-	// +kubebuilder:validation:Optional
 	ConnectionType *string `json:"connectionType,omitempty" tf:"connection_type,omitempty"`
 
 	// –  Description of the connection.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// –  A list of criteria that can be used in selecting this connection.
-	// +kubebuilder:validation:Optional
 	MatchCriteria []*string `json:"matchCriteria,omitempty" tf:"match_criteria,omitempty"`
 
 	// A map of physical connection requirements, such as VPC and SecurityGroup. Defined below.
-	// +kubebuilder:validation:Optional
 	PhysicalConnectionRequirements []PhysicalConnectionRequirementsParameters `json:"physicalConnectionRequirements,omitempty" tf:"physical_connection_requirements,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type PhysicalConnectionRequirementsInitParameters struct {
+
+	// The availability zone of the connection. This field is redundant and implied by subnet_id, but is currently an api requirement.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("availability_zone",false)
+	AvailabilityZone *string `json:"availabilityZone,omitempty" tf:"availability_zone,omitempty"`
+
+	AvailabilityZoneRef *v1.Reference `json:"availabilityZoneRef,omitempty" tf:"-"`
+
+	AvailabilityZoneSelector *v1.Selector `json:"availabilityZoneSelector,omitempty" tf:"-"`
+
+	// The security group ID list used by the connection.
+	SecurityGroupIDList []*string `json:"securityGroupIdList,omitempty" tf:"security_group_id_list,omitempty"`
+
+	// The subnet ID used by the connection.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	SubnetID *string `json:"subnetId,omitempty" tf:"subnet_id,omitempty"`
+
+	SubnetIDRef *v1.Reference `json:"subnetIdRef,omitempty" tf:"-"`
+
+	SubnetIDSelector *v1.Selector `json:"subnetIdSelector,omitempty" tf:"-"`
 }
 
 type PhysicalConnectionRequirementsObservation struct {
@@ -96,7 +140,6 @@ type PhysicalConnectionRequirementsParameters struct {
 	// The availability zone of the connection. This field is redundant and implied by subnet_id, but is currently an api requirement.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("availability_zone",false)
-	// +kubebuilder:validation:Optional
 	AvailabilityZone *string `json:"availabilityZone,omitempty" tf:"availability_zone,omitempty"`
 
 	// Reference to a Subnet in ec2 to populate availabilityZone.
@@ -108,13 +151,11 @@ type PhysicalConnectionRequirementsParameters struct {
 	AvailabilityZoneSelector *v1.Selector `json:"availabilityZoneSelector,omitempty" tf:"-"`
 
 	// The security group ID list used by the connection.
-	// +kubebuilder:validation:Optional
 	SecurityGroupIDList []*string `json:"securityGroupIdList,omitempty" tf:"security_group_id_list,omitempty"`
 
 	// The subnet ID used by the connection.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	SubnetID *string `json:"subnetId,omitempty" tf:"subnet_id,omitempty"`
 
 	// Reference to a Subnet in ec2 to populate subnetId.
@@ -130,6 +171,10 @@ type PhysicalConnectionRequirementsParameters struct {
 type ConnectionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ConnectionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ConnectionInitParameters `json:"initProvider,omitempty"`
 }
 
 // ConnectionStatus defines the observed state of Connection.

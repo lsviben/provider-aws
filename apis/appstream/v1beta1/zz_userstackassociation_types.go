@@ -13,6 +13,42 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type UserStackAssociationInitParameters struct {
+
+	// Authentication type for the user.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appstream/v1beta1.User
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("authentication_type",false)
+	AuthenticationType *string `json:"authenticationType,omitempty" tf:"authentication_type,omitempty"`
+
+	AuthenticationTypeRef *v1.Reference `json:"authenticationTypeRef,omitempty" tf:"-"`
+
+	AuthenticationTypeSelector *v1.Selector `json:"authenticationTypeSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Whether a welcome email is sent to a user after the user is created in the user pool.
+	SendEmailNotification *bool `json:"sendEmailNotification,omitempty" tf:"send_email_notification,omitempty"`
+
+	// Name of the stack that is associated with the user.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appstream/v1beta1.Stack
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
+	StackName *string `json:"stackName,omitempty" tf:"stack_name,omitempty"`
+
+	StackNameRef *v1.Reference `json:"stackNameRef,omitempty" tf:"-"`
+
+	StackNameSelector *v1.Selector `json:"stackNameSelector,omitempty" tf:"-"`
+
+	// Email address of the user who is associated with the stack.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appstream/v1beta1.User
+	UserName *string `json:"userName,omitempty" tf:"user_name,omitempty"`
+
+	UserNameRef *v1.Reference `json:"userNameRef,omitempty" tf:"-"`
+
+	UserNameSelector *v1.Selector `json:"userNameSelector,omitempty" tf:"-"`
+}
+
 type UserStackAssociationObservation struct {
 
 	// Authentication type for the user.
@@ -36,7 +72,6 @@ type UserStackAssociationParameters struct {
 	// Authentication type for the user.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appstream/v1beta1.User
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("authentication_type",false)
-	// +kubebuilder:validation:Optional
 	AuthenticationType *string `json:"authenticationType,omitempty" tf:"authentication_type,omitempty"`
 
 	// Reference to a User in appstream to populate authenticationType.
@@ -49,17 +84,14 @@ type UserStackAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Whether a welcome email is sent to a user after the user is created in the user pool.
-	// +kubebuilder:validation:Optional
 	SendEmailNotification *bool `json:"sendEmailNotification,omitempty" tf:"send_email_notification,omitempty"`
 
 	// Name of the stack that is associated with the user.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appstream/v1beta1.Stack
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
-	// +kubebuilder:validation:Optional
 	StackName *string `json:"stackName,omitempty" tf:"stack_name,omitempty"`
 
 	// Reference to a Stack in appstream to populate stackName.
@@ -72,7 +104,6 @@ type UserStackAssociationParameters struct {
 
 	// Email address of the user who is associated with the stack.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appstream/v1beta1.User
-	// +kubebuilder:validation:Optional
 	UserName *string `json:"userName,omitempty" tf:"user_name,omitempty"`
 
 	// Reference to a User in appstream to populate userName.
@@ -88,6 +119,10 @@ type UserStackAssociationParameters struct {
 type UserStackAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     UserStackAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider UserStackAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // UserStackAssociationStatus defines the observed state of UserStackAssociation.

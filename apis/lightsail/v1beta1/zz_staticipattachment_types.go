@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type StaticIPAttachmentInitParameters struct {
+
+	// The name of the Lightsail instance to attach the IP to
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Instance
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	InstanceName *string `json:"instanceName,omitempty" tf:"instance_name,omitempty"`
+
+	InstanceNameRef *v1.Reference `json:"instanceNameRef,omitempty" tf:"-"`
+
+	InstanceNameSelector *v1.Selector `json:"instanceNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The name of the allocated static IP
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.StaticIP
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	StaticIPName *string `json:"staticIpName,omitempty" tf:"static_ip_name,omitempty"`
+
+	StaticIPNameRef *v1.Reference `json:"staticIpNameRef,omitempty" tf:"-"`
+
+	StaticIPNameSelector *v1.Selector `json:"staticIpNameSelector,omitempty" tf:"-"`
+}
+
 type StaticIPAttachmentObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -31,7 +56,6 @@ type StaticIPAttachmentParameters struct {
 	// The name of the Lightsail instance to attach the IP to
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Instance
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	InstanceName *string `json:"instanceName,omitempty" tf:"instance_name,omitempty"`
 
 	// Reference to a Instance in lightsail to populate instanceName.
@@ -44,13 +68,11 @@ type StaticIPAttachmentParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The name of the allocated static IP
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.StaticIP
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	StaticIPName *string `json:"staticIpName,omitempty" tf:"static_ip_name,omitempty"`
 
 	// Reference to a StaticIP in lightsail to populate staticIpName.
@@ -66,6 +88,10 @@ type StaticIPAttachmentParameters struct {
 type StaticIPAttachmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     StaticIPAttachmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider StaticIPAttachmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // StaticIPAttachmentStatus defines the observed state of StaticIPAttachment.

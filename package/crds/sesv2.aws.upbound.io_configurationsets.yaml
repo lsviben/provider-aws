@@ -141,12 +141,91 @@ spec:
                           description: The domain to use for tracking open and click
                             events.
                           type: string
-                      required:
-                      - customRedirectDomain
                       type: object
                     type: array
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  deliveryOptions:
+                    description: An object that defines the dedicated IP pool that
+                      is used to send emails that you send using the configuration
+                      set.
+                    items:
+                      properties:
+                        sendingPoolName:
+                          description: The name of the dedicated IP pool to associate
+                            with the configuration set.
+                          type: string
+                        tlsPolicy:
+                          description: 'Specifies whether messages that use the configuration
+                            set are required to use Transport Layer Security (TLS).
+                            Valid values: REQUIRE, OPTIONAL.'
+                          type: string
+                      type: object
+                    type: array
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  reputationOptions:
+                    description: An object that defines whether or not Amazon SES
+                      collects reputation metrics for the emails that you send that
+                      use the configuration set.
+                    items:
+                      properties:
+                        reputationMetricsEnabled:
+                          description: If true, tracking of reputation metrics is
+                            enabled for the configuration set. If false, tracking
+                            of reputation metrics is disabled for the configuration
+                            set.
+                          type: boolean
+                      type: object
+                    type: array
+                  sendingOptions:
+                    description: An object that defines whether or not Amazon SES
+                      can send email that you send using the configuration set.
+                    items:
+                      properties:
+                        sendingEnabled:
+                          description: If true, email sending is enabled for the configuration
+                            set. If false, email sending is disabled for the configuration
+                            set.
+                          type: boolean
+                      type: object
+                    type: array
+                  suppressionOptions:
+                    description: An object that contains information about the suppression
+                      list preferences for your account.
+                    items:
+                      properties:
+                        suppressedReasons:
+                          description: 'A list that contains the reasons that email
+                            addresses are automatically added to the suppression list
+                            for your account. Valid values: BOUNCE, COMPLAINT.'
+                          items:
+                            type: string
+                          type: array
+                      type: object
+                    type: array
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
+                  trackingOptions:
+                    description: An object that defines the open and click tracking
+                      options for emails that you send using the configuration set.
+                    items:
+                      properties:
+                        customRedirectDomain:
+                          description: The domain to use for tracking open and click
+                            events.
+                          type: string
+                      type: object
+                    type: array
                 type: object
               managementPolicies:
                 default:

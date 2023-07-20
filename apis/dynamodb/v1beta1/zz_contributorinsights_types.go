@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ContributorInsightsInitParameters struct {
+
+	// The global secondary index name
+	IndexName *string `json:"indexName,omitempty" tf:"index_name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The name of the table to enable contributor insights
+	// +crossplane:generate:reference:type=Table
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+
+	TableNameRef *v1.Reference `json:"tableNameRef,omitempty" tf:"-"`
+
+	TableNameSelector *v1.Selector `json:"tableNameSelector,omitempty" tf:"-"`
+}
+
 type ContributorInsightsObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -26,17 +44,14 @@ type ContributorInsightsObservation struct {
 type ContributorInsightsParameters struct {
 
 	// The global secondary index name
-	// +kubebuilder:validation:Optional
 	IndexName *string `json:"indexName,omitempty" tf:"index_name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The name of the table to enable contributor insights
 	// +crossplane:generate:reference:type=Table
-	// +kubebuilder:validation:Optional
 	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
 
 	// Reference to a Table to populate tableName.
@@ -52,6 +67,10 @@ type ContributorInsightsParameters struct {
 type ContributorInsightsSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ContributorInsightsParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ContributorInsightsInitParameters `json:"initProvider,omitempty"`
 }
 
 // ContributorInsightsStatus defines the observed state of ContributorInsights.

@@ -78,8 +78,23 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  cidr:
+                    description: The IP address or address range to filter, in CIDR
+                      notation
+                    type: string
+                  policy:
+                    description: Block or Allow
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -279,12 +294,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: cidr is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.cidr)'
-            - message: policy is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.cidr)
+                || has(self.initProvider.cidr)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.policy)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.policy)
+                || has(self.initProvider.policy)'
           status:
             description: ReceiptFilterStatus defines the observed state of ReceiptFilter.
             properties:

@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ApplicationInitParameters struct {
+
+	// Indicates whether Application Insights automatically configures unmonitored resources in the resource group.
+	AutoConfigEnabled *bool `json:"autoConfigEnabled,omitempty" tf:"auto_config_enabled,omitempty"`
+
+	// Configures all of the resources in the resource group by applying the recommended configurations.
+	AutoCreate *bool `json:"autoCreate,omitempty" tf:"auto_create,omitempty"`
+
+	// Indicates whether Application Insights can listen to CloudWatch events for the application resources, such as instance terminated, failed deployment, and others.
+	CweMonitorEnabled *bool `json:"cweMonitorEnabled,omitempty" tf:"cwe_monitor_enabled,omitempty"`
+
+	// Application Insights can create applications based on a resource group or on an account. To create an account-based application using all of the resources in the account, set this parameter to ACCOUNT_BASED.
+	GroupingType *string `json:"groupingType,omitempty" tf:"grouping_type,omitempty"`
+
+	// When set to true, creates opsItems for any problems detected on an application.
+	OpsCenterEnabled *bool `json:"opsCenterEnabled,omitempty" tf:"ops_center_enabled,omitempty"`
+
+	// SNS topic provided to Application Insights that is associated to the created opsItem. Allows you to receive notifications for updates to the opsItem.
+	OpsItemSnsTopicArn *string `json:"opsItemSnsTopicArn,omitempty" tf:"ops_item_sns_topic_arn,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ApplicationObservation struct {
 
 	// ARN of the Application.
@@ -49,36 +77,28 @@ type ApplicationObservation struct {
 type ApplicationParameters struct {
 
 	// Indicates whether Application Insights automatically configures unmonitored resources in the resource group.
-	// +kubebuilder:validation:Optional
 	AutoConfigEnabled *bool `json:"autoConfigEnabled,omitempty" tf:"auto_config_enabled,omitempty"`
 
 	// Configures all of the resources in the resource group by applying the recommended configurations.
-	// +kubebuilder:validation:Optional
 	AutoCreate *bool `json:"autoCreate,omitempty" tf:"auto_create,omitempty"`
 
 	// Indicates whether Application Insights can listen to CloudWatch events for the application resources, such as instance terminated, failed deployment, and others.
-	// +kubebuilder:validation:Optional
 	CweMonitorEnabled *bool `json:"cweMonitorEnabled,omitempty" tf:"cwe_monitor_enabled,omitempty"`
 
 	// Application Insights can create applications based on a resource group or on an account. To create an account-based application using all of the resources in the account, set this parameter to ACCOUNT_BASED.
-	// +kubebuilder:validation:Optional
 	GroupingType *string `json:"groupingType,omitempty" tf:"grouping_type,omitempty"`
 
 	// When set to true, creates opsItems for any problems detected on an application.
-	// +kubebuilder:validation:Optional
 	OpsCenterEnabled *bool `json:"opsCenterEnabled,omitempty" tf:"ops_center_enabled,omitempty"`
 
 	// SNS topic provided to Application Insights that is associated to the created opsItem. Allows you to receive notifications for updates to the opsItem.
-	// +kubebuilder:validation:Optional
 	OpsItemSnsTopicArn *string `json:"opsItemSnsTopicArn,omitempty" tf:"ops_item_sns_topic_arn,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -86,6 +106,10 @@ type ApplicationParameters struct {
 type ApplicationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ApplicationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ApplicationInitParameters `json:"initProvider,omitempty"`
 }
 
 // ApplicationStatus defines the observed state of Application.

@@ -13,6 +13,21 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EncryptionConfigInitParameters struct {
+
+	// The type of encryption. Valid Values: KMS.
+	EncryptionType *string `json:"encryptionType,omitempty" tf:"encryption_type,omitempty"`
+
+	// The full ARN of the encryption key. Be sure to provide the full ARN of the encryption key, not just the ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
+
+	KeyIDRef *v1.Reference `json:"keyIdRef,omitempty" tf:"-"`
+
+	KeyIDSelector *v1.Selector `json:"keyIdSelector,omitempty" tf:"-"`
+}
+
 type EncryptionConfigObservation struct {
 
 	// The type of encryption. Valid Values: KMS.
@@ -25,13 +40,11 @@ type EncryptionConfigObservation struct {
 type EncryptionConfigParameters struct {
 
 	// The type of encryption. Valid Values: KMS.
-	// +kubebuilder:validation:Required
-	EncryptionType *string `json:"encryptionType" tf:"encryption_type,omitempty"`
+	EncryptionType *string `json:"encryptionType,omitempty" tf:"encryption_type,omitempty"`
 
 	// The full ARN of the encryption key. Be sure to provide the full ARN of the encryption key, not just the ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
 
 	// Reference to a Key in kms to populate keyId.
@@ -41,6 +54,28 @@ type EncryptionConfigParameters struct {
 	// Selector for a Key in kms to populate keyId.
 	// +kubebuilder:validation:Optional
 	KeyIDSelector *v1.Selector `json:"keyIdSelector,omitempty" tf:"-"`
+}
+
+type InstanceStorageConfigInitParameters struct {
+
+	// Specifies the identifier of the hosting Amazon Connect Instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
+
+	InstanceIDRef *v1.Reference `json:"instanceIdRef,omitempty" tf:"-"`
+
+	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A valid resource type. Valid Values: CHAT_TRANSCRIPTS | CALL_RECORDINGS | SCHEDULED_REPORTS | MEDIA_STREAMS | CONTACT_TRACE_RECORDS | AGENT_EVENTS | REAL_TIME_CONTACT_ANALYSIS_SEGMENTS.
+	ResourceType *string `json:"resourceType,omitempty" tf:"resource_type,omitempty"`
+
+	// Specifies the storage configuration options for the Connect Instance. Documented below.
+	StorageConfig []StorageConfigInitParameters `json:"storageConfig,omitempty" tf:"storage_config,omitempty"`
 }
 
 type InstanceStorageConfigObservation struct {
@@ -66,7 +101,6 @@ type InstanceStorageConfigParameters struct {
 	// Specifies the identifier of the hosting Amazon Connect Instance.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
 
 	// Reference to a Instance in connect to populate instanceId.
@@ -79,16 +113,25 @@ type InstanceStorageConfigParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A valid resource type. Valid Values: CHAT_TRANSCRIPTS | CALL_RECORDINGS | SCHEDULED_REPORTS | MEDIA_STREAMS | CONTACT_TRACE_RECORDS | AGENT_EVENTS | REAL_TIME_CONTACT_ANALYSIS_SEGMENTS.
-	// +kubebuilder:validation:Optional
 	ResourceType *string `json:"resourceType,omitempty" tf:"resource_type,omitempty"`
 
 	// Specifies the storage configuration options for the Connect Instance. Documented below.
-	// +kubebuilder:validation:Optional
 	StorageConfig []StorageConfigParameters `json:"storageConfig,omitempty" tf:"storage_config,omitempty"`
+}
+
+type KinesisFirehoseConfigInitParameters struct {
+
+	// The Amazon Resource Name (ARN) of the delivery stream.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/firehose/v1beta1.DeliveryStream
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",false)
+	FirehoseArn *string `json:"firehoseArn,omitempty" tf:"firehose_arn,omitempty"`
+
+	FirehoseArnRef *v1.Reference `json:"firehoseArnRef,omitempty" tf:"-"`
+
+	FirehoseArnSelector *v1.Selector `json:"firehoseArnSelector,omitempty" tf:"-"`
 }
 
 type KinesisFirehoseConfigObservation struct {
@@ -102,7 +145,6 @@ type KinesisFirehoseConfigParameters struct {
 	// The Amazon Resource Name (ARN) of the delivery stream.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/firehose/v1beta1.DeliveryStream
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",false)
-	// +kubebuilder:validation:Optional
 	FirehoseArn *string `json:"firehoseArn,omitempty" tf:"firehose_arn,omitempty"`
 
 	// Reference to a DeliveryStream in firehose to populate firehoseArn.
@@ -112,6 +154,18 @@ type KinesisFirehoseConfigParameters struct {
 	// Selector for a DeliveryStream in firehose to populate firehoseArn.
 	// +kubebuilder:validation:Optional
 	FirehoseArnSelector *v1.Selector `json:"firehoseArnSelector,omitempty" tf:"-"`
+}
+
+type KinesisStreamConfigInitParameters struct {
+
+	// The Amazon Resource Name (ARN) of the data stream.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kinesis/v1beta1.Stream
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",false)
+	StreamArn *string `json:"streamArn,omitempty" tf:"stream_arn,omitempty"`
+
+	StreamArnRef *v1.Reference `json:"streamArnRef,omitempty" tf:"-"`
+
+	StreamArnSelector *v1.Selector `json:"streamArnSelector,omitempty" tf:"-"`
 }
 
 type KinesisStreamConfigObservation struct {
@@ -125,7 +179,6 @@ type KinesisStreamConfigParameters struct {
 	// The Amazon Resource Name (ARN) of the data stream.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kinesis/v1beta1.Stream
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",false)
-	// +kubebuilder:validation:Optional
 	StreamArn *string `json:"streamArn,omitempty" tf:"stream_arn,omitempty"`
 
 	// Reference to a Stream in kinesis to populate streamArn.
@@ -135,6 +188,18 @@ type KinesisStreamConfigParameters struct {
 	// Selector for a Stream in kinesis to populate streamArn.
 	// +kubebuilder:validation:Optional
 	StreamArnSelector *v1.Selector `json:"streamArnSelector,omitempty" tf:"-"`
+}
+
+type KinesisVideoStreamConfigInitParameters struct {
+
+	// The encryption configuration. Documented below.
+	EncryptionConfig []EncryptionConfigInitParameters `json:"encryptionConfig,omitempty" tf:"encryption_config,omitempty"`
+
+	// The prefix of the video stream. Minimum length of 1. Maximum length of 128. When read from the state, the value returned is <prefix>-connect-<connect_instance_alias>-contact- since the API appends additional details to the prefix.
+	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
+
+	// The number of hours data is retained in the stream. Kinesis Video Streams retains the data in a data store that is associated with the stream. Minimum value of 0. Maximum value of 87600. A value of 0, indicates that the stream does not persist data.
+	RetentionPeriodHours *float64 `json:"retentionPeriodHours,omitempty" tf:"retention_period_hours,omitempty"`
 }
 
 type KinesisVideoStreamConfigObservation struct {
@@ -152,16 +217,28 @@ type KinesisVideoStreamConfigObservation struct {
 type KinesisVideoStreamConfigParameters struct {
 
 	// The encryption configuration. Documented below.
-	// +kubebuilder:validation:Required
-	EncryptionConfig []EncryptionConfigParameters `json:"encryptionConfig" tf:"encryption_config,omitempty"`
+	EncryptionConfig []EncryptionConfigParameters `json:"encryptionConfig,omitempty" tf:"encryption_config,omitempty"`
 
 	// The prefix of the video stream. Minimum length of 1. Maximum length of 128. When read from the state, the value returned is <prefix>-connect-<connect_instance_alias>-contact- since the API appends additional details to the prefix.
-	// +kubebuilder:validation:Required
-	Prefix *string `json:"prefix" tf:"prefix,omitempty"`
+	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
 
 	// The number of hours data is retained in the stream. Kinesis Video Streams retains the data in a data store that is associated with the stream. Minimum value of 0. Maximum value of 87600. A value of 0, indicates that the stream does not persist data.
-	// +kubebuilder:validation:Required
-	RetentionPeriodHours *float64 `json:"retentionPeriodHours" tf:"retention_period_hours,omitempty"`
+	RetentionPeriodHours *float64 `json:"retentionPeriodHours,omitempty" tf:"retention_period_hours,omitempty"`
+}
+
+type S3ConfigEncryptionConfigInitParameters struct {
+
+	// The type of encryption. Valid Values: KMS.
+	EncryptionType *string `json:"encryptionType,omitempty" tf:"encryption_type,omitempty"`
+
+	// The full ARN of the encryption key. Be sure to provide the full ARN of the encryption key, not just the ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
+
+	KeyIDRef *v1.Reference `json:"keyIdRef,omitempty" tf:"-"`
+
+	KeyIDSelector *v1.Selector `json:"keyIdSelector,omitempty" tf:"-"`
 }
 
 type S3ConfigEncryptionConfigObservation struct {
@@ -176,13 +253,11 @@ type S3ConfigEncryptionConfigObservation struct {
 type S3ConfigEncryptionConfigParameters struct {
 
 	// The type of encryption. Valid Values: KMS.
-	// +kubebuilder:validation:Required
-	EncryptionType *string `json:"encryptionType" tf:"encryption_type,omitempty"`
+	EncryptionType *string `json:"encryptionType,omitempty" tf:"encryption_type,omitempty"`
 
 	// The full ARN of the encryption key. Be sure to provide the full ARN of the encryption key, not just the ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
 
 	// Reference to a Key in kms to populate keyId.
@@ -192,6 +267,24 @@ type S3ConfigEncryptionConfigParameters struct {
 	// Selector for a Key in kms to populate keyId.
 	// +kubebuilder:validation:Optional
 	KeyIDSelector *v1.Selector `json:"keyIdSelector,omitempty" tf:"-"`
+}
+
+type S3ConfigInitParameters struct {
+
+	// The S3 bucket name.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	BucketName *string `json:"bucketName,omitempty" tf:"bucket_name,omitempty"`
+
+	BucketNameRef *v1.Reference `json:"bucketNameRef,omitempty" tf:"-"`
+
+	BucketNameSelector *v1.Selector `json:"bucketNameSelector,omitempty" tf:"-"`
+
+	// The S3 bucket prefix.
+	BucketPrefix *string `json:"bucketPrefix,omitempty" tf:"bucket_prefix,omitempty"`
+
+	// The encryption configuration. Documented below.
+	EncryptionConfig []S3ConfigEncryptionConfigInitParameters `json:"encryptionConfig,omitempty" tf:"encryption_config,omitempty"`
 }
 
 type S3ConfigObservation struct {
@@ -211,7 +304,6 @@ type S3ConfigParameters struct {
 	// The S3 bucket name.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	BucketName *string `json:"bucketName,omitempty" tf:"bucket_name,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucketName.
@@ -223,12 +315,28 @@ type S3ConfigParameters struct {
 	BucketNameSelector *v1.Selector `json:"bucketNameSelector,omitempty" tf:"-"`
 
 	// The S3 bucket prefix.
-	// +kubebuilder:validation:Required
-	BucketPrefix *string `json:"bucketPrefix" tf:"bucket_prefix,omitempty"`
+	BucketPrefix *string `json:"bucketPrefix,omitempty" tf:"bucket_prefix,omitempty"`
 
 	// The encryption configuration. Documented below.
-	// +kubebuilder:validation:Optional
 	EncryptionConfig []S3ConfigEncryptionConfigParameters `json:"encryptionConfig,omitempty" tf:"encryption_config,omitempty"`
+}
+
+type StorageConfigInitParameters struct {
+
+	// A block that specifies the configuration of the Kinesis Firehose delivery stream. Documented below.
+	KinesisFirehoseConfig []KinesisFirehoseConfigInitParameters `json:"kinesisFirehoseConfig,omitempty" tf:"kinesis_firehose_config,omitempty"`
+
+	// A block that specifies the configuration of the Kinesis data stream. Documented below.
+	KinesisStreamConfig []KinesisStreamConfigInitParameters `json:"kinesisStreamConfig,omitempty" tf:"kinesis_stream_config,omitempty"`
+
+	// A block that specifies the configuration of the Kinesis video stream. Documented below.
+	KinesisVideoStreamConfig []KinesisVideoStreamConfigInitParameters `json:"kinesisVideoStreamConfig,omitempty" tf:"kinesis_video_stream_config,omitempty"`
+
+	// A block that specifies the configuration of S3 Bucket. Documented below.
+	S3Config []S3ConfigInitParameters `json:"s3Config,omitempty" tf:"s3_config,omitempty"`
+
+	// A valid storage type. Valid Values: S3 | KINESIS_VIDEO_STREAM | KINESIS_STREAM | KINESIS_FIREHOSE.
+	StorageType *string `json:"storageType,omitempty" tf:"storage_type,omitempty"`
 }
 
 type StorageConfigObservation struct {
@@ -252,30 +360,29 @@ type StorageConfigObservation struct {
 type StorageConfigParameters struct {
 
 	// A block that specifies the configuration of the Kinesis Firehose delivery stream. Documented below.
-	// +kubebuilder:validation:Optional
 	KinesisFirehoseConfig []KinesisFirehoseConfigParameters `json:"kinesisFirehoseConfig,omitempty" tf:"kinesis_firehose_config,omitempty"`
 
 	// A block that specifies the configuration of the Kinesis data stream. Documented below.
-	// +kubebuilder:validation:Optional
 	KinesisStreamConfig []KinesisStreamConfigParameters `json:"kinesisStreamConfig,omitempty" tf:"kinesis_stream_config,omitempty"`
 
 	// A block that specifies the configuration of the Kinesis video stream. Documented below.
-	// +kubebuilder:validation:Optional
 	KinesisVideoStreamConfig []KinesisVideoStreamConfigParameters `json:"kinesisVideoStreamConfig,omitempty" tf:"kinesis_video_stream_config,omitempty"`
 
 	// A block that specifies the configuration of S3 Bucket. Documented below.
-	// +kubebuilder:validation:Optional
 	S3Config []S3ConfigParameters `json:"s3Config,omitempty" tf:"s3_config,omitempty"`
 
 	// A valid storage type. Valid Values: S3 | KINESIS_VIDEO_STREAM | KINESIS_STREAM | KINESIS_FIREHOSE.
-	// +kubebuilder:validation:Required
-	StorageType *string `json:"storageType" tf:"storage_type,omitempty"`
+	StorageType *string `json:"storageType,omitempty" tf:"storage_type,omitempty"`
 }
 
 // InstanceStorageConfigSpec defines the desired state of InstanceStorageConfig
 type InstanceStorageConfigSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     InstanceStorageConfigParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider InstanceStorageConfigInitParameters `json:"initProvider,omitempty"`
 }
 
 // InstanceStorageConfigStatus defines the observed state of InstanceStorageConfig.
@@ -296,8 +403,8 @@ type InstanceStorageConfigStatus struct {
 type InstanceStorageConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceType)",message="resourceType is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.storageConfig)",message="storageConfig is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceType) || has(self.initProvider.resourceType)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.storageConfig) || has(self.initProvider.storageConfig)",message="%!s(MISSING) is a required parameter"
 	Spec   InstanceStorageConfigSpec   `json:"spec"`
 	Status InstanceStorageConfigStatus `json:"status,omitempty"`
 }

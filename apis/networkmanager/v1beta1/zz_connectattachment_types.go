@@ -13,6 +13,45 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConnectAttachmentInitParameters struct {
+
+	// The ID of a core network where you want to create the attachment.
+	// +crossplane:generate:reference:type=CoreNetwork
+	CoreNetworkID *string `json:"coreNetworkId,omitempty" tf:"core_network_id,omitempty"`
+
+	CoreNetworkIDRef *v1.Reference `json:"coreNetworkIdRef,omitempty" tf:"-"`
+
+	CoreNetworkIDSelector *v1.Selector `json:"coreNetworkIdSelector,omitempty" tf:"-"`
+
+	// The Region where the edge is located.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.VPCAttachment
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("edge_location",true)
+	EdgeLocation *string `json:"edgeLocation,omitempty" tf:"edge_location,omitempty"`
+
+	EdgeLocationRef *v1.Reference `json:"edgeLocationRef,omitempty" tf:"-"`
+
+	EdgeLocationSelector *v1.Selector `json:"edgeLocationSelector,omitempty" tf:"-"`
+
+	// Options for creating an attachment.
+	Options []OptionsInitParameters `json:"options,omitempty" tf:"options,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The ID of the attachment between the two connections.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.VPCAttachment
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	TransportAttachmentID *string `json:"transportAttachmentId,omitempty" tf:"transport_attachment_id,omitempty"`
+
+	TransportAttachmentIDRef *v1.Reference `json:"transportAttachmentIdRef,omitempty" tf:"-"`
+
+	TransportAttachmentIDSelector *v1.Selector `json:"transportAttachmentIdSelector,omitempty" tf:"-"`
+}
+
 type ConnectAttachmentObservation struct {
 
 	// The ARN of the attachment.
@@ -68,7 +107,6 @@ type ConnectAttachmentParameters struct {
 
 	// The ID of a core network where you want to create the attachment.
 	// +crossplane:generate:reference:type=CoreNetwork
-	// +kubebuilder:validation:Optional
 	CoreNetworkID *string `json:"coreNetworkId,omitempty" tf:"core_network_id,omitempty"`
 
 	// Reference to a CoreNetwork to populate coreNetworkId.
@@ -82,7 +120,6 @@ type ConnectAttachmentParameters struct {
 	// The Region where the edge is located.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.VPCAttachment
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("edge_location",true)
-	// +kubebuilder:validation:Optional
 	EdgeLocation *string `json:"edgeLocation,omitempty" tf:"edge_location,omitempty"`
 
 	// Reference to a VPCAttachment in networkmanager to populate edgeLocation.
@@ -94,22 +131,18 @@ type ConnectAttachmentParameters struct {
 	EdgeLocationSelector *v1.Selector `json:"edgeLocationSelector,omitempty" tf:"-"`
 
 	// Options for creating an attachment.
-	// +kubebuilder:validation:Optional
 	Options []OptionsParameters `json:"options,omitempty" tf:"options,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The ID of the attachment between the two connections.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.VPCAttachment
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	TransportAttachmentID *string `json:"transportAttachmentId,omitempty" tf:"transport_attachment_id,omitempty"`
 
 	// Reference to a VPCAttachment in networkmanager to populate transportAttachmentId.
@@ -121,13 +154,15 @@ type ConnectAttachmentParameters struct {
 	TransportAttachmentIDSelector *v1.Selector `json:"transportAttachmentIdSelector,omitempty" tf:"-"`
 }
 
+type OptionsInitParameters struct {
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
+}
+
 type OptionsObservation struct {
 	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
 }
 
 type OptionsParameters struct {
-
-	// +kubebuilder:validation:Optional
 	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
 }
 
@@ -135,6 +170,10 @@ type OptionsParameters struct {
 type ConnectAttachmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ConnectAttachmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ConnectAttachmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // ConnectAttachmentStatus defines the observed state of ConnectAttachment.
@@ -155,7 +194,7 @@ type ConnectAttachmentStatus struct {
 type ConnectAttachment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.options)",message="options is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.options) || has(self.initProvider.options)",message="%!s(MISSING) is a required parameter"
 	Spec   ConnectAttachmentSpec   `json:"spec"`
 	Status ConnectAttachmentStatus `json:"status,omitempty"`
 }

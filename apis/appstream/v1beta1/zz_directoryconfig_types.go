@@ -13,6 +13,22 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DirectoryConfigInitParameters struct {
+
+	// Fully qualified name of the directory.
+	DirectoryName *string `json:"directoryName,omitempty" tf:"directory_name,omitempty"`
+
+	// Distinguished names of the organizational units for computer accounts.
+	OrganizationalUnitDistinguishedNames []*string `json:"organizationalUnitDistinguishedNames,omitempty" tf:"organizational_unit_distinguished_names,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Configuration block for the name of the directory and organizational unit (OU) to use to join the directory config to a Microsoft Active Directory domain. See service_account_credentials below.
+	ServiceAccountCredentials []ServiceAccountCredentialsInitParameters `json:"serviceAccountCredentials,omitempty" tf:"service_account_credentials,omitempty"`
+}
+
 type DirectoryConfigObservation struct {
 
 	// Date and time, in UTC and extended RFC 3339 format, when the directory config was created.
@@ -34,21 +50,26 @@ type DirectoryConfigObservation struct {
 type DirectoryConfigParameters struct {
 
 	// Fully qualified name of the directory.
-	// +kubebuilder:validation:Optional
 	DirectoryName *string `json:"directoryName,omitempty" tf:"directory_name,omitempty"`
 
 	// Distinguished names of the organizational units for computer accounts.
-	// +kubebuilder:validation:Optional
 	OrganizationalUnitDistinguishedNames []*string `json:"organizationalUnitDistinguishedNames,omitempty" tf:"organizational_unit_distinguished_names,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Configuration block for the name of the directory and organizational unit (OU) to use to join the directory config to a Microsoft Active Directory domain. See service_account_credentials below.
-	// +kubebuilder:validation:Optional
 	ServiceAccountCredentials []ServiceAccountCredentialsParameters `json:"serviceAccountCredentials,omitempty" tf:"service_account_credentials,omitempty"`
+}
+
+type ServiceAccountCredentialsInitParameters struct {
+
+	// User name of the account. This account must have the following privileges: create computer objects, join computers to the domain, and change/reset the password on descendant computer objects for the organizational units specified.
+	AccountName *string `json:"accountName,omitempty" tf:"account_name,omitempty"`
+
+	// Password for the account.
+	AccountPasswordSecretRef v1.SecretKeySelector `json:"accountPasswordSecretRef" tf:"-"`
 }
 
 type ServiceAccountCredentialsObservation struct {
@@ -60,11 +81,9 @@ type ServiceAccountCredentialsObservation struct {
 type ServiceAccountCredentialsParameters struct {
 
 	// User name of the account. This account must have the following privileges: create computer objects, join computers to the domain, and change/reset the password on descendant computer objects for the organizational units specified.
-	// +kubebuilder:validation:Required
-	AccountName *string `json:"accountName" tf:"account_name,omitempty"`
+	AccountName *string `json:"accountName,omitempty" tf:"account_name,omitempty"`
 
 	// Password for the account.
-	// +kubebuilder:validation:Required
 	AccountPasswordSecretRef v1.SecretKeySelector `json:"accountPasswordSecretRef" tf:"-"`
 }
 
@@ -72,6 +91,10 @@ type ServiceAccountCredentialsParameters struct {
 type DirectoryConfigSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DirectoryConfigParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DirectoryConfigInitParameters `json:"initProvider,omitempty"`
 }
 
 // DirectoryConfigStatus defines the observed state of DirectoryConfig.
@@ -92,9 +115,9 @@ type DirectoryConfigStatus struct {
 type DirectoryConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.directoryName)",message="directoryName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.organizationalUnitDistinguishedNames)",message="organizationalUnitDistinguishedNames is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.serviceAccountCredentials)",message="serviceAccountCredentials is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.directoryName) || has(self.initProvider.directoryName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.organizationalUnitDistinguishedNames) || has(self.initProvider.organizationalUnitDistinguishedNames)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.serviceAccountCredentials) || has(self.initProvider.serviceAccountCredentials)",message="%!s(MISSING) is a required parameter"
 	Spec   DirectoryConfigSpec   `json:"spec"`
 	Status DirectoryConfigStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EndpointInitParameters struct {
+
+	// The Amazon Kinesis data stream configuration.
+	KinesisStreamConfig []KinesisStreamConfigInitParameters `json:"kinesisStreamConfig,omitempty" tf:"kinesis_stream_config,omitempty"`
+
+	// The type of data stream where real-time log data is sent. The only valid value is Kinesis.
+	StreamType *string `json:"streamType,omitempty" tf:"stream_type,omitempty"`
+}
+
 type EndpointObservation struct {
 
 	// The Amazon Kinesis data stream configuration.
@@ -25,12 +34,32 @@ type EndpointObservation struct {
 type EndpointParameters struct {
 
 	// The Amazon Kinesis data stream configuration.
-	// +kubebuilder:validation:Required
-	KinesisStreamConfig []KinesisStreamConfigParameters `json:"kinesisStreamConfig" tf:"kinesis_stream_config,omitempty"`
+	KinesisStreamConfig []KinesisStreamConfigParameters `json:"kinesisStreamConfig,omitempty" tf:"kinesis_stream_config,omitempty"`
 
 	// The type of data stream where real-time log data is sent. The only valid value is Kinesis.
-	// +kubebuilder:validation:Required
-	StreamType *string `json:"streamType" tf:"stream_type,omitempty"`
+	StreamType *string `json:"streamType,omitempty" tf:"stream_type,omitempty"`
+}
+
+type KinesisStreamConfigInitParameters struct {
+
+	// The ARN of an IAM role that CloudFront can use to send real-time log data to the Kinesis data stream.
+	// See the AWS documentation for more information.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
+
+	// The ARN of the Kinesis data stream.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kinesis/v1beta1.Stream
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
+	StreamArn *string `json:"streamArn,omitempty" tf:"stream_arn,omitempty"`
+
+	StreamArnRef *v1.Reference `json:"streamArnRef,omitempty" tf:"-"`
+
+	StreamArnSelector *v1.Selector `json:"streamArnSelector,omitempty" tf:"-"`
 }
 
 type KinesisStreamConfigObservation struct {
@@ -49,7 +78,6 @@ type KinesisStreamConfigParameters struct {
 	// See the AWS documentation for more information.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -63,7 +91,6 @@ type KinesisStreamConfigParameters struct {
 	// The ARN of the Kinesis data stream.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kinesis/v1beta1.Stream
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
-	// +kubebuilder:validation:Optional
 	StreamArn *string `json:"streamArn,omitempty" tf:"stream_arn,omitempty"`
 
 	// Reference to a Stream in kinesis to populate streamArn.
@@ -73,6 +100,25 @@ type KinesisStreamConfigParameters struct {
 	// Selector for a Stream in kinesis to populate streamArn.
 	// +kubebuilder:validation:Optional
 	StreamArnSelector *v1.Selector `json:"streamArnSelector,omitempty" tf:"-"`
+}
+
+type RealtimeLogConfigInitParameters struct {
+
+	// The Amazon Kinesis data streams where real-time log data is sent.
+	Endpoint []EndpointInitParameters `json:"endpoint,omitempty" tf:"endpoint,omitempty"`
+
+	// The fields that are included in each real-time log record. See the AWS documentation for supported values.
+	Fields []*string `json:"fields,omitempty" tf:"fields,omitempty"`
+
+	// The unique name to identify this real-time log configuration.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The sampling rate for this real-time log configuration. The sampling rate determines the percentage of viewer requests that are represented in the real-time log data. An integer between 1 and 100, inclusive.
+	SamplingRate *float64 `json:"samplingRate,omitempty" tf:"sampling_rate,omitempty"`
 }
 
 type RealtimeLogConfigObservation struct {
@@ -99,24 +145,19 @@ type RealtimeLogConfigObservation struct {
 type RealtimeLogConfigParameters struct {
 
 	// The Amazon Kinesis data streams where real-time log data is sent.
-	// +kubebuilder:validation:Optional
 	Endpoint []EndpointParameters `json:"endpoint,omitempty" tf:"endpoint,omitempty"`
 
 	// The fields that are included in each real-time log record. See the AWS documentation for supported values.
-	// +kubebuilder:validation:Optional
 	Fields []*string `json:"fields,omitempty" tf:"fields,omitempty"`
 
 	// The unique name to identify this real-time log configuration.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The sampling rate for this real-time log configuration. The sampling rate determines the percentage of viewer requests that are represented in the real-time log data. An integer between 1 and 100, inclusive.
-	// +kubebuilder:validation:Optional
 	SamplingRate *float64 `json:"samplingRate,omitempty" tf:"sampling_rate,omitempty"`
 }
 
@@ -124,6 +165,10 @@ type RealtimeLogConfigParameters struct {
 type RealtimeLogConfigSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RealtimeLogConfigParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RealtimeLogConfigInitParameters `json:"initProvider,omitempty"`
 }
 
 // RealtimeLogConfigStatus defines the observed state of RealtimeLogConfig.
@@ -144,10 +189,10 @@ type RealtimeLogConfigStatus struct {
 type RealtimeLogConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.endpoint)",message="endpoint is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.fields)",message="fields is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.samplingRate)",message="samplingRate is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.endpoint) || has(self.initProvider.endpoint)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.fields) || has(self.initProvider.fields)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.samplingRate) || has(self.initProvider.samplingRate)",message="%!s(MISSING) is a required parameter"
 	Spec   RealtimeLogConfigSpec   `json:"spec"`
 	Status RealtimeLogConfigStatus `json:"status,omitempty"`
 }

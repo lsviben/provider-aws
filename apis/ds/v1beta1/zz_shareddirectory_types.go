@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SharedDirectoryInitParameters struct {
+
+	// Identifier of the Managed Microsoft AD directory that you want to share with other accounts.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ds/v1beta1.Directory
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DirectoryID *string `json:"directoryId,omitempty" tf:"directory_id,omitempty"`
+
+	DirectoryIDRef *v1.Reference `json:"directoryIdRef,omitempty" tf:"-"`
+
+	DirectoryIDSelector *v1.Selector `json:"directoryIdSelector,omitempty" tf:"-"`
+
+	// Method used when sharing a directory. Valid values are ORGANIZATIONS and HANDSHAKE. Default is HANDSHAKE.
+	Method *string `json:"method,omitempty" tf:"method,omitempty"`
+
+	// Message sent by the directory owner to the directory consumer to help the directory consumer administrator determine whether to approve or reject the share invitation.
+	NotesSecretRef *v1.SecretKeySelector `json:"notesSecretRef,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Identifier for the directory consumer account with whom the directory is to be shared. See below.
+	Target []TargetInitParameters `json:"target,omitempty" tf:"target,omitempty"`
+}
+
 type SharedDirectoryObservation struct {
 
 	// Identifier of the Managed Microsoft AD directory that you want to share with other accounts.
@@ -36,7 +61,6 @@ type SharedDirectoryParameters struct {
 	// Identifier of the Managed Microsoft AD directory that you want to share with other accounts.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ds/v1beta1.Directory
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DirectoryID *string `json:"directoryId,omitempty" tf:"directory_id,omitempty"`
 
 	// Reference to a Directory in ds to populate directoryId.
@@ -48,21 +72,26 @@ type SharedDirectoryParameters struct {
 	DirectoryIDSelector *v1.Selector `json:"directoryIdSelector,omitempty" tf:"-"`
 
 	// Method used when sharing a directory. Valid values are ORGANIZATIONS and HANDSHAKE. Default is HANDSHAKE.
-	// +kubebuilder:validation:Optional
 	Method *string `json:"method,omitempty" tf:"method,omitempty"`
 
 	// Message sent by the directory owner to the directory consumer to help the directory consumer administrator determine whether to approve or reject the share invitation.
-	// +kubebuilder:validation:Optional
 	NotesSecretRef *v1.SecretKeySelector `json:"notesSecretRef,omitempty" tf:"-"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Identifier for the directory consumer account with whom the directory is to be shared. See below.
-	// +kubebuilder:validation:Optional
 	Target []TargetParameters `json:"target,omitempty" tf:"target,omitempty"`
+}
+
+type TargetInitParameters struct {
+
+	// Identifier of the directory consumer account.
+	ID *string `json:"id,omitempty" tf:"id,omitempty"`
+
+	// Type of identifier to be used in the id field. Valid value is ACCOUNT. Default is ACCOUNT.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type TargetObservation struct {
@@ -77,11 +106,9 @@ type TargetObservation struct {
 type TargetParameters struct {
 
 	// Identifier of the directory consumer account.
-	// +kubebuilder:validation:Required
-	ID *string `json:"id" tf:"id,omitempty"`
+	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
 	// Type of identifier to be used in the id field. Valid value is ACCOUNT. Default is ACCOUNT.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -89,6 +116,10 @@ type TargetParameters struct {
 type SharedDirectorySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SharedDirectoryParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SharedDirectoryInitParameters `json:"initProvider,omitempty"`
 }
 
 // SharedDirectoryStatus defines the observed state of SharedDirectory.
@@ -109,7 +140,7 @@ type SharedDirectoryStatus struct {
 type SharedDirectory struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.target)",message="target is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.target) || has(self.initProvider.target)",message="%!s(MISSING) is a required parameter"
 	Spec   SharedDirectorySpec   `json:"spec"`
 	Status SharedDirectoryStatus `json:"status,omitempty"`
 }

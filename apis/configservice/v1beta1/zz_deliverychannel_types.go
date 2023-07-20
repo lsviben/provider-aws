@@ -13,6 +13,33 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DeliveryChannelInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The name of the S3 bucket used to store the configuration history.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	S3BucketName *string `json:"s3BucketName,omitempty" tf:"s3_bucket_name,omitempty"`
+
+	S3BucketNameRef *v1.Reference `json:"s3BucketNameRef,omitempty" tf:"-"`
+
+	S3BucketNameSelector *v1.Selector `json:"s3BucketNameSelector,omitempty" tf:"-"`
+
+	// The ARN of the AWS KMS key used to encrypt objects delivered by AWS Config. Must belong to the same Region as the destination S3 bucket.
+	S3KMSKeyArn *string `json:"s3KmsKeyArn,omitempty" tf:"s3_kms_key_arn,omitempty"`
+
+	// The prefix for the specified S3 bucket.
+	S3KeyPrefix *string `json:"s3KeyPrefix,omitempty" tf:"s3_key_prefix,omitempty"`
+
+	// Options for how AWS Config delivers configuration snapshots. See below
+	SnapshotDeliveryProperties []SnapshotDeliveryPropertiesInitParameters `json:"snapshotDeliveryProperties,omitempty" tf:"snapshot_delivery_properties,omitempty"`
+
+	// The ARN of the SNS topic that AWS Config delivers notifications to.
+	SnsTopicArn *string `json:"snsTopicArn,omitempty" tf:"sns_topic_arn,omitempty"`
+}
+
 type DeliveryChannelObservation struct {
 
 	// The name of the delivery channel.
@@ -38,12 +65,10 @@ type DeliveryChannelParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The name of the S3 bucket used to store the configuration history.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
-	// +kubebuilder:validation:Optional
 	S3BucketName *string `json:"s3BucketName,omitempty" tf:"s3_bucket_name,omitempty"`
 
 	// Reference to a Bucket in s3 to populate s3BucketName.
@@ -55,20 +80,22 @@ type DeliveryChannelParameters struct {
 	S3BucketNameSelector *v1.Selector `json:"s3BucketNameSelector,omitempty" tf:"-"`
 
 	// The ARN of the AWS KMS key used to encrypt objects delivered by AWS Config. Must belong to the same Region as the destination S3 bucket.
-	// +kubebuilder:validation:Optional
 	S3KMSKeyArn *string `json:"s3KmsKeyArn,omitempty" tf:"s3_kms_key_arn,omitempty"`
 
 	// The prefix for the specified S3 bucket.
-	// +kubebuilder:validation:Optional
 	S3KeyPrefix *string `json:"s3KeyPrefix,omitempty" tf:"s3_key_prefix,omitempty"`
 
 	// Options for how AWS Config delivers configuration snapshots. See below
-	// +kubebuilder:validation:Optional
 	SnapshotDeliveryProperties []SnapshotDeliveryPropertiesParameters `json:"snapshotDeliveryProperties,omitempty" tf:"snapshot_delivery_properties,omitempty"`
 
 	// The ARN of the SNS topic that AWS Config delivers notifications to.
-	// +kubebuilder:validation:Optional
 	SnsTopicArn *string `json:"snsTopicArn,omitempty" tf:"sns_topic_arn,omitempty"`
+}
+
+type SnapshotDeliveryPropertiesInitParameters struct {
+
+	// - The frequency with which AWS Config recurringly delivers configuration snapshotsE.g., One_Hour or Three_Hours. Valid values are listed here.
+	DeliveryFrequency *string `json:"deliveryFrequency,omitempty" tf:"delivery_frequency,omitempty"`
 }
 
 type SnapshotDeliveryPropertiesObservation struct {
@@ -80,7 +107,6 @@ type SnapshotDeliveryPropertiesObservation struct {
 type SnapshotDeliveryPropertiesParameters struct {
 
 	// - The frequency with which AWS Config recurringly delivers configuration snapshotsE.g., One_Hour or Three_Hours. Valid values are listed here.
-	// +kubebuilder:validation:Optional
 	DeliveryFrequency *string `json:"deliveryFrequency,omitempty" tf:"delivery_frequency,omitempty"`
 }
 
@@ -88,6 +114,10 @@ type SnapshotDeliveryPropertiesParameters struct {
 type DeliveryChannelSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DeliveryChannelParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DeliveryChannelInitParameters `json:"initProvider,omitempty"`
 }
 
 // DeliveryChannelStatus defines the observed state of DeliveryChannel.

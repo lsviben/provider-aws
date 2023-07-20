@@ -13,6 +13,29 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BudgetResourceAssociationInitParameters struct {
+
+	// Budget name.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/budgets/v1beta1.Budget
+	BudgetName *string `json:"budgetName,omitempty" tf:"budget_name,omitempty"`
+
+	BudgetNameRef *v1.Reference `json:"budgetNameRef,omitempty" tf:"-"`
+
+	BudgetNameSelector *v1.Selector `json:"budgetNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Resource identifier.
+	// +crossplane:generate:reference:type=Product
+	ResourceID *string `json:"resourceId,omitempty" tf:"resource_id,omitempty"`
+
+	ResourceIDRef *v1.Reference `json:"resourceIdRef,omitempty" tf:"-"`
+
+	ResourceIDSelector *v1.Selector `json:"resourceIdSelector,omitempty" tf:"-"`
+}
+
 type BudgetResourceAssociationObservation struct {
 
 	// Budget name.
@@ -29,7 +52,6 @@ type BudgetResourceAssociationParameters struct {
 
 	// Budget name.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/budgets/v1beta1.Budget
-	// +kubebuilder:validation:Optional
 	BudgetName *string `json:"budgetName,omitempty" tf:"budget_name,omitempty"`
 
 	// Reference to a Budget in budgets to populate budgetName.
@@ -42,12 +64,10 @@ type BudgetResourceAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Resource identifier.
 	// +crossplane:generate:reference:type=Product
-	// +kubebuilder:validation:Optional
 	ResourceID *string `json:"resourceId,omitempty" tf:"resource_id,omitempty"`
 
 	// Reference to a Product to populate resourceId.
@@ -63,6 +83,10 @@ type BudgetResourceAssociationParameters struct {
 type BudgetResourceAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BudgetResourceAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BudgetResourceAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // BudgetResourceAssociationStatus defines the observed state of BudgetResourceAssociation.

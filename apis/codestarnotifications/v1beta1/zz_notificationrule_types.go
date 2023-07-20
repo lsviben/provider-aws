@@ -13,6 +13,41 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type NotificationRuleInitParameters struct {
+
+	// The level of detail to include in the notifications for this resource. Possible values are BASIC and FULL.
+	DetailType *string `json:"detailType,omitempty" tf:"detail_type,omitempty"`
+
+	// A list of event types associated with this notification rule.
+	// For list of allowed events see here.
+	EventTypeIds []*string `json:"eventTypeIds,omitempty" tf:"event_type_ids,omitempty"`
+
+	// The name of notification rule.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ARN of the resource to associate with the notification rule.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/codecommit/v1beta1.Repository
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	Resource *string `json:"resource,omitempty" tf:"resource,omitempty"`
+
+	ResourceRef *v1.Reference `json:"resourceRef,omitempty" tf:"-"`
+
+	ResourceSelector *v1.Selector `json:"resourceSelector,omitempty" tf:"-"`
+
+	// The status of the notification rule. Possible values are ENABLED and DISABLED, default is ENABLED.
+	Status *string `json:"status,omitempty" tf:"status,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Configuration blocks containing notification target information. Can be specified multiple times. At least one target must be specified on creation.
+	Target []TargetInitParameters `json:"target,omitempty" tf:"target,omitempty"`
+}
+
 type NotificationRuleObservation struct {
 
 	// The codestar notification rule ARN.
@@ -50,27 +85,22 @@ type NotificationRuleObservation struct {
 type NotificationRuleParameters struct {
 
 	// The level of detail to include in the notifications for this resource. Possible values are BASIC and FULL.
-	// +kubebuilder:validation:Optional
 	DetailType *string `json:"detailType,omitempty" tf:"detail_type,omitempty"`
 
 	// A list of event types associated with this notification rule.
 	// For list of allowed events see here.
-	// +kubebuilder:validation:Optional
 	EventTypeIds []*string `json:"eventTypeIds,omitempty" tf:"event_type_ids,omitempty"`
 
 	// The name of notification rule.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ARN of the resource to associate with the notification rule.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/codecommit/v1beta1.Repository
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	Resource *string `json:"resource,omitempty" tf:"resource,omitempty"`
 
 	// Reference to a Repository in codecommit to populate resource.
@@ -82,16 +112,28 @@ type NotificationRuleParameters struct {
 	ResourceSelector *v1.Selector `json:"resourceSelector,omitempty" tf:"-"`
 
 	// The status of the notification rule. Possible values are ENABLED and DISABLED, default is ENABLED.
-	// +kubebuilder:validation:Optional
 	Status *string `json:"status,omitempty" tf:"status,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Configuration blocks containing notification target information. Can be specified multiple times. At least one target must be specified on creation.
-	// +kubebuilder:validation:Optional
 	Target []TargetParameters `json:"target,omitempty" tf:"target,omitempty"`
+}
+
+type TargetInitParameters struct {
+
+	// The ARN of notification rule target. For example, a SNS Topic ARN.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	Address *string `json:"address,omitempty" tf:"address,omitempty"`
+
+	AddressRef *v1.Reference `json:"addressRef,omitempty" tf:"-"`
+
+	AddressSelector *v1.Selector `json:"addressSelector,omitempty" tf:"-"`
+
+	// The type of the notification target. Default value is SNS.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type TargetObservation struct {
@@ -111,7 +153,6 @@ type TargetParameters struct {
 	// The ARN of notification rule target. For example, a SNS Topic ARN.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	Address *string `json:"address,omitempty" tf:"address,omitempty"`
 
 	// Reference to a Topic in sns to populate address.
@@ -123,7 +164,6 @@ type TargetParameters struct {
 	AddressSelector *v1.Selector `json:"addressSelector,omitempty" tf:"-"`
 
 	// The type of the notification target. Default value is SNS.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -131,6 +171,10 @@ type TargetParameters struct {
 type NotificationRuleSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     NotificationRuleParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider NotificationRuleInitParameters `json:"initProvider,omitempty"`
 }
 
 // NotificationRuleStatus defines the observed state of NotificationRule.
@@ -151,9 +195,9 @@ type NotificationRuleStatus struct {
 type NotificationRule struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.detailType)",message="detailType is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.eventTypeIds)",message="eventTypeIds is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.detailType) || has(self.initProvider.detailType)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.eventTypeIds) || has(self.initProvider.eventTypeIds)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   NotificationRuleSpec   `json:"spec"`
 	Status NotificationRuleStatus `json:"status,omitempty"`
 }

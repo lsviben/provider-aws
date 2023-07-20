@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type XSSMatchSetInitParameters struct {
+
+	// The name of the set
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The parts of web requests that you want to inspect for cross-site scripting attacks.
+	XSSMatchTuple []XSSMatchTupleInitParameters `json:"xssMatchTuple,omitempty" tf:"xss_match_tuple,omitempty"`
+}
+
 type XSSMatchSetObservation struct {
 
 	// The ID of the Regional WAF XSS Match Set.
@@ -28,17 +41,23 @@ type XSSMatchSetObservation struct {
 type XSSMatchSetParameters struct {
 
 	// The name of the set
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The parts of web requests that you want to inspect for cross-site scripting attacks.
-	// +kubebuilder:validation:Optional
 	XSSMatchTuple []XSSMatchTupleParameters `json:"xssMatchTuple,omitempty" tf:"xss_match_tuple,omitempty"`
+}
+
+type XSSMatchTupleFieldToMatchInitParameters struct {
+
+	// When the value of type is HEADER, enter the name of the header that you want the WAF to search, for example, User-Agent or Referer. If the value of type is any other value, omit data.
+	Data *string `json:"data,omitempty" tf:"data,omitempty"`
+
+	// The part of the web request that you want AWS WAF to search for a specified stringE.g., HEADER or METHOD
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type XSSMatchTupleFieldToMatchObservation struct {
@@ -53,12 +72,19 @@ type XSSMatchTupleFieldToMatchObservation struct {
 type XSSMatchTupleFieldToMatchParameters struct {
 
 	// When the value of type is HEADER, enter the name of the header that you want the WAF to search, for example, User-Agent or Referer. If the value of type is any other value, omit data.
-	// +kubebuilder:validation:Optional
 	Data *string `json:"data,omitempty" tf:"data,omitempty"`
 
 	// The part of the web request that you want AWS WAF to search for a specified stringE.g., HEADER or METHOD
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type XSSMatchTupleInitParameters struct {
+
+	// Specifies where in a web request to look for cross-site scripting attacks.
+	FieldToMatch []XSSMatchTupleFieldToMatchInitParameters `json:"fieldToMatch,omitempty" tf:"field_to_match,omitempty"`
+
+	// Which text transformation, if any, to perform on the web request before inspecting the request for cross-site scripting attacks.
+	TextTransformation *string `json:"textTransformation,omitempty" tf:"text_transformation,omitempty"`
 }
 
 type XSSMatchTupleObservation struct {
@@ -73,18 +99,20 @@ type XSSMatchTupleObservation struct {
 type XSSMatchTupleParameters struct {
 
 	// Specifies where in a web request to look for cross-site scripting attacks.
-	// +kubebuilder:validation:Required
-	FieldToMatch []XSSMatchTupleFieldToMatchParameters `json:"fieldToMatch" tf:"field_to_match,omitempty"`
+	FieldToMatch []XSSMatchTupleFieldToMatchParameters `json:"fieldToMatch,omitempty" tf:"field_to_match,omitempty"`
 
 	// Which text transformation, if any, to perform on the web request before inspecting the request for cross-site scripting attacks.
-	// +kubebuilder:validation:Required
-	TextTransformation *string `json:"textTransformation" tf:"text_transformation,omitempty"`
+	TextTransformation *string `json:"textTransformation,omitempty" tf:"text_transformation,omitempty"`
 }
 
 // XSSMatchSetSpec defines the desired state of XSSMatchSet
 type XSSMatchSetSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     XSSMatchSetParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider XSSMatchSetInitParameters `json:"initProvider,omitempty"`
 }
 
 // XSSMatchSetStatus defines the observed state of XSSMatchSet.
@@ -105,7 +133,7 @@ type XSSMatchSetStatus struct {
 type XSSMatchSet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   XSSMatchSetSpec   `json:"spec"`
 	Status XSSMatchSetStatus `json:"status,omitempty"`
 }

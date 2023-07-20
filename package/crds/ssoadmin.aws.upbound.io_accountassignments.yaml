@@ -94,13 +94,39 @@ spec:
                     description: 'The entity type for which the assignment will be
                       created. Valid values: AWS_ACCOUNT.'
                     type: string
-                required:
-                - instanceArn
-                - permissionSetArn
-                - principalId
-                - principalType
-                - region
-                - targetId
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  instanceArn:
+                    description: The Amazon Resource Name (ARN) of the SSO Instance.
+                    type: string
+                  permissionSetArn:
+                    description: The Amazon Resource Name (ARN) of the Permission
+                      Set that the admin wants to grant the principal access to.
+                    type: string
+                  principalId:
+                    description: An identifier for an object in SSO, such as a user
+                      or group. PrincipalIds are GUIDs (For example, f81d4fae-7dec-11d0-a765-00a0c91e6bf6).
+                    type: string
+                  principalType:
+                    description: 'The entity type for which the assignment will be
+                      created. Valid values: USER, GROUP.'
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  targetId:
+                    description: An AWS account identifier, typically a 10-12 digit
+                      string.
+                    type: string
+                  targetType:
+                    description: 'The entity type for which the assignment will be
+                      created. Valid values: AWS_ACCOUNT.'
+                    type: string
                 type: object
               managementPolicies:
                 default:

@@ -13,6 +13,29 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type TagOptionResourceAssociationInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Resource identifier.
+	// +crossplane:generate:reference:type=Product
+	ResourceID *string `json:"resourceId,omitempty" tf:"resource_id,omitempty"`
+
+	ResourceIDRef *v1.Reference `json:"resourceIdRef,omitempty" tf:"-"`
+
+	ResourceIDSelector *v1.Selector `json:"resourceIdSelector,omitempty" tf:"-"`
+
+	// Tag Option identifier.
+	// +crossplane:generate:reference:type=TagOption
+	TagOptionID *string `json:"tagOptionId,omitempty" tf:"tag_option_id,omitempty"`
+
+	TagOptionIDRef *v1.Reference `json:"tagOptionIdRef,omitempty" tf:"-"`
+
+	TagOptionIDSelector *v1.Selector `json:"tagOptionIdSelector,omitempty" tf:"-"`
+}
+
 type TagOptionResourceAssociationObservation struct {
 
 	// Identifier of the association.
@@ -41,12 +64,10 @@ type TagOptionResourceAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Resource identifier.
 	// +crossplane:generate:reference:type=Product
-	// +kubebuilder:validation:Optional
 	ResourceID *string `json:"resourceId,omitempty" tf:"resource_id,omitempty"`
 
 	// Reference to a Product to populate resourceId.
@@ -59,7 +80,6 @@ type TagOptionResourceAssociationParameters struct {
 
 	// Tag Option identifier.
 	// +crossplane:generate:reference:type=TagOption
-	// +kubebuilder:validation:Optional
 	TagOptionID *string `json:"tagOptionId,omitempty" tf:"tag_option_id,omitempty"`
 
 	// Reference to a TagOption to populate tagOptionId.
@@ -75,6 +95,10 @@ type TagOptionResourceAssociationParameters struct {
 type TagOptionResourceAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     TagOptionResourceAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider TagOptionResourceAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // TagOptionResourceAssociationStatus defines the observed state of TagOptionResourceAssociation.

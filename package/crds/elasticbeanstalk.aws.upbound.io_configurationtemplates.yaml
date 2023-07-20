@@ -176,18 +176,131 @@ spec:
                         value:
                           description: value for the configuration option
                           type: string
-                      required:
-                      - name
-                      - namespace
-                      - value
                       type: object
                     type: array
                   solutionStackName:
                     description: –  A solution stack to base your Template off of.
                       Example stacks can be found in the Amazon API documentation
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  application:
+                    description: –  name of the application to associate with this
+                      configuration template
+                    type: string
+                  applicationRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  applicationSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  description:
+                    description: Short description of the Template
+                    type: string
+                  environmentId:
+                    description: –  The ID of the environment used with this configuration
+                      template
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  setting:
+                    description: –  Option settings to configure the new Environment.
+                      These override specific values that are set as defaults. The
+                      format is detailed below in Option Settings
+                    items:
+                      properties:
+                        name:
+                          description: A unique name for this Template.
+                          type: string
+                        namespace:
+                          description: unique namespace identifying the option's associated
+                            AWS resource
+                          type: string
+                        resource:
+                          description: resource name for scheduled action
+                          type: string
+                        value:
+                          description: value for the configuration option
+                          type: string
+                      type: object
+                    type: array
+                  solutionStackName:
+                    description: –  A solution stack to base your Template off of.
+                      Example stacks can be found in the Amazon API documentation
+                    type: string
                 type: object
               managementPolicies:
                 default:

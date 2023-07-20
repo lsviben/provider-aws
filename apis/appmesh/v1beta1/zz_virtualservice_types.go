@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ProviderInitParameters struct {
+
+	// Virtual node associated with a virtual service.
+	VirtualNode []ProviderVirtualNodeInitParameters `json:"virtualNode,omitempty" tf:"virtual_node,omitempty"`
+
+	// Virtual router associated with a virtual service.
+	VirtualRouter []ProviderVirtualRouterInitParameters `json:"virtualRouter,omitempty" tf:"virtual_router,omitempty"`
+}
+
 type ProviderObservation struct {
 
 	// Virtual node associated with a virtual service.
@@ -25,12 +34,22 @@ type ProviderObservation struct {
 type ProviderParameters struct {
 
 	// Virtual node associated with a virtual service.
-	// +kubebuilder:validation:Optional
 	VirtualNode []ProviderVirtualNodeParameters `json:"virtualNode,omitempty" tf:"virtual_node,omitempty"`
 
 	// Virtual router associated with a virtual service.
-	// +kubebuilder:validation:Optional
 	VirtualRouter []ProviderVirtualRouterParameters `json:"virtualRouter,omitempty" tf:"virtual_router,omitempty"`
+}
+
+type ProviderVirtualNodeInitParameters struct {
+
+	// Name of the virtual node that is acting as a service provider. Must be between 1 and 255 characters in length.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appmesh/v1beta1.VirtualNode
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
+	VirtualNodeName *string `json:"virtualNodeName,omitempty" tf:"virtual_node_name,omitempty"`
+
+	VirtualNodeNameRef *v1.Reference `json:"virtualNodeNameRef,omitempty" tf:"-"`
+
+	VirtualNodeNameSelector *v1.Selector `json:"virtualNodeNameSelector,omitempty" tf:"-"`
 }
 
 type ProviderVirtualNodeObservation struct {
@@ -44,7 +63,6 @@ type ProviderVirtualNodeParameters struct {
 	// Name of the virtual node that is acting as a service provider. Must be between 1 and 255 characters in length.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appmesh/v1beta1.VirtualNode
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
-	// +kubebuilder:validation:Optional
 	VirtualNodeName *string `json:"virtualNodeName,omitempty" tf:"virtual_node_name,omitempty"`
 
 	// Reference to a VirtualNode in appmesh to populate virtualNodeName.
@@ -54,6 +72,18 @@ type ProviderVirtualNodeParameters struct {
 	// Selector for a VirtualNode in appmesh to populate virtualNodeName.
 	// +kubebuilder:validation:Optional
 	VirtualNodeNameSelector *v1.Selector `json:"virtualNodeNameSelector,omitempty" tf:"-"`
+}
+
+type ProviderVirtualRouterInitParameters struct {
+
+	// Name of the virtual router that is acting as a service provider. Must be between 1 and 255 characters in length.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appmesh/v1beta1.VirtualRouter
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
+	VirtualRouterName *string `json:"virtualRouterName,omitempty" tf:"virtual_router_name,omitempty"`
+
+	VirtualRouterNameRef *v1.Reference `json:"virtualRouterNameRef,omitempty" tf:"-"`
+
+	VirtualRouterNameSelector *v1.Selector `json:"virtualRouterNameSelector,omitempty" tf:"-"`
 }
 
 type ProviderVirtualRouterObservation struct {
@@ -67,7 +97,6 @@ type ProviderVirtualRouterParameters struct {
 	// Name of the virtual router that is acting as a service provider. Must be between 1 and 255 characters in length.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appmesh/v1beta1.VirtualRouter
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
-	// +kubebuilder:validation:Optional
 	VirtualRouterName *string `json:"virtualRouterName,omitempty" tf:"virtual_router_name,omitempty"`
 
 	// Reference to a VirtualRouter in appmesh to populate virtualRouterName.
@@ -77,6 +106,34 @@ type ProviderVirtualRouterParameters struct {
 	// Selector for a VirtualRouter in appmesh to populate virtualRouterName.
 	// +kubebuilder:validation:Optional
 	VirtualRouterNameSelector *v1.Selector `json:"virtualRouterNameSelector,omitempty" tf:"-"`
+}
+
+type VirtualServiceInitParameters_2 struct {
+
+	// Name of the service mesh in which to create the virtual service. Must be between 1 and 255 characters in length.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appmesh/v1beta1.Mesh
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	MeshName *string `json:"meshName,omitempty" tf:"mesh_name,omitempty"`
+
+	MeshNameRef *v1.Reference `json:"meshNameRef,omitempty" tf:"-"`
+
+	MeshNameSelector *v1.Selector `json:"meshNameSelector,omitempty" tf:"-"`
+
+	// AWS account ID of the service mesh's owner. Defaults to the account ID the AWS provider is currently connected to.
+	MeshOwner *string `json:"meshOwner,omitempty" tf:"mesh_owner,omitempty"`
+
+	// Name to use for the virtual service. Must be between 1 and 255 characters in length.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Virtual service specification to apply.
+	Spec []VirtualServiceSpecInitParameters `json:"spec,omitempty" tf:"spec,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type VirtualServiceObservation_2 struct {
@@ -120,7 +177,6 @@ type VirtualServiceParameters_2 struct {
 	// Name of the service mesh in which to create the virtual service. Must be between 1 and 255 characters in length.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appmesh/v1beta1.Mesh
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	MeshName *string `json:"meshName,omitempty" tf:"mesh_name,omitempty"`
 
 	// Reference to a Mesh in appmesh to populate meshName.
@@ -132,25 +188,26 @@ type VirtualServiceParameters_2 struct {
 	MeshNameSelector *v1.Selector `json:"meshNameSelector,omitempty" tf:"-"`
 
 	// AWS account ID of the service mesh's owner. Defaults to the account ID the AWS provider is currently connected to.
-	// +kubebuilder:validation:Optional
 	MeshOwner *string `json:"meshOwner,omitempty" tf:"mesh_owner,omitempty"`
 
 	// Name to use for the virtual service. Must be between 1 and 255 characters in length.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Virtual service specification to apply.
-	// +kubebuilder:validation:Optional
 	Spec []VirtualServiceSpecParameters `json:"spec,omitempty" tf:"spec,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type VirtualServiceSpecInitParameters struct {
+
+	// App Mesh object that is acting as the provider for a virtual service. You can specify a single virtual node or virtual router.
+	Provider []ProviderInitParameters `json:"provider,omitempty" tf:"provider,omitempty"`
 }
 
 type VirtualServiceSpecObservation struct {
@@ -162,7 +219,6 @@ type VirtualServiceSpecObservation struct {
 type VirtualServiceSpecParameters struct {
 
 	// App Mesh object that is acting as the provider for a virtual service. You can specify a single virtual node or virtual router.
-	// +kubebuilder:validation:Optional
 	Provider []ProviderParameters `json:"provider,omitempty" tf:"provider,omitempty"`
 }
 
@@ -170,6 +226,10 @@ type VirtualServiceSpecParameters struct {
 type VirtualServiceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VirtualServiceParameters_2 `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VirtualServiceInitParameters_2 `json:"initProvider,omitempty"`
 }
 
 // VirtualServiceStatus defines the observed state of VirtualService.
@@ -190,8 +250,8 @@ type VirtualServiceStatus struct {
 type VirtualService struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.spec)",message="spec is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.spec) || has(self.initProvider.spec)",message="%!s(MISSING) is a required parameter"
 	Spec   VirtualServiceSpec   `json:"spec"`
 	Status VirtualServiceStatus `json:"status,omitempty"`
 }

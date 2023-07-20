@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type FindingAggregatorInitParameters struct {
+
+	// Indicates whether to aggregate findings from all of the available Regions or from a specified list. The options are ALL_REGIONS, ALL_REGIONS_EXCEPT_SPECIFIED or SPECIFIED_REGIONS. When ALL_REGIONS or ALL_REGIONS_EXCEPT_SPECIFIED are used, Security Hub will automatically aggregate findings from new Regions as Security Hub supports them and you opt into them.
+	LinkingMode *string `json:"linkingMode,omitempty" tf:"linking_mode,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// List of regions to include or exclude
+	SpecifiedRegions []*string `json:"specifiedRegions,omitempty" tf:"specified_regions,omitempty"`
+}
+
 type FindingAggregatorObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -26,16 +39,13 @@ type FindingAggregatorObservation struct {
 type FindingAggregatorParameters struct {
 
 	// Indicates whether to aggregate findings from all of the available Regions or from a specified list. The options are ALL_REGIONS, ALL_REGIONS_EXCEPT_SPECIFIED or SPECIFIED_REGIONS. When ALL_REGIONS or ALL_REGIONS_EXCEPT_SPECIFIED are used, Security Hub will automatically aggregate findings from new Regions as Security Hub supports them and you opt into them.
-	// +kubebuilder:validation:Optional
 	LinkingMode *string `json:"linkingMode,omitempty" tf:"linking_mode,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// List of regions to include or exclude
-	// +kubebuilder:validation:Optional
 	SpecifiedRegions []*string `json:"specifiedRegions,omitempty" tf:"specified_regions,omitempty"`
 }
 
@@ -43,6 +53,10 @@ type FindingAggregatorParameters struct {
 type FindingAggregatorSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     FindingAggregatorParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider FindingAggregatorInitParameters `json:"initProvider,omitempty"`
 }
 
 // FindingAggregatorStatus defines the observed state of FindingAggregator.
@@ -63,7 +77,7 @@ type FindingAggregatorStatus struct {
 type FindingAggregator struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.linkingMode)",message="linkingMode is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.linkingMode) || has(self.initProvider.linkingMode)",message="%!s(MISSING) is a required parameter"
 	Spec   FindingAggregatorSpec   `json:"spec"`
 	Status FindingAggregatorStatus `json:"status,omitempty"`
 }

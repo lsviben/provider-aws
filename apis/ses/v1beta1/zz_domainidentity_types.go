@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DomainIdentityInitParameters struct {
+
+	// The domain name to assign to SES
+	Domain *string `json:"domain,omitempty" tf:"domain,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type DomainIdentityObservation struct {
 
 	// The ARN of the domain identity.
@@ -35,19 +45,21 @@ type DomainIdentityObservation struct {
 type DomainIdentityParameters struct {
 
 	// The domain name to assign to SES
-	// +kubebuilder:validation:Optional
 	Domain *string `json:"domain,omitempty" tf:"domain,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // DomainIdentitySpec defines the desired state of DomainIdentity
 type DomainIdentitySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DomainIdentityParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DomainIdentityInitParameters `json:"initProvider,omitempty"`
 }
 
 // DomainIdentityStatus defines the observed state of DomainIdentity.
@@ -68,7 +80,7 @@ type DomainIdentityStatus struct {
 type DomainIdentity struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.domain)",message="domain is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.domain) || has(self.initProvider.domain)",message="%!s(MISSING) is a required parameter"
 	Spec   DomainIdentitySpec   `json:"spec"`
 	Status DomainIdentityStatus `json:"status,omitempty"`
 }

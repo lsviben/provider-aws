@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DataCatalogConfigInitParameters struct {
+
+	// The name of the Glue table catalog.
+	Catalog *string `json:"catalog,omitempty" tf:"catalog,omitempty"`
+
+	// The name of the Glue table database.
+	Database *string `json:"database,omitempty" tf:"database,omitempty"`
+
+	// The name of the Glue table.
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+}
+
 type DataCatalogConfigObservation struct {
 
 	// The name of the Glue table catalog.
@@ -28,16 +40,22 @@ type DataCatalogConfigObservation struct {
 type DataCatalogConfigParameters struct {
 
 	// The name of the Glue table catalog.
-	// +kubebuilder:validation:Optional
 	Catalog *string `json:"catalog,omitempty" tf:"catalog,omitempty"`
 
 	// The name of the Glue table database.
-	// +kubebuilder:validation:Optional
 	Database *string `json:"database,omitempty" tf:"database,omitempty"`
 
 	// The name of the Glue table.
-	// +kubebuilder:validation:Optional
 	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+}
+
+type FeatureDefinitionInitParameters struct {
+
+	// The name of a feature. feature_name cannot be any of the following: is_deleted, write_time, api_invocation_time.
+	FeatureName *string `json:"featureName,omitempty" tf:"feature_name,omitempty"`
+
+	// The value type of a feature. Valid values are Integral, Fractional, or String.
+	FeatureType *string `json:"featureType,omitempty" tf:"feature_type,omitempty"`
 }
 
 type FeatureDefinitionObservation struct {
@@ -52,12 +70,47 @@ type FeatureDefinitionObservation struct {
 type FeatureDefinitionParameters struct {
 
 	// The name of a feature. feature_name cannot be any of the following: is_deleted, write_time, api_invocation_time.
-	// +kubebuilder:validation:Optional
 	FeatureName *string `json:"featureName,omitempty" tf:"feature_name,omitempty"`
 
 	// The value type of a feature. Valid values are Integral, Fractional, or String.
-	// +kubebuilder:validation:Optional
 	FeatureType *string `json:"featureType,omitempty" tf:"feature_type,omitempty"`
+}
+
+type FeatureGroupInitParameters struct {
+
+	// A free-form description of a Feature Group.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The name of the feature that stores the EventTime of a Record in a Feature Group.
+	EventTimeFeatureName *string `json:"eventTimeFeatureName,omitempty" tf:"event_time_feature_name,omitempty"`
+
+	// A list of Feature names and types. See Feature Definition Below.
+	FeatureDefinition []FeatureDefinitionInitParameters `json:"featureDefinition,omitempty" tf:"feature_definition,omitempty"`
+
+	// The Offline Feature Store Configuration. See Offline Store Config Below.
+	OfflineStoreConfig []OfflineStoreConfigInitParameters `json:"offlineStoreConfig,omitempty" tf:"offline_store_config,omitempty"`
+
+	// The Online Feature Store Configuration. See Online Store Config Below.
+	OnlineStoreConfig []OnlineStoreConfigInitParameters `json:"onlineStoreConfig,omitempty" tf:"online_store_config,omitempty"`
+
+	// The name of the Feature whose value uniquely identifies a Record defined in the Feature Store. Only the latest record per identifier value will be stored in the Online Store.
+	RecordIdentifierFeatureName *string `json:"recordIdentifierFeatureName,omitempty" tf:"record_identifier_feature_name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The Amazon Resource Name (ARN) of the IAM execution role used to persist data into the Offline Store if an offline_store_config is provided.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type FeatureGroupObservation struct {
@@ -98,38 +151,30 @@ type FeatureGroupObservation struct {
 type FeatureGroupParameters struct {
 
 	// A free-form description of a Feature Group.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The name of the feature that stores the EventTime of a Record in a Feature Group.
-	// +kubebuilder:validation:Optional
 	EventTimeFeatureName *string `json:"eventTimeFeatureName,omitempty" tf:"event_time_feature_name,omitempty"`
 
 	// A list of Feature names and types. See Feature Definition Below.
-	// +kubebuilder:validation:Optional
 	FeatureDefinition []FeatureDefinitionParameters `json:"featureDefinition,omitempty" tf:"feature_definition,omitempty"`
 
 	// The Offline Feature Store Configuration. See Offline Store Config Below.
-	// +kubebuilder:validation:Optional
 	OfflineStoreConfig []OfflineStoreConfigParameters `json:"offlineStoreConfig,omitempty" tf:"offline_store_config,omitempty"`
 
 	// The Online Feature Store Configuration. See Online Store Config Below.
-	// +kubebuilder:validation:Optional
 	OnlineStoreConfig []OnlineStoreConfigParameters `json:"onlineStoreConfig,omitempty" tf:"online_store_config,omitempty"`
 
 	// The name of the Feature whose value uniquely identifies a Record defined in the Feature Store. Only the latest record per identifier value will be stored in the Online Store.
-	// +kubebuilder:validation:Optional
 	RecordIdentifierFeatureName *string `json:"recordIdentifierFeatureName,omitempty" tf:"record_identifier_feature_name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The Amazon Resource Name (ARN) of the IAM execution role used to persist data into the Offline Store if an offline_store_config is provided.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -141,8 +186,19 @@ type FeatureGroupParameters struct {
 	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type OfflineStoreConfigInitParameters struct {
+
+	// The meta data of the Glue table that is autogenerated when an OfflineStore is created. See Data Catalog Config Below.
+	DataCatalogConfig []DataCatalogConfigInitParameters `json:"dataCatalogConfig,omitempty" tf:"data_catalog_config,omitempty"`
+
+	// Set to true to turn Online Store On.
+	DisableGlueTableCreation *bool `json:"disableGlueTableCreation,omitempty" tf:"disable_glue_table_creation,omitempty"`
+
+	// The Amazon Simple Storage (Amazon S3) location of OfflineStore. See S3 Storage Config Below.
+	S3StorageConfig []S3StorageConfigInitParameters `json:"s3StorageConfig,omitempty" tf:"s3_storage_config,omitempty"`
 }
 
 type OfflineStoreConfigObservation struct {
@@ -160,16 +216,22 @@ type OfflineStoreConfigObservation struct {
 type OfflineStoreConfigParameters struct {
 
 	// The meta data of the Glue table that is autogenerated when an OfflineStore is created. See Data Catalog Config Below.
-	// +kubebuilder:validation:Optional
 	DataCatalogConfig []DataCatalogConfigParameters `json:"dataCatalogConfig,omitempty" tf:"data_catalog_config,omitempty"`
 
 	// Set to true to turn Online Store On.
-	// +kubebuilder:validation:Optional
 	DisableGlueTableCreation *bool `json:"disableGlueTableCreation,omitempty" tf:"disable_glue_table_creation,omitempty"`
 
 	// The Amazon Simple Storage (Amazon S3) location of OfflineStore. See S3 Storage Config Below.
-	// +kubebuilder:validation:Required
-	S3StorageConfig []S3StorageConfigParameters `json:"s3StorageConfig" tf:"s3_storage_config,omitempty"`
+	S3StorageConfig []S3StorageConfigParameters `json:"s3StorageConfig,omitempty" tf:"s3_storage_config,omitempty"`
+}
+
+type OnlineStoreConfigInitParameters struct {
+
+	// Set to true to disable the automatic creation of an AWS Glue table when configuring an OfflineStore.
+	EnableOnlineStore *bool `json:"enableOnlineStore,omitempty" tf:"enable_online_store,omitempty"`
+
+	// Security config for at-rest encryption of your OnlineStore. See Security Config Below.
+	SecurityConfig []SecurityConfigInitParameters `json:"securityConfig,omitempty" tf:"security_config,omitempty"`
 }
 
 type OnlineStoreConfigObservation struct {
@@ -184,12 +246,19 @@ type OnlineStoreConfigObservation struct {
 type OnlineStoreConfigParameters struct {
 
 	// Set to true to disable the automatic creation of an AWS Glue table when configuring an OfflineStore.
-	// +kubebuilder:validation:Optional
 	EnableOnlineStore *bool `json:"enableOnlineStore,omitempty" tf:"enable_online_store,omitempty"`
 
 	// Security config for at-rest encryption of your OnlineStore. See Security Config Below.
-	// +kubebuilder:validation:Optional
 	SecurityConfig []SecurityConfigParameters `json:"securityConfig,omitempty" tf:"security_config,omitempty"`
+}
+
+type S3StorageConfigInitParameters struct {
+
+	// The AWS Key Management Service (KMS) key ID of the key used to encrypt any objects written into the OfflineStore S3 location.
+	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
+
+	// The S3 URI, or location in Amazon S3, of OfflineStore.
+	S3URI *string `json:"s3Uri,omitempty" tf:"s3_uri,omitempty"`
 }
 
 type S3StorageConfigObservation struct {
@@ -204,12 +273,16 @@ type S3StorageConfigObservation struct {
 type S3StorageConfigParameters struct {
 
 	// The AWS Key Management Service (KMS) key ID of the key used to encrypt any objects written into the OfflineStore S3 location.
-	// +kubebuilder:validation:Optional
 	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
 
 	// The S3 URI, or location in Amazon S3, of OfflineStore.
-	// +kubebuilder:validation:Required
-	S3URI *string `json:"s3Uri" tf:"s3_uri,omitempty"`
+	S3URI *string `json:"s3Uri,omitempty" tf:"s3_uri,omitempty"`
+}
+
+type SecurityConfigInitParameters struct {
+
+	// The AWS Key Management Service (KMS) key ID of the key used to encrypt any objects written into the OfflineStore S3 location.
+	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
 }
 
 type SecurityConfigObservation struct {
@@ -221,7 +294,6 @@ type SecurityConfigObservation struct {
 type SecurityConfigParameters struct {
 
 	// The AWS Key Management Service (KMS) key ID of the key used to encrypt any objects written into the OfflineStore S3 location.
-	// +kubebuilder:validation:Optional
 	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
 }
 
@@ -229,6 +301,10 @@ type SecurityConfigParameters struct {
 type FeatureGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     FeatureGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider FeatureGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // FeatureGroupStatus defines the observed state of FeatureGroup.
@@ -249,9 +325,9 @@ type FeatureGroupStatus struct {
 type FeatureGroup struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.eventTimeFeatureName)",message="eventTimeFeatureName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.featureDefinition)",message="featureDefinition is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.recordIdentifierFeatureName)",message="recordIdentifierFeatureName is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.eventTimeFeatureName) || has(self.initProvider.eventTimeFeatureName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.featureDefinition) || has(self.initProvider.featureDefinition)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.recordIdentifierFeatureName) || has(self.initProvider.recordIdentifierFeatureName)",message="%!s(MISSING) is a required parameter"
 	Spec   FeatureGroupSpec   `json:"spec"`
 	Status FeatureGroupStatus `json:"status,omitempty"`
 }

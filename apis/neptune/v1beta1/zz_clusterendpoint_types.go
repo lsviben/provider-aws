@@ -13,6 +13,33 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ClusterEndpointInitParameters struct {
+
+	// The DB cluster identifier of the DB cluster associated with the endpoint.
+	// +crossplane:generate:reference:type=Cluster
+	ClusterIdentifier *string `json:"clusterIdentifier,omitempty" tf:"cluster_identifier,omitempty"`
+
+	ClusterIdentifierRef *v1.Reference `json:"clusterIdentifierRef,omitempty" tf:"-"`
+
+	ClusterIdentifierSelector *v1.Selector `json:"clusterIdentifierSelector,omitempty" tf:"-"`
+
+	// The type of the endpoint. One of: READER, WRITER, ANY.
+	EndpointType *string `json:"endpointType,omitempty" tf:"endpoint_type,omitempty"`
+
+	// List of DB instance identifiers that aren't part of the custom endpoint group. All other eligible instances are reachable through the custom endpoint. Only relevant if the list of static members is empty.
+	ExcludedMembers []*string `json:"excludedMembers,omitempty" tf:"excluded_members,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// List of DB instance identifiers that are part of the custom endpoint group.
+	StaticMembers []*string `json:"staticMembers,omitempty" tf:"static_members,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ClusterEndpointObservation struct {
 
 	// The Neptune Cluster Endpoint Amazon Resource Name (ARN).
@@ -47,7 +74,6 @@ type ClusterEndpointParameters struct {
 
 	// The DB cluster identifier of the DB cluster associated with the endpoint.
 	// +crossplane:generate:reference:type=Cluster
-	// +kubebuilder:validation:Optional
 	ClusterIdentifier *string `json:"clusterIdentifier,omitempty" tf:"cluster_identifier,omitempty"`
 
 	// Reference to a Cluster to populate clusterIdentifier.
@@ -59,24 +85,19 @@ type ClusterEndpointParameters struct {
 	ClusterIdentifierSelector *v1.Selector `json:"clusterIdentifierSelector,omitempty" tf:"-"`
 
 	// The type of the endpoint. One of: READER, WRITER, ANY.
-	// +kubebuilder:validation:Optional
 	EndpointType *string `json:"endpointType,omitempty" tf:"endpoint_type,omitempty"`
 
 	// List of DB instance identifiers that aren't part of the custom endpoint group. All other eligible instances are reachable through the custom endpoint. Only relevant if the list of static members is empty.
-	// +kubebuilder:validation:Optional
 	ExcludedMembers []*string `json:"excludedMembers,omitempty" tf:"excluded_members,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// List of DB instance identifiers that are part of the custom endpoint group.
-	// +kubebuilder:validation:Optional
 	StaticMembers []*string `json:"staticMembers,omitempty" tf:"static_members,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -84,6 +105,10 @@ type ClusterEndpointParameters struct {
 type ClusterEndpointSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ClusterEndpointParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ClusterEndpointInitParameters `json:"initProvider,omitempty"`
 }
 
 // ClusterEndpointStatus defines the observed state of ClusterEndpoint.
@@ -104,7 +129,7 @@ type ClusterEndpointStatus struct {
 type ClusterEndpoint struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.endpointType)",message="endpointType is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.endpointType) || has(self.initProvider.endpointType)",message="%!s(MISSING) is a required parameter"
 	Spec   ClusterEndpointSpec   `json:"spec"`
 	Status ClusterEndpointStatus `json:"status,omitempty"`
 }

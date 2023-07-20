@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CustomizedMetricSpecificationInitParameters struct {
+
+	// Configuration block(s) with the dimensions of the metric if the metric was published with dimensions. Detailed below.
+	Dimensions []DimensionsInitParameters `json:"dimensions,omitempty" tf:"dimensions,omitempty"`
+
+	// Name of the metric.
+	MetricName *string `json:"metricName,omitempty" tf:"metric_name,omitempty"`
+
+	// Namespace of the metric.
+	Namespace *string `json:"namespace,omitempty" tf:"namespace,omitempty"`
+
+	// Statistic of the metric. Valid values: Average, Minimum, Maximum, SampleCount, and Sum.
+	Statistic *string `json:"statistic,omitempty" tf:"statistic,omitempty"`
+
+	// Unit of the metric.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+}
+
 type CustomizedMetricSpecificationObservation struct {
 
 	// Configuration block(s) with the dimensions of the metric if the metric was published with dimensions. Detailed below.
@@ -34,24 +52,28 @@ type CustomizedMetricSpecificationObservation struct {
 type CustomizedMetricSpecificationParameters struct {
 
 	// Configuration block(s) with the dimensions of the metric if the metric was published with dimensions. Detailed below.
-	// +kubebuilder:validation:Optional
 	Dimensions []DimensionsParameters `json:"dimensions,omitempty" tf:"dimensions,omitempty"`
 
 	// Name of the metric.
-	// +kubebuilder:validation:Required
-	MetricName *string `json:"metricName" tf:"metric_name,omitempty"`
+	MetricName *string `json:"metricName,omitempty" tf:"metric_name,omitempty"`
 
 	// Namespace of the metric.
-	// +kubebuilder:validation:Required
-	Namespace *string `json:"namespace" tf:"namespace,omitempty"`
+	Namespace *string `json:"namespace,omitempty" tf:"namespace,omitempty"`
 
 	// Statistic of the metric. Valid values: Average, Minimum, Maximum, SampleCount, and Sum.
-	// +kubebuilder:validation:Required
-	Statistic *string `json:"statistic" tf:"statistic,omitempty"`
+	Statistic *string `json:"statistic,omitempty" tf:"statistic,omitempty"`
 
 	// Unit of the metric.
-	// +kubebuilder:validation:Optional
 	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+}
+
+type DimensionsInitParameters struct {
+
+	// Name of the dimension.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Value of the dimension.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type DimensionsObservation struct {
@@ -66,12 +88,53 @@ type DimensionsObservation struct {
 type DimensionsParameters struct {
 
 	// Name of the dimension.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Value of the dimension.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type PolicyInitParameters struct {
+
+	// Policy type. Valid values are StepScaling and TargetTrackingScaling. Defaults to StepScaling. Certain services only support only one policy type. For more information see the Target Tracking Scaling Policies and Step Scaling Policies documentation.
+	PolicyType *string `json:"policyType,omitempty" tf:"policy_type,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Resource type and unique identifier string for the resource associated with the scaling policy. Documentation can be found in the ResourceId parameter at: AWS Application Auto Scaling API Reference
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appautoscaling/v1beta1.Target
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("resource_id",false)
+	ResourceID *string `json:"resourceId,omitempty" tf:"resource_id,omitempty"`
+
+	ResourceIDRef *v1.Reference `json:"resourceIdRef,omitempty" tf:"-"`
+
+	ResourceIDSelector *v1.Selector `json:"resourceIdSelector,omitempty" tf:"-"`
+
+	// Scalable dimension of the scalable target. Documentation can be found in the ScalableDimension parameter at: AWS Application Auto Scaling API Reference
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appautoscaling/v1beta1.Target
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("scalable_dimension",false)
+	ScalableDimension *string `json:"scalableDimension,omitempty" tf:"scalable_dimension,omitempty"`
+
+	ScalableDimensionRef *v1.Reference `json:"scalableDimensionRef,omitempty" tf:"-"`
+
+	ScalableDimensionSelector *v1.Selector `json:"scalableDimensionSelector,omitempty" tf:"-"`
+
+	// AWS service namespace of the scalable target. Documentation can be found in the ServiceNamespace parameter at: AWS Application Auto Scaling API Reference
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appautoscaling/v1beta1.Target
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("service_namespace",false)
+	ServiceNamespace *string `json:"serviceNamespace,omitempty" tf:"service_namespace,omitempty"`
+
+	ServiceNamespaceRef *v1.Reference `json:"serviceNamespaceRef,omitempty" tf:"-"`
+
+	ServiceNamespaceSelector *v1.Selector `json:"serviceNamespaceSelector,omitempty" tf:"-"`
+
+	// Step scaling policy configuration, requires policy_type = "StepScaling" (default). See supported fields below.
+	StepScalingPolicyConfiguration []StepScalingPolicyConfigurationInitParameters `json:"stepScalingPolicyConfiguration,omitempty" tf:"step_scaling_policy_configuration,omitempty"`
+
+	// Target tracking policy, requires policy_type = "TargetTrackingScaling". See supported fields below.
+	TargetTrackingScalingPolicyConfiguration []TargetTrackingScalingPolicyConfigurationInitParameters `json:"targetTrackingScalingPolicyConfiguration,omitempty" tf:"target_tracking_scaling_policy_configuration,omitempty"`
 }
 
 type PolicyObservation struct {
@@ -106,18 +169,15 @@ type PolicyObservation struct {
 type PolicyParameters struct {
 
 	// Policy type. Valid values are StepScaling and TargetTrackingScaling. Defaults to StepScaling. Certain services only support only one policy type. For more information see the Target Tracking Scaling Policies and Step Scaling Policies documentation.
-	// +kubebuilder:validation:Optional
 	PolicyType *string `json:"policyType,omitempty" tf:"policy_type,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Resource type and unique identifier string for the resource associated with the scaling policy. Documentation can be found in the ResourceId parameter at: AWS Application Auto Scaling API Reference
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appautoscaling/v1beta1.Target
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("resource_id",false)
-	// +kubebuilder:validation:Optional
 	ResourceID *string `json:"resourceId,omitempty" tf:"resource_id,omitempty"`
 
 	// Reference to a Target in appautoscaling to populate resourceId.
@@ -131,7 +191,6 @@ type PolicyParameters struct {
 	// Scalable dimension of the scalable target. Documentation can be found in the ScalableDimension parameter at: AWS Application Auto Scaling API Reference
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appautoscaling/v1beta1.Target
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("scalable_dimension",false)
-	// +kubebuilder:validation:Optional
 	ScalableDimension *string `json:"scalableDimension,omitempty" tf:"scalable_dimension,omitempty"`
 
 	// Reference to a Target in appautoscaling to populate scalableDimension.
@@ -145,7 +204,6 @@ type PolicyParameters struct {
 	// AWS service namespace of the scalable target. Documentation can be found in the ServiceNamespace parameter at: AWS Application Auto Scaling API Reference
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appautoscaling/v1beta1.Target
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("service_namespace",false)
-	// +kubebuilder:validation:Optional
 	ServiceNamespace *string `json:"serviceNamespace,omitempty" tf:"service_namespace,omitempty"`
 
 	// Reference to a Target in appautoscaling to populate serviceNamespace.
@@ -157,12 +215,19 @@ type PolicyParameters struct {
 	ServiceNamespaceSelector *v1.Selector `json:"serviceNamespaceSelector,omitempty" tf:"-"`
 
 	// Step scaling policy configuration, requires policy_type = "StepScaling" (default). See supported fields below.
-	// +kubebuilder:validation:Optional
 	StepScalingPolicyConfiguration []StepScalingPolicyConfigurationParameters `json:"stepScalingPolicyConfiguration,omitempty" tf:"step_scaling_policy_configuration,omitempty"`
 
 	// Target tracking policy, requires policy_type = "TargetTrackingScaling". See supported fields below.
-	// +kubebuilder:validation:Optional
 	TargetTrackingScalingPolicyConfiguration []TargetTrackingScalingPolicyConfigurationParameters `json:"targetTrackingScalingPolicyConfiguration,omitempty" tf:"target_tracking_scaling_policy_configuration,omitempty"`
+}
+
+type PredefinedMetricSpecificationInitParameters struct {
+
+	// Metric type.
+	PredefinedMetricType *string `json:"predefinedMetricType,omitempty" tf:"predefined_metric_type,omitempty"`
+
+	// Reserved for future use if the predefined_metric_type is not ALBRequestCountPerTarget. If the predefined_metric_type is ALBRequestCountPerTarget, you must specify this argument. Documentation can be found at: AWS Predefined Scaling Metric Specification. Must be less than or equal to 1023 characters in length.
+	ResourceLabel *string `json:"resourceLabel,omitempty" tf:"resource_label,omitempty"`
 }
 
 type PredefinedMetricSpecificationObservation struct {
@@ -177,12 +242,22 @@ type PredefinedMetricSpecificationObservation struct {
 type PredefinedMetricSpecificationParameters struct {
 
 	// Metric type.
-	// +kubebuilder:validation:Required
-	PredefinedMetricType *string `json:"predefinedMetricType" tf:"predefined_metric_type,omitempty"`
+	PredefinedMetricType *string `json:"predefinedMetricType,omitempty" tf:"predefined_metric_type,omitempty"`
 
 	// Reserved for future use if the predefined_metric_type is not ALBRequestCountPerTarget. If the predefined_metric_type is ALBRequestCountPerTarget, you must specify this argument. Documentation can be found at: AWS Predefined Scaling Metric Specification. Must be less than or equal to 1023 characters in length.
-	// +kubebuilder:validation:Optional
 	ResourceLabel *string `json:"resourceLabel,omitempty" tf:"resource_label,omitempty"`
+}
+
+type StepAdjustmentInitParameters struct {
+
+	// Lower bound for the difference between the alarm threshold and the CloudWatch metric. Without a value, AWS will treat this bound as negative infinity.
+	MetricIntervalLowerBound *string `json:"metricIntervalLowerBound,omitempty" tf:"metric_interval_lower_bound,omitempty"`
+
+	// Upper bound for the difference between the alarm threshold and the CloudWatch metric. Without a value, AWS will treat this bound as infinity. The upper bound must be greater than the lower bound.
+	MetricIntervalUpperBound *string `json:"metricIntervalUpperBound,omitempty" tf:"metric_interval_upper_bound,omitempty"`
+
+	// Number of members by which to scale, when the adjustment bounds are breached. A positive value scales up. A negative value scales down.
+	ScalingAdjustment *float64 `json:"scalingAdjustment,omitempty" tf:"scaling_adjustment,omitempty"`
 }
 
 type StepAdjustmentObservation struct {
@@ -200,16 +275,31 @@ type StepAdjustmentObservation struct {
 type StepAdjustmentParameters struct {
 
 	// Lower bound for the difference between the alarm threshold and the CloudWatch metric. Without a value, AWS will treat this bound as negative infinity.
-	// +kubebuilder:validation:Optional
 	MetricIntervalLowerBound *string `json:"metricIntervalLowerBound,omitempty" tf:"metric_interval_lower_bound,omitempty"`
 
 	// Upper bound for the difference between the alarm threshold and the CloudWatch metric. Without a value, AWS will treat this bound as infinity. The upper bound must be greater than the lower bound.
-	// +kubebuilder:validation:Optional
 	MetricIntervalUpperBound *string `json:"metricIntervalUpperBound,omitempty" tf:"metric_interval_upper_bound,omitempty"`
 
 	// Number of members by which to scale, when the adjustment bounds are breached. A positive value scales up. A negative value scales down.
-	// +kubebuilder:validation:Required
-	ScalingAdjustment *float64 `json:"scalingAdjustment" tf:"scaling_adjustment,omitempty"`
+	ScalingAdjustment *float64 `json:"scalingAdjustment,omitempty" tf:"scaling_adjustment,omitempty"`
+}
+
+type StepScalingPolicyConfigurationInitParameters struct {
+
+	// Whether the adjustment is an absolute number or a percentage of the current capacity. Valid values are ChangeInCapacity, ExactCapacity, and PercentChangeInCapacity.
+	AdjustmentType *string `json:"adjustmentType,omitempty" tf:"adjustment_type,omitempty"`
+
+	// Amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start.
+	Cooldown *float64 `json:"cooldown,omitempty" tf:"cooldown,omitempty"`
+
+	// Aggregation type for the policy's metrics. Valid values are "Minimum", "Maximum", and "Average". Without a value, AWS will treat the aggregation type as "Average".
+	MetricAggregationType *string `json:"metricAggregationType,omitempty" tf:"metric_aggregation_type,omitempty"`
+
+	// Minimum number to adjust your scalable dimension as a result of a scaling activity. If the adjustment type is PercentChangeInCapacity, the scaling policy changes the scalable dimension of the scalable target by this amount.
+	MinAdjustmentMagnitude *float64 `json:"minAdjustmentMagnitude,omitempty" tf:"min_adjustment_magnitude,omitempty"`
+
+	// Set of adjustments that manage scaling. These have the following structure:
+	StepAdjustment []StepAdjustmentInitParameters `json:"stepAdjustment,omitempty" tf:"step_adjustment,omitempty"`
 }
 
 type StepScalingPolicyConfigurationObservation struct {
@@ -233,24 +323,40 @@ type StepScalingPolicyConfigurationObservation struct {
 type StepScalingPolicyConfigurationParameters struct {
 
 	// Whether the adjustment is an absolute number or a percentage of the current capacity. Valid values are ChangeInCapacity, ExactCapacity, and PercentChangeInCapacity.
-	// +kubebuilder:validation:Optional
 	AdjustmentType *string `json:"adjustmentType,omitempty" tf:"adjustment_type,omitempty"`
 
 	// Amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start.
-	// +kubebuilder:validation:Optional
 	Cooldown *float64 `json:"cooldown,omitempty" tf:"cooldown,omitempty"`
 
 	// Aggregation type for the policy's metrics. Valid values are "Minimum", "Maximum", and "Average". Without a value, AWS will treat the aggregation type as "Average".
-	// +kubebuilder:validation:Optional
 	MetricAggregationType *string `json:"metricAggregationType,omitempty" tf:"metric_aggregation_type,omitempty"`
 
 	// Minimum number to adjust your scalable dimension as a result of a scaling activity. If the adjustment type is PercentChangeInCapacity, the scaling policy changes the scalable dimension of the scalable target by this amount.
-	// +kubebuilder:validation:Optional
 	MinAdjustmentMagnitude *float64 `json:"minAdjustmentMagnitude,omitempty" tf:"min_adjustment_magnitude,omitempty"`
 
 	// Set of adjustments that manage scaling. These have the following structure:
-	// +kubebuilder:validation:Optional
 	StepAdjustment []StepAdjustmentParameters `json:"stepAdjustment,omitempty" tf:"step_adjustment,omitempty"`
+}
+
+type TargetTrackingScalingPolicyConfigurationInitParameters struct {
+
+	// Custom CloudWatch metric. Documentation can be found  at: AWS Customized Metric Specification. See supported fields below.
+	CustomizedMetricSpecification []CustomizedMetricSpecificationInitParameters `json:"customizedMetricSpecification,omitempty" tf:"customized_metric_specification,omitempty"`
+
+	// Whether scale in by the target tracking policy is disabled. If the value is true, scale in is disabled and the target tracking policy won't remove capacity from the scalable resource. Otherwise, scale in is enabled and the target tracking policy can remove capacity from the scalable resource. The default value is false.
+	DisableScaleIn *bool `json:"disableScaleIn,omitempty" tf:"disable_scale_in,omitempty"`
+
+	// Predefined metric. See supported fields below.
+	PredefinedMetricSpecification []PredefinedMetricSpecificationInitParameters `json:"predefinedMetricSpecification,omitempty" tf:"predefined_metric_specification,omitempty"`
+
+	// Amount of time, in seconds, after a scale in activity completes before another scale in activity can start.
+	ScaleInCooldown *float64 `json:"scaleInCooldown,omitempty" tf:"scale_in_cooldown,omitempty"`
+
+	// Amount of time, in seconds, after a scale out activity completes before another scale out activity can start.
+	ScaleOutCooldown *float64 `json:"scaleOutCooldown,omitempty" tf:"scale_out_cooldown,omitempty"`
+
+	// Target value for the metric.
+	TargetValue *float64 `json:"targetValue,omitempty" tf:"target_value,omitempty"`
 }
 
 type TargetTrackingScalingPolicyConfigurationObservation struct {
@@ -277,34 +383,32 @@ type TargetTrackingScalingPolicyConfigurationObservation struct {
 type TargetTrackingScalingPolicyConfigurationParameters struct {
 
 	// Custom CloudWatch metric. Documentation can be found  at: AWS Customized Metric Specification. See supported fields below.
-	// +kubebuilder:validation:Optional
 	CustomizedMetricSpecification []CustomizedMetricSpecificationParameters `json:"customizedMetricSpecification,omitempty" tf:"customized_metric_specification,omitempty"`
 
 	// Whether scale in by the target tracking policy is disabled. If the value is true, scale in is disabled and the target tracking policy won't remove capacity from the scalable resource. Otherwise, scale in is enabled and the target tracking policy can remove capacity from the scalable resource. The default value is false.
-	// +kubebuilder:validation:Optional
 	DisableScaleIn *bool `json:"disableScaleIn,omitempty" tf:"disable_scale_in,omitempty"`
 
 	// Predefined metric. See supported fields below.
-	// +kubebuilder:validation:Optional
 	PredefinedMetricSpecification []PredefinedMetricSpecificationParameters `json:"predefinedMetricSpecification,omitempty" tf:"predefined_metric_specification,omitempty"`
 
 	// Amount of time, in seconds, after a scale in activity completes before another scale in activity can start.
-	// +kubebuilder:validation:Optional
 	ScaleInCooldown *float64 `json:"scaleInCooldown,omitempty" tf:"scale_in_cooldown,omitempty"`
 
 	// Amount of time, in seconds, after a scale out activity completes before another scale out activity can start.
-	// +kubebuilder:validation:Optional
 	ScaleOutCooldown *float64 `json:"scaleOutCooldown,omitempty" tf:"scale_out_cooldown,omitempty"`
 
 	// Target value for the metric.
-	// +kubebuilder:validation:Required
-	TargetValue *float64 `json:"targetValue" tf:"target_value,omitempty"`
+	TargetValue *float64 `json:"targetValue,omitempty" tf:"target_value,omitempty"`
 }
 
 // PolicySpec defines the desired state of Policy
 type PolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // PolicyStatus defines the observed state of Policy.

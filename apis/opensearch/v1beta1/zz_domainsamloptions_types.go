@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DomainSAMLOptionsInitParameters struct {
+
+	// Name of the domain.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/opensearch/v1beta1.Domain
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("domain_name",false)
+	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
+
+	DomainNameRef *v1.Reference `json:"domainNameRef,omitempty" tf:"-"`
+
+	DomainNameSelector *v1.Selector `json:"domainNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// SAML authentication options for an AWS OpenSearch Domain.
+	SAMLOptions []SAMLOptionsInitParameters `json:"samlOptions,omitempty" tf:"saml_options,omitempty"`
+}
+
 type DomainSAMLOptionsObservation struct {
 
 	// Name of the domain.
@@ -30,7 +49,6 @@ type DomainSAMLOptionsParameters struct {
 	// Name of the domain.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/opensearch/v1beta1.Domain
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("domain_name",false)
-	// +kubebuilder:validation:Optional
 	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
 
 	// Reference to a Domain in opensearch to populate domainName.
@@ -43,12 +61,19 @@ type DomainSAMLOptionsParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// SAML authentication options for an AWS OpenSearch Domain.
-	// +kubebuilder:validation:Optional
 	SAMLOptions []SAMLOptionsParameters `json:"samlOptions,omitempty" tf:"saml_options,omitempty"`
+}
+
+type IdpInitParameters struct {
+
+	// Unique Entity ID of the application in SAML Identity Provider.
+	EntityID *string `json:"entityId,omitempty" tf:"entity_id,omitempty"`
+
+	// Metadata of the SAML application in xml format.
+	MetadataContent *string `json:"metadataContent,omitempty" tf:"metadata_content,omitempty"`
 }
 
 type IdpObservation struct {
@@ -63,12 +88,34 @@ type IdpObservation struct {
 type IdpParameters struct {
 
 	// Unique Entity ID of the application in SAML Identity Provider.
-	// +kubebuilder:validation:Required
-	EntityID *string `json:"entityId" tf:"entity_id,omitempty"`
+	EntityID *string `json:"entityId,omitempty" tf:"entity_id,omitempty"`
 
 	// Metadata of the SAML application in xml format.
-	// +kubebuilder:validation:Required
-	MetadataContent *string `json:"metadataContent" tf:"metadata_content,omitempty"`
+	MetadataContent *string `json:"metadataContent,omitempty" tf:"metadata_content,omitempty"`
+}
+
+type SAMLOptionsInitParameters struct {
+
+	// Whether SAML authentication is enabled.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// Information from your identity provider.
+	Idp []IdpInitParameters `json:"idp,omitempty" tf:"idp,omitempty"`
+
+	// This backend role from the SAML IdP receives full permissions to the cluster, equivalent to a new master user.
+	MasterBackendRole *string `json:"masterBackendRole,omitempty" tf:"master_backend_role,omitempty"`
+
+	// This username from the SAML IdP receives full permissions to the cluster, equivalent to a new master user.
+	MasterUserNameSecretRef *v1.SecretKeySelector `json:"masterUserNameSecretRef,omitempty" tf:"-"`
+
+	// Element of the SAML assertion to use for backend roles. Default is roles.
+	RolesKey *string `json:"rolesKey,omitempty" tf:"roles_key,omitempty"`
+
+	// Duration of a session in minutes after a user logs in. Default is 60. Maximum value is 1,440.
+	SessionTimeoutMinutes *float64 `json:"sessionTimeoutMinutes,omitempty" tf:"session_timeout_minutes,omitempty"`
+
+	// Element of the SAML assertion to use for username. Default is NameID.
+	SubjectKey *string `json:"subjectKey,omitempty" tf:"subject_key,omitempty"`
 }
 
 type SAMLOptionsObservation struct {
@@ -95,31 +142,24 @@ type SAMLOptionsObservation struct {
 type SAMLOptionsParameters struct {
 
 	// Whether SAML authentication is enabled.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// Information from your identity provider.
-	// +kubebuilder:validation:Optional
 	Idp []IdpParameters `json:"idp,omitempty" tf:"idp,omitempty"`
 
 	// This backend role from the SAML IdP receives full permissions to the cluster, equivalent to a new master user.
-	// +kubebuilder:validation:Optional
 	MasterBackendRole *string `json:"masterBackendRole,omitempty" tf:"master_backend_role,omitempty"`
 
 	// This username from the SAML IdP receives full permissions to the cluster, equivalent to a new master user.
-	// +kubebuilder:validation:Optional
 	MasterUserNameSecretRef *v1.SecretKeySelector `json:"masterUserNameSecretRef,omitempty" tf:"-"`
 
 	// Element of the SAML assertion to use for backend roles. Default is roles.
-	// +kubebuilder:validation:Optional
 	RolesKey *string `json:"rolesKey,omitempty" tf:"roles_key,omitempty"`
 
 	// Duration of a session in minutes after a user logs in. Default is 60. Maximum value is 1,440.
-	// +kubebuilder:validation:Optional
 	SessionTimeoutMinutes *float64 `json:"sessionTimeoutMinutes,omitempty" tf:"session_timeout_minutes,omitempty"`
 
 	// Element of the SAML assertion to use for username. Default is NameID.
-	// +kubebuilder:validation:Optional
 	SubjectKey *string `json:"subjectKey,omitempty" tf:"subject_key,omitempty"`
 }
 
@@ -127,6 +167,10 @@ type SAMLOptionsParameters struct {
 type DomainSAMLOptionsSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DomainSAMLOptionsParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DomainSAMLOptionsInitParameters `json:"initProvider,omitempty"`
 }
 
 // DomainSAMLOptionsStatus defines the observed state of DomainSAMLOptions.

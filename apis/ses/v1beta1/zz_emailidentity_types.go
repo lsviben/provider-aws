@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EmailIdentityInitParameters struct {
+
+	// The email address to assign to SES.
+	Email *string `json:"email,omitempty" tf:"email,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type EmailIdentityObservation struct {
 
 	// The ARN of the email identity.
@@ -27,19 +37,21 @@ type EmailIdentityObservation struct {
 type EmailIdentityParameters struct {
 
 	// The email address to assign to SES.
-	// +kubebuilder:validation:Optional
 	Email *string `json:"email,omitempty" tf:"email,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // EmailIdentitySpec defines the desired state of EmailIdentity
 type EmailIdentitySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EmailIdentityParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EmailIdentityInitParameters `json:"initProvider,omitempty"`
 }
 
 // EmailIdentityStatus defines the observed state of EmailIdentity.
@@ -60,7 +72,7 @@ type EmailIdentityStatus struct {
 type EmailIdentity struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.email)",message="email is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.email) || has(self.initProvider.email)",message="%!s(MISSING) is a required parameter"
 	Spec   EmailIdentitySpec   `json:"spec"`
 	Status EmailIdentityStatus `json:"status,omitempty"`
 }

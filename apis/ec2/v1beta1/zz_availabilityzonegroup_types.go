@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AvailabilityZoneGroupInitParameters struct {
+
+	// Indicates whether to enable or disable Availability Zone Group. Valid values: opted-in or not-opted-in.
+	OptInStatus *string `json:"optInStatus,omitempty" tf:"opt_in_status,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type AvailabilityZoneGroupObservation struct {
 
 	// Name of the Availability Zone Group.
@@ -25,19 +35,21 @@ type AvailabilityZoneGroupObservation struct {
 type AvailabilityZoneGroupParameters struct {
 
 	// Indicates whether to enable or disable Availability Zone Group. Valid values: opted-in or not-opted-in.
-	// +kubebuilder:validation:Optional
 	OptInStatus *string `json:"optInStatus,omitempty" tf:"opt_in_status,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // AvailabilityZoneGroupSpec defines the desired state of AvailabilityZoneGroup
 type AvailabilityZoneGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AvailabilityZoneGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AvailabilityZoneGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // AvailabilityZoneGroupStatus defines the observed state of AvailabilityZoneGroup.
@@ -58,7 +70,7 @@ type AvailabilityZoneGroupStatus struct {
 type AvailabilityZoneGroup struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.optInStatus)",message="optInStatus is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.optInStatus) || has(self.initProvider.optInStatus)",message="%!s(MISSING) is a required parameter"
 	Spec   AvailabilityZoneGroupSpec   `json:"spec"`
 	Status AvailabilityZoneGroupStatus `json:"status,omitempty"`
 }

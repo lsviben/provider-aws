@@ -13,6 +13,21 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ApplicationSnapshotInitParameters struct {
+
+	// The name of an existing  Kinesis Analytics v2 Application. Note that the application must be running for a snapshot to be created.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kinesisanalyticsv2/v1beta1.Application
+	ApplicationName *string `json:"applicationName,omitempty" tf:"application_name,omitempty"`
+
+	ApplicationNameRef *v1.Reference `json:"applicationNameRef,omitempty" tf:"-"`
+
+	ApplicationNameSelector *v1.Selector `json:"applicationNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type ApplicationSnapshotObservation struct {
 
 	// The name of an existing  Kinesis Analytics v2 Application. Note that the application must be running for a snapshot to be created.
@@ -32,7 +47,6 @@ type ApplicationSnapshotParameters struct {
 
 	// The name of an existing  Kinesis Analytics v2 Application. Note that the application must be running for a snapshot to be created.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kinesisanalyticsv2/v1beta1.Application
-	// +kubebuilder:validation:Optional
 	ApplicationName *string `json:"applicationName,omitempty" tf:"application_name,omitempty"`
 
 	// Reference to a Application in kinesisanalyticsv2 to populate applicationName.
@@ -45,14 +59,17 @@ type ApplicationSnapshotParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // ApplicationSnapshotSpec defines the desired state of ApplicationSnapshot
 type ApplicationSnapshotSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ApplicationSnapshotParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ApplicationSnapshotInitParameters `json:"initProvider,omitempty"`
 }
 
 // ApplicationSnapshotStatus defines the observed state of ApplicationSnapshot.

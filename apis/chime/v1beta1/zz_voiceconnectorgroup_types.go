@@ -13,6 +13,21 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConnectorInitParameters struct {
+
+	// The priority associated with the Amazon Chime Voice Connector, with 1 being the highest priority. Higher priority Amazon Chime Voice Connectors are attempted first.
+	Priority *float64 `json:"priority,omitempty" tf:"priority,omitempty"`
+
+	// The Amazon Chime Voice Connector ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/chime/v1beta1.VoiceConnector
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	VoiceConnectorID *string `json:"voiceConnectorId,omitempty" tf:"voice_connector_id,omitempty"`
+
+	VoiceConnectorIDRef *v1.Reference `json:"voiceConnectorIdRef,omitempty" tf:"-"`
+
+	VoiceConnectorIDSelector *v1.Selector `json:"voiceConnectorIdSelector,omitempty" tf:"-"`
+}
+
 type ConnectorObservation struct {
 
 	// The priority associated with the Amazon Chime Voice Connector, with 1 being the highest priority. Higher priority Amazon Chime Voice Connectors are attempted first.
@@ -25,13 +40,11 @@ type ConnectorObservation struct {
 type ConnectorParameters struct {
 
 	// The priority associated with the Amazon Chime Voice Connector, with 1 being the highest priority. Higher priority Amazon Chime Voice Connectors are attempted first.
-	// +kubebuilder:validation:Required
-	Priority *float64 `json:"priority" tf:"priority,omitempty"`
+	Priority *float64 `json:"priority,omitempty" tf:"priority,omitempty"`
 
 	// The Amazon Chime Voice Connector ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/chime/v1beta1.VoiceConnector
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	VoiceConnectorID *string `json:"voiceConnectorId,omitempty" tf:"voice_connector_id,omitempty"`
 
 	// Reference to a VoiceConnector in chime to populate voiceConnectorId.
@@ -41,6 +54,16 @@ type ConnectorParameters struct {
 	// Selector for a VoiceConnector in chime to populate voiceConnectorId.
 	// +kubebuilder:validation:Optional
 	VoiceConnectorIDSelector *v1.Selector `json:"voiceConnectorIdSelector,omitempty" tf:"-"`
+}
+
+type VoiceConnectorGroupInitParameters struct {
+
+	// The Amazon Chime Voice Connectors to route inbound calls to.
+	Connector []ConnectorInitParameters `json:"connector,omitempty" tf:"connector,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type VoiceConnectorGroupObservation struct {
@@ -55,19 +78,21 @@ type VoiceConnectorGroupObservation struct {
 type VoiceConnectorGroupParameters struct {
 
 	// The Amazon Chime Voice Connectors to route inbound calls to.
-	// +kubebuilder:validation:Optional
 	Connector []ConnectorParameters `json:"connector,omitempty" tf:"connector,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // VoiceConnectorGroupSpec defines the desired state of VoiceConnectorGroup
 type VoiceConnectorGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VoiceConnectorGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VoiceConnectorGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // VoiceConnectorGroupStatus defines the observed state of VoiceConnectorGroup.

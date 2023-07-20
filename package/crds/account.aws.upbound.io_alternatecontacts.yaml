@@ -91,9 +91,36 @@ spec:
                   title:
                     description: Title for the alternate contact.
                     type: string
-                required:
-                - alternateContactType
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  accountId:
+                    description: ID of the target account when managing member accounts.
+                      Will manage current user's account by default if omitted.
+                    type: string
+                  alternateContactType:
+                    description: 'Type of the alternate contact. Allowed values are:
+                      BILLING, OPERATIONS, SECURITY.'
+                    type: string
+                  emailAddress:
+                    description: An email address for the alternate contact.
+                    type: string
+                  name:
+                    description: Name of the alternate contact.
+                    type: string
+                  phoneNumber:
+                    description: Phone number for the alternate contact.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  title:
+                    description: Title for the alternate contact.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -293,18 +320,22 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: emailAddress is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.emailAddress)'
-            - message: name is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.emailAddress)
+                || has(self.initProvider.emailAddress)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)'
-            - message: phoneNumber is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)
+                || has(self.initProvider.name)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.phoneNumber)'
-            - message: title is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.phoneNumber)
+                || has(self.initProvider.phoneNumber)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.title)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.title)
+                || has(self.initProvider.title)'
           status:
             description: AlternateContactStatus defines the observed state of AlternateContact.
             properties:

@@ -36,5 +36,21 @@ func (mg *ResourceAssociation) ResolveReferences(ctx context.Context, c client.R
 	mg.Spec.ForProvider.ResourceShareArn = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Spec.ForProvider.ResourceShareArnRef = rsp.ResolvedReference
 
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.ResourceShareArn),
+		Extract:      resource.ExtractParamPath("arn", true),
+		Reference:    mg.Spec.InitProvider.ResourceShareArnRef,
+		Selector:     mg.Spec.InitProvider.ResourceShareArnSelector,
+		To: reference.To{
+			List:    &ResourceShareList{},
+			Managed: &ResourceShare{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.InitProvider.ResourceShareArn")
+	}
+	mg.Spec.InitProvider.ResourceShareArn = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.InitProvider.ResourceShareArnRef = rsp.ResolvedReference
+
 	return nil
 }

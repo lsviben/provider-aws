@@ -13,6 +13,29 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type LBAttachmentInitParameters struct {
+
+	// The name of the instance to attach to the load balancer.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Instance
+	InstanceName *string `json:"instanceName,omitempty" tf:"instance_name,omitempty"`
+
+	InstanceNameRef *v1.Reference `json:"instanceNameRef,omitempty" tf:"-"`
+
+	InstanceNameSelector *v1.Selector `json:"instanceNameSelector,omitempty" tf:"-"`
+
+	// The name of the Lightsail load balancer.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.LB
+	LBName *string `json:"lbName,omitempty" tf:"lb_name,omitempty"`
+
+	LBNameRef *v1.Reference `json:"lbNameRef,omitempty" tf:"-"`
+
+	LBNameSelector *v1.Selector `json:"lbNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type LBAttachmentObservation struct {
 
 	// A combination of attributes to create a unique id: lb_name,instance_name
@@ -29,7 +52,6 @@ type LBAttachmentParameters struct {
 
 	// The name of the instance to attach to the load balancer.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Instance
-	// +kubebuilder:validation:Optional
 	InstanceName *string `json:"instanceName,omitempty" tf:"instance_name,omitempty"`
 
 	// Reference to a Instance in lightsail to populate instanceName.
@@ -42,7 +64,6 @@ type LBAttachmentParameters struct {
 
 	// The name of the Lightsail load balancer.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.LB
-	// +kubebuilder:validation:Optional
 	LBName *string `json:"lbName,omitempty" tf:"lb_name,omitempty"`
 
 	// Reference to a LB in lightsail to populate lbName.
@@ -55,14 +76,17 @@ type LBAttachmentParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // LBAttachmentSpec defines the desired state of LBAttachment
 type LBAttachmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     LBAttachmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider LBAttachmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // LBAttachmentStatus defines the observed state of LBAttachment.

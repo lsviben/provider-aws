@@ -13,6 +13,27 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VPCIpamScopeInitParameters struct {
+
+	// A description for the scope you're creating.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The ID of the IPAM for which you're creating this scope.
+	// +crossplane:generate:reference:type=VPCIpam
+	IpamID *string `json:"ipamId,omitempty" tf:"ipam_id,omitempty"`
+
+	IpamIDRef *v1.Reference `json:"ipamIdRef,omitempty" tf:"-"`
+
+	IpamIDSelector *v1.Selector `json:"ipamIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type VPCIpamScopeObservation struct {
 	Arn *string `json:"arn,omitempty" tf:"arn,omitempty"`
 
@@ -45,12 +66,10 @@ type VPCIpamScopeObservation struct {
 type VPCIpamScopeParameters struct {
 
 	// A description for the scope you're creating.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The ID of the IPAM for which you're creating this scope.
 	// +crossplane:generate:reference:type=VPCIpam
-	// +kubebuilder:validation:Optional
 	IpamID *string `json:"ipamId,omitempty" tf:"ipam_id,omitempty"`
 
 	// Reference to a VPCIpam to populate ipamId.
@@ -63,11 +82,9 @@ type VPCIpamScopeParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -75,6 +92,10 @@ type VPCIpamScopeParameters struct {
 type VPCIpamScopeSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VPCIpamScopeParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VPCIpamScopeInitParameters `json:"initProvider,omitempty"`
 }
 
 // VPCIpamScopeStatus defines the observed state of VPCIpamScope.

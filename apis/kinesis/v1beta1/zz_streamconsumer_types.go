@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type StreamConsumerInitParameters struct {
+
+	// Name of the stream consumer.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// –  Amazon Resource Name (ARN) of the data stream the consumer is registered with.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kinesis/v1beta1.Stream
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
+	StreamArn *string `json:"streamArn,omitempty" tf:"stream_arn,omitempty"`
+
+	StreamArnRef *v1.Reference `json:"streamArnRef,omitempty" tf:"-"`
+
+	StreamArnSelector *v1.Selector `json:"streamArnSelector,omitempty" tf:"-"`
+}
+
 type StreamConsumerObservation struct {
 
 	// Amazon Resource Name (ARN) of the stream consumer.
@@ -34,18 +53,15 @@ type StreamConsumerObservation struct {
 type StreamConsumerParameters struct {
 
 	// Name of the stream consumer.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// –  Amazon Resource Name (ARN) of the data stream the consumer is registered with.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kinesis/v1beta1.Stream
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
-	// +kubebuilder:validation:Optional
 	StreamArn *string `json:"streamArn,omitempty" tf:"stream_arn,omitempty"`
 
 	// Reference to a Stream in kinesis to populate streamArn.
@@ -61,6 +77,10 @@ type StreamConsumerParameters struct {
 type StreamConsumerSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     StreamConsumerParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider StreamConsumerInitParameters `json:"initProvider,omitempty"`
 }
 
 // StreamConsumerStatus defines the observed state of StreamConsumer.
@@ -81,7 +101,7 @@ type StreamConsumerStatus struct {
 type StreamConsumer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   StreamConsumerSpec   `json:"spec"`
 	Status StreamConsumerStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,12 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AttributePayloadInitParameters struct {
+
+	// Key-value map.
+	Attributes map[string]*string `json:"attributes,omitempty" tf:"attributes,omitempty"`
+}
+
 type AttributePayloadObservation struct {
 
 	// Key-value map.
@@ -22,8 +28,10 @@ type AttributePayloadObservation struct {
 type AttributePayloadParameters struct {
 
 	// Key-value map.
-	// +kubebuilder:validation:Optional
 	Attributes map[string]*string `json:"attributes,omitempty" tf:"attributes,omitempty"`
+}
+
+type MetadataInitParameters struct {
 }
 
 type MetadataObservation struct {
@@ -38,6 +46,15 @@ type MetadataObservation struct {
 type MetadataParameters struct {
 }
 
+type PropertiesInitParameters struct {
+
+	// The Thing Group attributes. Defined below.
+	AttributePayload []AttributePayloadInitParameters `json:"attributePayload,omitempty" tf:"attribute_payload,omitempty"`
+
+	// A description of the Thing Group.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+}
+
 type PropertiesObservation struct {
 
 	// The Thing Group attributes. Defined below.
@@ -50,12 +67,13 @@ type PropertiesObservation struct {
 type PropertiesParameters struct {
 
 	// The Thing Group attributes. Defined below.
-	// +kubebuilder:validation:Optional
 	AttributePayload []AttributePayloadParameters `json:"attributePayload,omitempty" tf:"attribute_payload,omitempty"`
 
 	// A description of the Thing Group.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+}
+
+type RootToParentGroupsInitParameters struct {
 }
 
 type RootToParentGroupsObservation struct {
@@ -68,6 +86,27 @@ type RootToParentGroupsObservation struct {
 }
 
 type RootToParentGroupsParameters struct {
+}
+
+type ThingGroupInitParameters struct {
+
+	// The name of the parent Thing Group.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iot/v1beta1.ThingGroup
+	ParentGroupName *string `json:"parentGroupName,omitempty" tf:"parent_group_name,omitempty"`
+
+	ParentGroupNameRef *v1.Reference `json:"parentGroupNameRef,omitempty" tf:"-"`
+
+	ParentGroupNameSelector *v1.Selector `json:"parentGroupNameSelector,omitempty" tf:"-"`
+
+	// The Thing Group properties. Defined below.
+	Properties []PropertiesInitParameters `json:"properties,omitempty" tf:"properties,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type ThingGroupObservation struct {
@@ -99,7 +138,6 @@ type ThingGroupParameters struct {
 
 	// The name of the parent Thing Group.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iot/v1beta1.ThingGroup
-	// +kubebuilder:validation:Optional
 	ParentGroupName *string `json:"parentGroupName,omitempty" tf:"parent_group_name,omitempty"`
 
 	// Reference to a ThingGroup in iot to populate parentGroupName.
@@ -111,16 +149,13 @@ type ThingGroupParameters struct {
 	ParentGroupNameSelector *v1.Selector `json:"parentGroupNameSelector,omitempty" tf:"-"`
 
 	// The Thing Group properties. Defined below.
-	// +kubebuilder:validation:Optional
 	Properties []PropertiesParameters `json:"properties,omitempty" tf:"properties,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -128,6 +163,10 @@ type ThingGroupParameters struct {
 type ThingGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ThingGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ThingGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // ThingGroupStatus defines the observed state of ThingGroup.

@@ -4,7 +4,7 @@ go 1.19
 
 replace github.com/crossplane/crossplane-runtime => github.com/lsviben/crossplane-runtime v0.0.0-20230713114334-73a675c82cc5
 
-replace github.com/upbound/upjet => github.com/lsviben/upjet v0.0.0-20230713115411-982b36f30328
+replace github.com/upbound/upjet => github.com/lsviben/upjet v0.0.0-20230720100249-c22fd1e6260c
 
 replace github.com/crossplane/crossplane-tools => github.com/lsviben/crossplane-tools v0.0.0-20230712201434-f65dadcb91b1
 
@@ -20,6 +20,7 @@ require (
 	github.com/go-ini/ini v1.46.0
 	github.com/google/go-cmp v0.5.9
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.0
+	github.com/imdario/mergo v0.3.16
 	github.com/pkg/errors v0.9.1
 	github.com/upbound/upjet v0.9.0-rc.0.0.20230502154751-645d7260d814
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
@@ -89,7 +90,6 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.7.0 // indirect
 	github.com/hashicorp/vault/api v1.9.2 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
-	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect

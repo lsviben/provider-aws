@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConditionInitParameters struct {
+
+	// Key for the condition. Valid values: aws:PrincipalOrgID.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Type of condition. Value values: StringEquals.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+
+	// Value for the key.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/organizations/v1beta1.Organization
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+
+	ValueRef *v1.Reference `json:"valueRef,omitempty" tf:"-"`
+
+	ValueSelector *v1.Selector `json:"valueSelector,omitempty" tf:"-"`
+}
+
 type ConditionObservation struct {
 
 	// Key for the condition. Valid values: aws:PrincipalOrgID.
@@ -28,17 +46,14 @@ type ConditionObservation struct {
 type ConditionParameters struct {
 
 	// Key for the condition. Valid values: aws:PrincipalOrgID.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Type of condition. Value values: StringEquals.
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 
 	// Value for the key.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/organizations/v1beta1.Organization
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 
 	// Reference to a Organization in organizations to populate value.
@@ -48,6 +63,33 @@ type ConditionParameters struct {
 	// Selector for a Organization in organizations to populate value.
 	// +kubebuilder:validation:Optional
 	ValueSelector *v1.Selector `json:"valueSelector,omitempty" tf:"-"`
+}
+
+type PermissionInitParameters struct {
+
+	// The action that you are enabling the other account to perform. Defaults to events:PutEvents.
+	Action *string `json:"action,omitempty" tf:"action,omitempty"`
+
+	// Configuration block to limit the event bus permissions you are granting to only accounts that fulfill the condition. Specified below.
+	Condition []ConditionInitParameters `json:"condition,omitempty" tf:"condition,omitempty"`
+
+	// The event bus to set the permissions on. If you omit this, the permissions are set on the default event bus.
+	// +crossplane:generate:reference:type=Bus
+	EventBusName *string `json:"eventBusName,omitempty" tf:"event_bus_name,omitempty"`
+
+	EventBusNameRef *v1.Reference `json:"eventBusNameRef,omitempty" tf:"-"`
+
+	EventBusNameSelector *v1.Selector `json:"eventBusNameSelector,omitempty" tf:"-"`
+
+	// The 12-digit AWS account ID that you are permitting to put events to your default event bus. Specify * to permit any account to put events to your default event bus, optionally limited by condition.
+	Principal *string `json:"principal,omitempty" tf:"principal,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// An identifier string for the external account that you are granting permissions to.
+	StatementID *string `json:"statementId,omitempty" tf:"statement_id,omitempty"`
 }
 
 type PermissionObservation struct {
@@ -74,16 +116,13 @@ type PermissionObservation struct {
 type PermissionParameters struct {
 
 	// The action that you are enabling the other account to perform. Defaults to events:PutEvents.
-	// +kubebuilder:validation:Optional
 	Action *string `json:"action,omitempty" tf:"action,omitempty"`
 
 	// Configuration block to limit the event bus permissions you are granting to only accounts that fulfill the condition. Specified below.
-	// +kubebuilder:validation:Optional
 	Condition []ConditionParameters `json:"condition,omitempty" tf:"condition,omitempty"`
 
 	// The event bus to set the permissions on. If you omit this, the permissions are set on the default event bus.
 	// +crossplane:generate:reference:type=Bus
-	// +kubebuilder:validation:Optional
 	EventBusName *string `json:"eventBusName,omitempty" tf:"event_bus_name,omitempty"`
 
 	// Reference to a Bus to populate eventBusName.
@@ -95,16 +134,13 @@ type PermissionParameters struct {
 	EventBusNameSelector *v1.Selector `json:"eventBusNameSelector,omitempty" tf:"-"`
 
 	// The 12-digit AWS account ID that you are permitting to put events to your default event bus. Specify * to permit any account to put events to your default event bus, optionally limited by condition.
-	// +kubebuilder:validation:Optional
 	Principal *string `json:"principal,omitempty" tf:"principal,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// An identifier string for the external account that you are granting permissions to.
-	// +kubebuilder:validation:Optional
 	StatementID *string `json:"statementId,omitempty" tf:"statement_id,omitempty"`
 }
 
@@ -112,6 +148,10 @@ type PermissionParameters struct {
 type PermissionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PermissionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PermissionInitParameters `json:"initProvider,omitempty"`
 }
 
 // PermissionStatus defines the observed state of Permission.
@@ -132,8 +172,8 @@ type PermissionStatus struct {
 type Permission struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.principal)",message="principal is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.statementId)",message="statementId is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.principal) || has(self.initProvider.principal)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.statementId) || has(self.initProvider.statementId)",message="%!s(MISSING) is a required parameter"
 	Spec   PermissionSpec   `json:"spec"`
 	Status PermissionStatus `json:"status,omitempty"`
 }

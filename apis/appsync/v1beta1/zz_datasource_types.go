@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AuthorizationConfigInitParameters struct {
+
+	// Authorization type that the HTTP endpoint requires. Default values is AWS_IAM.
+	AuthorizationType *string `json:"authorizationType,omitempty" tf:"authorization_type,omitempty"`
+
+	// Identity and Access Management (IAM) settings. See AWS IAM Config.
+	AwsIAMConfig []AwsIAMConfigInitParameters `json:"awsIamConfig,omitempty" tf:"aws_iam_config,omitempty"`
+}
+
 type AuthorizationConfigObservation struct {
 
 	// Authorization type that the HTTP endpoint requires. Default values is AWS_IAM.
@@ -25,12 +34,19 @@ type AuthorizationConfigObservation struct {
 type AuthorizationConfigParameters struct {
 
 	// Authorization type that the HTTP endpoint requires. Default values is AWS_IAM.
-	// +kubebuilder:validation:Optional
 	AuthorizationType *string `json:"authorizationType,omitempty" tf:"authorization_type,omitempty"`
 
 	// Identity and Access Management (IAM) settings. See AWS IAM Config.
-	// +kubebuilder:validation:Optional
 	AwsIAMConfig []AwsIAMConfigParameters `json:"awsIamConfig,omitempty" tf:"aws_iam_config,omitempty"`
+}
+
+type AwsIAMConfigInitParameters struct {
+
+	// Signing Amazon Web Services Region for IAM authorization.
+	SigningRegion *string `json:"signingRegion,omitempty" tf:"signing_region,omitempty"`
+
+	// Signing service name for IAM authorization.
+	SigningServiceName *string `json:"signingServiceName,omitempty" tf:"signing_service_name,omitempty"`
 }
 
 type AwsIAMConfigObservation struct {
@@ -45,12 +61,57 @@ type AwsIAMConfigObservation struct {
 type AwsIAMConfigParameters struct {
 
 	// Signing Amazon Web Services Region for IAM authorization.
-	// +kubebuilder:validation:Optional
 	SigningRegion *string `json:"signingRegion,omitempty" tf:"signing_region,omitempty"`
 
 	// Signing service name for IAM authorization.
-	// +kubebuilder:validation:Optional
 	SigningServiceName *string `json:"signingServiceName,omitempty" tf:"signing_service_name,omitempty"`
+}
+
+type DatasourceInitParameters struct {
+
+	// API ID for the GraphQL API for the data source.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appsync/v1beta1.GraphQLAPI
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
+
+	APIIDRef *v1.Reference `json:"apiIdRef,omitempty" tf:"-"`
+
+	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
+
+	// Description of the data source.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// DynamoDB settings. See below
+	DynamodbConfig []DynamodbConfigInitParameters `json:"dynamodbConfig,omitempty" tf:"dynamodb_config,omitempty"`
+
+	// Amazon Elasticsearch settings. See below
+	ElasticsearchConfig []ElasticsearchConfigInitParameters `json:"elasticsearchConfig,omitempty" tf:"elasticsearch_config,omitempty"`
+
+	// HTTP settings. See below
+	HTTPConfig []HTTPConfigInitParameters `json:"httpConfig,omitempty" tf:"http_config,omitempty"`
+
+	// AWS Lambda settings. See below
+	LambdaConfig []LambdaConfigInitParameters `json:"lambdaConfig,omitempty" tf:"lambda_config,omitempty"`
+
+	// AWS Region for RDS HTTP endpoint. Defaults to current region.
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// AWS RDS settings. See Relational Database Config
+	RelationalDatabaseConfig []RelationalDatabaseConfigInitParameters `json:"relationalDatabaseConfig,omitempty" tf:"relational_database_config,omitempty"`
+
+	// IAM service role ARN for the data source.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	ServiceRoleArn *string `json:"serviceRoleArn,omitempty" tf:"service_role_arn,omitempty"`
+
+	ServiceRoleArnRef *v1.Reference `json:"serviceRoleArnRef,omitempty" tf:"-"`
+
+	ServiceRoleArnSelector *v1.Selector `json:"serviceRoleArnSelector,omitempty" tf:"-"`
+
+	// Type of the Data Source. Valid values: AWS_LAMBDA, AMAZON_DYNAMODB, AMAZON_ELASTICSEARCH, HTTP, NONE, RELATIONAL_DATABASE.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type DatasourceObservation struct {
@@ -93,7 +154,6 @@ type DatasourceParameters struct {
 	// API ID for the GraphQL API for the data source.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appsync/v1beta1.GraphQLAPI
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
 
 	// Reference to a GraphQLAPI in appsync to populate apiId.
@@ -105,39 +165,31 @@ type DatasourceParameters struct {
 	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
 
 	// Description of the data source.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// DynamoDB settings. See below
-	// +kubebuilder:validation:Optional
 	DynamodbConfig []DynamodbConfigParameters `json:"dynamodbConfig,omitempty" tf:"dynamodb_config,omitempty"`
 
 	// Amazon Elasticsearch settings. See below
-	// +kubebuilder:validation:Optional
 	ElasticsearchConfig []ElasticsearchConfigParameters `json:"elasticsearchConfig,omitempty" tf:"elasticsearch_config,omitempty"`
 
 	// HTTP settings. See below
-	// +kubebuilder:validation:Optional
 	HTTPConfig []HTTPConfigParameters `json:"httpConfig,omitempty" tf:"http_config,omitempty"`
 
 	// AWS Lambda settings. See below
-	// +kubebuilder:validation:Optional
 	LambdaConfig []LambdaConfigParameters `json:"lambdaConfig,omitempty" tf:"lambda_config,omitempty"`
 
 	// AWS Region for RDS HTTP endpoint. Defaults to current region.
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// AWS RDS settings. See Relational Database Config
-	// +kubebuilder:validation:Optional
 	RelationalDatabaseConfig []RelationalDatabaseConfigParameters `json:"relationalDatabaseConfig,omitempty" tf:"relational_database_config,omitempty"`
 
 	// IAM service role ARN for the data source.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	ServiceRoleArn *string `json:"serviceRoleArn,omitempty" tf:"service_role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate serviceRoleArn.
@@ -149,8 +201,16 @@ type DatasourceParameters struct {
 	ServiceRoleArnSelector *v1.Selector `json:"serviceRoleArnSelector,omitempty" tf:"-"`
 
 	// Type of the Data Source. Valid values: AWS_LAMBDA, AMAZON_DYNAMODB, AMAZON_ELASTICSEARCH, HTTP, NONE, RELATIONAL_DATABASE.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type DeltaSyncConfigInitParameters struct {
+	BaseTableTTL *float64 `json:"baseTableTtl,omitempty" tf:"base_table_ttl,omitempty"`
+
+	// User-supplied name for the data source.
+	DeltaSyncTableName *string `json:"deltaSyncTableName,omitempty" tf:"delta_sync_table_name,omitempty"`
+
+	DeltaSyncTableTTL *float64 `json:"deltaSyncTableTtl,omitempty" tf:"delta_sync_table_ttl,omitempty"`
 }
 
 type DeltaSyncConfigObservation struct {
@@ -163,16 +223,32 @@ type DeltaSyncConfigObservation struct {
 }
 
 type DeltaSyncConfigParameters struct {
-
-	// +kubebuilder:validation:Optional
 	BaseTableTTL *float64 `json:"baseTableTtl,omitempty" tf:"base_table_ttl,omitempty"`
 
 	// User-supplied name for the data source.
-	// +kubebuilder:validation:Required
-	DeltaSyncTableName *string `json:"deltaSyncTableName" tf:"delta_sync_table_name,omitempty"`
+	DeltaSyncTableName *string `json:"deltaSyncTableName,omitempty" tf:"delta_sync_table_name,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	DeltaSyncTableTTL *float64 `json:"deltaSyncTableTtl,omitempty" tf:"delta_sync_table_ttl,omitempty"`
+}
+
+type DynamodbConfigInitParameters struct {
+	DeltaSyncConfig []DeltaSyncConfigInitParameters `json:"deltaSyncConfig,omitempty" tf:"delta_sync_config,omitempty"`
+
+	// AWS region of the DynamoDB table. Defaults to current region.
+	Region *string `json:"region,omitempty" tf:"region,omitempty"`
+
+	// Name of the DynamoDB table.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/dynamodb/v1beta1.Table
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+
+	TableNameRef *v1.Reference `json:"tableNameRef,omitempty" tf:"-"`
+
+	TableNameSelector *v1.Selector `json:"tableNameSelector,omitempty" tf:"-"`
+
+	// Set to true to use Amazon Cognito credentials with this data source.
+	UseCallerCredentials *bool `json:"useCallerCredentials,omitempty" tf:"use_caller_credentials,omitempty"`
+
+	Versioned *bool `json:"versioned,omitempty" tf:"versioned,omitempty"`
 }
 
 type DynamodbConfigObservation struct {
@@ -191,17 +267,13 @@ type DynamodbConfigObservation struct {
 }
 
 type DynamodbConfigParameters struct {
-
-	// +kubebuilder:validation:Optional
 	DeltaSyncConfig []DeltaSyncConfigParameters `json:"deltaSyncConfig,omitempty" tf:"delta_sync_config,omitempty"`
 
 	// AWS region of the DynamoDB table. Defaults to current region.
-	// +kubebuilder:validation:Optional
 	Region *string `json:"region,omitempty" tf:"region,omitempty"`
 
 	// Name of the DynamoDB table.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/dynamodb/v1beta1.Table
-	// +kubebuilder:validation:Optional
 	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
 
 	// Reference to a Table in dynamodb to populate tableName.
@@ -213,11 +285,18 @@ type DynamodbConfigParameters struct {
 	TableNameSelector *v1.Selector `json:"tableNameSelector,omitempty" tf:"-"`
 
 	// Set to true to use Amazon Cognito credentials with this data source.
-	// +kubebuilder:validation:Optional
 	UseCallerCredentials *bool `json:"useCallerCredentials,omitempty" tf:"use_caller_credentials,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	Versioned *bool `json:"versioned,omitempty" tf:"versioned,omitempty"`
+}
+
+type ElasticsearchConfigInitParameters struct {
+
+	// HTTP endpoint of the Elasticsearch domain.
+	Endpoint *string `json:"endpoint,omitempty" tf:"endpoint,omitempty"`
+
+	// AWS region of Elasticsearch domain. Defaults to current region.
+	Region *string `json:"region,omitempty" tf:"region,omitempty"`
 }
 
 type ElasticsearchConfigObservation struct {
@@ -232,12 +311,19 @@ type ElasticsearchConfigObservation struct {
 type ElasticsearchConfigParameters struct {
 
 	// HTTP endpoint of the Elasticsearch domain.
-	// +kubebuilder:validation:Required
-	Endpoint *string `json:"endpoint" tf:"endpoint,omitempty"`
+	Endpoint *string `json:"endpoint,omitempty" tf:"endpoint,omitempty"`
 
 	// AWS region of Elasticsearch domain. Defaults to current region.
-	// +kubebuilder:validation:Optional
 	Region *string `json:"region,omitempty" tf:"region,omitempty"`
+}
+
+type HTTPConfigInitParameters struct {
+
+	// Authorization configuration in case the HTTP endpoint requires authorization. See Authorization Config.
+	AuthorizationConfig []AuthorizationConfigInitParameters `json:"authorizationConfig,omitempty" tf:"authorization_config,omitempty"`
+
+	// HTTP URL.
+	Endpoint *string `json:"endpoint,omitempty" tf:"endpoint,omitempty"`
 }
 
 type HTTPConfigObservation struct {
@@ -252,12 +338,28 @@ type HTTPConfigObservation struct {
 type HTTPConfigParameters struct {
 
 	// Authorization configuration in case the HTTP endpoint requires authorization. See Authorization Config.
-	// +kubebuilder:validation:Optional
 	AuthorizationConfig []AuthorizationConfigParameters `json:"authorizationConfig,omitempty" tf:"authorization_config,omitempty"`
 
 	// HTTP URL.
-	// +kubebuilder:validation:Required
-	Endpoint *string `json:"endpoint" tf:"endpoint,omitempty"`
+	Endpoint *string `json:"endpoint,omitempty" tf:"endpoint,omitempty"`
+}
+
+type HTTPEndpointConfigInitParameters struct {
+
+	// AWS secret store ARN for database credentials.
+	AwsSecretStoreArn *string `json:"awsSecretStoreArn,omitempty" tf:"aws_secret_store_arn,omitempty"`
+
+	// Amazon RDS cluster identifier.
+	DBClusterIdentifier *string `json:"dbClusterIdentifier,omitempty" tf:"db_cluster_identifier,omitempty"`
+
+	// Logical database name.
+	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
+
+	// AWS Region for RDS HTTP endpoint. Defaults to current region.
+	Region *string `json:"region,omitempty" tf:"region,omitempty"`
+
+	// Logical schema name.
+	Schema *string `json:"schema,omitempty" tf:"schema,omitempty"`
 }
 
 type HTTPEndpointConfigObservation struct {
@@ -281,24 +383,25 @@ type HTTPEndpointConfigObservation struct {
 type HTTPEndpointConfigParameters struct {
 
 	// AWS secret store ARN for database credentials.
-	// +kubebuilder:validation:Required
-	AwsSecretStoreArn *string `json:"awsSecretStoreArn" tf:"aws_secret_store_arn,omitempty"`
+	AwsSecretStoreArn *string `json:"awsSecretStoreArn,omitempty" tf:"aws_secret_store_arn,omitempty"`
 
 	// Amazon RDS cluster identifier.
-	// +kubebuilder:validation:Required
-	DBClusterIdentifier *string `json:"dbClusterIdentifier" tf:"db_cluster_identifier,omitempty"`
+	DBClusterIdentifier *string `json:"dbClusterIdentifier,omitempty" tf:"db_cluster_identifier,omitempty"`
 
 	// Logical database name.
-	// +kubebuilder:validation:Optional
 	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
 
 	// AWS Region for RDS HTTP endpoint. Defaults to current region.
-	// +kubebuilder:validation:Optional
 	Region *string `json:"region,omitempty" tf:"region,omitempty"`
 
 	// Logical schema name.
-	// +kubebuilder:validation:Optional
 	Schema *string `json:"schema,omitempty" tf:"schema,omitempty"`
+}
+
+type LambdaConfigInitParameters struct {
+
+	// ARN for the Lambda function.
+	FunctionArn *string `json:"functionArn,omitempty" tf:"function_arn,omitempty"`
 }
 
 type LambdaConfigObservation struct {
@@ -310,8 +413,16 @@ type LambdaConfigObservation struct {
 type LambdaConfigParameters struct {
 
 	// ARN for the Lambda function.
-	// +kubebuilder:validation:Required
-	FunctionArn *string `json:"functionArn" tf:"function_arn,omitempty"`
+	FunctionArn *string `json:"functionArn,omitempty" tf:"function_arn,omitempty"`
+}
+
+type RelationalDatabaseConfigInitParameters struct {
+
+	// Amazon RDS HTTP endpoint configuration. See HTTP Endpoint Config.
+	HTTPEndpointConfig []HTTPEndpointConfigInitParameters `json:"httpEndpointConfig,omitempty" tf:"http_endpoint_config,omitempty"`
+
+	// Source type for the relational database. Valid values: RDS_HTTP_ENDPOINT.
+	SourceType *string `json:"sourceType,omitempty" tf:"source_type,omitempty"`
 }
 
 type RelationalDatabaseConfigObservation struct {
@@ -326,11 +437,9 @@ type RelationalDatabaseConfigObservation struct {
 type RelationalDatabaseConfigParameters struct {
 
 	// Amazon RDS HTTP endpoint configuration. See HTTP Endpoint Config.
-	// +kubebuilder:validation:Optional
 	HTTPEndpointConfig []HTTPEndpointConfigParameters `json:"httpEndpointConfig,omitempty" tf:"http_endpoint_config,omitempty"`
 
 	// Source type for the relational database. Valid values: RDS_HTTP_ENDPOINT.
-	// +kubebuilder:validation:Optional
 	SourceType *string `json:"sourceType,omitempty" tf:"source_type,omitempty"`
 }
 
@@ -338,6 +447,10 @@ type RelationalDatabaseConfigParameters struct {
 type DatasourceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DatasourceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DatasourceInitParameters `json:"initProvider,omitempty"`
 }
 
 // DatasourceStatus defines the observed state of Datasource.
@@ -358,7 +471,7 @@ type DatasourceStatus struct {
 type Datasource struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.type)",message="type is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.type) || has(self.initProvider.type)",message="%!s(MISSING) is a required parameter"
 	Spec   DatasourceSpec   `json:"spec"`
 	Status DatasourceStatus `json:"status,omitempty"`
 }

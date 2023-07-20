@@ -206,8 +206,148 @@ spec:
                             type: string
                         type: object
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  accepter:
+                    description: An optional configuration block that allows for [VPC
+                      Peering Connection] (https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)
+                      options to be set for the VPC that accepts the peering connection
+                      (a maximum of one).
+                    items:
+                      properties:
+                        allowClassicLinkToRemoteVpc:
+                          description: Allow a local linked EC2-Classic instance to
+                            communicate with instances in a peer VPC. This enables
+                            an outbound communication from the local ClassicLink connection
+                            to the remote VPC. This option is not supported for inter-region
+                            VPC peering.
+                          type: boolean
+                        allowRemoteVpcDnsResolution:
+                          description: Allow a local VPC to resolve public DNS hostnames
+                            to private IP addresses when queried from instances in
+                            the peer VPC.
+                          type: boolean
+                        allowVpcToRemoteClassicLink:
+                          description: Allow a local VPC to communicate with a linked
+                            EC2-Classic instance in a peer VPC. This enables an outbound
+                            communication from the local VPC to the remote ClassicLink
+                            connection. This option is not supported for inter-region
+                            VPC peering.
+                          type: boolean
+                      type: object
+                    type: array
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  requester:
+                    description: A optional configuration block that allows for [VPC
+                      Peering Connection] (https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)
+                      options to be set for the VPC that requests the peering connection
+                      (a maximum of one).
+                    items:
+                      properties:
+                        allowClassicLinkToRemoteVpc:
+                          description: Allow a local linked EC2-Classic instance to
+                            communicate with instances in a peer VPC. This enables
+                            an outbound communication from the local ClassicLink connection
+                            to the remote VPC. This option is not supported for inter-region
+                            VPC peering.
+                          type: boolean
+                        allowRemoteVpcDnsResolution:
+                          description: Allow a local VPC to resolve public DNS hostnames
+                            to private IP addresses when queried from instances in
+                            the peer VPC.
+                          type: boolean
+                        allowVpcToRemoteClassicLink:
+                          description: Allow a local VPC to communicate with a linked
+                            EC2-Classic instance in a peer VPC. This enables an outbound
+                            communication from the local VPC to the remote ClassicLink
+                            connection. This option is not supported for inter-region
+                            VPC peering.
+                          type: boolean
+                      type: object
+                    type: array
+                  vpcPeeringConnectionId:
+                    description: The ID of the requester VPC peering connection.
+                    type: string
+                  vpcPeeringConnectionIdRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  vpcPeeringConnectionIdSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
                 type: object
               managementPolicies:
                 default:

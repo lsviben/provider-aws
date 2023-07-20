@@ -13,6 +13,17 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type GeoMatchConstraintInitParameters struct {
+
+	// The type of geographical area you want AWS WAF to search for. Currently Country is the only valid value.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+
+	// The country that you want AWS WAF to search for.
+	// This is the two-letter country code, e.g., US, CA, RU, CN, etc.
+	// See docs for all supported values.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
 type GeoMatchConstraintObservation struct {
 
 	// The type of geographical area you want AWS WAF to search for. Currently Country is the only valid value.
@@ -27,14 +38,25 @@ type GeoMatchConstraintObservation struct {
 type GeoMatchConstraintParameters struct {
 
 	// The type of geographical area you want AWS WAF to search for. Currently Country is the only valid value.
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 
 	// The country that you want AWS WAF to search for.
 	// This is the two-letter country code, e.g., US, CA, RU, CN, etc.
 	// See docs for all supported values.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type GeoMatchSetInitParameters struct {
+
+	// The Geo Match Constraint objects which contain the country that you want AWS WAF to search for.
+	GeoMatchConstraint []GeoMatchConstraintInitParameters `json:"geoMatchConstraint,omitempty" tf:"geo_match_constraint,omitempty"`
+
+	// The name or description of the Geo Match Set.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type GeoMatchSetObservation struct {
@@ -52,23 +74,24 @@ type GeoMatchSetObservation struct {
 type GeoMatchSetParameters struct {
 
 	// The Geo Match Constraint objects which contain the country that you want AWS WAF to search for.
-	// +kubebuilder:validation:Optional
 	GeoMatchConstraint []GeoMatchConstraintParameters `json:"geoMatchConstraint,omitempty" tf:"geo_match_constraint,omitempty"`
 
 	// The name or description of the Geo Match Set.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // GeoMatchSetSpec defines the desired state of GeoMatchSet
 type GeoMatchSetSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     GeoMatchSetParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider GeoMatchSetInitParameters `json:"initProvider,omitempty"`
 }
 
 // GeoMatchSetStatus defines the observed state of GeoMatchSet.
@@ -89,7 +112,7 @@ type GeoMatchSetStatus struct {
 type GeoMatchSet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   GeoMatchSetSpec   `json:"spec"`
 	Status GeoMatchSetStatus `json:"status,omitempty"`
 }

@@ -112,7 +112,57 @@ spec:
                     description: Key-value map of resource tags.
                     type: object
                 required:
-                - region
+                - hsmPartitionPasswordSecretRef
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  description:
+                    description: A text description of the HSM configuration to be
+                      created.
+                    type: string
+                  hsmIpAddress:
+                    description: The IP address that the Amazon Redshift cluster must
+                      use to access the HSM.
+                    type: string
+                  hsmPartitionName:
+                    description: The name of the partition in the HSM where the Amazon
+                      Redshift clusters will store their database encryption keys.
+                    type: string
+                  hsmPartitionPasswordSecretRef:
+                    description: The password required to access the HSM partition.
+                    properties:
+                      key:
+                        description: The key to select.
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                      namespace:
+                        description: Namespace of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    - namespace
+                    type: object
+                  hsmServerPublicCertificate:
+                    description: The HSMs public certificate file. When using Cloud
+                      HSM, the file name is server.pem.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
+                required:
+                - hsmPartitionPasswordSecretRef
                 type: object
               managementPolicies:
                 default:
@@ -312,21 +362,26 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: description is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.description)'
-            - message: hsmIpAddress is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.description)
+                || has(self.initProvider.description)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.hsmIpAddress)'
-            - message: hsmPartitionName is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.hsmIpAddress)
+                || has(self.initProvider.hsmIpAddress)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.hsmPartitionName)'
-            - message: hsmPartitionPasswordSecretRef is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.hsmPartitionName)
+                || has(self.initProvider.hsmPartitionName)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.hsmPartitionPasswordSecretRef)'
-            - message: hsmServerPublicCertificate is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.hsmPartitionPasswordSecretRef)
+                || has(self.initProvider.hsmPartitionPasswordSecretRef)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.hsmServerPublicCertificate)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.hsmServerPublicCertificate)
+                || has(self.initProvider.hsmServerPublicCertificate)'
           status:
             description: HSMConfigurationStatus defines the observed state of HSMConfiguration.
             properties:

@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EBSEncryptionByDefaultInitParameters struct {
+
+	// Whether or not default EBS encryption is enabled. Valid values are true or false. Defaults to true.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type EBSEncryptionByDefaultObservation struct {
 
 	// Whether or not default EBS encryption is enabled. Valid values are true or false. Defaults to true.
@@ -24,19 +34,21 @@ type EBSEncryptionByDefaultObservation struct {
 type EBSEncryptionByDefaultParameters struct {
 
 	// Whether or not default EBS encryption is enabled. Valid values are true or false. Defaults to true.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // EBSEncryptionByDefaultSpec defines the desired state of EBSEncryptionByDefault
 type EBSEncryptionByDefaultSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EBSEncryptionByDefaultParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EBSEncryptionByDefaultInitParameters `json:"initProvider,omitempty"`
 }
 
 // EBSEncryptionByDefaultStatus defines the observed state of EBSEncryptionByDefault.

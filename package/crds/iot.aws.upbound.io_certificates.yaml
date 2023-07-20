@@ -120,8 +120,65 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  active:
+                    description: Boolean flag to indicate if the certificate should
+                      be active
+                    type: boolean
+                  caPemSecretRef:
+                    description: The CA certificate for the certificate to be registered.
+                      If this is set, the CA needs to be registered with AWS IoT beforehand.
+                    properties:
+                      key:
+                        description: The key to select.
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                      namespace:
+                        description: Namespace of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    - namespace
+                    type: object
+                  certificatePemSecretRef:
+                    description: The certificate to be registered. If ca_pem is unspecified,
+                      review RegisterCertificateWithoutCA. If ca_pem is specified,
+                      review RegisterCertificate for more information on registering
+                      a certificate.
+                    properties:
+                      key:
+                        description: The key to select.
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                      namespace:
+                        description: Namespace of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    - namespace
+                    type: object
+                  csr:
+                    description: The certificate signing request. Review CreateCertificateFromCsr
+                      for more information on generating a certificate from a certificate
+                      signing request (CSR). If none is specified both the certificate
+                      and keys will be generated, review CreateKeysAndCertificate
+                      for more information on generating keys and a certificate.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -321,9 +378,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: active is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.active)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.active)
+                || has(self.initProvider.active)'
           status:
             description: CertificateStatus defines the observed state of Certificate.
             properties:

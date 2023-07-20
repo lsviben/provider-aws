@@ -88,9 +88,6 @@ spec:
                                 description: The type of key; currently only KMS is
                                   supported
                                 type: string
-                            required:
-                            - id
-                            - type
                             type: object
                           type: array
                         location:
@@ -182,8 +179,6 @@ spec:
                           description: The type of the artifact store, such as Amazon
                             S3
                           type: string
-                      required:
-                      - type
                       type: object
                     type: array
                   region:
@@ -335,20 +330,11 @@ spec:
                               version:
                                 description: A string that identifies the action type.
                                 type: string
-                            required:
-                            - category
-                            - name
-                            - owner
-                            - provider
-                            - version
                             type: object
                           type: array
                         name:
                           description: The name of the stage.
                           type: string
-                      required:
-                      - action
-                      - name
                       type: object
                     type: array
                   tags:
@@ -356,8 +342,287 @@ spec:
                       type: string
                     description: Key-value map of resource tags.
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  artifactStore:
+                    description: One or more artifact_store blocks. Artifact stores
+                      are documented below.
+                    items:
+                      properties:
+                        encryptionKey:
+                          description: The encryption key block AWS CodePipeline uses
+                            to encrypt the data in the artifact store, such as an
+                            AWS Key Management Service (AWS KMS) key. If you don't
+                            specify a key, AWS CodePipeline uses the default key for
+                            Amazon Simple Storage Service (Amazon S3). An encryption_key
+                            block is documented below.
+                          items:
+                            properties:
+                              id:
+                                description: The KMS key ARN or ID
+                                type: string
+                              type:
+                                description: The type of key; currently only KMS is
+                                  supported
+                                type: string
+                            type: object
+                          type: array
+                        location:
+                          description: The location where AWS CodePipeline stores
+                            artifacts for a pipeline; currently only S3 is supported.
+                          type: string
+                        locationRef:
+                          description: A Reference to a named object.
+                          properties:
+                            name:
+                              description: Name of the referenced object.
+                              type: string
+                            policy:
+                              description: Policies for referencing.
+                              properties:
+                                resolution:
+                                  default: Required
+                                  description: Resolution specifies whether resolution
+                                    of this reference is required. The default is
+                                    'Required', which means the reconcile will fail
+                                    if the reference cannot be resolved. 'Optional'
+                                    means this reference will be a no-op if it cannot
+                                    be resolved.
+                                  enum:
+                                  - Required
+                                  - Optional
+                                  type: string
+                                resolve:
+                                  description: Resolve specifies when this reference
+                                    should be resolved. The default is 'IfNotPresent',
+                                    which will attempt to resolve the reference only
+                                    when the corresponding field is not present. Use
+                                    'Always' to resolve the reference on every reconcile.
+                                  enum:
+                                  - Always
+                                  - IfNotPresent
+                                  type: string
+                              type: object
+                          required:
+                          - name
+                          type: object
+                        locationSelector:
+                          description: A Selector selects an object.
+                          properties:
+                            matchControllerRef:
+                              description: MatchControllerRef ensures an object with
+                                the same controller reference as the selecting object
+                                is selected.
+                              type: boolean
+                            matchLabels:
+                              additionalProperties:
+                                type: string
+                              description: MatchLabels ensures an object with matching
+                                labels is selected.
+                              type: object
+                            policy:
+                              description: Policies for selection.
+                              properties:
+                                resolution:
+                                  default: Required
+                                  description: Resolution specifies whether resolution
+                                    of this reference is required. The default is
+                                    'Required', which means the reconcile will fail
+                                    if the reference cannot be resolved. 'Optional'
+                                    means this reference will be a no-op if it cannot
+                                    be resolved.
+                                  enum:
+                                  - Required
+                                  - Optional
+                                  type: string
+                                resolve:
+                                  description: Resolve specifies when this reference
+                                    should be resolved. The default is 'IfNotPresent',
+                                    which will attempt to resolve the reference only
+                                    when the corresponding field is not present. Use
+                                    'Always' to resolve the reference on every reconcile.
+                                  enum:
+                                  - Always
+                                  - IfNotPresent
+                                  type: string
+                              type: object
+                          type: object
+                        region:
+                          description: The region where the artifact store is located.
+                            Required for a cross-region CodePipeline, do not provide
+                            for a single-region CodePipeline.
+                          type: string
+                        type:
+                          description: The type of the artifact store, such as Amazon
+                            S3
+                          type: string
+                      type: object
+                    type: array
+                  region:
+                    description: The region in which to run the action. Region is
+                      the region you'd like your resource to be created in.
+                    type: string
+                  roleArn:
+                    description: A service role Amazon Resource Name (ARN) that grants
+                      AWS CodePipeline permission to make calls to AWS services on
+                      your behalf.
+                    type: string
+                  roleArnRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  roleArnSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  stage:
+                    description: (Minimum of at least two stage blocks is required)
+                      A stage block. Stages are documented below.
+                    items:
+                      properties:
+                        action:
+                          description: The action(s) to include in the stage. Defined
+                            as an action block below
+                          items:
+                            properties:
+                              category:
+                                description: A category defines what kind of action
+                                  can be taken in the stage, and constrains the provider
+                                  type for the action. Possible values are Approval,
+                                  Build, Deploy, Invoke, Source and Test.
+                                type: string
+                              configuration:
+                                additionalProperties:
+                                  type: string
+                                description: A map of the action declaration's configuration.
+                                  Configurations options for action types and providers
+                                  can be found in the Pipeline Structure Reference
+                                  and Action Structure Reference documentation.
+                                type: object
+                              inputArtifacts:
+                                description: A list of artifact names to be worked
+                                  on.
+                                items:
+                                  type: string
+                                type: array
+                              name:
+                                description: The action declaration's name.
+                                type: string
+                              namespace:
+                                description: The namespace all output variables will
+                                  be accessed from.
+                                type: string
+                              outputArtifacts:
+                                description: A list of artifact names to output. Output
+                                  artifact names must be unique within a pipeline.
+                                items:
+                                  type: string
+                                type: array
+                              owner:
+                                description: The creator of the action being called.
+                                  Possible values are AWS, Custom and ThirdParty.
+                                type: string
+                              provider:
+                                description: The provider of the service being called
+                                  by the action. Valid providers are determined by
+                                  the action category. Provider names are listed in
+                                  the Action Structure Reference documentation.
+                                type: string
+                              region:
+                                description: The region in which to run the action.
+                                type: string
+                              roleArn:
+                                description: The ARN of the IAM service role that
+                                  will perform the declared action. This is assumed
+                                  through the roleArn for the pipeline.
+                                type: string
+                              runOrder:
+                                description: The order in which actions are run.
+                                type: number
+                              version:
+                                description: A string that identifies the action type.
+                                type: string
+                            type: object
+                          type: array
+                        name:
+                          description: The name of the stage.
+                          type: string
+                      type: object
+                    type: array
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
                 type: object
               managementPolicies:
                 default:
@@ -557,12 +822,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: artifactStore is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.artifactStore)'
-            - message: stage is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.artifactStore)
+                || has(self.initProvider.artifactStore)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.stage)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.stage)
+                || has(self.initProvider.stage)'
           status:
             description: CodepipelineStatus defines the observed state of Codepipeline.
             properties:

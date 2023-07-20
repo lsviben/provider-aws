@@ -83,8 +83,27 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  functionName:
+                    description: Name or Amazon Resource Name (ARN) of the Lambda
+                      Function.
+                    type: string
+                  provisionedConcurrentExecutions:
+                    description: Amount of capacity to allocate. Must be greater than
+                      or equal to 1.
+                    type: number
+                  qualifier:
+                    description: Lambda Function version or Lambda Alias name.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -284,15 +303,18 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: functionName is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.functionName)'
-            - message: provisionedConcurrentExecutions is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.functionName)
+                || has(self.initProvider.functionName)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.provisionedConcurrentExecutions)'
-            - message: qualifier is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.provisionedConcurrentExecutions)
+                || has(self.initProvider.provisionedConcurrentExecutions)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.qualifier)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.qualifier)
+                || has(self.initProvider.qualifier)'
           status:
             description: ProvisionedConcurrencyConfigStatus defines the observed state
               of ProvisionedConcurrencyConfig.

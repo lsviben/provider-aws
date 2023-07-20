@@ -13,6 +13,20 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ApplicationInitParameters struct {
+	AppversionLifecycle []AppversionLifecycleInitParameters `json:"appversionLifecycle,omitempty" tf:"appversion_lifecycle,omitempty"`
+
+	// Short description of the application
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ApplicationObservation struct {
 	AppversionLifecycle []AppversionLifecycleObservation `json:"appversionLifecycle,omitempty" tf:"appversion_lifecycle,omitempty"`
 
@@ -32,22 +46,38 @@ type ApplicationObservation struct {
 }
 
 type ApplicationParameters struct {
-
-	// +kubebuilder:validation:Optional
 	AppversionLifecycle []AppversionLifecycleParameters `json:"appversionLifecycle,omitempty" tf:"appversion_lifecycle,omitempty"`
 
 	// Short description of the application
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type AppversionLifecycleInitParameters struct {
+
+	// Set to true to delete a version's source bundle from S3 when the application version is deleted.
+	DeleteSourceFromS3 *bool `json:"deleteSourceFromS3,omitempty" tf:"delete_source_from_s3,omitempty"`
+
+	// The number of days to retain an application version ('max_age_in_days' and 'max_count' cannot be enabled simultaneously.).
+	MaxAgeInDays *float64 `json:"maxAgeInDays,omitempty" tf:"max_age_in_days,omitempty"`
+
+	// The maximum number of application versions to retain ('max_age_in_days' and 'max_count' cannot be enabled simultaneously.).
+	MaxCount *float64 `json:"maxCount,omitempty" tf:"max_count,omitempty"`
+
+	// The ARN of an IAM service role under which the application version is deleted.  Elastic Beanstalk must have permission to assume this role.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	ServiceRole *string `json:"serviceRole,omitempty" tf:"service_role,omitempty"`
+
+	ServiceRoleRef *v1.Reference `json:"serviceRoleRef,omitempty" tf:"-"`
+
+	ServiceRoleSelector *v1.Selector `json:"serviceRoleSelector,omitempty" tf:"-"`
 }
 
 type AppversionLifecycleObservation struct {
@@ -68,21 +98,17 @@ type AppversionLifecycleObservation struct {
 type AppversionLifecycleParameters struct {
 
 	// Set to true to delete a version's source bundle from S3 when the application version is deleted.
-	// +kubebuilder:validation:Optional
 	DeleteSourceFromS3 *bool `json:"deleteSourceFromS3,omitempty" tf:"delete_source_from_s3,omitempty"`
 
 	// The number of days to retain an application version ('max_age_in_days' and 'max_count' cannot be enabled simultaneously.).
-	// +kubebuilder:validation:Optional
 	MaxAgeInDays *float64 `json:"maxAgeInDays,omitempty" tf:"max_age_in_days,omitempty"`
 
 	// The maximum number of application versions to retain ('max_age_in_days' and 'max_count' cannot be enabled simultaneously.).
-	// +kubebuilder:validation:Optional
 	MaxCount *float64 `json:"maxCount,omitempty" tf:"max_count,omitempty"`
 
 	// The ARN of an IAM service role under which the application version is deleted.  Elastic Beanstalk must have permission to assume this role.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	ServiceRole *string `json:"serviceRole,omitempty" tf:"service_role,omitempty"`
 
 	// Reference to a Role in iam to populate serviceRole.
@@ -98,6 +124,10 @@ type AppversionLifecycleParameters struct {
 type ApplicationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ApplicationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ApplicationInitParameters `json:"initProvider,omitempty"`
 }
 
 // ApplicationStatus defines the observed state of Application.

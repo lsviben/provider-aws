@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ExtensionAssociationInitParameters struct {
+
+	// The ARN of the extension defined in the association.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appconfig/v1beta1.Extension
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	ExtensionArn *string `json:"extensionArn,omitempty" tf:"extension_arn,omitempty"`
+
+	ExtensionArnRef *v1.Reference `json:"extensionArnRef,omitempty" tf:"-"`
+
+	ExtensionArnSelector *v1.Selector `json:"extensionArnSelector,omitempty" tf:"-"`
+
+	// The parameter names and values defined for the association.
+	Parameters map[string]*string `json:"parameters,omitempty" tf:"parameters,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ARN of the application, configuration profile, or environment to associate with the extension.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appconfig/v1beta1.Application
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
+
+	ResourceArnRef *v1.Reference `json:"resourceArnRef,omitempty" tf:"-"`
+
+	ResourceArnSelector *v1.Selector `json:"resourceArnSelector,omitempty" tf:"-"`
+}
+
 type ExtensionAssociationObservation struct {
 
 	// ARN of the AppConfig Extension Association.
@@ -39,7 +67,6 @@ type ExtensionAssociationParameters struct {
 	// The ARN of the extension defined in the association.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appconfig/v1beta1.Extension
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	ExtensionArn *string `json:"extensionArn,omitempty" tf:"extension_arn,omitempty"`
 
 	// Reference to a Extension in appconfig to populate extensionArn.
@@ -51,18 +78,15 @@ type ExtensionAssociationParameters struct {
 	ExtensionArnSelector *v1.Selector `json:"extensionArnSelector,omitempty" tf:"-"`
 
 	// The parameter names and values defined for the association.
-	// +kubebuilder:validation:Optional
 	Parameters map[string]*string `json:"parameters,omitempty" tf:"parameters,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ARN of the application, configuration profile, or environment to associate with the extension.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appconfig/v1beta1.Application
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
 
 	// Reference to a Application in appconfig to populate resourceArn.
@@ -78,6 +102,10 @@ type ExtensionAssociationParameters struct {
 type ExtensionAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ExtensionAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ExtensionAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // ExtensionAssociationStatus defines the observed state of ExtensionAssociation.

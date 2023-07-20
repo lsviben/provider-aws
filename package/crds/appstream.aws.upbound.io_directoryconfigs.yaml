@@ -112,12 +112,63 @@ spec:
                           - namespace
                           type: object
                       required:
-                      - accountName
                       - accountPasswordSecretRef
                       type: object
                     type: array
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  directoryName:
+                    description: Fully qualified name of the directory.
+                    type: string
+                  organizationalUnitDistinguishedNames:
+                    description: Distinguished names of the organizational units for
+                      computer accounts.
+                    items:
+                      type: string
+                    type: array
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  serviceAccountCredentials:
+                    description: Configuration block for the name of the directory
+                      and organizational unit (OU) to use to join the directory config
+                      to a Microsoft Active Directory domain. See service_account_credentials
+                      below.
+                    items:
+                      properties:
+                        accountName:
+                          description: 'User name of the account. This account must
+                            have the following privileges: create computer objects,
+                            join computers to the domain, and change/reset the password
+                            on descendant computer objects for the organizational
+                            units specified.'
+                          type: string
+                        accountPasswordSecretRef:
+                          description: Password for the account.
+                          properties:
+                            key:
+                              description: The key to select.
+                              type: string
+                            name:
+                              description: Name of the secret.
+                              type: string
+                            namespace:
+                              description: Namespace of the secret.
+                              type: string
+                          required:
+                          - key
+                          - name
+                          - namespace
+                          type: object
+                      required:
+                      - accountPasswordSecretRef
+                      type: object
+                    type: array
                 type: object
               managementPolicies:
                 default:
@@ -317,15 +368,18 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: directoryName is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.directoryName)'
-            - message: organizationalUnitDistinguishedNames is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.directoryName)
+                || has(self.initProvider.directoryName)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.organizationalUnitDistinguishedNames)'
-            - message: serviceAccountCredentials is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.organizationalUnitDistinguishedNames)
+                || has(self.initProvider.organizationalUnitDistinguishedNames)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.serviceAccountCredentials)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.serviceAccountCredentials)
+                || has(self.initProvider.serviceAccountCredentials)'
           status:
             description: DirectoryConfigStatus defines the observed state of DirectoryConfig.
             properties:

@@ -13,6 +13,9 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type InlinePolicyInitParameters struct {
+}
+
 type InlinePolicyObservation struct {
 
 	// Friendly name of the role. See IAM Identifiers for more information.
@@ -23,6 +26,30 @@ type InlinePolicyObservation struct {
 }
 
 type InlinePolicyParameters struct {
+}
+
+type RoleInitParameters struct {
+
+	// Policy that grants an entity permission to assume the role.
+	AssumeRolePolicy *string `json:"assumeRolePolicy,omitempty" tf:"assume_role_policy,omitempty"`
+
+	// Description of the role.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Whether to force detaching any policies the role has before destroying it. Defaults to false.
+	ForceDetachPolicies *bool `json:"forceDetachPolicies,omitempty" tf:"force_detach_policies,omitempty"`
+
+	// Maximum session duration (in seconds) that you want to set for the specified role. If you do not specify a value for this setting, the default maximum of one hour is applied. This setting can have a value from 1 hour to 12 hours.
+	MaxSessionDuration *float64 `json:"maxSessionDuration,omitempty" tf:"max_session_duration,omitempty"`
+
+	// Path to the role. See IAM Identifiers for more information.
+	Path *string `json:"path,omitempty" tf:"path,omitempty"`
+
+	// ARN of the policy that is used to set the permissions boundary for the role.
+	PermissionsBoundary *string `json:"permissionsBoundary,omitempty" tf:"permissions_boundary,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type RoleObservation struct {
@@ -73,31 +100,24 @@ type RoleObservation struct {
 type RoleParameters struct {
 
 	// Policy that grants an entity permission to assume the role.
-	// +kubebuilder:validation:Optional
 	AssumeRolePolicy *string `json:"assumeRolePolicy,omitempty" tf:"assume_role_policy,omitempty"`
 
 	// Description of the role.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Whether to force detaching any policies the role has before destroying it. Defaults to false.
-	// +kubebuilder:validation:Optional
 	ForceDetachPolicies *bool `json:"forceDetachPolicies,omitempty" tf:"force_detach_policies,omitempty"`
 
 	// Maximum session duration (in seconds) that you want to set for the specified role. If you do not specify a value for this setting, the default maximum of one hour is applied. This setting can have a value from 1 hour to 12 hours.
-	// +kubebuilder:validation:Optional
 	MaxSessionDuration *float64 `json:"maxSessionDuration,omitempty" tf:"max_session_duration,omitempty"`
 
 	// Path to the role. See IAM Identifiers for more information.
-	// +kubebuilder:validation:Optional
 	Path *string `json:"path,omitempty" tf:"path,omitempty"`
 
 	// ARN of the policy that is used to set the permissions boundary for the role.
-	// +kubebuilder:validation:Optional
 	PermissionsBoundary *string `json:"permissionsBoundary,omitempty" tf:"permissions_boundary,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -105,6 +125,10 @@ type RoleParameters struct {
 type RoleSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RoleParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RoleInitParameters `json:"initProvider,omitempty"`
 }
 
 // RoleStatus defines the observed state of Role.
@@ -125,7 +149,7 @@ type RoleStatus struct {
 type Role struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.assumeRolePolicy)",message="assumeRolePolicy is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.assumeRolePolicy) || has(self.initProvider.assumeRolePolicy)",message="%!s(MISSING) is a required parameter"
 	Spec   RoleSpec   `json:"spec"`
 	Status RoleStatus `json:"status,omitempty"`
 }

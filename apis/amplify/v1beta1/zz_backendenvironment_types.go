@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BackendEnvironmentInitParameters struct {
+
+	// Unique ID for an Amplify app.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/amplify/v1beta1.App
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	AppID *string `json:"appId,omitempty" tf:"app_id,omitempty"`
+
+	AppIDRef *v1.Reference `json:"appIdRef,omitempty" tf:"-"`
+
+	AppIDSelector *v1.Selector `json:"appIdSelector,omitempty" tf:"-"`
+
+	// Name of deployment artifacts.
+	DeploymentArtifacts *string `json:"deploymentArtifacts,omitempty" tf:"deployment_artifacts,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// AWS CloudFormation stack name of a backend environment.
+	StackName *string `json:"stackName,omitempty" tf:"stack_name,omitempty"`
+}
+
 type BackendEnvironmentObservation struct {
 
 	// Unique ID for an Amplify app.
@@ -36,7 +58,6 @@ type BackendEnvironmentParameters struct {
 	// Unique ID for an Amplify app.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/amplify/v1beta1.App
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	AppID *string `json:"appId,omitempty" tf:"app_id,omitempty"`
 
 	// Reference to a App in amplify to populate appId.
@@ -48,16 +69,13 @@ type BackendEnvironmentParameters struct {
 	AppIDSelector *v1.Selector `json:"appIdSelector,omitempty" tf:"-"`
 
 	// Name of deployment artifacts.
-	// +kubebuilder:validation:Optional
 	DeploymentArtifacts *string `json:"deploymentArtifacts,omitempty" tf:"deployment_artifacts,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// AWS CloudFormation stack name of a backend environment.
-	// +kubebuilder:validation:Optional
 	StackName *string `json:"stackName,omitempty" tf:"stack_name,omitempty"`
 }
 
@@ -65,6 +83,10 @@ type BackendEnvironmentParameters struct {
 type BackendEnvironmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BackendEnvironmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BackendEnvironmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // BackendEnvironmentStatus defines the observed state of BackendEnvironment.

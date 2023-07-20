@@ -13,6 +13,23 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ModelPackageGroupPolicyInitParameters struct {
+
+	// The name of the model package group.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.ModelPackageGroup
+	ModelPackageGroupName *string `json:"modelPackageGroupName,omitempty" tf:"model_package_group_name,omitempty"`
+
+	ModelPackageGroupNameRef *v1.Reference `json:"modelPackageGroupNameRef,omitempty" tf:"-"`
+
+	ModelPackageGroupNameSelector *v1.Selector `json:"modelPackageGroupNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	ResourcePolicy *string `json:"resourcePolicy,omitempty" tf:"resource_policy,omitempty"`
+}
+
 type ModelPackageGroupPolicyObservation struct {
 
 	// The name of the Model Package Package Group.
@@ -28,7 +45,6 @@ type ModelPackageGroupPolicyParameters struct {
 
 	// The name of the model package group.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.ModelPackageGroup
-	// +kubebuilder:validation:Optional
 	ModelPackageGroupName *string `json:"modelPackageGroupName,omitempty" tf:"model_package_group_name,omitempty"`
 
 	// Reference to a ModelPackageGroup in sagemaker to populate modelPackageGroupName.
@@ -41,10 +57,8 @@ type ModelPackageGroupPolicyParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
-	// +kubebuilder:validation:Optional
 	ResourcePolicy *string `json:"resourcePolicy,omitempty" tf:"resource_policy,omitempty"`
 }
 
@@ -52,6 +66,10 @@ type ModelPackageGroupPolicyParameters struct {
 type ModelPackageGroupPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ModelPackageGroupPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ModelPackageGroupPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // ModelPackageGroupPolicyStatus defines the observed state of ModelPackageGroupPolicy.
@@ -72,7 +90,7 @@ type ModelPackageGroupPolicyStatus struct {
 type ModelPackageGroupPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourcePolicy)",message="resourcePolicy is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourcePolicy) || has(self.initProvider.resourcePolicy)",message="%!s(MISSING) is a required parameter"
 	Spec   ModelPackageGroupPolicySpec   `json:"spec"`
 	Status ModelPackageGroupPolicyStatus `json:"status,omitempty"`
 }

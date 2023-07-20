@@ -13,6 +13,9 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ClusterConfigurationInitParameters struct {
+}
+
 type ClusterConfigurationObservation struct {
 
 	// Description for the cluster.
@@ -58,6 +61,32 @@ type ClusterConfigurationObservation struct {
 type ClusterConfigurationParameters struct {
 }
 
+type SnapshotInitParameters struct {
+
+	// Name of the MemoryDB cluster to take a snapshot of.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/memorydb/v1beta1.Cluster
+	ClusterName *string `json:"clusterName,omitempty" tf:"cluster_name,omitempty"`
+
+	ClusterNameRef *v1.Reference `json:"clusterNameRef,omitempty" tf:"-"`
+
+	ClusterNameSelector *v1.Selector `json:"clusterNameSelector,omitempty" tf:"-"`
+
+	// ARN of the KMS key used to encrypt the snapshot at rest.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	KMSKeyArn *string `json:"kmsKeyArn,omitempty" tf:"kms_key_arn,omitempty"`
+
+	KMSKeyArnRef *v1.Reference `json:"kmsKeyArnRef,omitempty" tf:"-"`
+
+	KMSKeyArnSelector *v1.Selector `json:"kmsKeyArnSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type SnapshotObservation struct {
 
 	// The ARN of the snapshot.
@@ -89,7 +118,6 @@ type SnapshotParameters struct {
 
 	// Name of the MemoryDB cluster to take a snapshot of.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/memorydb/v1beta1.Cluster
-	// +kubebuilder:validation:Optional
 	ClusterName *string `json:"clusterName,omitempty" tf:"cluster_name,omitempty"`
 
 	// Reference to a Cluster in memorydb to populate clusterName.
@@ -102,7 +130,6 @@ type SnapshotParameters struct {
 
 	// ARN of the KMS key used to encrypt the snapshot at rest.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
-	// +kubebuilder:validation:Optional
 	KMSKeyArn *string `json:"kmsKeyArn,omitempty" tf:"kms_key_arn,omitempty"`
 
 	// Reference to a Key in kms to populate kmsKeyArn.
@@ -115,11 +142,9 @@ type SnapshotParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -127,6 +152,10 @@ type SnapshotParameters struct {
 type SnapshotSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SnapshotParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SnapshotInitParameters `json:"initProvider,omitempty"`
 }
 
 // SnapshotStatus defines the observed state of Snapshot.

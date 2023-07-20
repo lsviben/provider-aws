@@ -13,6 +13,21 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EncryptionConfigurationInitParameters struct {
+
+	// The encryption type to use for the repository. Valid values are AES256 or KMS. Defaults to AES256.
+	EncryptionType *string `json:"encryptionType,omitempty" tf:"encryption_type,omitempty"`
+
+	// The ARN of the KMS key to use when encryption_type is KMS. If not specified, uses the default AWS managed key for ECR.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	KMSKey *string `json:"kmsKey,omitempty" tf:"kms_key,omitempty"`
+
+	KMSKeyRef *v1.Reference `json:"kmsKeyRef,omitempty" tf:"-"`
+
+	KMSKeySelector *v1.Selector `json:"kmsKeySelector,omitempty" tf:"-"`
+}
+
 type EncryptionConfigurationObservation struct {
 
 	// The encryption type to use for the repository. Valid values are AES256 or KMS. Defaults to AES256.
@@ -25,13 +40,11 @@ type EncryptionConfigurationObservation struct {
 type EncryptionConfigurationParameters struct {
 
 	// The encryption type to use for the repository. Valid values are AES256 or KMS. Defaults to AES256.
-	// +kubebuilder:validation:Optional
 	EncryptionType *string `json:"encryptionType,omitempty" tf:"encryption_type,omitempty"`
 
 	// The ARN of the KMS key to use when encryption_type is KMS. If not specified, uses the default AWS managed key for ECR.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	KMSKey *string `json:"kmsKey,omitempty" tf:"kms_key,omitempty"`
 
 	// Reference to a Key in kms to populate kmsKey.
@@ -43,6 +56,12 @@ type EncryptionConfigurationParameters struct {
 	KMSKeySelector *v1.Selector `json:"kmsKeySelector,omitempty" tf:"-"`
 }
 
+type ImageScanningConfigurationInitParameters struct {
+
+	// Indicates whether images are scanned after being pushed to the repository (true) or not scanned (false).
+	ScanOnPush *bool `json:"scanOnPush,omitempty" tf:"scan_on_push,omitempty"`
+}
+
 type ImageScanningConfigurationObservation struct {
 
 	// Indicates whether images are scanned after being pushed to the repository (true) or not scanned (false).
@@ -52,8 +71,30 @@ type ImageScanningConfigurationObservation struct {
 type ImageScanningConfigurationParameters struct {
 
 	// Indicates whether images are scanned after being pushed to the repository (true) or not scanned (false).
-	// +kubebuilder:validation:Required
-	ScanOnPush *bool `json:"scanOnPush" tf:"scan_on_push,omitempty"`
+	ScanOnPush *bool `json:"scanOnPush,omitempty" tf:"scan_on_push,omitempty"`
+}
+
+type RepositoryInitParameters struct {
+
+	// Encryption configuration for the repository. See below for schema.
+	EncryptionConfiguration []EncryptionConfigurationInitParameters `json:"encryptionConfiguration,omitempty" tf:"encryption_configuration,omitempty"`
+
+	// If true, will delete the repository even if it contains images.
+	// Defaults to false.
+	ForceDelete *bool `json:"forceDelete,omitempty" tf:"force_delete,omitempty"`
+
+	// Configuration block that defines image scanning configuration for the repository. By default, image scanning must be manually triggered. See the ECR User Guide for more information about image scanning.
+	ImageScanningConfiguration []ImageScanningConfigurationInitParameters `json:"imageScanningConfiguration,omitempty" tf:"image_scanning_configuration,omitempty"`
+
+	// The tag mutability setting for the repository. Must be one of: MUTABLE or IMMUTABLE. Defaults to MUTABLE.
+	ImageTagMutability *string `json:"imageTagMutability,omitempty" tf:"image_tag_mutability,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type RepositoryObservation struct {
@@ -92,29 +133,23 @@ type RepositoryObservation struct {
 type RepositoryParameters struct {
 
 	// Encryption configuration for the repository. See below for schema.
-	// +kubebuilder:validation:Optional
 	EncryptionConfiguration []EncryptionConfigurationParameters `json:"encryptionConfiguration,omitempty" tf:"encryption_configuration,omitempty"`
 
 	// If true, will delete the repository even if it contains images.
 	// Defaults to false.
-	// +kubebuilder:validation:Optional
 	ForceDelete *bool `json:"forceDelete,omitempty" tf:"force_delete,omitempty"`
 
 	// Configuration block that defines image scanning configuration for the repository. By default, image scanning must be manually triggered. See the ECR User Guide for more information about image scanning.
-	// +kubebuilder:validation:Optional
 	ImageScanningConfiguration []ImageScanningConfigurationParameters `json:"imageScanningConfiguration,omitempty" tf:"image_scanning_configuration,omitempty"`
 
 	// The tag mutability setting for the repository. Must be one of: MUTABLE or IMMUTABLE. Defaults to MUTABLE.
-	// +kubebuilder:validation:Optional
 	ImageTagMutability *string `json:"imageTagMutability,omitempty" tf:"image_tag_mutability,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -122,6 +157,10 @@ type RepositoryParameters struct {
 type RepositorySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RepositoryParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RepositoryInitParameters `json:"initProvider,omitempty"`
 }
 
 // RepositoryStatus defines the observed state of Repository.

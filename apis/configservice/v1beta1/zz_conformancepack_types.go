@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConformancePackInitParameters struct {
+
+	// Amazon S3 bucket where AWS Config stores conformance pack templates. Maximum length of 63.
+	DeliveryS3Bucket *string `json:"deliveryS3Bucket,omitempty" tf:"delivery_s3_bucket,omitempty"`
+
+	// The prefix for the Amazon S3 bucket. Maximum length of 1024.
+	DeliveryS3KeyPrefix *string `json:"deliveryS3KeyPrefix,omitempty" tf:"delivery_s3_key_prefix,omitempty"`
+
+	// Set of configuration blocks describing input parameters passed to the conformance pack template. Documented below. When configured, the parameters must also be included in the template_body or in the template stored in Amazon S3 if using template_s3_uri.
+	InputParameter []InputParameterInitParameters `json:"inputParameter,omitempty" tf:"input_parameter,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A string containing full conformance pack template body. Maximum length of 51200. Drift detection is not possible with this argument.
+	TemplateBody *string `json:"templateBody,omitempty" tf:"template_body,omitempty"`
+
+	// Location of file, e.g., s3://bucketname/prefix, containing the template body. The uri must point to the conformance pack template that is located in an Amazon S3 bucket in the same region as the conformance pack. Maximum length of 1024. Drift detection is not possible with this argument.
+	TemplateS3URI *string `json:"templateS3Uri,omitempty" tf:"template_s3_uri,omitempty"`
+}
+
 type ConformancePackObservation struct {
 
 	// Amazon Resource Name (ARN) of the conformance pack.
@@ -39,29 +61,32 @@ type ConformancePackObservation struct {
 type ConformancePackParameters struct {
 
 	// Amazon S3 bucket where AWS Config stores conformance pack templates. Maximum length of 63.
-	// +kubebuilder:validation:Optional
 	DeliveryS3Bucket *string `json:"deliveryS3Bucket,omitempty" tf:"delivery_s3_bucket,omitempty"`
 
 	// The prefix for the Amazon S3 bucket. Maximum length of 1024.
-	// +kubebuilder:validation:Optional
 	DeliveryS3KeyPrefix *string `json:"deliveryS3KeyPrefix,omitempty" tf:"delivery_s3_key_prefix,omitempty"`
 
 	// Set of configuration blocks describing input parameters passed to the conformance pack template. Documented below. When configured, the parameters must also be included in the template_body or in the template stored in Amazon S3 if using template_s3_uri.
-	// +kubebuilder:validation:Optional
 	InputParameter []InputParameterParameters `json:"inputParameter,omitempty" tf:"input_parameter,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A string containing full conformance pack template body. Maximum length of 51200. Drift detection is not possible with this argument.
-	// +kubebuilder:validation:Optional
 	TemplateBody *string `json:"templateBody,omitempty" tf:"template_body,omitempty"`
 
 	// Location of file, e.g., s3://bucketname/prefix, containing the template body. The uri must point to the conformance pack template that is located in an Amazon S3 bucket in the same region as the conformance pack. Maximum length of 1024. Drift detection is not possible with this argument.
-	// +kubebuilder:validation:Optional
 	TemplateS3URI *string `json:"templateS3Uri,omitempty" tf:"template_s3_uri,omitempty"`
+}
+
+type InputParameterInitParameters struct {
+
+	// The input key.
+	ParameterName *string `json:"parameterName,omitempty" tf:"parameter_name,omitempty"`
+
+	// The input value.
+	ParameterValue *string `json:"parameterValue,omitempty" tf:"parameter_value,omitempty"`
 }
 
 type InputParameterObservation struct {
@@ -76,18 +101,20 @@ type InputParameterObservation struct {
 type InputParameterParameters struct {
 
 	// The input key.
-	// +kubebuilder:validation:Required
-	ParameterName *string `json:"parameterName" tf:"parameter_name,omitempty"`
+	ParameterName *string `json:"parameterName,omitempty" tf:"parameter_name,omitempty"`
 
 	// The input value.
-	// +kubebuilder:validation:Required
-	ParameterValue *string `json:"parameterValue" tf:"parameter_value,omitempty"`
+	ParameterValue *string `json:"parameterValue,omitempty" tf:"parameter_value,omitempty"`
 }
 
 // ConformancePackSpec defines the desired state of ConformancePack
 type ConformancePackSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ConformancePackParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ConformancePackInitParameters `json:"initProvider,omitempty"`
 }
 
 // ConformancePackStatus defines the observed state of ConformancePack.

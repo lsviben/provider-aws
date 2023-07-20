@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ContentTypeProfileConfigInitParameters struct {
+
+	// Object that contains an attribute items that contains the list of configurations for a field-level encryption content type-profile. See Content Type Profile.
+	ContentTypeProfiles []ContentTypeProfilesInitParameters `json:"contentTypeProfiles,omitempty" tf:"content_type_profiles,omitempty"`
+
+	// specifies what to do when an unknown content type is provided for the profile. If true, content is forwarded without being encrypted when the content type is unknown. If false (the default), an error is returned when the content type is unknown.
+	ForwardWhenContentTypeIsUnknown *bool `json:"forwardWhenContentTypeIsUnknown,omitempty" tf:"forward_when_content_type_is_unknown,omitempty"`
+}
+
 type ContentTypeProfileConfigObservation struct {
 
 	// Object that contains an attribute items that contains the list of configurations for a field-level encryption content type-profile. See Content Type Profile.
@@ -25,12 +34,26 @@ type ContentTypeProfileConfigObservation struct {
 type ContentTypeProfileConfigParameters struct {
 
 	// Object that contains an attribute items that contains the list of configurations for a field-level encryption content type-profile. See Content Type Profile.
-	// +kubebuilder:validation:Required
-	ContentTypeProfiles []ContentTypeProfilesParameters `json:"contentTypeProfiles" tf:"content_type_profiles,omitempty"`
+	ContentTypeProfiles []ContentTypeProfilesParameters `json:"contentTypeProfiles,omitempty" tf:"content_type_profiles,omitempty"`
 
 	// specifies what to do when an unknown content type is provided for the profile. If true, content is forwarded without being encrypted when the content type is unknown. If false (the default), an error is returned when the content type is unknown.
-	// +kubebuilder:validation:Required
-	ForwardWhenContentTypeIsUnknown *bool `json:"forwardWhenContentTypeIsUnknown" tf:"forward_when_content_type_is_unknown,omitempty"`
+	ForwardWhenContentTypeIsUnknown *bool `json:"forwardWhenContentTypeIsUnknown,omitempty" tf:"forward_when_content_type_is_unknown,omitempty"`
+}
+
+type ContentTypeProfilesInitParameters struct {
+	Items []ContentTypeProfilesItemsInitParameters `json:"items,omitempty" tf:"items,omitempty"`
+}
+
+type ContentTypeProfilesItemsInitParameters struct {
+
+	// he content type for a field-level encryption content type-profile mapping. Valid value is application/x-www-form-urlencoded.
+	ContentType *string `json:"contentType,omitempty" tf:"content_type,omitempty"`
+
+	// The format for a field-level encryption content type-profile mapping. Valid value is URLEncoded.
+	Format *string `json:"format,omitempty" tf:"format,omitempty"`
+
+	// The profile ID for a field-level encryption content type-profile mapping.
+	ProfileID *string `json:"profileId,omitempty" tf:"profile_id,omitempty"`
 }
 
 type ContentTypeProfilesItemsObservation struct {
@@ -48,15 +71,12 @@ type ContentTypeProfilesItemsObservation struct {
 type ContentTypeProfilesItemsParameters struct {
 
 	// he content type for a field-level encryption content type-profile mapping. Valid value is application/x-www-form-urlencoded.
-	// +kubebuilder:validation:Required
-	ContentType *string `json:"contentType" tf:"content_type,omitempty"`
+	ContentType *string `json:"contentType,omitempty" tf:"content_type,omitempty"`
 
 	// The format for a field-level encryption content type-profile mapping. Valid value is URLEncoded.
-	// +kubebuilder:validation:Required
-	Format *string `json:"format" tf:"format,omitempty"`
+	Format *string `json:"format,omitempty" tf:"format,omitempty"`
 
 	// The profile ID for a field-level encryption content type-profile mapping.
-	// +kubebuilder:validation:Optional
 	ProfileID *string `json:"profileId,omitempty" tf:"profile_id,omitempty"`
 }
 
@@ -65,9 +85,23 @@ type ContentTypeProfilesObservation struct {
 }
 
 type ContentTypeProfilesParameters struct {
+	Items []ContentTypeProfilesItemsParameters `json:"items,omitempty" tf:"items,omitempty"`
+}
 
-	// +kubebuilder:validation:Required
-	Items []ContentTypeProfilesItemsParameters `json:"items" tf:"items,omitempty"`
+type FieldLevelEncryptionConfigInitParameters struct {
+
+	// An optional comment about the Field Level Encryption Config.
+	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
+
+	// Content Type Profile Config specifies when to forward content if a content type isn't recognized and profiles to use as by default in a request if a query argument doesn't specify a profile to use.
+	ContentTypeProfileConfig []ContentTypeProfileConfigInitParameters `json:"contentTypeProfileConfig,omitempty" tf:"content_type_profile_config,omitempty"`
+
+	// Query Arg Profile Config that specifies when to forward content if a profile isn't found and the profile that can be provided as a query argument in a request.
+	QueryArgProfileConfig []QueryArgProfileConfigInitParameters `json:"queryArgProfileConfig,omitempty" tf:"query_arg_profile_config,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type FieldLevelEncryptionConfigObservation struct {
@@ -94,21 +128,26 @@ type FieldLevelEncryptionConfigObservation struct {
 type FieldLevelEncryptionConfigParameters struct {
 
 	// An optional comment about the Field Level Encryption Config.
-	// +kubebuilder:validation:Optional
 	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
 
 	// Content Type Profile Config specifies when to forward content if a content type isn't recognized and profiles to use as by default in a request if a query argument doesn't specify a profile to use.
-	// +kubebuilder:validation:Optional
 	ContentTypeProfileConfig []ContentTypeProfileConfigParameters `json:"contentTypeProfileConfig,omitempty" tf:"content_type_profile_config,omitempty"`
 
 	// Query Arg Profile Config that specifies when to forward content if a profile isn't found and the profile that can be provided as a query argument in a request.
-	// +kubebuilder:validation:Optional
 	QueryArgProfileConfig []QueryArgProfileConfigParameters `json:"queryArgProfileConfig,omitempty" tf:"query_arg_profile_config,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type QueryArgProfileConfigInitParameters struct {
+
+	// Flag to set if you want a request to be forwarded to the origin even if the profile specified by the field-level encryption query argument, fle-profile, is unknown.
+	ForwardWhenQueryArgProfileIsUnknown *bool `json:"forwardWhenQueryArgProfileIsUnknown,omitempty" tf:"forward_when_query_arg_profile_is_unknown,omitempty"`
+
+	// Object that contains an attribute items that contains the list ofrofiles specified for query argument-profile mapping for field-level encryption. see Query Arg Profile.
+	QueryArgProfiles []QueryArgProfilesInitParameters `json:"queryArgProfiles,omitempty" tf:"query_arg_profiles,omitempty"`
 }
 
 type QueryArgProfileConfigObservation struct {
@@ -123,12 +162,29 @@ type QueryArgProfileConfigObservation struct {
 type QueryArgProfileConfigParameters struct {
 
 	// Flag to set if you want a request to be forwarded to the origin even if the profile specified by the field-level encryption query argument, fle-profile, is unknown.
-	// +kubebuilder:validation:Required
-	ForwardWhenQueryArgProfileIsUnknown *bool `json:"forwardWhenQueryArgProfileIsUnknown" tf:"forward_when_query_arg_profile_is_unknown,omitempty"`
+	ForwardWhenQueryArgProfileIsUnknown *bool `json:"forwardWhenQueryArgProfileIsUnknown,omitempty" tf:"forward_when_query_arg_profile_is_unknown,omitempty"`
 
 	// Object that contains an attribute items that contains the list ofrofiles specified for query argument-profile mapping for field-level encryption. see Query Arg Profile.
-	// +kubebuilder:validation:Optional
 	QueryArgProfiles []QueryArgProfilesParameters `json:"queryArgProfiles,omitempty" tf:"query_arg_profiles,omitempty"`
+}
+
+type QueryArgProfilesInitParameters struct {
+	Items []QueryArgProfilesItemsInitParameters `json:"items,omitempty" tf:"items,omitempty"`
+}
+
+type QueryArgProfilesItemsInitParameters struct {
+
+	// The profile ID for a field-level encryption content type-profile mapping.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudfront/v1beta1.FieldLevelEncryptionProfile
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	ProfileID *string `json:"profileId,omitempty" tf:"profile_id,omitempty"`
+
+	ProfileIDRef *v1.Reference `json:"profileIdRef,omitempty" tf:"-"`
+
+	ProfileIDSelector *v1.Selector `json:"profileIdSelector,omitempty" tf:"-"`
+
+	// Query argument for field-level encryption query argument-profile mapping.
+	QueryArg *string `json:"queryArg,omitempty" tf:"query_arg,omitempty"`
 }
 
 type QueryArgProfilesItemsObservation struct {
@@ -145,7 +201,6 @@ type QueryArgProfilesItemsParameters struct {
 	// The profile ID for a field-level encryption content type-profile mapping.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudfront/v1beta1.FieldLevelEncryptionProfile
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	ProfileID *string `json:"profileId,omitempty" tf:"profile_id,omitempty"`
 
 	// Reference to a FieldLevelEncryptionProfile in cloudfront to populate profileId.
@@ -157,8 +212,7 @@ type QueryArgProfilesItemsParameters struct {
 	ProfileIDSelector *v1.Selector `json:"profileIdSelector,omitempty" tf:"-"`
 
 	// Query argument for field-level encryption query argument-profile mapping.
-	// +kubebuilder:validation:Required
-	QueryArg *string `json:"queryArg" tf:"query_arg,omitempty"`
+	QueryArg *string `json:"queryArg,omitempty" tf:"query_arg,omitempty"`
 }
 
 type QueryArgProfilesObservation struct {
@@ -166,8 +220,6 @@ type QueryArgProfilesObservation struct {
 }
 
 type QueryArgProfilesParameters struct {
-
-	// +kubebuilder:validation:Optional
 	Items []QueryArgProfilesItemsParameters `json:"items,omitempty" tf:"items,omitempty"`
 }
 
@@ -175,6 +227,10 @@ type QueryArgProfilesParameters struct {
 type FieldLevelEncryptionConfigSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     FieldLevelEncryptionConfigParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider FieldLevelEncryptionConfigInitParameters `json:"initProvider,omitempty"`
 }
 
 // FieldLevelEncryptionConfigStatus defines the observed state of FieldLevelEncryptionConfig.
@@ -195,8 +251,8 @@ type FieldLevelEncryptionConfigStatus struct {
 type FieldLevelEncryptionConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.contentTypeProfileConfig)",message="contentTypeProfileConfig is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.queryArgProfileConfig)",message="queryArgProfileConfig is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.contentTypeProfileConfig) || has(self.initProvider.contentTypeProfileConfig)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.queryArgProfileConfig) || has(self.initProvider.queryArgProfileConfig)",message="%!s(MISSING) is a required parameter"
 	Spec   FieldLevelEncryptionConfigSpec   `json:"spec"`
 	Status FieldLevelEncryptionConfigStatus `json:"status,omitempty"`
 }

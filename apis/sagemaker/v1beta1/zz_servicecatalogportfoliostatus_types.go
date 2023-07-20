@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ServicecatalogPortfolioStatusInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Whether Service Catalog is enabled or disabled in SageMaker. Valid values are Enabled and Disabled.
+	Status *string `json:"status,omitempty" tf:"status,omitempty"`
+}
+
 type ServicecatalogPortfolioStatusObservation struct {
 
 	// The AWS Region the Servicecatalog portfolio status resides in.
@@ -26,11 +36,9 @@ type ServicecatalogPortfolioStatusParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Whether Service Catalog is enabled or disabled in SageMaker. Valid values are Enabled and Disabled.
-	// +kubebuilder:validation:Optional
 	Status *string `json:"status,omitempty" tf:"status,omitempty"`
 }
 
@@ -38,6 +46,10 @@ type ServicecatalogPortfolioStatusParameters struct {
 type ServicecatalogPortfolioStatusSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ServicecatalogPortfolioStatusParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ServicecatalogPortfolioStatusInitParameters `json:"initProvider,omitempty"`
 }
 
 // ServicecatalogPortfolioStatusStatus defines the observed state of ServicecatalogPortfolioStatus.
@@ -58,7 +70,7 @@ type ServicecatalogPortfolioStatusStatus struct {
 type ServicecatalogPortfolioStatus struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.status)",message="status is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.status) || has(self.initProvider.status)",message="%!s(MISSING) is a required parameter"
 	Spec   ServicecatalogPortfolioStatusSpec   `json:"spec"`
 	Status ServicecatalogPortfolioStatusStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,33 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SSHKeyInitParameters struct {
+
+	// (Requirement) The public key portion of an SSH key pair.
+	Body *string `json:"body,omitempty" tf:"body,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// (Requirement) The Server ID of the Transfer Server (e.g., s-12345678)
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/transfer/v1beta1.Server
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	ServerID *string `json:"serverId,omitempty" tf:"server_id,omitempty"`
+
+	ServerIDRef *v1.Reference `json:"serverIdRef,omitempty" tf:"-"`
+
+	ServerIDSelector *v1.Selector `json:"serverIdSelector,omitempty" tf:"-"`
+
+	// (Requirement) The name of the user account that is assigned to one or more servers.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/transfer/v1beta1.User
+	UserName *string `json:"userName,omitempty" tf:"user_name,omitempty"`
+
+	UserNameRef *v1.Reference `json:"userNameRef,omitempty" tf:"-"`
+
+	UserNameSelector *v1.Selector `json:"userNameSelector,omitempty" tf:"-"`
+}
+
 type SSHKeyObservation struct {
 
 	// (Requirement) The public key portion of an SSH key pair.
@@ -30,18 +57,15 @@ type SSHKeyObservation struct {
 type SSHKeyParameters struct {
 
 	// (Requirement) The public key portion of an SSH key pair.
-	// +kubebuilder:validation:Optional
 	Body *string `json:"body,omitempty" tf:"body,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// (Requirement) The Server ID of the Transfer Server (e.g., s-12345678)
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/transfer/v1beta1.Server
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	ServerID *string `json:"serverId,omitempty" tf:"server_id,omitempty"`
 
 	// Reference to a Server in transfer to populate serverId.
@@ -54,7 +78,6 @@ type SSHKeyParameters struct {
 
 	// (Requirement) The name of the user account that is assigned to one or more servers.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/transfer/v1beta1.User
-	// +kubebuilder:validation:Optional
 	UserName *string `json:"userName,omitempty" tf:"user_name,omitempty"`
 
 	// Reference to a User in transfer to populate userName.
@@ -70,6 +93,10 @@ type SSHKeyParameters struct {
 type SSHKeySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SSHKeyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SSHKeyInitParameters `json:"initProvider,omitempty"`
 }
 
 // SSHKeyStatus defines the observed state of SSHKey.
@@ -90,7 +117,7 @@ type SSHKeyStatus struct {
 type SSHKey struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.body)",message="body is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.body) || has(self.initProvider.body)",message="%!s(MISSING) is a required parameter"
 	Spec   SSHKeySpec   `json:"spec"`
 	Status SSHKeyStatus `json:"status,omitempty"`
 }

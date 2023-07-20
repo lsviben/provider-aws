@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VaultLockConfigurationInitParameters struct {
+
+	// Name of the backup vault to add a lock configuration for.
+	// +crossplane:generate:reference:type=Vault
+	BackupVaultName *string `json:"backupVaultName,omitempty" tf:"backup_vault_name,omitempty"`
+
+	BackupVaultNameRef *v1.Reference `json:"backupVaultNameRef,omitempty" tf:"-"`
+
+	BackupVaultNameSelector *v1.Selector `json:"backupVaultNameSelector,omitempty" tf:"-"`
+
+	// The number of days before the lock date. If omitted creates a vault lock in governance mode, otherwise it will create a vault lock in compliance mode.
+	ChangeableForDays *float64 `json:"changeableForDays,omitempty" tf:"changeable_for_days,omitempty"`
+
+	// The maximum retention period that the vault retains its recovery points.
+	MaxRetentionDays *float64 `json:"maxRetentionDays,omitempty" tf:"max_retention_days,omitempty"`
+
+	// The minimum retention period that the vault retains its recovery points.
+	MinRetentionDays *float64 `json:"minRetentionDays,omitempty" tf:"min_retention_days,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type VaultLockConfigurationObservation struct {
 
 	// The ARN of the vault.
@@ -37,7 +61,6 @@ type VaultLockConfigurationParameters struct {
 
 	// Name of the backup vault to add a lock configuration for.
 	// +crossplane:generate:reference:type=Vault
-	// +kubebuilder:validation:Optional
 	BackupVaultName *string `json:"backupVaultName,omitempty" tf:"backup_vault_name,omitempty"`
 
 	// Reference to a Vault to populate backupVaultName.
@@ -49,27 +72,27 @@ type VaultLockConfigurationParameters struct {
 	BackupVaultNameSelector *v1.Selector `json:"backupVaultNameSelector,omitempty" tf:"-"`
 
 	// The number of days before the lock date. If omitted creates a vault lock in governance mode, otherwise it will create a vault lock in compliance mode.
-	// +kubebuilder:validation:Optional
 	ChangeableForDays *float64 `json:"changeableForDays,omitempty" tf:"changeable_for_days,omitempty"`
 
 	// The maximum retention period that the vault retains its recovery points.
-	// +kubebuilder:validation:Optional
 	MaxRetentionDays *float64 `json:"maxRetentionDays,omitempty" tf:"max_retention_days,omitempty"`
 
 	// The minimum retention period that the vault retains its recovery points.
-	// +kubebuilder:validation:Optional
 	MinRetentionDays *float64 `json:"minRetentionDays,omitempty" tf:"min_retention_days,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // VaultLockConfigurationSpec defines the desired state of VaultLockConfiguration
 type VaultLockConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VaultLockConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VaultLockConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // VaultLockConfigurationStatus defines the observed state of VaultLockConfiguration.

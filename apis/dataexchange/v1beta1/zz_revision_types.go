@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RevisionInitParameters struct {
+
+	// An optional comment about the revision.
+	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
+
+	// The dataset id.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/dataexchange/v1beta1.DataSet
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DataSetID *string `json:"dataSetId,omitempty" tf:"data_set_id,omitempty"`
+
+	DataSetIDRef *v1.Reference `json:"dataSetIdRef,omitempty" tf:"-"`
+
+	DataSetIDSelector *v1.Selector `json:"dataSetIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type RevisionObservation struct {
 
 	// The Amazon Resource Name of this data set.
@@ -40,13 +62,11 @@ type RevisionObservation struct {
 type RevisionParameters struct {
 
 	// An optional comment about the revision.
-	// +kubebuilder:validation:Optional
 	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
 
 	// The dataset id.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/dataexchange/v1beta1.DataSet
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DataSetID *string `json:"dataSetId,omitempty" tf:"data_set_id,omitempty"`
 
 	// Reference to a DataSet in dataexchange to populate dataSetId.
@@ -59,11 +79,9 @@ type RevisionParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -71,6 +89,10 @@ type RevisionParameters struct {
 type RevisionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RevisionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RevisionInitParameters `json:"initProvider,omitempty"`
 }
 
 // RevisionStatus defines the observed state of Revision.

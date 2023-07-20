@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConfigInitParameters struct {
+
+	// Specifies the day that the hours of operation applies to.
+	Day *string `json:"day,omitempty" tf:"day,omitempty"`
+
+	// A end time block specifies the time that your contact center closes. The end_time is documented below.
+	EndTime []EndTimeInitParameters `json:"endTime,omitempty" tf:"end_time,omitempty"`
+
+	// A start time block specifies the time that your contact center opens. The start_time is documented below.
+	StartTime []StartTimeInitParameters `json:"startTime,omitempty" tf:"start_time,omitempty"`
+}
+
 type ConfigObservation struct {
 
 	// Specifies the day that the hours of operation applies to.
@@ -28,16 +40,22 @@ type ConfigObservation struct {
 type ConfigParameters struct {
 
 	// Specifies the day that the hours of operation applies to.
-	// +kubebuilder:validation:Required
-	Day *string `json:"day" tf:"day,omitempty"`
+	Day *string `json:"day,omitempty" tf:"day,omitempty"`
 
 	// A end time block specifies the time that your contact center closes. The end_time is documented below.
-	// +kubebuilder:validation:Required
-	EndTime []EndTimeParameters `json:"endTime" tf:"end_time,omitempty"`
+	EndTime []EndTimeParameters `json:"endTime,omitempty" tf:"end_time,omitempty"`
 
 	// A start time block specifies the time that your contact center opens. The start_time is documented below.
-	// +kubebuilder:validation:Required
-	StartTime []StartTimeParameters `json:"startTime" tf:"start_time,omitempty"`
+	StartTime []StartTimeParameters `json:"startTime,omitempty" tf:"start_time,omitempty"`
+}
+
+type EndTimeInitParameters struct {
+
+	// Specifies the hour of closing.
+	Hours *float64 `json:"hours,omitempty" tf:"hours,omitempty"`
+
+	// Specifies the minute of closing.
+	Minutes *float64 `json:"minutes,omitempty" tf:"minutes,omitempty"`
 }
 
 type EndTimeObservation struct {
@@ -52,12 +70,41 @@ type EndTimeObservation struct {
 type EndTimeParameters struct {
 
 	// Specifies the hour of closing.
-	// +kubebuilder:validation:Required
-	Hours *float64 `json:"hours" tf:"hours,omitempty"`
+	Hours *float64 `json:"hours,omitempty" tf:"hours,omitempty"`
 
 	// Specifies the minute of closing.
-	// +kubebuilder:validation:Required
-	Minutes *float64 `json:"minutes" tf:"minutes,omitempty"`
+	Minutes *float64 `json:"minutes,omitempty" tf:"minutes,omitempty"`
+}
+
+type HoursOfOperationInitParameters struct {
+
+	// One or more config blocks which define the configuration information for the hours of operation: day, start time, and end time . Config blocks are documented below.
+	Config []ConfigInitParameters `json:"config,omitempty" tf:"config,omitempty"`
+
+	// Specifies the description of the Hours of Operation.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Specifies the identifier of the hosting Amazon Connect Instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
+
+	InstanceIDRef *v1.Reference `json:"instanceIdRef,omitempty" tf:"-"`
+
+	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
+
+	// Specifies the name of the Hours of Operation.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Specifies the time zone of the Hours of Operation.
+	TimeZone *string `json:"timeZone,omitempty" tf:"time_zone,omitempty"`
 }
 
 type HoursOfOperationObservation struct {
@@ -99,17 +146,14 @@ type HoursOfOperationObservation struct {
 type HoursOfOperationParameters struct {
 
 	// One or more config blocks which define the configuration information for the hours of operation: day, start time, and end time . Config blocks are documented below.
-	// +kubebuilder:validation:Optional
 	Config []ConfigParameters `json:"config,omitempty" tf:"config,omitempty"`
 
 	// Specifies the description of the Hours of Operation.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Specifies the identifier of the hosting Amazon Connect Instance.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
 
 	// Reference to a Instance in connect to populate instanceId.
@@ -121,21 +165,26 @@ type HoursOfOperationParameters struct {
 	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
 
 	// Specifies the name of the Hours of Operation.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Specifies the time zone of the Hours of Operation.
-	// +kubebuilder:validation:Optional
 	TimeZone *string `json:"timeZone,omitempty" tf:"time_zone,omitempty"`
+}
+
+type StartTimeInitParameters struct {
+
+	// Specifies the hour of opening.
+	Hours *float64 `json:"hours,omitempty" tf:"hours,omitempty"`
+
+	// Specifies the minute of opening.
+	Minutes *float64 `json:"minutes,omitempty" tf:"minutes,omitempty"`
 }
 
 type StartTimeObservation struct {
@@ -150,18 +199,20 @@ type StartTimeObservation struct {
 type StartTimeParameters struct {
 
 	// Specifies the hour of opening.
-	// +kubebuilder:validation:Required
-	Hours *float64 `json:"hours" tf:"hours,omitempty"`
+	Hours *float64 `json:"hours,omitempty" tf:"hours,omitempty"`
 
 	// Specifies the minute of opening.
-	// +kubebuilder:validation:Required
-	Minutes *float64 `json:"minutes" tf:"minutes,omitempty"`
+	Minutes *float64 `json:"minutes,omitempty" tf:"minutes,omitempty"`
 }
 
 // HoursOfOperationSpec defines the desired state of HoursOfOperation
 type HoursOfOperationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     HoursOfOperationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider HoursOfOperationInitParameters `json:"initProvider,omitempty"`
 }
 
 // HoursOfOperationStatus defines the observed state of HoursOfOperation.
@@ -182,9 +233,9 @@ type HoursOfOperationStatus struct {
 type HoursOfOperation struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.config)",message="config is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.timeZone)",message="timeZone is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.config) || has(self.initProvider.config)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.timeZone) || has(self.initProvider.timeZone)",message="%!s(MISSING) is a required parameter"
 	Spec   HoursOfOperationSpec   `json:"spec"`
 	Status HoursOfOperationStatus `json:"status,omitempty"`
 }

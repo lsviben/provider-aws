@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DestinationInitParameters struct {
+
+	// A Region to replicate to.
+	Region *string `json:"region,omitempty" tf:"region,omitempty"`
+
+	// The account ID of the destination registry to replicate to.
+	RegistryID *string `json:"registryId,omitempty" tf:"registry_id,omitempty"`
+}
+
 type DestinationObservation struct {
 
 	// A Region to replicate to.
@@ -25,12 +34,21 @@ type DestinationObservation struct {
 type DestinationParameters struct {
 
 	// A Region to replicate to.
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"region,omitempty"`
+	Region *string `json:"region,omitempty" tf:"region,omitempty"`
 
 	// The account ID of the destination registry to replicate to.
-	// +kubebuilder:validation:Required
-	RegistryID *string `json:"registryId" tf:"registry_id,omitempty"`
+	RegistryID *string `json:"registryId,omitempty" tf:"registry_id,omitempty"`
+}
+
+type ReplicationConfigurationInitParameters struct {
+
+	// A Region to replicate to.
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Replication configuration for a registry. See Replication Configuration.
+	ReplicationConfiguration []ReplicationConfigurationReplicationConfigurationInitParameters `json:"replicationConfiguration,omitempty" tf:"replication_configuration,omitempty"`
 }
 
 type ReplicationConfigurationObservation struct {
@@ -48,12 +66,16 @@ type ReplicationConfigurationParameters struct {
 	// A Region to replicate to.
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Replication configuration for a registry. See Replication Configuration.
-	// +kubebuilder:validation:Optional
 	ReplicationConfiguration []ReplicationConfigurationReplicationConfigurationParameters `json:"replicationConfiguration,omitempty" tf:"replication_configuration,omitempty"`
+}
+
+type ReplicationConfigurationReplicationConfigurationInitParameters struct {
+
+	// The replication rules for a replication configuration. A maximum of 10 are allowed per replication_configuration. See Rule
+	Rule []ReplicationConfigurationRuleInitParameters `json:"rule,omitempty" tf:"rule,omitempty"`
 }
 
 type ReplicationConfigurationReplicationConfigurationObservation struct {
@@ -65,8 +87,16 @@ type ReplicationConfigurationReplicationConfigurationObservation struct {
 type ReplicationConfigurationReplicationConfigurationParameters struct {
 
 	// The replication rules for a replication configuration. A maximum of 10 are allowed per replication_configuration. See Rule
-	// +kubebuilder:validation:Required
-	Rule []ReplicationConfigurationRuleParameters `json:"rule" tf:"rule,omitempty"`
+	Rule []ReplicationConfigurationRuleParameters `json:"rule,omitempty" tf:"rule,omitempty"`
+}
+
+type ReplicationConfigurationRuleInitParameters struct {
+
+	// the details of a replication destination. A maximum of 25 are allowed per rule. See Destination.
+	Destination []DestinationInitParameters `json:"destination,omitempty" tf:"destination,omitempty"`
+
+	// filters for a replication rule. See Repository Filter.
+	RepositoryFilter []RuleRepositoryFilterInitParameters `json:"repositoryFilter,omitempty" tf:"repository_filter,omitempty"`
 }
 
 type ReplicationConfigurationRuleObservation struct {
@@ -81,12 +111,19 @@ type ReplicationConfigurationRuleObservation struct {
 type ReplicationConfigurationRuleParameters struct {
 
 	// the details of a replication destination. A maximum of 25 are allowed per rule. See Destination.
-	// +kubebuilder:validation:Required
-	Destination []DestinationParameters `json:"destination" tf:"destination,omitempty"`
+	Destination []DestinationParameters `json:"destination,omitempty" tf:"destination,omitempty"`
 
 	// filters for a replication rule. See Repository Filter.
-	// +kubebuilder:validation:Optional
 	RepositoryFilter []RuleRepositoryFilterParameters `json:"repositoryFilter,omitempty" tf:"repository_filter,omitempty"`
+}
+
+type RuleRepositoryFilterInitParameters struct {
+
+	// The repository filter details.
+	Filter *string `json:"filter,omitempty" tf:"filter,omitempty"`
+
+	// The repository filter type. The only supported value is PREFIX_MATCH, which is a repository name prefix specified with the filter parameter.
+	FilterType *string `json:"filterType,omitempty" tf:"filter_type,omitempty"`
 }
 
 type RuleRepositoryFilterObservation struct {
@@ -101,18 +138,20 @@ type RuleRepositoryFilterObservation struct {
 type RuleRepositoryFilterParameters struct {
 
 	// The repository filter details.
-	// +kubebuilder:validation:Required
-	Filter *string `json:"filter" tf:"filter,omitempty"`
+	Filter *string `json:"filter,omitempty" tf:"filter,omitempty"`
 
 	// The repository filter type. The only supported value is PREFIX_MATCH, which is a repository name prefix specified with the filter parameter.
-	// +kubebuilder:validation:Required
-	FilterType *string `json:"filterType" tf:"filter_type,omitempty"`
+	FilterType *string `json:"filterType,omitempty" tf:"filter_type,omitempty"`
 }
 
 // ReplicationConfigurationSpec defines the desired state of ReplicationConfiguration
 type ReplicationConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ReplicationConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ReplicationConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // ReplicationConfigurationStatus defines the observed state of ReplicationConfiguration.

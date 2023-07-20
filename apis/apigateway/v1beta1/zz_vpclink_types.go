@@ -13,6 +13,33 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VPCLinkInitParameters struct {
+
+	// Description of the VPC link.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Name used to label and identify the VPC link.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	TargetArnRefs []v1.Reference `json:"targetArnRefs,omitempty" tf:"-"`
+
+	TargetArnSelector *v1.Selector `json:"targetArnSelector,omitempty" tf:"-"`
+
+	// List of network load balancer arns in the VPC targeted by the VPC link. Currently AWS only supports 1 target.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elbv2/v1beta1.LB
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	// +crossplane:generate:reference:refFieldName=TargetArnRefs
+	// +crossplane:generate:reference:selectorFieldName=TargetArnSelector
+	TargetArns []*string `json:"targetArns,omitempty" tf:"target_arns,omitempty"`
+}
+
 type VPCLinkObservation struct {
 	Arn *string `json:"arn,omitempty" tf:"arn,omitempty"`
 
@@ -38,20 +65,16 @@ type VPCLinkObservation struct {
 type VPCLinkParameters struct {
 
 	// Description of the VPC link.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Name used to label and identify the VPC link.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// References to LB in elbv2 to populate targetArns.
@@ -67,7 +90,6 @@ type VPCLinkParameters struct {
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
 	// +crossplane:generate:reference:refFieldName=TargetArnRefs
 	// +crossplane:generate:reference:selectorFieldName=TargetArnSelector
-	// +kubebuilder:validation:Optional
 	TargetArns []*string `json:"targetArns,omitempty" tf:"target_arns,omitempty"`
 }
 
@@ -75,6 +97,10 @@ type VPCLinkParameters struct {
 type VPCLinkSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VPCLinkParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VPCLinkInitParameters `json:"initProvider,omitempty"`
 }
 
 // VPCLinkStatus defines the observed state of VPCLink.
@@ -95,7 +121,7 @@ type VPCLinkStatus struct {
 type VPCLink struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   VPCLinkSpec   `json:"spec"`
 	Status VPCLinkStatus `json:"status,omitempty"`
 }

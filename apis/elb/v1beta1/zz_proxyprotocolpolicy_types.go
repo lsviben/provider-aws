@@ -13,6 +13,26 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ProxyProtocolPolicyInitParameters struct {
+
+	// List of instance ports to which the policy
+	// should be applied. This can be specified if the protocol is SSL or TCP.
+	InstancePorts []*string `json:"instancePorts,omitempty" tf:"instance_ports,omitempty"`
+
+	// The load balancer to which the policy
+	// should be attached.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.ELB
+	LoadBalancer *string `json:"loadBalancer,omitempty" tf:"load_balancer,omitempty"`
+
+	LoadBalancerRef *v1.Reference `json:"loadBalancerRef,omitempty" tf:"-"`
+
+	LoadBalancerSelector *v1.Selector `json:"loadBalancerSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type ProxyProtocolPolicyObservation struct {
 
 	// The ID of the policy.
@@ -31,13 +51,11 @@ type ProxyProtocolPolicyParameters struct {
 
 	// List of instance ports to which the policy
 	// should be applied. This can be specified if the protocol is SSL or TCP.
-	// +kubebuilder:validation:Optional
 	InstancePorts []*string `json:"instancePorts,omitempty" tf:"instance_ports,omitempty"`
 
 	// The load balancer to which the policy
 	// should be attached.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.ELB
-	// +kubebuilder:validation:Optional
 	LoadBalancer *string `json:"loadBalancer,omitempty" tf:"load_balancer,omitempty"`
 
 	// Reference to a ELB in elb to populate loadBalancer.
@@ -50,14 +68,17 @@ type ProxyProtocolPolicyParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // ProxyProtocolPolicySpec defines the desired state of ProxyProtocolPolicy
 type ProxyProtocolPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ProxyProtocolPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ProxyProtocolPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // ProxyProtocolPolicyStatus defines the observed state of ProxyProtocolPolicy.
@@ -78,7 +99,7 @@ type ProxyProtocolPolicyStatus struct {
 type ProxyProtocolPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.instancePorts)",message="instancePorts is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.instancePorts) || has(self.initProvider.instancePorts)",message="%!s(MISSING) is a required parameter"
 	Spec   ProxyProtocolPolicySpec   `json:"spec"`
 	Status ProxyProtocolPolicyStatus `json:"status,omitempty"`
 }

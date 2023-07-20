@@ -36,6 +36,22 @@ func (mg *Filter) ResolveReferences(ctx context.Context, c client.Reader) error 
 	mg.Spec.ForProvider.DetectorID = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Spec.ForProvider.DetectorIDRef = rsp.ResolvedReference
 
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.DetectorID),
+		Extract:      resource.ExtractResourceID(),
+		Reference:    mg.Spec.InitProvider.DetectorIDRef,
+		Selector:     mg.Spec.InitProvider.DetectorIDSelector,
+		To: reference.To{
+			List:    &DetectorList{},
+			Managed: &Detector{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.InitProvider.DetectorID")
+	}
+	mg.Spec.InitProvider.DetectorID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.InitProvider.DetectorIDRef = rsp.ResolvedReference
+
 	return nil
 }
 
@@ -77,6 +93,38 @@ func (mg *Member) ResolveReferences(ctx context.Context, c client.Reader) error 
 	}
 	mg.Spec.ForProvider.DetectorID = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Spec.ForProvider.DetectorIDRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.AccountID),
+		Extract:      resource.ExtractParamPath("account_id", true),
+		Reference:    mg.Spec.InitProvider.AccountIDRef,
+		Selector:     mg.Spec.InitProvider.AccountIDSelector,
+		To: reference.To{
+			List:    &DetectorList{},
+			Managed: &Detector{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.InitProvider.AccountID")
+	}
+	mg.Spec.InitProvider.AccountID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.InitProvider.AccountIDRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.DetectorID),
+		Extract:      resource.ExtractResourceID(),
+		Reference:    mg.Spec.InitProvider.DetectorIDRef,
+		Selector:     mg.Spec.InitProvider.DetectorIDSelector,
+		To: reference.To{
+			List:    &DetectorList{},
+			Managed: &Detector{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.InitProvider.DetectorID")
+	}
+	mg.Spec.InitProvider.DetectorID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.InitProvider.DetectorIDRef = rsp.ResolvedReference
 
 	return nil
 }

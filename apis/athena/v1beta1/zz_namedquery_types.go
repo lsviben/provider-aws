@@ -13,6 +13,39 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type NamedQueryInitParameters struct {
+
+	// Database to which the query belongs.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/athena/v1beta1.Database
+	Database *string `json:"database,omitempty" tf:"database,omitempty"`
+
+	DatabaseRef *v1.Reference `json:"databaseRef,omitempty" tf:"-"`
+
+	DatabaseSelector *v1.Selector `json:"databaseSelector,omitempty" tf:"-"`
+
+	// Brief explanation of the query. Maximum length of 1024.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Plain language name for the query. Maximum length of 128.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Text of the query itself. In other words, all query statements. Maximum length of 262144.
+	Query *string `json:"query,omitempty" tf:"query,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Workgroup to which the query belongs. Defaults to primary
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/athena/v1beta1.Workgroup
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Workgroup *string `json:"workgroup,omitempty" tf:"workgroup,omitempty"`
+
+	WorkgroupRef *v1.Reference `json:"workgroupRef,omitempty" tf:"-"`
+
+	WorkgroupSelector *v1.Selector `json:"workgroupSelector,omitempty" tf:"-"`
+}
+
 type NamedQueryObservation struct {
 
 	// Database to which the query belongs.
@@ -38,7 +71,6 @@ type NamedQueryParameters struct {
 
 	// Database to which the query belongs.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/athena/v1beta1.Database
-	// +kubebuilder:validation:Optional
 	Database *string `json:"database,omitempty" tf:"database,omitempty"`
 
 	// Reference to a Database in athena to populate database.
@@ -50,26 +82,21 @@ type NamedQueryParameters struct {
 	DatabaseSelector *v1.Selector `json:"databaseSelector,omitempty" tf:"-"`
 
 	// Brief explanation of the query. Maximum length of 1024.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Plain language name for the query. Maximum length of 128.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Text of the query itself. In other words, all query statements. Maximum length of 262144.
-	// +kubebuilder:validation:Optional
 	Query *string `json:"query,omitempty" tf:"query,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Workgroup to which the query belongs. Defaults to primary
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/athena/v1beta1.Workgroup
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Workgroup *string `json:"workgroup,omitempty" tf:"workgroup,omitempty"`
 
 	// Reference to a Workgroup in athena to populate workgroup.
@@ -85,6 +112,10 @@ type NamedQueryParameters struct {
 type NamedQuerySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     NamedQueryParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider NamedQueryInitParameters `json:"initProvider,omitempty"`
 }
 
 // NamedQueryStatus defines the observed state of NamedQuery.
@@ -105,8 +136,8 @@ type NamedQueryStatus struct {
 type NamedQuery struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.query)",message="query is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.query) || has(self.initProvider.query)",message="%!s(MISSING) is a required parameter"
 	Spec   NamedQuerySpec   `json:"spec"`
 	Status NamedQueryStatus `json:"status,omitempty"`
 }

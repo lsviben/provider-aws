@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DiscovererInitParameters struct {
+
+	// The description of the discoverer. Maximum of 256 characters.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The ARN of the event bus to discover event schemas on.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudwatchevents/v1beta1.Bus
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	SourceArn *string `json:"sourceArn,omitempty" tf:"source_arn,omitempty"`
+
+	SourceArnRef *v1.Reference `json:"sourceArnRef,omitempty" tf:"-"`
+
+	SourceArnSelector *v1.Selector `json:"sourceArnSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type DiscovererObservation struct {
 
 	// The Amazon Resource Name (ARN) of the discoverer.
@@ -37,18 +59,15 @@ type DiscovererObservation struct {
 type DiscovererParameters struct {
 
 	// The description of the discoverer. Maximum of 256 characters.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The ARN of the event bus to discover event schemas on.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudwatchevents/v1beta1.Bus
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	SourceArn *string `json:"sourceArn,omitempty" tf:"source_arn,omitempty"`
 
 	// Reference to a Bus in cloudwatchevents to populate sourceArn.
@@ -60,7 +79,6 @@ type DiscovererParameters struct {
 	SourceArnSelector *v1.Selector `json:"sourceArnSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -68,6 +86,10 @@ type DiscovererParameters struct {
 type DiscovererSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DiscovererParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DiscovererInitParameters `json:"initProvider,omitempty"`
 }
 
 // DiscovererStatus defines the observed state of Discoverer.

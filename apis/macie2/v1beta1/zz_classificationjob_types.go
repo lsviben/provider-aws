@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AndInitParameters struct {
+
+	// A property-based condition that defines a property, operator, and one or more values for including or excluding an S3 buckets from the job. (documented below)
+	SimpleCriterion []SimpleCriterionInitParameters `json:"simpleCriterion,omitempty" tf:"simple_criterion,omitempty"`
+
+	// A tag-based condition that defines the operator and tag keys or tag key and value pairs for including or excluding an S3 buckets from the job. (documented below)
+	TagCriterion []TagCriterionInitParameters `json:"tagCriterion,omitempty" tf:"tag_criterion,omitempty"`
+}
+
 type AndObservation struct {
 
 	// A property-based condition that defines a property, operator, and one or more values for including or excluding an S3 buckets from the job. (documented below)
@@ -25,12 +34,22 @@ type AndObservation struct {
 type AndParameters struct {
 
 	// A property-based condition that defines a property, operator, and one or more values for including or excluding an S3 buckets from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	SimpleCriterion []SimpleCriterionParameters `json:"simpleCriterion,omitempty" tf:"simple_criterion,omitempty"`
 
 	// A tag-based condition that defines the operator and tag keys or tag key and value pairs for including or excluding an S3 buckets from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	TagCriterion []TagCriterionParameters `json:"tagCriterion,omitempty" tf:"tag_criterion,omitempty"`
+}
+
+type AndSimpleCriterionInitParameters struct {
+
+	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
+	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
+
+	// The object property to use in the condition.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// An array that lists the values to use in the condition.
+	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
 }
 
 type AndSimpleCriterionObservation struct {
@@ -48,15 +67,24 @@ type AndSimpleCriterionObservation struct {
 type AndSimpleCriterionParameters struct {
 
 	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
-	// +kubebuilder:validation:Optional
 	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
 
 	// The object property to use in the condition.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// An array that lists the values to use in the condition.
-	// +kubebuilder:validation:Optional
+	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
+}
+
+type AndSimpleScopeTermInitParameters struct {
+
+	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
+	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
+
+	// The object property to use in the condition.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// An array that lists the values to use in the condition.
 	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
 }
 
@@ -75,16 +103,22 @@ type AndSimpleScopeTermObservation struct {
 type AndSimpleScopeTermParameters struct {
 
 	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
-	// +kubebuilder:validation:Optional
 	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
 
 	// The object property to use in the condition.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// An array that lists the values to use in the condition.
-	// +kubebuilder:validation:Optional
 	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
+}
+
+type AndTagCriterionInitParameters struct {
+
+	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
+	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
+
+	// The tag keys or tag key and value pairs to use in the condition.
+	TagValues []TagCriterionTagValuesInitParameters `json:"tagValues,omitempty" tf:"tag_values,omitempty"`
 }
 
 type AndTagCriterionObservation struct {
@@ -99,12 +133,25 @@ type AndTagCriterionObservation struct {
 type AndTagCriterionParameters struct {
 
 	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
-	// +kubebuilder:validation:Optional
 	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
 
 	// The tag keys or tag key and value pairs to use in the condition.
-	// +kubebuilder:validation:Optional
 	TagValues []TagCriterionTagValuesParameters `json:"tagValues,omitempty" tf:"tag_values,omitempty"`
+}
+
+type AndTagScopeTermInitParameters struct {
+
+	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
+	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
+
+	// The object property to use in the condition.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The tag keys or tag key and value pairs to use in the condition.
+	TagValues []AndTagScopeTermTagValuesInitParameters `json:"tagValues,omitempty" tf:"tag_values,omitempty"`
+
+	// The type of object to apply the condition to. The only valid value is S3_OBJECT.
+	Target *string `json:"target,omitempty" tf:"target,omitempty"`
 }
 
 type AndTagScopeTermObservation struct {
@@ -125,20 +172,25 @@ type AndTagScopeTermObservation struct {
 type AndTagScopeTermParameters struct {
 
 	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
-	// +kubebuilder:validation:Optional
 	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
 
 	// The object property to use in the condition.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The tag keys or tag key and value pairs to use in the condition.
-	// +kubebuilder:validation:Optional
 	TagValues []AndTagScopeTermTagValuesParameters `json:"tagValues,omitempty" tf:"tag_values,omitempty"`
 
 	// The type of object to apply the condition to. The only valid value is S3_OBJECT.
-	// +kubebuilder:validation:Optional
 	Target *string `json:"target,omitempty" tf:"target,omitempty"`
+}
+
+type AndTagScopeTermTagValuesInitParameters struct {
+
+	// The object property to use in the condition.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The tag value.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type AndTagScopeTermTagValuesObservation struct {
@@ -153,12 +205,19 @@ type AndTagScopeTermTagValuesObservation struct {
 type AndTagScopeTermTagValuesParameters struct {
 
 	// The object property to use in the condition.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The tag value.
-	// +kubebuilder:validation:Optional
 	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type BucketCriteriaInitParameters struct {
+
+	// The property- or tag-based conditions that determine which objects to exclude from the analysis. (documented below)
+	Excludes []ExcludesInitParameters `json:"excludes,omitempty" tf:"excludes,omitempty"`
+
+	// The property- or tag-based conditions that determine which objects to include in the analysis. (documented below)
+	Includes []IncludesInitParameters `json:"includes,omitempty" tf:"includes,omitempty"`
 }
 
 type BucketCriteriaObservation struct {
@@ -173,12 +232,19 @@ type BucketCriteriaObservation struct {
 type BucketCriteriaParameters struct {
 
 	// The property- or tag-based conditions that determine which objects to exclude from the analysis. (documented below)
-	// +kubebuilder:validation:Optional
 	Excludes []ExcludesParameters `json:"excludes,omitempty" tf:"excludes,omitempty"`
 
 	// The property- or tag-based conditions that determine which objects to include in the analysis. (documented below)
-	// +kubebuilder:validation:Optional
 	Includes []IncludesParameters `json:"includes,omitempty" tf:"includes,omitempty"`
+}
+
+type BucketDefinitionsInitParameters struct {
+
+	// The unique identifier for the AWS account that owns the buckets.
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	// An array that lists the names of the buckets.
+	Buckets []*string `json:"buckets,omitempty" tf:"buckets,omitempty"`
 }
 
 type BucketDefinitionsObservation struct {
@@ -193,12 +259,47 @@ type BucketDefinitionsObservation struct {
 type BucketDefinitionsParameters struct {
 
 	// The unique identifier for the AWS account that owns the buckets.
-	// +kubebuilder:validation:Required
-	AccountID *string `json:"accountId" tf:"account_id,omitempty"`
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// An array that lists the names of the buckets.
-	// +kubebuilder:validation:Required
-	Buckets []*string `json:"buckets" tf:"buckets,omitempty"`
+	Buckets []*string `json:"buckets,omitempty" tf:"buckets,omitempty"`
+}
+
+type ClassificationJobInitParameters struct {
+
+	// The custom data identifiers to use for data analysis and classification.
+	CustomDataIdentifierIds []*string `json:"customDataIdentifierIds,omitempty" tf:"custom_data_identifier_ids,omitempty"`
+
+	// A custom description of the job. The description can contain as many as 200 characters.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Specifies whether to analyze all existing, eligible objects immediately after the job is created.
+	InitialRun *bool `json:"initialRun,omitempty" tf:"initial_run,omitempty"`
+
+	// The status for the job. Valid values are: CANCELLED, RUNNING and USER_PAUSED
+	JobStatus *string `json:"jobStatus,omitempty" tf:"job_status,omitempty"`
+
+	// The schedule for running the job. Valid values are: ONE_TIME - Run the job only once. If you specify this value, don't specify a value for the schedule_frequency property. SCHEDULED - Run the job on a daily, weekly, or monthly basis. If you specify this value, use the schedule_frequency property to define the recurrence pattern for the job.
+	JobType *string `json:"jobType,omitempty" tf:"job_type,omitempty"`
+
+	// A custom name for the job. The name can contain as many as 500 characters. Conflicts with name_prefix.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The S3 buckets that contain the objects to analyze, and the scope of that analysis. (documented below)
+	S3JobDefinition []S3JobDefinitionInitParameters `json:"s3JobDefinition,omitempty" tf:"s3_job_definition,omitempty"`
+
+	// The sampling depth, as a percentage, to apply when processing objects. This value determines the percentage of eligible objects that the job analyzes. If this value is less than 100, Amazon Macie selects the objects to analyze at random, up to the specified percentage, and analyzes all the data in those objects.
+	SamplingPercentage *float64 `json:"samplingPercentage,omitempty" tf:"sampling_percentage,omitempty"`
+
+	// The recurrence pattern for running the job. To run the job only once, don't specify a value for this property and set the value for the job_type property to ONE_TIME. (documented below)
+	ScheduleFrequency []ScheduleFrequencyInitParameters `json:"scheduleFrequency,omitempty" tf:"schedule_frequency,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type ClassificationJobObservation struct {
@@ -253,49 +354,47 @@ type ClassificationJobObservation struct {
 type ClassificationJobParameters struct {
 
 	// The custom data identifiers to use for data analysis and classification.
-	// +kubebuilder:validation:Optional
 	CustomDataIdentifierIds []*string `json:"customDataIdentifierIds,omitempty" tf:"custom_data_identifier_ids,omitempty"`
 
 	// A custom description of the job. The description can contain as many as 200 characters.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Specifies whether to analyze all existing, eligible objects immediately after the job is created.
-	// +kubebuilder:validation:Optional
 	InitialRun *bool `json:"initialRun,omitempty" tf:"initial_run,omitempty"`
 
 	// The status for the job. Valid values are: CANCELLED, RUNNING and USER_PAUSED
-	// +kubebuilder:validation:Optional
 	JobStatus *string `json:"jobStatus,omitempty" tf:"job_status,omitempty"`
 
 	// The schedule for running the job. Valid values are: ONE_TIME - Run the job only once. If you specify this value, don't specify a value for the schedule_frequency property. SCHEDULED - Run the job on a daily, weekly, or monthly basis. If you specify this value, use the schedule_frequency property to define the recurrence pattern for the job.
-	// +kubebuilder:validation:Optional
 	JobType *string `json:"jobType,omitempty" tf:"job_type,omitempty"`
 
 	// A custom name for the job. The name can contain as many as 500 characters. Conflicts with name_prefix.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The S3 buckets that contain the objects to analyze, and the scope of that analysis. (documented below)
-	// +kubebuilder:validation:Optional
 	S3JobDefinition []S3JobDefinitionParameters `json:"s3JobDefinition,omitempty" tf:"s3_job_definition,omitempty"`
 
 	// The sampling depth, as a percentage, to apply when processing objects. This value determines the percentage of eligible objects that the job analyzes. If this value is less than 100, Amazon Macie selects the objects to analyze at random, up to the specified percentage, and analyzes all the data in those objects.
-	// +kubebuilder:validation:Optional
 	SamplingPercentage *float64 `json:"samplingPercentage,omitempty" tf:"sampling_percentage,omitempty"`
 
 	// The recurrence pattern for running the job. To run the job only once, don't specify a value for this property and set the value for the job_type property to ONE_TIME. (documented below)
-	// +kubebuilder:validation:Optional
 	ScheduleFrequency []ScheduleFrequencyParameters `json:"scheduleFrequency,omitempty" tf:"schedule_frequency,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type ExcludesAndInitParameters struct {
+
+	// A property-based condition that defines a property, operator, and one or more values for including or excluding an object from the job. (documented below)
+	SimpleScopeTerm []SimpleScopeTermInitParameters `json:"simpleScopeTerm,omitempty" tf:"simple_scope_term,omitempty"`
+
+	// A tag-based condition that defines the operator and tag keys or tag key and value pairs for including or excluding an object from the job. (documented below)
+	TagScopeTerm []TagScopeTermInitParameters `json:"tagScopeTerm,omitempty" tf:"tag_scope_term,omitempty"`
 }
 
 type ExcludesAndObservation struct {
@@ -310,12 +409,16 @@ type ExcludesAndObservation struct {
 type ExcludesAndParameters struct {
 
 	// A property-based condition that defines a property, operator, and one or more values for including or excluding an object from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	SimpleScopeTerm []SimpleScopeTermParameters `json:"simpleScopeTerm,omitempty" tf:"simple_scope_term,omitempty"`
 
 	// A tag-based condition that defines the operator and tag keys or tag key and value pairs for including or excluding an object from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	TagScopeTerm []TagScopeTermParameters `json:"tagScopeTerm,omitempty" tf:"tag_scope_term,omitempty"`
+}
+
+type ExcludesInitParameters struct {
+
+	// An array of conditions, one for each condition that determines which objects to include or exclude from the job. (documented below)
+	And []AndInitParameters `json:"and,omitempty" tf:"and,omitempty"`
 }
 
 type ExcludesObservation struct {
@@ -327,8 +430,16 @@ type ExcludesObservation struct {
 type ExcludesParameters struct {
 
 	// An array of conditions, one for each condition that determines which objects to include or exclude from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	And []AndParameters `json:"and,omitempty" tf:"and,omitempty"`
+}
+
+type IncludesAndInitParameters struct {
+
+	// A property-based condition that defines a property, operator, and one or more values for including or excluding an S3 buckets from the job. (documented below)
+	SimpleCriterion []AndSimpleCriterionInitParameters `json:"simpleCriterion,omitempty" tf:"simple_criterion,omitempty"`
+
+	// A tag-based condition that defines the operator and tag keys or tag key and value pairs for including or excluding an S3 buckets from the job. (documented below)
+	TagCriterion []AndTagCriterionInitParameters `json:"tagCriterion,omitempty" tf:"tag_criterion,omitempty"`
 }
 
 type IncludesAndObservation struct {
@@ -343,12 +454,16 @@ type IncludesAndObservation struct {
 type IncludesAndParameters struct {
 
 	// A property-based condition that defines a property, operator, and one or more values for including or excluding an S3 buckets from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	SimpleCriterion []AndSimpleCriterionParameters `json:"simpleCriterion,omitempty" tf:"simple_criterion,omitempty"`
 
 	// A tag-based condition that defines the operator and tag keys or tag key and value pairs for including or excluding an S3 buckets from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	TagCriterion []AndTagCriterionParameters `json:"tagCriterion,omitempty" tf:"tag_criterion,omitempty"`
+}
+
+type IncludesInitParameters struct {
+
+	// An array of conditions, one for each condition that determines which objects to include or exclude from the job. (documented below)
+	And []IncludesAndInitParameters `json:"and,omitempty" tf:"and,omitempty"`
 }
 
 type IncludesObservation struct {
@@ -360,8 +475,19 @@ type IncludesObservation struct {
 type IncludesParameters struct {
 
 	// An array of conditions, one for each condition that determines which objects to include or exclude from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	And []IncludesAndParameters `json:"and,omitempty" tf:"and,omitempty"`
+}
+
+type S3JobDefinitionInitParameters struct {
+
+	// The property- and tag-based conditions that determine which S3 buckets to include or exclude from the analysis. Conflicts with bucket_definitions. (documented below)
+	BucketCriteria []BucketCriteriaInitParameters `json:"bucketCriteria,omitempty" tf:"bucket_criteria,omitempty"`
+
+	// An array of objects, one for each AWS account that owns buckets to analyze. Each object specifies the account ID for an account and one or more buckets to analyze for the account. Conflicts with bucket_criteria. (documented below)
+	BucketDefinitions []BucketDefinitionsInitParameters `json:"bucketDefinitions,omitempty" tf:"bucket_definitions,omitempty"`
+
+	// The property- and tag-based conditions that determine which objects to include or exclude from the analysis. (documented below)
+	Scoping []ScopingInitParameters `json:"scoping,omitempty" tf:"scoping,omitempty"`
 }
 
 type S3JobDefinitionObservation struct {
@@ -379,16 +505,25 @@ type S3JobDefinitionObservation struct {
 type S3JobDefinitionParameters struct {
 
 	// The property- and tag-based conditions that determine which S3 buckets to include or exclude from the analysis. Conflicts with bucket_definitions. (documented below)
-	// +kubebuilder:validation:Optional
 	BucketCriteria []BucketCriteriaParameters `json:"bucketCriteria,omitempty" tf:"bucket_criteria,omitempty"`
 
 	// An array of objects, one for each AWS account that owns buckets to analyze. Each object specifies the account ID for an account and one or more buckets to analyze for the account. Conflicts with bucket_criteria. (documented below)
-	// +kubebuilder:validation:Optional
 	BucketDefinitions []BucketDefinitionsParameters `json:"bucketDefinitions,omitempty" tf:"bucket_definitions,omitempty"`
 
 	// The property- and tag-based conditions that determine which objects to include or exclude from the analysis. (documented below)
-	// +kubebuilder:validation:Optional
 	Scoping []ScopingParameters `json:"scoping,omitempty" tf:"scoping,omitempty"`
+}
+
+type ScheduleFrequencyInitParameters struct {
+
+	// Specifies a daily recurrence pattern for running the job.
+	DailySchedule *bool `json:"dailySchedule,omitempty" tf:"daily_schedule,omitempty"`
+
+	// Specifies a monthly recurrence pattern for running the job.
+	MonthlySchedule *float64 `json:"monthlySchedule,omitempty" tf:"monthly_schedule,omitempty"`
+
+	// Specifies a weekly recurrence pattern for running the job.
+	WeeklySchedule *string `json:"weeklySchedule,omitempty" tf:"weekly_schedule,omitempty"`
 }
 
 type ScheduleFrequencyObservation struct {
@@ -406,16 +541,19 @@ type ScheduleFrequencyObservation struct {
 type ScheduleFrequencyParameters struct {
 
 	// Specifies a daily recurrence pattern for running the job.
-	// +kubebuilder:validation:Optional
 	DailySchedule *bool `json:"dailySchedule,omitempty" tf:"daily_schedule,omitempty"`
 
 	// Specifies a monthly recurrence pattern for running the job.
-	// +kubebuilder:validation:Optional
 	MonthlySchedule *float64 `json:"monthlySchedule,omitempty" tf:"monthly_schedule,omitempty"`
 
 	// Specifies a weekly recurrence pattern for running the job.
-	// +kubebuilder:validation:Optional
 	WeeklySchedule *string `json:"weeklySchedule,omitempty" tf:"weekly_schedule,omitempty"`
+}
+
+type ScopingExcludesInitParameters struct {
+
+	// An array of conditions, one for each condition that determines which objects to include or exclude from the job. (documented below)
+	And []ExcludesAndInitParameters `json:"and,omitempty" tf:"and,omitempty"`
 }
 
 type ScopingExcludesObservation struct {
@@ -427,8 +565,16 @@ type ScopingExcludesObservation struct {
 type ScopingExcludesParameters struct {
 
 	// An array of conditions, one for each condition that determines which objects to include or exclude from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	And []ExcludesAndParameters `json:"and,omitempty" tf:"and,omitempty"`
+}
+
+type ScopingIncludesAndInitParameters struct {
+
+	// A property-based condition that defines a property, operator, and one or more values for including or excluding an object from the job. (documented below)
+	SimpleScopeTerm []AndSimpleScopeTermInitParameters `json:"simpleScopeTerm,omitempty" tf:"simple_scope_term,omitempty"`
+
+	// A tag-based condition that defines the operator and tag keys or tag key and value pairs for including or excluding an object from the job. (documented below)
+	TagScopeTerm []AndTagScopeTermInitParameters `json:"tagScopeTerm,omitempty" tf:"tag_scope_term,omitempty"`
 }
 
 type ScopingIncludesAndObservation struct {
@@ -443,12 +589,16 @@ type ScopingIncludesAndObservation struct {
 type ScopingIncludesAndParameters struct {
 
 	// A property-based condition that defines a property, operator, and one or more values for including or excluding an object from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	SimpleScopeTerm []AndSimpleScopeTermParameters `json:"simpleScopeTerm,omitempty" tf:"simple_scope_term,omitempty"`
 
 	// A tag-based condition that defines the operator and tag keys or tag key and value pairs for including or excluding an object from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	TagScopeTerm []AndTagScopeTermParameters `json:"tagScopeTerm,omitempty" tf:"tag_scope_term,omitempty"`
+}
+
+type ScopingIncludesInitParameters struct {
+
+	// An array of conditions, one for each condition that determines which objects to include or exclude from the job. (documented below)
+	And []ScopingIncludesAndInitParameters `json:"and,omitempty" tf:"and,omitempty"`
 }
 
 type ScopingIncludesObservation struct {
@@ -460,8 +610,16 @@ type ScopingIncludesObservation struct {
 type ScopingIncludesParameters struct {
 
 	// An array of conditions, one for each condition that determines which objects to include or exclude from the job. (documented below)
-	// +kubebuilder:validation:Optional
 	And []ScopingIncludesAndParameters `json:"and,omitempty" tf:"and,omitempty"`
+}
+
+type ScopingInitParameters struct {
+
+	// The property- or tag-based conditions that determine which objects to exclude from the analysis. (documented below)
+	Excludes []ScopingExcludesInitParameters `json:"excludes,omitempty" tf:"excludes,omitempty"`
+
+	// The property- or tag-based conditions that determine which objects to include in the analysis. (documented below)
+	Includes []ScopingIncludesInitParameters `json:"includes,omitempty" tf:"includes,omitempty"`
 }
 
 type ScopingObservation struct {
@@ -476,12 +634,22 @@ type ScopingObservation struct {
 type ScopingParameters struct {
 
 	// The property- or tag-based conditions that determine which objects to exclude from the analysis. (documented below)
-	// +kubebuilder:validation:Optional
 	Excludes []ScopingExcludesParameters `json:"excludes,omitempty" tf:"excludes,omitempty"`
 
 	// The property- or tag-based conditions that determine which objects to include in the analysis. (documented below)
-	// +kubebuilder:validation:Optional
 	Includes []ScopingIncludesParameters `json:"includes,omitempty" tf:"includes,omitempty"`
+}
+
+type SimpleCriterionInitParameters struct {
+
+	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
+	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
+
+	// The object property to use in the condition.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// An array that lists the values to use in the condition.
+	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
 }
 
 type SimpleCriterionObservation struct {
@@ -499,15 +667,24 @@ type SimpleCriterionObservation struct {
 type SimpleCriterionParameters struct {
 
 	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
-	// +kubebuilder:validation:Optional
 	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
 
 	// The object property to use in the condition.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// An array that lists the values to use in the condition.
-	// +kubebuilder:validation:Optional
+	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
+}
+
+type SimpleScopeTermInitParameters struct {
+
+	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
+	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
+
+	// The object property to use in the condition.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// An array that lists the values to use in the condition.
 	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
 }
 
@@ -526,16 +703,22 @@ type SimpleScopeTermObservation struct {
 type SimpleScopeTermParameters struct {
 
 	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
-	// +kubebuilder:validation:Optional
 	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
 
 	// The object property to use in the condition.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// An array that lists the values to use in the condition.
-	// +kubebuilder:validation:Optional
 	Values []*string `json:"values,omitempty" tf:"values,omitempty"`
+}
+
+type TagCriterionInitParameters struct {
+
+	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
+	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
+
+	// The tag keys or tag key and value pairs to use in the condition.
+	TagValues []TagValuesInitParameters `json:"tagValues,omitempty" tf:"tag_values,omitempty"`
 }
 
 type TagCriterionObservation struct {
@@ -550,12 +733,19 @@ type TagCriterionObservation struct {
 type TagCriterionParameters struct {
 
 	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
-	// +kubebuilder:validation:Optional
 	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
 
 	// The tag keys or tag key and value pairs to use in the condition.
-	// +kubebuilder:validation:Optional
 	TagValues []TagValuesParameters `json:"tagValues,omitempty" tf:"tag_values,omitempty"`
+}
+
+type TagCriterionTagValuesInitParameters struct {
+
+	// The object property to use in the condition.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The tag value.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type TagCriterionTagValuesObservation struct {
@@ -570,12 +760,25 @@ type TagCriterionTagValuesObservation struct {
 type TagCriterionTagValuesParameters struct {
 
 	// The object property to use in the condition.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The tag value.
-	// +kubebuilder:validation:Optional
 	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type TagScopeTermInitParameters struct {
+
+	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
+	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
+
+	// The object property to use in the condition.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The tag keys or tag key and value pairs to use in the condition.
+	TagValues []TagScopeTermTagValuesInitParameters `json:"tagValues,omitempty" tf:"tag_values,omitempty"`
+
+	// The type of object to apply the condition to. The only valid value is S3_OBJECT.
+	Target *string `json:"target,omitempty" tf:"target,omitempty"`
 }
 
 type TagScopeTermObservation struct {
@@ -596,20 +799,25 @@ type TagScopeTermObservation struct {
 type TagScopeTermParameters struct {
 
 	// The operator to use in a condition. Valid values are: EQ, GT, GTE, LT, LTE, NE, CONTAINS, STARTS_WITH
-	// +kubebuilder:validation:Optional
 	Comparator *string `json:"comparator,omitempty" tf:"comparator,omitempty"`
 
 	// The object property to use in the condition.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The tag keys or tag key and value pairs to use in the condition.
-	// +kubebuilder:validation:Optional
 	TagValues []TagScopeTermTagValuesParameters `json:"tagValues,omitempty" tf:"tag_values,omitempty"`
 
 	// The type of object to apply the condition to. The only valid value is S3_OBJECT.
-	// +kubebuilder:validation:Optional
 	Target *string `json:"target,omitempty" tf:"target,omitempty"`
+}
+
+type TagScopeTermTagValuesInitParameters struct {
+
+	// The object property to use in the condition.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The tag value.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type TagScopeTermTagValuesObservation struct {
@@ -624,11 +832,18 @@ type TagScopeTermTagValuesObservation struct {
 type TagScopeTermTagValuesParameters struct {
 
 	// The object property to use in the condition.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The tag value.
-	// +kubebuilder:validation:Optional
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type TagValuesInitParameters struct {
+
+	// The object property to use in the condition.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// The tag value.
 	Value *string `json:"value,omitempty" tf:"value,omitempty"`
 }
 
@@ -644,12 +859,13 @@ type TagValuesObservation struct {
 type TagValuesParameters struct {
 
 	// The object property to use in the condition.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// The tag value.
-	// +kubebuilder:validation:Optional
 	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type UserPausedDetailsInitParameters struct {
 }
 
 type UserPausedDetailsObservation struct {
@@ -667,6 +883,10 @@ type UserPausedDetailsParameters struct {
 type ClassificationJobSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ClassificationJobParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ClassificationJobInitParameters `json:"initProvider,omitempty"`
 }
 
 // ClassificationJobStatus defines the observed state of ClassificationJob.
@@ -687,8 +907,8 @@ type ClassificationJobStatus struct {
 type ClassificationJob struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.jobType)",message="jobType is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.s3JobDefinition)",message="s3JobDefinition is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.jobType) || has(self.initProvider.jobType)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.s3JobDefinition) || has(self.initProvider.s3JobDefinition)",message="%!s(MISSING) is a required parameter"
 	Spec   ClassificationJobSpec   `json:"spec"`
 	Status ClassificationJobStatus `json:"status,omitempty"`
 }

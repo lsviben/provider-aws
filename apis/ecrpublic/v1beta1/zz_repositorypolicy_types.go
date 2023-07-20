@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RepositoryPolicyInitParameters struct {
+
+	// The policy document. This is a JSON formatted string
+	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Name of the repository to apply the policy.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ecrpublic/v1beta1.Repository
+	RepositoryName *string `json:"repositoryName,omitempty" tf:"repository_name,omitempty"`
+
+	RepositoryNameRef *v1.Reference `json:"repositoryNameRef,omitempty" tf:"-"`
+
+	RepositoryNameSelector *v1.Selector `json:"repositoryNameSelector,omitempty" tf:"-"`
+}
+
 type RepositoryPolicyObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -29,17 +47,14 @@ type RepositoryPolicyObservation struct {
 type RepositoryPolicyParameters struct {
 
 	// The policy document. This is a JSON formatted string
-	// +kubebuilder:validation:Optional
 	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Name of the repository to apply the policy.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ecrpublic/v1beta1.Repository
-	// +kubebuilder:validation:Optional
 	RepositoryName *string `json:"repositoryName,omitempty" tf:"repository_name,omitempty"`
 
 	// Reference to a Repository in ecrpublic to populate repositoryName.
@@ -55,6 +70,10 @@ type RepositoryPolicyParameters struct {
 type RepositoryPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RepositoryPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RepositoryPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // RepositoryPolicyStatus defines the observed state of RepositoryPolicy.
@@ -75,7 +94,7 @@ type RepositoryPolicyStatus struct {
 type RepositoryPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policy)",message="policy is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policy) || has(self.initProvider.policy)",message="%!s(MISSING) is a required parameter"
 	Spec   RepositoryPolicySpec   `json:"spec"`
 	Status RepositoryPolicyStatus `json:"status,omitempty"`
 }

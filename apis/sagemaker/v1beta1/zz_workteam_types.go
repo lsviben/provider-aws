@@ -13,6 +13,36 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CognitoMemberDefinitionInitParameters struct {
+
+	// An identifier for an application client. You must create the app client ID using Amazon Cognito.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cognitoidp/v1beta1.UserPoolClient
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	ClientID *string `json:"clientId,omitempty" tf:"client_id,omitempty"`
+
+	ClientIDRef *v1.Reference `json:"clientIdRef,omitempty" tf:"-"`
+
+	ClientIDSelector *v1.Selector `json:"clientIdSelector,omitempty" tf:"-"`
+
+	// An identifier for a user group.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cognitoidp/v1beta1.UserGroup
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	UserGroup *string `json:"userGroup,omitempty" tf:"user_group,omitempty"`
+
+	UserGroupRef *v1.Reference `json:"userGroupRef,omitempty" tf:"-"`
+
+	UserGroupSelector *v1.Selector `json:"userGroupSelector,omitempty" tf:"-"`
+
+	// An identifier for a user pool. The user pool must be in the same region as the service that you are calling.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cognitoidp/v1beta1.UserPoolDomain
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("user_pool_id",false)
+	UserPool *string `json:"userPool,omitempty" tf:"user_pool,omitempty"`
+
+	UserPoolRef *v1.Reference `json:"userPoolRef,omitempty" tf:"-"`
+
+	UserPoolSelector *v1.Selector `json:"userPoolSelector,omitempty" tf:"-"`
+}
+
 type CognitoMemberDefinitionObservation struct {
 
 	// An identifier for an application client. You must create the app client ID using Amazon Cognito.
@@ -30,7 +60,6 @@ type CognitoMemberDefinitionParameters struct {
 	// An identifier for an application client. You must create the app client ID using Amazon Cognito.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cognitoidp/v1beta1.UserPoolClient
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	ClientID *string `json:"clientId,omitempty" tf:"client_id,omitempty"`
 
 	// Reference to a UserPoolClient in cognitoidp to populate clientId.
@@ -44,7 +73,6 @@ type CognitoMemberDefinitionParameters struct {
 	// An identifier for a user group.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cognitoidp/v1beta1.UserGroup
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	UserGroup *string `json:"userGroup,omitempty" tf:"user_group,omitempty"`
 
 	// Reference to a UserGroup in cognitoidp to populate userGroup.
@@ -58,7 +86,6 @@ type CognitoMemberDefinitionParameters struct {
 	// An identifier for a user pool. The user pool must be in the same region as the service that you are calling.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cognitoidp/v1beta1.UserPoolDomain
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("user_pool_id",false)
-	// +kubebuilder:validation:Optional
 	UserPool *string `json:"userPool,omitempty" tf:"user_pool,omitempty"`
 
 	// Reference to a UserPoolDomain in cognitoidp to populate userPool.
@@ -68,6 +95,15 @@ type CognitoMemberDefinitionParameters struct {
 	// Selector for a UserPoolDomain in cognitoidp to populate userPool.
 	// +kubebuilder:validation:Optional
 	UserPoolSelector *v1.Selector `json:"userPoolSelector,omitempty" tf:"-"`
+}
+
+type MemberDefinitionInitParameters struct {
+
+	// The Amazon Cognito user group that is part of the work team. See Cognito Member Definition details below.
+	CognitoMemberDefinition []CognitoMemberDefinitionInitParameters `json:"cognitoMemberDefinition,omitempty" tf:"cognito_member_definition,omitempty"`
+
+	// A list user groups that exist in your OIDC Identity Provider (IdP). One to ten groups can be used to create a single private work team. See Cognito Member Definition details below.
+	OidcMemberDefinition []OidcMemberDefinitionInitParameters `json:"oidcMemberDefinition,omitempty" tf:"oidc_member_definition,omitempty"`
 }
 
 type MemberDefinitionObservation struct {
@@ -82,12 +118,16 @@ type MemberDefinitionObservation struct {
 type MemberDefinitionParameters struct {
 
 	// The Amazon Cognito user group that is part of the work team. See Cognito Member Definition details below.
-	// +kubebuilder:validation:Optional
 	CognitoMemberDefinition []CognitoMemberDefinitionParameters `json:"cognitoMemberDefinition,omitempty" tf:"cognito_member_definition,omitempty"`
 
 	// A list user groups that exist in your OIDC Identity Provider (IdP). One to ten groups can be used to create a single private work team. See Cognito Member Definition details below.
-	// +kubebuilder:validation:Optional
 	OidcMemberDefinition []OidcMemberDefinitionParameters `json:"oidcMemberDefinition,omitempty" tf:"oidc_member_definition,omitempty"`
+}
+
+type NotificationConfigurationInitParameters struct {
+
+	// The ARN for the SNS topic to which notifications should be published.
+	NotificationTopicArn *string `json:"notificationTopicArn,omitempty" tf:"notification_topic_arn,omitempty"`
 }
 
 type NotificationConfigurationObservation struct {
@@ -99,8 +139,13 @@ type NotificationConfigurationObservation struct {
 type NotificationConfigurationParameters struct {
 
 	// The ARN for the SNS topic to which notifications should be published.
-	// +kubebuilder:validation:Optional
 	NotificationTopicArn *string `json:"notificationTopicArn,omitempty" tf:"notification_topic_arn,omitempty"`
+}
+
+type OidcMemberDefinitionInitParameters struct {
+
+	// A list of comma separated strings that identifies user groups in your OIDC IdP. Each user group is made up of a group of private workers.
+	Groups []*string `json:"groups,omitempty" tf:"groups,omitempty"`
 }
 
 type OidcMemberDefinitionObservation struct {
@@ -112,8 +157,35 @@ type OidcMemberDefinitionObservation struct {
 type OidcMemberDefinitionParameters struct {
 
 	// A list of comma separated strings that identifies user groups in your OIDC IdP. Each user group is made up of a group of private workers.
-	// +kubebuilder:validation:Required
-	Groups []*string `json:"groups" tf:"groups,omitempty"`
+	Groups []*string `json:"groups,omitempty" tf:"groups,omitempty"`
+}
+
+type WorkteamInitParameters struct {
+
+	// A description of the work team.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// A list of Member Definitions that contains objects that identify the workers that make up the work team. Workforces can be created using Amazon Cognito or your own OIDC Identity Provider (IdP). For private workforces created using Amazon Cognito use cognito_member_definition. For workforces created using your own OIDC identity provider (IdP) use oidc_member_definition. Do not provide input for both of these parameters in a single request. see Member Definition details below.
+	MemberDefinition []MemberDefinitionInitParameters `json:"memberDefinition,omitempty" tf:"member_definition,omitempty"`
+
+	// Configures notification of workers regarding available or expiring work items. see Notification Configuration details below.
+	NotificationConfiguration []NotificationConfigurationInitParameters `json:"notificationConfiguration,omitempty" tf:"notification_configuration,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The name of the Workteam (must be unique).
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.Workforce
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	WorkforceName *string `json:"workforceName,omitempty" tf:"workforce_name,omitempty"`
+
+	WorkforceNameRef *v1.Reference `json:"workforceNameRef,omitempty" tf:"-"`
+
+	WorkforceNameSelector *v1.Selector `json:"workforceNameSelector,omitempty" tf:"-"`
 }
 
 type WorkteamObservation struct {
@@ -149,30 +221,24 @@ type WorkteamObservation struct {
 type WorkteamParameters struct {
 
 	// A description of the work team.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// A list of Member Definitions that contains objects that identify the workers that make up the work team. Workforces can be created using Amazon Cognito or your own OIDC Identity Provider (IdP). For private workforces created using Amazon Cognito use cognito_member_definition. For workforces created using your own OIDC identity provider (IdP) use oidc_member_definition. Do not provide input for both of these parameters in a single request. see Member Definition details below.
-	// +kubebuilder:validation:Optional
 	MemberDefinition []MemberDefinitionParameters `json:"memberDefinition,omitempty" tf:"member_definition,omitempty"`
 
 	// Configures notification of workers regarding available or expiring work items. see Notification Configuration details below.
-	// +kubebuilder:validation:Optional
 	NotificationConfiguration []NotificationConfigurationParameters `json:"notificationConfiguration,omitempty" tf:"notification_configuration,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The name of the Workteam (must be unique).
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.Workforce
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	WorkforceName *string `json:"workforceName,omitempty" tf:"workforce_name,omitempty"`
 
 	// Reference to a Workforce in sagemaker to populate workforceName.
@@ -188,6 +254,10 @@ type WorkteamParameters struct {
 type WorkteamSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     WorkteamParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider WorkteamInitParameters `json:"initProvider,omitempty"`
 }
 
 // WorkteamStatus defines the observed state of Workteam.
@@ -208,8 +278,8 @@ type WorkteamStatus struct {
 type Workteam struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.description)",message="description is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.memberDefinition)",message="memberDefinition is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.description) || has(self.initProvider.description)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.memberDefinition) || has(self.initProvider.memberDefinition)",message="%!s(MISSING) is a required parameter"
 	Spec   WorkteamSpec   `json:"spec"`
 	Status WorkteamStatus `json:"status,omitempty"`
 }

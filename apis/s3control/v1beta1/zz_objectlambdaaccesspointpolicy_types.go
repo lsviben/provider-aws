@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ObjectLambdaAccessPointPolicyInitParameters struct {
+
+	// The AWS account ID for the account that owns the Object Lambda Access Point.
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	// The name of the Object Lambda Access Point.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3control/v1beta1.ObjectLambdaAccessPoint
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	NameRef *v1.Reference `json:"nameRef,omitempty" tf:"-"`
+
+	NameSelector *v1.Selector `json:"nameSelector,omitempty" tf:"-"`
+
+	// The Object Lambda Access Point resource policy document.
+	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type ObjectLambdaAccessPointPolicyObservation struct {
 
 	// The AWS account ID for the account that owns the Object Lambda Access Point.
@@ -34,13 +56,11 @@ type ObjectLambdaAccessPointPolicyObservation struct {
 type ObjectLambdaAccessPointPolicyParameters struct {
 
 	// The AWS account ID for the account that owns the Object Lambda Access Point.
-	// +kubebuilder:validation:Optional
 	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// The name of the Object Lambda Access Point.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3control/v1beta1.ObjectLambdaAccessPoint
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Reference to a ObjectLambdaAccessPoint in s3control to populate name.
@@ -52,19 +72,21 @@ type ObjectLambdaAccessPointPolicyParameters struct {
 	NameSelector *v1.Selector `json:"nameSelector,omitempty" tf:"-"`
 
 	// The Object Lambda Access Point resource policy document.
-	// +kubebuilder:validation:Optional
 	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // ObjectLambdaAccessPointPolicySpec defines the desired state of ObjectLambdaAccessPointPolicy
 type ObjectLambdaAccessPointPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ObjectLambdaAccessPointPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ObjectLambdaAccessPointPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // ObjectLambdaAccessPointPolicyStatus defines the observed state of ObjectLambdaAccessPointPolicy.
@@ -85,7 +107,7 @@ type ObjectLambdaAccessPointPolicyStatus struct {
 type ObjectLambdaAccessPointPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policy)",message="policy is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.policy) || has(self.initProvider.policy)",message="%!s(MISSING) is a required parameter"
 	Spec   ObjectLambdaAccessPointPolicySpec   `json:"spec"`
 	Status ObjectLambdaAccessPointPolicyStatus `json:"status,omitempty"`
 }

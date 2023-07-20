@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EnumerationValueInitParameters struct {
+
+	// Additional values related to the slot type value. Each item must be less than or equal to 140 characters in length.
+	Synonyms []*string `json:"synonyms,omitempty" tf:"synonyms,omitempty"`
+
+	// The value of the slot type. Must be less than or equal to 140 characters in length.
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
 type EnumerationValueObservation struct {
 
 	// Additional values related to the slot type value. Each item must be less than or equal to 140 characters in length.
@@ -25,12 +34,36 @@ type EnumerationValueObservation struct {
 type EnumerationValueParameters struct {
 
 	// Additional values related to the slot type value. Each item must be less than or equal to 140 characters in length.
-	// +kubebuilder:validation:Optional
 	Synonyms []*string `json:"synonyms,omitempty" tf:"synonyms,omitempty"`
 
 	// The value of the slot type. Must be less than or equal to 140 characters in length.
-	// +kubebuilder:validation:Required
-	Value *string `json:"value" tf:"value,omitempty"`
+	Value *string `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type SlotTypeInitParameters struct {
+
+	// Determines if a new slot type version is created when the initial resource is created and on each
+	// update. Defaults to false.
+	CreateVersion *bool `json:"createVersion,omitempty" tf:"create_version,omitempty"`
+
+	// A description of the slot type. Must be less than or equal to 200 characters in length.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// A list of EnumerationValue objects that defines the values that
+	// the slot type can take. Each value can have a list of synonyms, which are additional values that help
+	// train the machine learning model about the values that it resolves for a slot. Attributes are
+	// documented under enumeration_value.
+	EnumerationValue []EnumerationValueInitParameters `json:"enumerationValue,omitempty" tf:"enumeration_value,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Determines the slot resolution strategy that Amazon Lex
+	// uses to return slot type values. ORIGINAL_VALUE returns the value entered by the user if the user
+	// value is similar to the slot value. TOP_RESOLUTION returns the first value in the resolution list
+	// if there is a resolution list for the slot, otherwise null is returned. Defaults to ORIGINAL_VALUE.
+	ValueSelectionStrategy *string `json:"valueSelectionStrategy,omitempty" tf:"value_selection_strategy,omitempty"`
 }
 
 type SlotTypeObservation struct {
@@ -74,30 +107,25 @@ type SlotTypeParameters struct {
 
 	// Determines if a new slot type version is created when the initial resource is created and on each
 	// update. Defaults to false.
-	// +kubebuilder:validation:Optional
 	CreateVersion *bool `json:"createVersion,omitempty" tf:"create_version,omitempty"`
 
 	// A description of the slot type. Must be less than or equal to 200 characters in length.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// A list of EnumerationValue objects that defines the values that
 	// the slot type can take. Each value can have a list of synonyms, which are additional values that help
 	// train the machine learning model about the values that it resolves for a slot. Attributes are
 	// documented under enumeration_value.
-	// +kubebuilder:validation:Optional
 	EnumerationValue []EnumerationValueParameters `json:"enumerationValue,omitempty" tf:"enumeration_value,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Determines the slot resolution strategy that Amazon Lex
 	// uses to return slot type values. ORIGINAL_VALUE returns the value entered by the user if the user
 	// value is similar to the slot value. TOP_RESOLUTION returns the first value in the resolution list
 	// if there is a resolution list for the slot, otherwise null is returned. Defaults to ORIGINAL_VALUE.
-	// +kubebuilder:validation:Optional
 	ValueSelectionStrategy *string `json:"valueSelectionStrategy,omitempty" tf:"value_selection_strategy,omitempty"`
 }
 
@@ -105,6 +133,10 @@ type SlotTypeParameters struct {
 type SlotTypeSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SlotTypeParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SlotTypeInitParameters `json:"initProvider,omitempty"`
 }
 
 // SlotTypeStatus defines the observed state of SlotType.
@@ -125,7 +157,7 @@ type SlotTypeStatus struct {
 type SlotType struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.enumerationValue)",message="enumerationValue is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.enumerationValue) || has(self.initProvider.enumerationValue)",message="%!s(MISSING) is a required parameter"
 	Spec   SlotTypeSpec   `json:"spec"`
 	Status SlotTypeStatus `json:"status,omitempty"`
 }

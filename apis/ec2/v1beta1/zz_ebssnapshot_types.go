@@ -13,6 +13,40 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EBSSnapshotInitParameters struct {
+
+	// A description of what the snapshot is.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Outpost on which to create a local snapshot.
+	OutpostArn *string `json:"outpostArn,omitempty" tf:"outpost_arn,omitempty"`
+
+	// Indicates whether to permanently restore an archived snapshot.
+	PermanentRestore *bool `json:"permanentRestore,omitempty" tf:"permanent_restore,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The name of the storage tier. Valid values are archive and standard. Default value is standard.
+	StorageTier *string `json:"storageTier,omitempty" tf:"storage_tier,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Specifies the number of days for which to temporarily restore an archived snapshot. Required for temporary restores only. The snapshot will be automatically re-archived after this period.
+	TemporaryRestoreDays *float64 `json:"temporaryRestoreDays,omitempty" tf:"temporary_restore_days,omitempty"`
+
+	// The Volume ID of which to make a snapshot.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.EBSVolume
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	VolumeID *string `json:"volumeId,omitempty" tf:"volume_id,omitempty"`
+
+	VolumeIDRef *v1.Reference `json:"volumeIdRef,omitempty" tf:"-"`
+
+	VolumeIDSelector *v1.Selector `json:"volumeIdSelector,omitempty" tf:"-"`
+}
+
 type EBSSnapshotObservation struct {
 
 	// Amazon Resource Name (ARN) of the EBS Snapshot.
@@ -67,38 +101,30 @@ type EBSSnapshotObservation struct {
 type EBSSnapshotParameters struct {
 
 	// A description of what the snapshot is.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the Outpost on which to create a local snapshot.
-	// +kubebuilder:validation:Optional
 	OutpostArn *string `json:"outpostArn,omitempty" tf:"outpost_arn,omitempty"`
 
 	// Indicates whether to permanently restore an archived snapshot.
-	// +kubebuilder:validation:Optional
 	PermanentRestore *bool `json:"permanentRestore,omitempty" tf:"permanent_restore,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The name of the storage tier. Valid values are archive and standard. Default value is standard.
-	// +kubebuilder:validation:Optional
 	StorageTier *string `json:"storageTier,omitempty" tf:"storage_tier,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Specifies the number of days for which to temporarily restore an archived snapshot. Required for temporary restores only. The snapshot will be automatically re-archived after this period.
-	// +kubebuilder:validation:Optional
 	TemporaryRestoreDays *float64 `json:"temporaryRestoreDays,omitempty" tf:"temporary_restore_days,omitempty"`
 
 	// The Volume ID of which to make a snapshot.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.EBSVolume
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	VolumeID *string `json:"volumeId,omitempty" tf:"volume_id,omitempty"`
 
 	// Reference to a EBSVolume in ec2 to populate volumeId.
@@ -114,6 +140,10 @@ type EBSSnapshotParameters struct {
 type EBSSnapshotSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EBSSnapshotParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EBSSnapshotInitParameters `json:"initProvider,omitempty"`
 }
 
 // EBSSnapshotStatus defines the observed state of EBSSnapshot.

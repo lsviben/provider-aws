@@ -13,6 +13,36 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DefaultSecurityGroupEgressInitParameters struct {
+
+	// List of CIDR blocks.
+	CidrBlocks []*string `json:"cidrBlocks,omitempty" tf:"cidr_blocks"`
+
+	// Description of this rule.
+	Description *string `json:"description,omitempty" tf:"description"`
+
+	// Start port (or ICMP type number if protocol is icmp)
+	FromPort *float64 `json:"fromPort,omitempty" tf:"from_port"`
+
+	// List of IPv6 CIDR blocks.
+	IPv6CidrBlocks []*string `json:"ipv6CidrBlocks,omitempty" tf:"ipv6_cidr_blocks"`
+
+	// List of prefix list IDs (for allowing access to VPC endpoints)
+	PrefixListIds []*string `json:"prefixListIds,omitempty" tf:"prefix_list_ids"`
+
+	// Protocol. If you select a protocol of "-1" (semantically equivalent to all, which is not a valid value here), you must specify a from_port and to_port equal to 0. If not icmp, tcp, udp, or -1 use the protocol number.
+	Protocol *string `json:"protocol,omitempty" tf:"protocol"`
+
+	// List of security groups. A group name can be used relative to the default VPC. Otherwise, group ID.
+	SecurityGroups []*string `json:"securityGroups,omitempty" tf:"security_groups"`
+
+	// Whether the security group itself will be added as a source to this egress rule.
+	Self *bool `json:"self,omitempty" tf:"self"`
+
+	// End range port (or ICMP code if protocol is icmp).
+	ToPort *float64 `json:"toPort,omitempty" tf:"to_port"`
+}
+
 type DefaultSecurityGroupEgressObservation struct {
 
 	// List of CIDR blocks.
@@ -46,39 +76,60 @@ type DefaultSecurityGroupEgressObservation struct {
 type DefaultSecurityGroupEgressParameters struct {
 
 	// List of CIDR blocks.
-	// +kubebuilder:validation:Optional
 	CidrBlocks []*string `json:"cidrBlocks,omitempty" tf:"cidr_blocks"`
 
 	// Description of this rule.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description"`
 
 	// Start port (or ICMP type number if protocol is icmp)
-	// +kubebuilder:validation:Optional
 	FromPort *float64 `json:"fromPort,omitempty" tf:"from_port"`
 
 	// List of IPv6 CIDR blocks.
-	// +kubebuilder:validation:Optional
 	IPv6CidrBlocks []*string `json:"ipv6CidrBlocks,omitempty" tf:"ipv6_cidr_blocks"`
 
 	// List of prefix list IDs (for allowing access to VPC endpoints)
-	// +kubebuilder:validation:Optional
 	PrefixListIds []*string `json:"prefixListIds,omitempty" tf:"prefix_list_ids"`
 
 	// Protocol. If you select a protocol of "-1" (semantically equivalent to all, which is not a valid value here), you must specify a from_port and to_port equal to 0. If not icmp, tcp, udp, or -1 use the protocol number.
-	// +kubebuilder:validation:Optional
 	Protocol *string `json:"protocol,omitempty" tf:"protocol"`
 
 	// List of security groups. A group name can be used relative to the default VPC. Otherwise, group ID.
-	// +kubebuilder:validation:Optional
 	SecurityGroups []*string `json:"securityGroups,omitempty" tf:"security_groups"`
 
 	// Whether the security group itself will be added as a source to this egress rule.
-	// +kubebuilder:validation:Optional
 	Self *bool `json:"self,omitempty" tf:"self"`
 
 	// End range port (or ICMP code if protocol is icmp).
-	// +kubebuilder:validation:Optional
+	ToPort *float64 `json:"toPort,omitempty" tf:"to_port"`
+}
+
+type DefaultSecurityGroupIngressInitParameters struct {
+
+	// List of CIDR blocks.
+	CidrBlocks []*string `json:"cidrBlocks,omitempty" tf:"cidr_blocks"`
+
+	// Description of this rule.
+	Description *string `json:"description,omitempty" tf:"description"`
+
+	// Start port (or ICMP type number if protocol is icmp)
+	FromPort *float64 `json:"fromPort,omitempty" tf:"from_port"`
+
+	// List of IPv6 CIDR blocks.
+	IPv6CidrBlocks []*string `json:"ipv6CidrBlocks,omitempty" tf:"ipv6_cidr_blocks"`
+
+	// List of prefix list IDs (for allowing access to VPC endpoints)
+	PrefixListIds []*string `json:"prefixListIds,omitempty" tf:"prefix_list_ids"`
+
+	// Protocol. If you select a protocol of "-1" (semantically equivalent to all, which is not a valid value here), you must specify a from_port and to_port equal to 0. If not icmp, tcp, udp, or -1 use the protocol number.
+	Protocol *string `json:"protocol,omitempty" tf:"protocol"`
+
+	// List of security groups. A group name can be used relative to the default VPC. Otherwise, group ID.
+	SecurityGroups []*string `json:"securityGroups,omitempty" tf:"security_groups"`
+
+	// Whether the security group itself will be added as a source to this egress rule.
+	Self *bool `json:"self,omitempty" tf:"self"`
+
+	// End range port (or ICMP code if protocol is icmp).
 	ToPort *float64 `json:"toPort,omitempty" tf:"to_port"`
 }
 
@@ -115,40 +166,57 @@ type DefaultSecurityGroupIngressObservation struct {
 type DefaultSecurityGroupIngressParameters struct {
 
 	// List of CIDR blocks.
-	// +kubebuilder:validation:Optional
 	CidrBlocks []*string `json:"cidrBlocks,omitempty" tf:"cidr_blocks"`
 
 	// Description of this rule.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description"`
 
 	// Start port (or ICMP type number if protocol is icmp)
-	// +kubebuilder:validation:Optional
 	FromPort *float64 `json:"fromPort,omitempty" tf:"from_port"`
 
 	// List of IPv6 CIDR blocks.
-	// +kubebuilder:validation:Optional
 	IPv6CidrBlocks []*string `json:"ipv6CidrBlocks,omitempty" tf:"ipv6_cidr_blocks"`
 
 	// List of prefix list IDs (for allowing access to VPC endpoints)
-	// +kubebuilder:validation:Optional
 	PrefixListIds []*string `json:"prefixListIds,omitempty" tf:"prefix_list_ids"`
 
 	// Protocol. If you select a protocol of "-1" (semantically equivalent to all, which is not a valid value here), you must specify a from_port and to_port equal to 0. If not icmp, tcp, udp, or -1 use the protocol number.
-	// +kubebuilder:validation:Optional
 	Protocol *string `json:"protocol,omitempty" tf:"protocol"`
 
 	// List of security groups. A group name can be used relative to the default VPC. Otherwise, group ID.
-	// +kubebuilder:validation:Optional
 	SecurityGroups []*string `json:"securityGroups,omitempty" tf:"security_groups"`
 
 	// Whether the security group itself will be added as a source to this egress rule.
-	// +kubebuilder:validation:Optional
 	Self *bool `json:"self,omitempty" tf:"self"`
 
 	// End range port (or ICMP code if protocol is icmp).
-	// +kubebuilder:validation:Optional
 	ToPort *float64 `json:"toPort,omitempty" tf:"to_port"`
+}
+
+type DefaultSecurityGroupInitParameters struct {
+
+	// Configuration block. Detailed below.
+	Egress []DefaultSecurityGroupEgressInitParameters `json:"egress,omitempty" tf:"egress,omitempty"`
+
+	// Configuration block. Detailed below.
+	Ingress []DefaultSecurityGroupIngressInitParameters `json:"ingress,omitempty" tf:"ingress,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	RevokeRulesOnDelete *bool `json:"revokeRulesOnDelete,omitempty" tf:"revoke_rules_on_delete,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// VPC ID. Note that changing the  It will be left in its current state.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
+	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
+
+	VPCIDRef *v1.Reference `json:"vpcIdRef,omitempty" tf:"-"`
+
+	VPCIDSelector *v1.Selector `json:"vpcIdSelector,omitempty" tf:"-"`
 }
 
 type DefaultSecurityGroupObservation struct {
@@ -189,28 +257,22 @@ type DefaultSecurityGroupObservation struct {
 type DefaultSecurityGroupParameters struct {
 
 	// Configuration block. Detailed below.
-	// +kubebuilder:validation:Optional
 	Egress []DefaultSecurityGroupEgressParameters `json:"egress,omitempty" tf:"egress,omitempty"`
 
 	// Configuration block. Detailed below.
-	// +kubebuilder:validation:Optional
 	Ingress []DefaultSecurityGroupIngressParameters `json:"ingress,omitempty" tf:"ingress,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
-	// +kubebuilder:validation:Optional
 	RevokeRulesOnDelete *bool `json:"revokeRulesOnDelete,omitempty" tf:"revoke_rules_on_delete,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// VPC ID. Note that changing the  It will be left in its current state.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
-	// +kubebuilder:validation:Optional
 	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
 
 	// Reference to a VPC in ec2 to populate vpcId.
@@ -226,6 +288,10 @@ type DefaultSecurityGroupParameters struct {
 type DefaultSecurityGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DefaultSecurityGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DefaultSecurityGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // DefaultSecurityGroupStatus defines the observed state of DefaultSecurityGroup.

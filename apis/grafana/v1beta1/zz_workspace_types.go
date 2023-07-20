@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VPCConfigurationInitParameters struct {
+
+	// - The list of Amazon EC2 security group IDs attached to the Amazon VPC for your Grafana workspace to connect.
+	SecurityGroupIds []*string `json:"securityGroupIds,omitempty" tf:"security_group_ids,omitempty"`
+
+	// - The list of Amazon EC2 subnet IDs created in the Amazon VPC for your Grafana workspace to connect.
+	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
+}
+
 type VPCConfigurationObservation struct {
 
 	// - The list of Amazon EC2 security group IDs attached to the Amazon VPC for your Grafana workspace to connect.
@@ -25,12 +34,65 @@ type VPCConfigurationObservation struct {
 type VPCConfigurationParameters struct {
 
 	// - The list of Amazon EC2 security group IDs attached to the Amazon VPC for your Grafana workspace to connect.
-	// +kubebuilder:validation:Required
-	SecurityGroupIds []*string `json:"securityGroupIds" tf:"security_group_ids,omitempty"`
+	SecurityGroupIds []*string `json:"securityGroupIds,omitempty" tf:"security_group_ids,omitempty"`
 
 	// - The list of Amazon EC2 subnet IDs created in the Amazon VPC for your Grafana workspace to connect.
-	// +kubebuilder:validation:Required
-	SubnetIds []*string `json:"subnetIds" tf:"subnet_ids,omitempty"`
+	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
+}
+
+type WorkspaceInitParameters struct {
+
+	// The type of account access for the workspace. Valid values are CURRENT_ACCOUNT and ORGANIZATION. If ORGANIZATION is specified, then organizational_units must also be present.
+	AccountAccessType *string `json:"accountAccessType,omitempty" tf:"account_access_type,omitempty"`
+
+	// The authentication providers for the workspace. Valid values are AWS_SSO, SAML, or both.
+	AuthenticationProviders []*string `json:"authenticationProviders,omitempty" tf:"authentication_providers,omitempty"`
+
+	// The configuration string for the workspace that you create. For more information about the format and configuration options available, see Working in your Grafana workspace.
+	Configuration *string `json:"configuration,omitempty" tf:"configuration,omitempty"`
+
+	// The data sources for the workspace. Valid values are AMAZON_OPENSEARCH_SERVICE, ATHENA, CLOUDWATCH, PROMETHEUS, REDSHIFT, SITEWISE, TIMESTREAM, XRAY
+	DataSources []*string `json:"dataSources,omitempty" tf:"data_sources,omitempty"`
+
+	// The workspace description.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The Grafana workspace name.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The notification destinations. If a data source is specified here, Amazon Managed Grafana will create IAM roles and permissions needed to use these destinations. Must be set to SNS.
+	NotificationDestinations []*string `json:"notificationDestinations,omitempty" tf:"notification_destinations,omitempty"`
+
+	// The role name that the workspace uses to access resources through Amazon Organizations.
+	OrganizationRoleName *string `json:"organizationRoleName,omitempty" tf:"organization_role_name,omitempty"`
+
+	// The Amazon Organizations organizational units that the workspace is authorized to use data sources from.
+	OrganizationalUnits []*string `json:"organizationalUnits,omitempty" tf:"organizational_units,omitempty"`
+
+	// The permission type of the workspace. If SERVICE_MANAGED is specified, the IAM roles and IAM policy attachments are generated automatically. If CUSTOMER_MANAGED is specified, the IAM roles and IAM policy attachments will not be created.
+	PermissionType *string `json:"permissionType,omitempty" tf:"permission_type,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The IAM role ARN that the workspace assumes.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
+
+	// The AWS CloudFormation stack set name that provisions IAM roles to be used by the workspace.
+	StackSetName *string `json:"stackSetName,omitempty" tf:"stack_set_name,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The configuration settings for an Amazon VPC that contains data sources for your Grafana workspace to connect to. See VPC Configuration below.
+	VPCConfiguration []VPCConfigurationInitParameters `json:"vpcConfiguration,omitempty" tf:"vpc_configuration,omitempty"`
 }
 
 type WorkspaceObservation struct {
@@ -97,54 +159,42 @@ type WorkspaceObservation struct {
 type WorkspaceParameters struct {
 
 	// The type of account access for the workspace. Valid values are CURRENT_ACCOUNT and ORGANIZATION. If ORGANIZATION is specified, then organizational_units must also be present.
-	// +kubebuilder:validation:Optional
 	AccountAccessType *string `json:"accountAccessType,omitempty" tf:"account_access_type,omitempty"`
 
 	// The authentication providers for the workspace. Valid values are AWS_SSO, SAML, or both.
-	// +kubebuilder:validation:Optional
 	AuthenticationProviders []*string `json:"authenticationProviders,omitempty" tf:"authentication_providers,omitempty"`
 
 	// The configuration string for the workspace that you create. For more information about the format and configuration options available, see Working in your Grafana workspace.
-	// +kubebuilder:validation:Optional
 	Configuration *string `json:"configuration,omitempty" tf:"configuration,omitempty"`
 
 	// The data sources for the workspace. Valid values are AMAZON_OPENSEARCH_SERVICE, ATHENA, CLOUDWATCH, PROMETHEUS, REDSHIFT, SITEWISE, TIMESTREAM, XRAY
-	// +kubebuilder:validation:Optional
 	DataSources []*string `json:"dataSources,omitempty" tf:"data_sources,omitempty"`
 
 	// The workspace description.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The Grafana workspace name.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The notification destinations. If a data source is specified here, Amazon Managed Grafana will create IAM roles and permissions needed to use these destinations. Must be set to SNS.
-	// +kubebuilder:validation:Optional
 	NotificationDestinations []*string `json:"notificationDestinations,omitempty" tf:"notification_destinations,omitempty"`
 
 	// The role name that the workspace uses to access resources through Amazon Organizations.
-	// +kubebuilder:validation:Optional
 	OrganizationRoleName *string `json:"organizationRoleName,omitempty" tf:"organization_role_name,omitempty"`
 
 	// The Amazon Organizations organizational units that the workspace is authorized to use data sources from.
-	// +kubebuilder:validation:Optional
 	OrganizationalUnits []*string `json:"organizationalUnits,omitempty" tf:"organizational_units,omitempty"`
 
 	// The permission type of the workspace. If SERVICE_MANAGED is specified, the IAM roles and IAM policy attachments are generated automatically. If CUSTOMER_MANAGED is specified, the IAM roles and IAM policy attachments will not be created.
-	// +kubebuilder:validation:Optional
 	PermissionType *string `json:"permissionType,omitempty" tf:"permission_type,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The IAM role ARN that the workspace assumes.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -156,15 +206,12 @@ type WorkspaceParameters struct {
 	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
 
 	// The AWS CloudFormation stack set name that provisions IAM roles to be used by the workspace.
-	// +kubebuilder:validation:Optional
 	StackSetName *string `json:"stackSetName,omitempty" tf:"stack_set_name,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The configuration settings for an Amazon VPC that contains data sources for your Grafana workspace to connect to. See VPC Configuration below.
-	// +kubebuilder:validation:Optional
 	VPCConfiguration []VPCConfigurationParameters `json:"vpcConfiguration,omitempty" tf:"vpc_configuration,omitempty"`
 }
 
@@ -172,6 +219,10 @@ type WorkspaceParameters struct {
 type WorkspaceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     WorkspaceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider WorkspaceInitParameters `json:"initProvider,omitempty"`
 }
 
 // WorkspaceStatus defines the observed state of Workspace.
@@ -192,9 +243,9 @@ type WorkspaceStatus struct {
 type Workspace struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accountAccessType)",message="accountAccessType is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.authenticationProviders)",message="authenticationProviders is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.permissionType)",message="permissionType is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accountAccessType) || has(self.initProvider.accountAccessType)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.authenticationProviders) || has(self.initProvider.authenticationProviders)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.permissionType) || has(self.initProvider.permissionType)",message="%!s(MISSING) is a required parameter"
 	Spec   WorkspaceSpec   `json:"spec"`
 	Status WorkspaceStatus `json:"status,omitempty"`
 }

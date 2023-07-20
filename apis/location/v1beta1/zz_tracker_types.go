@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type TrackerInitParameters struct {
+
+	// The optional description for the tracker resource.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// A key identifier for an AWS KMS customer managed key assigned to the Amazon Location resource.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
+
+	KMSKeyIDRef *v1.Reference `json:"kmsKeyIdRef,omitempty" tf:"-"`
+
+	KMSKeyIDSelector *v1.Selector `json:"kmsKeyIdSelector,omitempty" tf:"-"`
+
+	// The position filtering method of the tracker resource. Valid values: TimeBased, DistanceBased, AccuracyBased. Default: TimeBased.
+	PositionFiltering *string `json:"positionFiltering,omitempty" tf:"position_filtering,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type TrackerObservation struct {
 
 	// The timestamp for when the tracker resource was created in ISO 8601 format.
@@ -45,12 +69,10 @@ type TrackerObservation struct {
 type TrackerParameters struct {
 
 	// The optional description for the tracker resource.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// A key identifier for an AWS KMS customer managed key assigned to the Amazon Location resource.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
-	// +kubebuilder:validation:Optional
 	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
 
 	// Reference to a Key in kms to populate kmsKeyId.
@@ -62,16 +84,13 @@ type TrackerParameters struct {
 	KMSKeyIDSelector *v1.Selector `json:"kmsKeyIdSelector,omitempty" tf:"-"`
 
 	// The position filtering method of the tracker resource. Valid values: TimeBased, DistanceBased, AccuracyBased. Default: TimeBased.
-	// +kubebuilder:validation:Optional
 	PositionFiltering *string `json:"positionFiltering,omitempty" tf:"position_filtering,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -79,6 +98,10 @@ type TrackerParameters struct {
 type TrackerSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     TrackerParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider TrackerInitParameters `json:"initProvider,omitempty"`
 }
 
 // TrackerStatus defines the observed state of Tracker.

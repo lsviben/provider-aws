@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CertificateValidationInitParameters struct {
+
+	// ARN of the certificate that is being validated.
+	// +crossplane:generate:reference:type=Certificate
+	CertificateArn *string `json:"certificateArn,omitempty" tf:"certificate_arn,omitempty"`
+
+	CertificateArnRef *v1.Reference `json:"certificateArnRef,omitempty" tf:"-"`
+
+	CertificateArnSelector *v1.Selector `json:"certificateArnSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// List of FQDNs that implement the validation. Only valid for DNS validation method ACM certificates. If this is set, the resource can implement additional sanity checks and has an explicit dependency on the resource that is implementing the validation
+	ValidationRecordFqdns []*string `json:"validationRecordFqdns,omitempty" tf:"validation_record_fqdns,omitempty"`
+}
+
 type CertificateValidationObservation struct {
 
 	// ARN of the certificate that is being validated.
@@ -29,7 +47,6 @@ type CertificateValidationParameters struct {
 
 	// ARN of the certificate that is being validated.
 	// +crossplane:generate:reference:type=Certificate
-	// +kubebuilder:validation:Optional
 	CertificateArn *string `json:"certificateArn,omitempty" tf:"certificate_arn,omitempty"`
 
 	// Reference to a Certificate to populate certificateArn.
@@ -42,11 +59,9 @@ type CertificateValidationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// List of FQDNs that implement the validation. Only valid for DNS validation method ACM certificates. If this is set, the resource can implement additional sanity checks and has an explicit dependency on the resource that is implementing the validation
-	// +kubebuilder:validation:Optional
 	ValidationRecordFqdns []*string `json:"validationRecordFqdns,omitempty" tf:"validation_record_fqdns,omitempty"`
 }
 
@@ -54,6 +69,10 @@ type CertificateValidationParameters struct {
 type CertificateValidationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     CertificateValidationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider CertificateValidationInitParameters `json:"initProvider,omitempty"`
 }
 
 // CertificateValidationStatus defines the observed state of CertificateValidation.

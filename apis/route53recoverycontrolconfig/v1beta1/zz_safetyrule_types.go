@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RuleConfigInitParameters struct {
+
+	// Logical negation of the rule.
+	Inverted *bool `json:"inverted,omitempty" tf:"inverted,omitempty"`
+
+	// Number of controls that must be set when you specify an ATLEAST type rule.
+	Threshold *float64 `json:"threshold,omitempty" tf:"threshold,omitempty"`
+
+	// Rule type. Valid values are ATLEAST, AND, and OR.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type RuleConfigObservation struct {
 
 	// Logical negation of the rule.
@@ -28,16 +40,53 @@ type RuleConfigObservation struct {
 type RuleConfigParameters struct {
 
 	// Logical negation of the rule.
-	// +kubebuilder:validation:Required
-	Inverted *bool `json:"inverted" tf:"inverted,omitempty"`
+	Inverted *bool `json:"inverted,omitempty" tf:"inverted,omitempty"`
 
 	// Number of controls that must be set when you specify an ATLEAST type rule.
-	// +kubebuilder:validation:Required
-	Threshold *float64 `json:"threshold" tf:"threshold,omitempty"`
+	Threshold *float64 `json:"threshold,omitempty" tf:"threshold,omitempty"`
 
 	// Rule type. Valid values are ATLEAST, AND, and OR.
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type SafetyRuleInitParameters struct {
+
+	// Routing controls that are part of transactions that are evaluated to determine if a request to change a routing control state is allowed.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53recoverycontrolconfig/v1beta1.RoutingControl
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
+	AssertedControls []*string `json:"assertedControls,omitempty" tf:"asserted_controls,omitempty"`
+
+	AssertedControlsRefs []v1.Reference `json:"assertedControlsRefs,omitempty" tf:"-"`
+
+	AssertedControlsSelector *v1.Selector `json:"assertedControlsSelector,omitempty" tf:"-"`
+
+	// ARN of the control panel in which this safety rule will reside.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53recoverycontrolconfig/v1beta1.ControlPanel
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
+	ControlPanelArn *string `json:"controlPanelArn,omitempty" tf:"control_panel_arn,omitempty"`
+
+	ControlPanelArnRef *v1.Reference `json:"controlPanelArnRef,omitempty" tf:"-"`
+
+	ControlPanelArnSelector *v1.Selector `json:"controlPanelArnSelector,omitempty" tf:"-"`
+
+	// Gating controls for the new gating rule. That is, routing controls that are evaluated by the rule configuration that you specify.
+	GatingControls []*string `json:"gatingControls,omitempty" tf:"gating_controls,omitempty"`
+
+	// Name describing the safety rule.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Configuration block for safety rule criteria. See below.
+	RuleConfig []RuleConfigInitParameters `json:"ruleConfig,omitempty" tf:"rule_config,omitempty"`
+
+	// Routing controls that can only be set or unset if the specified rule_config evaluates to true for the specified gating_controls.
+	TargetControls []*string `json:"targetControls,omitempty" tf:"target_controls,omitempty"`
+
+	// Evaluation period, in milliseconds (ms), during which any request against the target routing controls will fail.
+	WaitPeriodMs *float64 `json:"waitPeriodMs,omitempty" tf:"wait_period_ms,omitempty"`
 }
 
 type SafetyRuleObservation struct {
@@ -77,7 +126,6 @@ type SafetyRuleParameters struct {
 	// Routing controls that are part of transactions that are evaluated to determine if a request to change a routing control state is allowed.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53recoverycontrolconfig/v1beta1.RoutingControl
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
-	// +kubebuilder:validation:Optional
 	AssertedControls []*string `json:"assertedControls,omitempty" tf:"asserted_controls,omitempty"`
 
 	// References to RoutingControl in route53recoverycontrolconfig to populate assertedControls.
@@ -91,7 +139,6 @@ type SafetyRuleParameters struct {
 	// ARN of the control panel in which this safety rule will reside.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53recoverycontrolconfig/v1beta1.ControlPanel
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
-	// +kubebuilder:validation:Optional
 	ControlPanelArn *string `json:"controlPanelArn,omitempty" tf:"control_panel_arn,omitempty"`
 
 	// Reference to a ControlPanel in route53recoverycontrolconfig to populate controlPanelArn.
@@ -103,28 +150,22 @@ type SafetyRuleParameters struct {
 	ControlPanelArnSelector *v1.Selector `json:"controlPanelArnSelector,omitempty" tf:"-"`
 
 	// Gating controls for the new gating rule. That is, routing controls that are evaluated by the rule configuration that you specify.
-	// +kubebuilder:validation:Optional
 	GatingControls []*string `json:"gatingControls,omitempty" tf:"gating_controls,omitempty"`
 
 	// Name describing the safety rule.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Configuration block for safety rule criteria. See below.
-	// +kubebuilder:validation:Optional
 	RuleConfig []RuleConfigParameters `json:"ruleConfig,omitempty" tf:"rule_config,omitempty"`
 
 	// Routing controls that can only be set or unset if the specified rule_config evaluates to true for the specified gating_controls.
-	// +kubebuilder:validation:Optional
 	TargetControls []*string `json:"targetControls,omitempty" tf:"target_controls,omitempty"`
 
 	// Evaluation period, in milliseconds (ms), during which any request against the target routing controls will fail.
-	// +kubebuilder:validation:Optional
 	WaitPeriodMs *float64 `json:"waitPeriodMs,omitempty" tf:"wait_period_ms,omitempty"`
 }
 
@@ -132,6 +173,10 @@ type SafetyRuleParameters struct {
 type SafetyRuleSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SafetyRuleParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SafetyRuleInitParameters `json:"initProvider,omitempty"`
 }
 
 // SafetyRuleStatus defines the observed state of SafetyRule.
@@ -152,9 +197,9 @@ type SafetyRuleStatus struct {
 type SafetyRule struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ruleConfig)",message="ruleConfig is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.waitPeriodMs)",message="waitPeriodMs is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ruleConfig) || has(self.initProvider.ruleConfig)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.waitPeriodMs) || has(self.initProvider.waitPeriodMs)",message="%!s(MISSING) is a required parameter"
 	Spec   SafetyRuleSpec   `json:"spec"`
 	Status SafetyRuleStatus `json:"status,omitempty"`
 }

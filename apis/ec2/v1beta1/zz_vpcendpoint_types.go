@@ -13,6 +13,9 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DNSEntryInitParameters struct {
+}
+
 type DNSEntryObservation struct {
 
 	// The DNS name.
@@ -25,6 +28,12 @@ type DNSEntryObservation struct {
 type DNSEntryParameters struct {
 }
 
+type DNSOptionsInitParameters struct {
+
+	// The DNS records created for the endpoint. Valid values are ipv4, dualstack, service-defined, and ipv6.
+	DNSRecordIPType *string `json:"dnsRecordIpType,omitempty" tf:"dns_record_ip_type,omitempty"`
+}
+
 type DNSOptionsObservation struct {
 
 	// The DNS records created for the endpoint. Valid values are ipv4, dualstack, service-defined, and ipv6.
@@ -34,8 +43,53 @@ type DNSOptionsObservation struct {
 type DNSOptionsParameters struct {
 
 	// The DNS records created for the endpoint. Valid values are ipv4, dualstack, service-defined, and ipv6.
-	// +kubebuilder:validation:Optional
 	DNSRecordIPType *string `json:"dnsRecordIpType,omitempty" tf:"dns_record_ip_type,omitempty"`
+}
+
+type VPCEndpointInitParameters_2 struct {
+
+	// Accept the VPC endpoint (the VPC endpoint and service need to be in the same AWS account).
+	AutoAccept *bool `json:"autoAccept,omitempty" tf:"auto_accept,omitempty"`
+
+	// The DNS options for the endpoint. See dns_options below.
+	DNSOptions []DNSOptionsInitParameters `json:"dnsOptions,omitempty" tf:"dns_options,omitempty"`
+
+	// The IP address type for the endpoint. Valid values are ipv4, dualstack, and ipv6.
+	IPAddressType *string `json:"ipAddressType,omitempty" tf:"ip_address_type,omitempty"`
+
+	// A policy to attach to the endpoint that controls access to the service. This is a JSON formatted string. Defaults to full access. All Gateway and some Interface endpoints support policies - see the relevant AWS documentation for more details.
+	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
+
+	// Whether or not to associate a private hosted zone with the specified VPC. Applicable for endpoints of type Interface.
+	// Defaults to false.
+	PrivateDNSEnabled *bool `json:"privateDnsEnabled,omitempty" tf:"private_dns_enabled,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The service name. For AWS services the service name is usually in the form com.amazonaws.<region>.<service> (the SageMaker Notebook service is an exception to this rule, the service name is in the form aws.sagemaker.<region>.notebook).
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPCEndpointService
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("service_name",true)
+	ServiceName *string `json:"serviceName,omitempty" tf:"service_name,omitempty"`
+
+	ServiceNameRef *v1.Reference `json:"serviceNameRef,omitempty" tf:"-"`
+
+	ServiceNameSelector *v1.Selector `json:"serviceNameSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The VPC endpoint type, Gateway, GatewayLoadBalancer, or Interface. Defaults to Gateway.
+	VPCEndpointType *string `json:"vpcEndpointType,omitempty" tf:"vpc_endpoint_type,omitempty"`
+
+	// The ID of the VPC in which the endpoint will be used.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
+	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
+
+	VPCIDRef *v1.Reference `json:"vpcIdRef,omitempty" tf:"-"`
+
+	VPCIDSelector *v1.Selector `json:"vpcIdSelector,omitempty" tf:"-"`
 }
 
 type VPCEndpointObservation_2 struct {
@@ -112,35 +166,28 @@ type VPCEndpointObservation_2 struct {
 type VPCEndpointParameters_2 struct {
 
 	// Accept the VPC endpoint (the VPC endpoint and service need to be in the same AWS account).
-	// +kubebuilder:validation:Optional
 	AutoAccept *bool `json:"autoAccept,omitempty" tf:"auto_accept,omitempty"`
 
 	// The DNS options for the endpoint. See dns_options below.
-	// +kubebuilder:validation:Optional
 	DNSOptions []DNSOptionsParameters `json:"dnsOptions,omitempty" tf:"dns_options,omitempty"`
 
 	// The IP address type for the endpoint. Valid values are ipv4, dualstack, and ipv6.
-	// +kubebuilder:validation:Optional
 	IPAddressType *string `json:"ipAddressType,omitempty" tf:"ip_address_type,omitempty"`
 
 	// A policy to attach to the endpoint that controls access to the service. This is a JSON formatted string. Defaults to full access. All Gateway and some Interface endpoints support policies - see the relevant AWS documentation for more details.
-	// +kubebuilder:validation:Optional
 	Policy *string `json:"policy,omitempty" tf:"policy,omitempty"`
 
 	// Whether or not to associate a private hosted zone with the specified VPC. Applicable for endpoints of type Interface.
 	// Defaults to false.
-	// +kubebuilder:validation:Optional
 	PrivateDNSEnabled *bool `json:"privateDnsEnabled,omitempty" tf:"private_dns_enabled,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The service name. For AWS services the service name is usually in the form com.amazonaws.<region>.<service> (the SageMaker Notebook service is an exception to this rule, the service name is in the form aws.sagemaker.<region>.notebook).
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPCEndpointService
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("service_name",true)
-	// +kubebuilder:validation:Optional
 	ServiceName *string `json:"serviceName,omitempty" tf:"service_name,omitempty"`
 
 	// Reference to a VPCEndpointService in ec2 to populate serviceName.
@@ -152,16 +199,13 @@ type VPCEndpointParameters_2 struct {
 	ServiceNameSelector *v1.Selector `json:"serviceNameSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The VPC endpoint type, Gateway, GatewayLoadBalancer, or Interface. Defaults to Gateway.
-	// +kubebuilder:validation:Optional
 	VPCEndpointType *string `json:"vpcEndpointType,omitempty" tf:"vpc_endpoint_type,omitempty"`
 
 	// The ID of the VPC in which the endpoint will be used.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.VPC
-	// +kubebuilder:validation:Optional
 	VPCID *string `json:"vpcId,omitempty" tf:"vpc_id,omitempty"`
 
 	// Reference to a VPC in ec2 to populate vpcId.
@@ -177,6 +221,10 @@ type VPCEndpointParameters_2 struct {
 type VPCEndpointSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VPCEndpointParameters_2 `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VPCEndpointInitParameters_2 `json:"initProvider,omitempty"`
 }
 
 // VPCEndpointStatus defines the observed state of VPCEndpoint.

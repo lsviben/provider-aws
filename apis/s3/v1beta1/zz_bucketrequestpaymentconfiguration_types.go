@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BucketRequestPaymentConfigurationInitParameters struct {
+
+	// Name of the bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	BucketRef *v1.Reference `json:"bucketRef,omitempty" tf:"-"`
+
+	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
+
+	// Account ID of the expected bucket owner.
+	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
+
+	// Specifies who pays for the download and request fees. Valid values: BucketOwner, Requester.
+	Payer *string `json:"payer,omitempty" tf:"payer,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type BucketRequestPaymentConfigurationObservation struct {
 
 	// Name of the bucket.
@@ -33,7 +55,6 @@ type BucketRequestPaymentConfigurationParameters struct {
 	// Name of the bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucket.
@@ -45,23 +66,24 @@ type BucketRequestPaymentConfigurationParameters struct {
 	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
 
 	// Account ID of the expected bucket owner.
-	// +kubebuilder:validation:Optional
 	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
 
 	// Specifies who pays for the download and request fees. Valid values: BucketOwner, Requester.
-	// +kubebuilder:validation:Optional
 	Payer *string `json:"payer,omitempty" tf:"payer,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // BucketRequestPaymentConfigurationSpec defines the desired state of BucketRequestPaymentConfiguration
 type BucketRequestPaymentConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BucketRequestPaymentConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BucketRequestPaymentConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // BucketRequestPaymentConfigurationStatus defines the observed state of BucketRequestPaymentConfiguration.
@@ -82,7 +104,7 @@ type BucketRequestPaymentConfigurationStatus struct {
 type BucketRequestPaymentConfiguration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.payer)",message="payer is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.payer) || has(self.initProvider.payer)",message="%!s(MISSING) is a required parameter"
 	Spec   BucketRequestPaymentConfigurationSpec   `json:"spec"`
 	Status BucketRequestPaymentConfigurationStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,35 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ProductPortfolioAssociationInitParameters struct {
+
+	// Language code. Valid values: en (English), jp (Japanese), zh (Chinese). Default value is en.
+	AcceptLanguage *string `json:"acceptLanguage,omitempty" tf:"accept_language,omitempty"`
+
+	// Portfolio identifier.
+	// +crossplane:generate:reference:type=Portfolio
+	PortfolioID *string `json:"portfolioId,omitempty" tf:"portfolio_id,omitempty"`
+
+	PortfolioIDRef *v1.Reference `json:"portfolioIdRef,omitempty" tf:"-"`
+
+	PortfolioIDSelector *v1.Selector `json:"portfolioIdSelector,omitempty" tf:"-"`
+
+	// Product identifier.
+	// +crossplane:generate:reference:type=Product
+	ProductID *string `json:"productId,omitempty" tf:"product_id,omitempty"`
+
+	ProductIDRef *v1.Reference `json:"productIdRef,omitempty" tf:"-"`
+
+	ProductIDSelector *v1.Selector `json:"productIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Identifier of the source portfolio.
+	SourcePortfolioID *string `json:"sourcePortfolioId,omitempty" tf:"source_portfolio_id,omitempty"`
+}
+
 type ProductPortfolioAssociationObservation struct {
 
 	// Language code. Valid values: en (English), jp (Japanese), zh (Chinese). Default value is en.
@@ -34,12 +63,10 @@ type ProductPortfolioAssociationObservation struct {
 type ProductPortfolioAssociationParameters struct {
 
 	// Language code. Valid values: en (English), jp (Japanese), zh (Chinese). Default value is en.
-	// +kubebuilder:validation:Optional
 	AcceptLanguage *string `json:"acceptLanguage,omitempty" tf:"accept_language,omitempty"`
 
 	// Portfolio identifier.
 	// +crossplane:generate:reference:type=Portfolio
-	// +kubebuilder:validation:Optional
 	PortfolioID *string `json:"portfolioId,omitempty" tf:"portfolio_id,omitempty"`
 
 	// Reference to a Portfolio to populate portfolioId.
@@ -52,7 +79,6 @@ type ProductPortfolioAssociationParameters struct {
 
 	// Product identifier.
 	// +crossplane:generate:reference:type=Product
-	// +kubebuilder:validation:Optional
 	ProductID *string `json:"productId,omitempty" tf:"product_id,omitempty"`
 
 	// Reference to a Product to populate productId.
@@ -65,11 +91,9 @@ type ProductPortfolioAssociationParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Identifier of the source portfolio.
-	// +kubebuilder:validation:Optional
 	SourcePortfolioID *string `json:"sourcePortfolioId,omitempty" tf:"source_portfolio_id,omitempty"`
 }
 
@@ -77,6 +101,10 @@ type ProductPortfolioAssociationParameters struct {
 type ProductPortfolioAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ProductPortfolioAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ProductPortfolioAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // ProductPortfolioAssociationStatus defines the observed state of ProductPortfolioAssociation.
@@ -97,7 +125,7 @@ type ProductPortfolioAssociationStatus struct {
 type ProductPortfolioAssociation struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.acceptLanguage)",message="acceptLanguage is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.acceptLanguage) || has(self.initProvider.acceptLanguage)",message="%!s(MISSING) is a required parameter"
 	Spec   ProductPortfolioAssociationSpec   `json:"spec"`
 	Status ProductPortfolioAssociationStatus `json:"status,omitempty"`
 }

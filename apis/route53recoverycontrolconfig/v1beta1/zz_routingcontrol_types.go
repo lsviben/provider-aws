@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RoutingControlInitParameters struct {
+
+	// ARN of the cluster in which this routing control will reside.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53recoverycontrolconfig/v1beta1.Cluster
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
+	ClusterArn *string `json:"clusterArn,omitempty" tf:"cluster_arn,omitempty"`
+
+	ClusterArnRef *v1.Reference `json:"clusterArnRef,omitempty" tf:"-"`
+
+	ClusterArnSelector *v1.Selector `json:"clusterArnSelector,omitempty" tf:"-"`
+
+	// ARN of the control panel in which this routing control will reside.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53recoverycontrolconfig/v1beta1.ControlPanel
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
+	ControlPanelArn *string `json:"controlPanelArn,omitempty" tf:"control_panel_arn,omitempty"`
+
+	ControlPanelArnRef *v1.Reference `json:"controlPanelArnRef,omitempty" tf:"-"`
+
+	ControlPanelArnSelector *v1.Selector `json:"controlPanelArnSelector,omitempty" tf:"-"`
+
+	// The name describing the routing control.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type RoutingControlObservation struct {
 
 	// ARN of the routing control.
@@ -38,7 +66,6 @@ type RoutingControlParameters struct {
 	// ARN of the cluster in which this routing control will reside.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53recoverycontrolconfig/v1beta1.Cluster
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
-	// +kubebuilder:validation:Optional
 	ClusterArn *string `json:"clusterArn,omitempty" tf:"cluster_arn,omitempty"`
 
 	// Reference to a Cluster in route53recoverycontrolconfig to populate clusterArn.
@@ -52,7 +79,6 @@ type RoutingControlParameters struct {
 	// ARN of the control panel in which this routing control will reside.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53recoverycontrolconfig/v1beta1.ControlPanel
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
-	// +kubebuilder:validation:Optional
 	ControlPanelArn *string `json:"controlPanelArn,omitempty" tf:"control_panel_arn,omitempty"`
 
 	// Reference to a ControlPanel in route53recoverycontrolconfig to populate controlPanelArn.
@@ -64,19 +90,21 @@ type RoutingControlParameters struct {
 	ControlPanelArnSelector *v1.Selector `json:"controlPanelArnSelector,omitempty" tf:"-"`
 
 	// The name describing the routing control.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // RoutingControlSpec defines the desired state of RoutingControl
 type RoutingControlSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RoutingControlParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RoutingControlInitParameters `json:"initProvider,omitempty"`
 }
 
 // RoutingControlStatus defines the observed state of RoutingControl.
@@ -97,7 +125,7 @@ type RoutingControlStatus struct {
 type RoutingControl struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   RoutingControlSpec   `json:"spec"`
 	Status RoutingControlStatus `json:"status,omitempty"`
 }

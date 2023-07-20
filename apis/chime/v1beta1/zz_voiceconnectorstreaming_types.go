@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VoiceConnectorStreamingInitParameters struct {
+
+	// The retention period, in hours, for the Amazon Kinesis data.
+	DataRetention *float64 `json:"dataRetention,omitempty" tf:"data_retention,omitempty"`
+
+	// When true, media streaming to Amazon Kinesis is turned off. Default: false
+	Disabled *bool `json:"disabled,omitempty" tf:"disabled,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The streaming notification targets. Valid Values: EventBridge | SNS | SQS
+	StreamingNotificationTargets []*string `json:"streamingNotificationTargets,omitempty" tf:"streaming_notification_targets,omitempty"`
+
+	// The Amazon Chime Voice Connector ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/chime/v1beta1.VoiceConnector
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	VoiceConnectorID *string `json:"voiceConnectorId,omitempty" tf:"voice_connector_id,omitempty"`
+
+	VoiceConnectorIDRef *v1.Reference `json:"voiceConnectorIdRef,omitempty" tf:"-"`
+
+	VoiceConnectorIDSelector *v1.Selector `json:"voiceConnectorIdSelector,omitempty" tf:"-"`
+}
+
 type VoiceConnectorStreamingObservation struct {
 
 	// The retention period, in hours, for the Amazon Kinesis data.
@@ -34,26 +59,21 @@ type VoiceConnectorStreamingObservation struct {
 type VoiceConnectorStreamingParameters struct {
 
 	// The retention period, in hours, for the Amazon Kinesis data.
-	// +kubebuilder:validation:Optional
 	DataRetention *float64 `json:"dataRetention,omitempty" tf:"data_retention,omitempty"`
 
 	// When true, media streaming to Amazon Kinesis is turned off. Default: false
-	// +kubebuilder:validation:Optional
 	Disabled *bool `json:"disabled,omitempty" tf:"disabled,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The streaming notification targets. Valid Values: EventBridge | SNS | SQS
-	// +kubebuilder:validation:Optional
 	StreamingNotificationTargets []*string `json:"streamingNotificationTargets,omitempty" tf:"streaming_notification_targets,omitempty"`
 
 	// The Amazon Chime Voice Connector ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/chime/v1beta1.VoiceConnector
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	VoiceConnectorID *string `json:"voiceConnectorId,omitempty" tf:"voice_connector_id,omitempty"`
 
 	// Reference to a VoiceConnector in chime to populate voiceConnectorId.
@@ -69,6 +89,10 @@ type VoiceConnectorStreamingParameters struct {
 type VoiceConnectorStreamingSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VoiceConnectorStreamingParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VoiceConnectorStreamingInitParameters `json:"initProvider,omitempty"`
 }
 
 // VoiceConnectorStreamingStatus defines the observed state of VoiceConnectorStreaming.
@@ -89,7 +113,7 @@ type VoiceConnectorStreamingStatus struct {
 type VoiceConnectorStreaming struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dataRetention)",message="dataRetention is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dataRetention) || has(self.initProvider.dataRetention)",message="%!s(MISSING) is a required parameter"
 	Spec   VoiceConnectorStreamingSpec   `json:"spec"`
 	Status VoiceConnectorStreamingStatus `json:"status,omitempty"`
 }

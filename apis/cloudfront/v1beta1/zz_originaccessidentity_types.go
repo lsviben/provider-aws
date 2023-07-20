@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type OriginAccessIdentityInitParameters struct {
+
+	// An optional comment for the origin access identity.
+	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type OriginAccessIdentityObservation struct {
 
 	// Internal value used by CloudFront to allow future
@@ -46,19 +56,21 @@ type OriginAccessIdentityObservation struct {
 type OriginAccessIdentityParameters struct {
 
 	// An optional comment for the origin access identity.
-	// +kubebuilder:validation:Optional
 	Comment *string `json:"comment,omitempty" tf:"comment,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // OriginAccessIdentitySpec defines the desired state of OriginAccessIdentity
 type OriginAccessIdentitySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     OriginAccessIdentityParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider OriginAccessIdentityInitParameters `json:"initProvider,omitempty"`
 }
 
 // OriginAccessIdentityStatus defines the observed state of OriginAccessIdentity.

@@ -13,6 +13,9 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AmisInitParameters struct {
+}
+
 type AmisObservation struct {
 
 	// Account identifier of the AMI.
@@ -32,6 +35,53 @@ type AmisObservation struct {
 }
 
 type AmisParameters struct {
+}
+
+type ImageInitParameters struct {
+
+	// - Amazon Resource Name (ARN) of the container recipe.
+	ContainerRecipeArn *string `json:"containerRecipeArn,omitempty" tf:"container_recipe_arn,omitempty"`
+
+	// Amazon Resource Name (ARN) of the Image Builder Distribution Configuration.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/imagebuilder/v1beta1.DistributionConfiguration
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	DistributionConfigurationArn *string `json:"distributionConfigurationArn,omitempty" tf:"distribution_configuration_arn,omitempty"`
+
+	DistributionConfigurationArnRef *v1.Reference `json:"distributionConfigurationArnRef,omitempty" tf:"-"`
+
+	DistributionConfigurationArnSelector *v1.Selector `json:"distributionConfigurationArnSelector,omitempty" tf:"-"`
+
+	// Whether additional information about the image being created is collected. Defaults to true.
+	EnhancedImageMetadataEnabled *bool `json:"enhancedImageMetadataEnabled,omitempty" tf:"enhanced_image_metadata_enabled,omitempty"`
+
+	// Amazon Resource Name (ARN) of the image recipe.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/imagebuilder/v1beta1.ImageRecipe
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	ImageRecipeArn *string `json:"imageRecipeArn,omitempty" tf:"image_recipe_arn,omitempty"`
+
+	ImageRecipeArnRef *v1.Reference `json:"imageRecipeArnRef,omitempty" tf:"-"`
+
+	ImageRecipeArnSelector *v1.Selector `json:"imageRecipeArnSelector,omitempty" tf:"-"`
+
+	// Configuration block with image tests configuration. Detailed below.
+	ImageTestsConfiguration []ImageTestsConfigurationInitParameters `json:"imageTestsConfiguration,omitempty" tf:"image_tests_configuration,omitempty"`
+
+	// Amazon Resource Name (ARN) of the Image Builder Infrastructure Configuration.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/imagebuilder/v1beta1.InfrastructureConfiguration
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	InfrastructureConfigurationArn *string `json:"infrastructureConfigurationArn,omitempty" tf:"infrastructure_configuration_arn,omitempty"`
+
+	InfrastructureConfigurationArnRef *v1.Reference `json:"infrastructureConfigurationArnRef,omitempty" tf:"-"`
+
+	InfrastructureConfigurationArnSelector *v1.Selector `json:"infrastructureConfigurationArnSelector,omitempty" tf:"-"`
+
+	// Region of the AMI.
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type ImageObservation struct {
@@ -87,13 +137,11 @@ type ImageObservation struct {
 type ImageParameters struct {
 
 	// - Amazon Resource Name (ARN) of the container recipe.
-	// +kubebuilder:validation:Optional
 	ContainerRecipeArn *string `json:"containerRecipeArn,omitempty" tf:"container_recipe_arn,omitempty"`
 
 	// Amazon Resource Name (ARN) of the Image Builder Distribution Configuration.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/imagebuilder/v1beta1.DistributionConfiguration
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	DistributionConfigurationArn *string `json:"distributionConfigurationArn,omitempty" tf:"distribution_configuration_arn,omitempty"`
 
 	// Reference to a DistributionConfiguration in imagebuilder to populate distributionConfigurationArn.
@@ -105,13 +153,11 @@ type ImageParameters struct {
 	DistributionConfigurationArnSelector *v1.Selector `json:"distributionConfigurationArnSelector,omitempty" tf:"-"`
 
 	// Whether additional information about the image being created is collected. Defaults to true.
-	// +kubebuilder:validation:Optional
 	EnhancedImageMetadataEnabled *bool `json:"enhancedImageMetadataEnabled,omitempty" tf:"enhanced_image_metadata_enabled,omitempty"`
 
 	// Amazon Resource Name (ARN) of the image recipe.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/imagebuilder/v1beta1.ImageRecipe
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	ImageRecipeArn *string `json:"imageRecipeArn,omitempty" tf:"image_recipe_arn,omitempty"`
 
 	// Reference to a ImageRecipe in imagebuilder to populate imageRecipeArn.
@@ -123,13 +169,11 @@ type ImageParameters struct {
 	ImageRecipeArnSelector *v1.Selector `json:"imageRecipeArnSelector,omitempty" tf:"-"`
 
 	// Configuration block with image tests configuration. Detailed below.
-	// +kubebuilder:validation:Optional
 	ImageTestsConfiguration []ImageTestsConfigurationParameters `json:"imageTestsConfiguration,omitempty" tf:"image_tests_configuration,omitempty"`
 
 	// Amazon Resource Name (ARN) of the Image Builder Infrastructure Configuration.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/imagebuilder/v1beta1.InfrastructureConfiguration
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	InfrastructureConfigurationArn *string `json:"infrastructureConfigurationArn,omitempty" tf:"infrastructure_configuration_arn,omitempty"`
 
 	// Reference to a InfrastructureConfiguration in imagebuilder to populate infrastructureConfigurationArn.
@@ -143,12 +187,19 @@ type ImageParameters struct {
 	// Region of the AMI.
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type ImageTestsConfigurationInitParameters struct {
+
+	// Whether image tests are enabled. Defaults to true.
+	ImageTestsEnabled *bool `json:"imageTestsEnabled,omitempty" tf:"image_tests_enabled,omitempty"`
+
+	// Number of minutes before image tests time out. Valid values are between 60 and 1440. Defaults to 720.
+	TimeoutMinutes *float64 `json:"timeoutMinutes,omitempty" tf:"timeout_minutes,omitempty"`
 }
 
 type ImageTestsConfigurationObservation struct {
@@ -163,12 +214,13 @@ type ImageTestsConfigurationObservation struct {
 type ImageTestsConfigurationParameters struct {
 
 	// Whether image tests are enabled. Defaults to true.
-	// +kubebuilder:validation:Optional
 	ImageTestsEnabled *bool `json:"imageTestsEnabled,omitempty" tf:"image_tests_enabled,omitempty"`
 
 	// Number of minutes before image tests time out. Valid values are between 60 and 1440. Defaults to 720.
-	// +kubebuilder:validation:Optional
 	TimeoutMinutes *float64 `json:"timeoutMinutes,omitempty" tf:"timeout_minutes,omitempty"`
+}
+
+type OutputResourcesInitParameters struct {
 }
 
 type OutputResourcesObservation struct {
@@ -184,6 +236,10 @@ type OutputResourcesParameters struct {
 type ImageSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ImageParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ImageInitParameters `json:"initProvider,omitempty"`
 }
 
 // ImageStatus defines the observed state of Image.

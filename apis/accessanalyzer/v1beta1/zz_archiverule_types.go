@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ArchiveRuleInitParameters struct {
+
+	// Analyzer name.
+	AnalyzerName *string `json:"analyzerName,omitempty" tf:"analyzer_name,omitempty"`
+
+	// Filter criteria for the archive rule. See Filter for more details.
+	Filter []FilterInitParameters `json:"filter,omitempty" tf:"filter,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type ArchiveRuleObservation struct {
 
 	// Analyzer name.
@@ -28,17 +41,32 @@ type ArchiveRuleObservation struct {
 type ArchiveRuleParameters struct {
 
 	// Analyzer name.
-	// +kubebuilder:validation:Required
-	AnalyzerName *string `json:"analyzerName" tf:"analyzer_name,omitempty"`
+	AnalyzerName *string `json:"analyzerName,omitempty" tf:"analyzer_name,omitempty"`
 
 	// Filter criteria for the archive rule. See Filter for more details.
-	// +kubebuilder:validation:Optional
 	Filter []FilterParameters `json:"filter,omitempty" tf:"filter,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type FilterInitParameters struct {
+
+	// Contains comparator.
+	Contains []*string `json:"contains,omitempty" tf:"contains,omitempty"`
+
+	// Filter criteria.
+	Criteria *string `json:"criteria,omitempty" tf:"criteria,omitempty"`
+
+	// Equals comparator.
+	Eq []*string `json:"eq,omitempty" tf:"eq,omitempty"`
+
+	// Boolean comparator.
+	Exists *string `json:"exists,omitempty" tf:"exists,omitempty"`
+
+	// Not Equals comparator.
+	Neq []*string `json:"neq,omitempty" tf:"neq,omitempty"`
 }
 
 type FilterObservation struct {
@@ -62,23 +90,18 @@ type FilterObservation struct {
 type FilterParameters struct {
 
 	// Contains comparator.
-	// +kubebuilder:validation:Optional
 	Contains []*string `json:"contains,omitempty" tf:"contains,omitempty"`
 
 	// Filter criteria.
-	// +kubebuilder:validation:Required
-	Criteria *string `json:"criteria" tf:"criteria,omitempty"`
+	Criteria *string `json:"criteria,omitempty" tf:"criteria,omitempty"`
 
 	// Equals comparator.
-	// +kubebuilder:validation:Optional
 	Eq []*string `json:"eq,omitempty" tf:"eq,omitempty"`
 
 	// Boolean comparator.
-	// +kubebuilder:validation:Optional
 	Exists *string `json:"exists,omitempty" tf:"exists,omitempty"`
 
 	// Not Equals comparator.
-	// +kubebuilder:validation:Optional
 	Neq []*string `json:"neq,omitempty" tf:"neq,omitempty"`
 }
 
@@ -86,6 +109,10 @@ type FilterParameters struct {
 type ArchiveRuleSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ArchiveRuleParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ArchiveRuleInitParameters `json:"initProvider,omitempty"`
 }
 
 // ArchiveRuleStatus defines the observed state of ArchiveRule.
@@ -106,7 +133,7 @@ type ArchiveRuleStatus struct {
 type ArchiveRule struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.filter)",message="filter is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.filter) || has(self.initProvider.filter)",message="%!s(MISSING) is a required parameter"
 	Spec   ArchiveRuleSpec   `json:"spec"`
 	Status ArchiveRuleStatus `json:"status,omitempty"`
 }

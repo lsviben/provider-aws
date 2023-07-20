@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EnvironmentMembershipInitParameters struct {
+
+	// The ID of the environment that contains the environment member you want to add.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloud9/v1beta1.EnvironmentEC2
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	EnvironmentID *string `json:"environmentId,omitempty" tf:"environment_id,omitempty"`
+
+	EnvironmentIDRef *v1.Reference `json:"environmentIdRef,omitempty" tf:"-"`
+
+	EnvironmentIDSelector *v1.Selector `json:"environmentIdSelector,omitempty" tf:"-"`
+
+	// The type of environment member permissions you want to associate with this environment member. Allowed values are read-only and read-write .
+	Permissions *string `json:"permissions,omitempty" tf:"permissions,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The Amazon Resource Name (ARN) of the environment member you want to add.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.User
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	UserArn *string `json:"userArn,omitempty" tf:"user_arn,omitempty"`
+
+	UserArnRef *v1.Reference `json:"userArnRef,omitempty" tf:"-"`
+
+	UserArnSelector *v1.Selector `json:"userArnSelector,omitempty" tf:"-"`
+}
+
 type EnvironmentMembershipObservation struct {
 
 	// The ID of the environment that contains the environment member you want to add.
@@ -36,7 +64,6 @@ type EnvironmentMembershipParameters struct {
 	// The ID of the environment that contains the environment member you want to add.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloud9/v1beta1.EnvironmentEC2
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	EnvironmentID *string `json:"environmentId,omitempty" tf:"environment_id,omitempty"`
 
 	// Reference to a EnvironmentEC2 in cloud9 to populate environmentId.
@@ -48,18 +75,15 @@ type EnvironmentMembershipParameters struct {
 	EnvironmentIDSelector *v1.Selector `json:"environmentIdSelector,omitempty" tf:"-"`
 
 	// The type of environment member permissions you want to associate with this environment member. Allowed values are read-only and read-write .
-	// +kubebuilder:validation:Optional
 	Permissions *string `json:"permissions,omitempty" tf:"permissions,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The Amazon Resource Name (ARN) of the environment member you want to add.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.User
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	UserArn *string `json:"userArn,omitempty" tf:"user_arn,omitempty"`
 
 	// Reference to a User in iam to populate userArn.
@@ -75,6 +99,10 @@ type EnvironmentMembershipParameters struct {
 type EnvironmentMembershipSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EnvironmentMembershipParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EnvironmentMembershipInitParameters `json:"initProvider,omitempty"`
 }
 
 // EnvironmentMembershipStatus defines the observed state of EnvironmentMembership.
@@ -95,7 +123,7 @@ type EnvironmentMembershipStatus struct {
 type EnvironmentMembership struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.permissions)",message="permissions is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.permissions) || has(self.initProvider.permissions)",message="%!s(MISSING) is a required parameter"
 	Spec   EnvironmentMembershipSpec   `json:"spec"`
 	Status EnvironmentMembershipStatus `json:"status,omitempty"`
 }

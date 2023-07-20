@@ -13,6 +13,27 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CiphertextInitParameters struct {
+
+	// An optional mapping that makes up the encryption context.
+	Context map[string]*string `json:"context,omitempty" tf:"context,omitempty"`
+
+	// Globally unique key ID for the customer master key.
+	// +crossplane:generate:reference:type=Key
+	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
+
+	KeyIDRef *v1.Reference `json:"keyIdRef,omitempty" tf:"-"`
+
+	KeyIDSelector *v1.Selector `json:"keyIdSelector,omitempty" tf:"-"`
+
+	// Data to be encrypted. Note that this may show up in logs, and it will be stored in the state file.
+	PlaintextSecretRef v1.SecretKeySelector `json:"plaintextSecretRef" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type CiphertextObservation struct {
 
 	// Base64 encoded ciphertext
@@ -30,12 +51,10 @@ type CiphertextObservation struct {
 type CiphertextParameters struct {
 
 	// An optional mapping that makes up the encryption context.
-	// +kubebuilder:validation:Optional
 	Context map[string]*string `json:"context,omitempty" tf:"context,omitempty"`
 
 	// Globally unique key ID for the customer master key.
 	// +crossplane:generate:reference:type=Key
-	// +kubebuilder:validation:Optional
 	KeyID *string `json:"keyId,omitempty" tf:"key_id,omitempty"`
 
 	// Reference to a Key to populate keyId.
@@ -47,19 +66,21 @@ type CiphertextParameters struct {
 	KeyIDSelector *v1.Selector `json:"keyIdSelector,omitempty" tf:"-"`
 
 	// Data to be encrypted. Note that this may show up in logs, and it will be stored in the state file.
-	// +kubebuilder:validation:Optional
 	PlaintextSecretRef v1.SecretKeySelector `json:"plaintextSecretRef" tf:"-"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // CiphertextSpec defines the desired state of Ciphertext
 type CiphertextSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     CiphertextParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider CiphertextInitParameters `json:"initProvider,omitempty"`
 }
 
 // CiphertextStatus defines the observed state of Ciphertext.
@@ -80,7 +101,7 @@ type CiphertextStatus struct {
 type Ciphertext struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.plaintextSecretRef)",message="plaintextSecretRef is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.plaintextSecretRef) || has(self.initProvider.plaintextSecretRef)",message="%!s(MISSING) is a required parameter"
 	Spec   CiphertextSpec   `json:"spec"`
 	Status CiphertextStatus `json:"status,omitempty"`
 }

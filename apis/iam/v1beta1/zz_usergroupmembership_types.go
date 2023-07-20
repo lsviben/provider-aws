@@ -13,6 +13,26 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type UserGroupMembershipInitParameters struct {
+	GroupRefs []v1.Reference `json:"groupRefs,omitempty" tf:"-"`
+
+	GroupSelector *v1.Selector `json:"groupSelector,omitempty" tf:"-"`
+
+	// A list of IAM Groups to add the user to
+	// +crossplane:generate:reference:type=Group
+	// +crossplane:generate:reference:refFieldName=GroupRefs
+	// +crossplane:generate:reference:selectorFieldName=GroupSelector
+	Groups []*string `json:"groups,omitempty" tf:"groups,omitempty"`
+
+	// The name of the IAM User to add to groups
+	// +crossplane:generate:reference:type=User
+	User *string `json:"user,omitempty" tf:"user,omitempty"`
+
+	UserRef *v1.Reference `json:"userRef,omitempty" tf:"-"`
+
+	UserSelector *v1.Selector `json:"userSelector,omitempty" tf:"-"`
+}
+
 type UserGroupMembershipObservation struct {
 
 	// A list of IAM Groups to add the user to
@@ -38,12 +58,10 @@ type UserGroupMembershipParameters struct {
 	// +crossplane:generate:reference:type=Group
 	// +crossplane:generate:reference:refFieldName=GroupRefs
 	// +crossplane:generate:reference:selectorFieldName=GroupSelector
-	// +kubebuilder:validation:Optional
 	Groups []*string `json:"groups,omitempty" tf:"groups,omitempty"`
 
 	// The name of the IAM User to add to groups
 	// +crossplane:generate:reference:type=User
-	// +kubebuilder:validation:Optional
 	User *string `json:"user,omitempty" tf:"user,omitempty"`
 
 	// Reference to a User to populate user.
@@ -59,6 +77,10 @@ type UserGroupMembershipParameters struct {
 type UserGroupMembershipSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     UserGroupMembershipParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider UserGroupMembershipInitParameters `json:"initProvider,omitempty"`
 }
 
 // UserGroupMembershipStatus defines the observed state of UserGroupMembership.

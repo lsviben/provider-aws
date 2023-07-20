@@ -333,8 +333,8 @@ github.com/lsviben/crossplane-runtime v0.0.0-20230713114334-73a675c82cc5 h1:0NOC
 github.com/lsviben/crossplane-runtime v0.0.0-20230713114334-73a675c82cc5/go.mod h1:YxGjz2K6pBwOmag6oHXgRuPgr/+ntwTA9ujdY6l23Mw=
 github.com/lsviben/crossplane-tools v0.0.0-20230712201434-f65dadcb91b1 h1:y0ZVQR4xB3anTAIpfKNWNi35CwhlP12WqM/nowMkVP4=
 github.com/lsviben/crossplane-tools v0.0.0-20230712201434-f65dadcb91b1/go.mod h1:+e4OaFlOcmr0JvINHl/yvEYBrZawzTgj6pQumOH1SS0=
-github.com/lsviben/upjet v0.0.0-20230713115411-982b36f30328 h1:9bbLkFGhJwG7EfibY4ANIbJOYAYYc0ZHwYllT45kR9Y=
-github.com/lsviben/upjet v0.0.0-20230713115411-982b36f30328/go.mod h1:NqcKjLScTB584XmXvrveguWv9pIeeldIneCA6LEKAhQ=
+github.com/lsviben/upjet v0.0.0-20230720100249-c22fd1e6260c h1:BimBlYrXpaxrMgVd5tMkkgkbkUN5uH3aal5cV//YMDo=
+github.com/lsviben/upjet v0.0.0-20230720100249-c22fd1e6260c/go.mod h1:NqcKjLScTB584XmXvrveguWv9pIeeldIneCA6LEKAhQ=
 github.com/mailru/easyjson v0.7.7 h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0=
 github.com/mailru/easyjson v0.7.7/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=

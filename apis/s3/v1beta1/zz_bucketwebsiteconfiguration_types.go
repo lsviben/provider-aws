@@ -13,6 +13,41 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BucketWebsiteConfigurationInitParameters struct {
+
+	// Name of the bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	BucketRef *v1.Reference `json:"bucketRef,omitempty" tf:"-"`
+
+	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
+
+	// Name of the error document for the website. See below.
+	ErrorDocument []ErrorDocumentInitParameters `json:"errorDocument,omitempty" tf:"error_document,omitempty"`
+
+	// Account ID of the expected bucket owner.
+	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
+
+	// Name of the index document for the website. See below.
+	IndexDocument []IndexDocumentInitParameters `json:"indexDocument,omitempty" tf:"index_document,omitempty"`
+
+	// Redirect behavior for every request to this bucket's website endpoint. See below. Conflicts with error_document, index_document, and routing_rule.
+	RedirectAllRequestsTo []RedirectAllRequestsToInitParameters `json:"redirectAllRequestsTo,omitempty" tf:"redirect_all_requests_to,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// List of rules that define when a redirect is applied and the redirect behavior. See below.
+	RoutingRule []RoutingRuleInitParameters `json:"routingRule,omitempty" tf:"routing_rule,omitempty"`
+
+	// JSON array containing routing rules
+	// describing redirect behavior and when redirects are applied. Use this parameter when your routing rules contain empty String values ("") as seen in the example above.
+	RoutingRules *string `json:"routingRules,omitempty" tf:"routing_rules,omitempty"`
+}
+
 type BucketWebsiteConfigurationObservation struct {
 
 	// Name of the bucket.
@@ -52,7 +87,6 @@ type BucketWebsiteConfigurationParameters struct {
 	// Name of the bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucket.
@@ -64,34 +98,36 @@ type BucketWebsiteConfigurationParameters struct {
 	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
 
 	// Name of the error document for the website. See below.
-	// +kubebuilder:validation:Optional
 	ErrorDocument []ErrorDocumentParameters `json:"errorDocument,omitempty" tf:"error_document,omitempty"`
 
 	// Account ID of the expected bucket owner.
-	// +kubebuilder:validation:Optional
 	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
 
 	// Name of the index document for the website. See below.
-	// +kubebuilder:validation:Optional
 	IndexDocument []IndexDocumentParameters `json:"indexDocument,omitempty" tf:"index_document,omitempty"`
 
 	// Redirect behavior for every request to this bucket's website endpoint. See below. Conflicts with error_document, index_document, and routing_rule.
-	// +kubebuilder:validation:Optional
 	RedirectAllRequestsTo []RedirectAllRequestsToParameters `json:"redirectAllRequestsTo,omitempty" tf:"redirect_all_requests_to,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// List of rules that define when a redirect is applied and the redirect behavior. See below.
-	// +kubebuilder:validation:Optional
 	RoutingRule []RoutingRuleParameters `json:"routingRule,omitempty" tf:"routing_rule,omitempty"`
 
 	// JSON array containing routing rules
 	// describing redirect behavior and when redirects are applied. Use this parameter when your routing rules contain empty String values ("") as seen in the example above.
-	// +kubebuilder:validation:Optional
 	RoutingRules *string `json:"routingRules,omitempty" tf:"routing_rules,omitempty"`
+}
+
+type ConditionInitParameters struct {
+
+	// HTTP error code when the redirect is applied. If specified with key_prefix_equals, then both must be true for the redirect to be applied.
+	HTTPErrorCodeReturnedEquals *string `json:"httpErrorCodeReturnedEquals,omitempty" tf:"http_error_code_returned_equals,omitempty"`
+
+	// Object key name prefix when the redirect is applied. If specified with http_error_code_returned_equals, then both must be true for the redirect to be applied.
+	KeyPrefixEquals *string `json:"keyPrefixEquals,omitempty" tf:"key_prefix_equals,omitempty"`
 }
 
 type ConditionObservation struct {
@@ -106,12 +142,16 @@ type ConditionObservation struct {
 type ConditionParameters struct {
 
 	// HTTP error code when the redirect is applied. If specified with key_prefix_equals, then both must be true for the redirect to be applied.
-	// +kubebuilder:validation:Optional
 	HTTPErrorCodeReturnedEquals *string `json:"httpErrorCodeReturnedEquals,omitempty" tf:"http_error_code_returned_equals,omitempty"`
 
 	// Object key name prefix when the redirect is applied. If specified with http_error_code_returned_equals, then both must be true for the redirect to be applied.
-	// +kubebuilder:validation:Optional
 	KeyPrefixEquals *string `json:"keyPrefixEquals,omitempty" tf:"key_prefix_equals,omitempty"`
+}
+
+type ErrorDocumentInitParameters struct {
+
+	// Object key name to use when a 4XX class error occurs.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 }
 
 type ErrorDocumentObservation struct {
@@ -123,8 +163,15 @@ type ErrorDocumentObservation struct {
 type ErrorDocumentParameters struct {
 
 	// Object key name to use when a 4XX class error occurs.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+}
+
+type IndexDocumentInitParameters struct {
+
+	// Suffix that is appended to a request that is for a directory on the website endpoint.
+	// For example, if the suffix is index.html and you make a request to samplebucket/images/, the data that is returned will be for the object with the key name images/index.html.
+	// The suffix must not be empty and must not include a slash character.
+	Suffix *string `json:"suffix,omitempty" tf:"suffix,omitempty"`
 }
 
 type IndexDocumentObservation struct {
@@ -140,8 +187,16 @@ type IndexDocumentParameters struct {
 	// Suffix that is appended to a request that is for a directory on the website endpoint.
 	// For example, if the suffix is index.html and you make a request to samplebucket/images/, the data that is returned will be for the object with the key name images/index.html.
 	// The suffix must not be empty and must not include a slash character.
-	// +kubebuilder:validation:Required
-	Suffix *string `json:"suffix" tf:"suffix,omitempty"`
+	Suffix *string `json:"suffix,omitempty" tf:"suffix,omitempty"`
+}
+
+type RedirectAllRequestsToInitParameters struct {
+
+	// Name of the host where requests are redirected.
+	HostName *string `json:"hostName,omitempty" tf:"host_name,omitempty"`
+
+	// Protocol to use when redirecting requests. The default is the protocol that is used in the original request. Valid values: http, https.
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
 }
 
 type RedirectAllRequestsToObservation struct {
@@ -156,12 +211,28 @@ type RedirectAllRequestsToObservation struct {
 type RedirectAllRequestsToParameters struct {
 
 	// Name of the host where requests are redirected.
-	// +kubebuilder:validation:Required
-	HostName *string `json:"hostName" tf:"host_name,omitempty"`
+	HostName *string `json:"hostName,omitempty" tf:"host_name,omitempty"`
 
 	// Protocol to use when redirecting requests. The default is the protocol that is used in the original request. Valid values: http, https.
-	// +kubebuilder:validation:Optional
 	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
+}
+
+type RedirectInitParameters struct {
+
+	// HTTP redirect code to use on the response.
+	HTTPRedirectCode *string `json:"httpRedirectCode,omitempty" tf:"http_redirect_code,omitempty"`
+
+	// Name of the host where requests are redirected.
+	HostName *string `json:"hostName,omitempty" tf:"host_name,omitempty"`
+
+	// Protocol to use when redirecting requests. The default is the protocol that is used in the original request. Valid values: http, https.
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
+
+	// Object key prefix to use in the redirect request. For example, to redirect requests for all pages with prefix docs/ (objects in the docs/ folder) to documents/, you can set a condition block with key_prefix_equals set to docs/ and in the redirect set replace_key_prefix_with to /documents.
+	ReplaceKeyPrefixWith *string `json:"replaceKeyPrefixWith,omitempty" tf:"replace_key_prefix_with,omitempty"`
+
+	// Specific object key to use in the redirect request. For example, redirect request to error.html.
+	ReplaceKeyWith *string `json:"replaceKeyWith,omitempty" tf:"replace_key_with,omitempty"`
 }
 
 type RedirectObservation struct {
@@ -185,24 +256,28 @@ type RedirectObservation struct {
 type RedirectParameters struct {
 
 	// HTTP redirect code to use on the response.
-	// +kubebuilder:validation:Optional
 	HTTPRedirectCode *string `json:"httpRedirectCode,omitempty" tf:"http_redirect_code,omitempty"`
 
 	// Name of the host where requests are redirected.
-	// +kubebuilder:validation:Optional
 	HostName *string `json:"hostName,omitempty" tf:"host_name,omitempty"`
 
 	// Protocol to use when redirecting requests. The default is the protocol that is used in the original request. Valid values: http, https.
-	// +kubebuilder:validation:Optional
 	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
 
 	// Object key prefix to use in the redirect request. For example, to redirect requests for all pages with prefix docs/ (objects in the docs/ folder) to documents/, you can set a condition block with key_prefix_equals set to docs/ and in the redirect set replace_key_prefix_with to /documents.
-	// +kubebuilder:validation:Optional
 	ReplaceKeyPrefixWith *string `json:"replaceKeyPrefixWith,omitempty" tf:"replace_key_prefix_with,omitempty"`
 
 	// Specific object key to use in the redirect request. For example, redirect request to error.html.
-	// +kubebuilder:validation:Optional
 	ReplaceKeyWith *string `json:"replaceKeyWith,omitempty" tf:"replace_key_with,omitempty"`
+}
+
+type RoutingRuleInitParameters struct {
+
+	// Configuration block for describing a condition that must be met for the specified redirect to apply. See below.
+	Condition []ConditionInitParameters `json:"condition,omitempty" tf:"condition,omitempty"`
+
+	// Configuration block for redirect information. See below.
+	Redirect []RedirectInitParameters `json:"redirect,omitempty" tf:"redirect,omitempty"`
 }
 
 type RoutingRuleObservation struct {
@@ -217,18 +292,20 @@ type RoutingRuleObservation struct {
 type RoutingRuleParameters struct {
 
 	// Configuration block for describing a condition that must be met for the specified redirect to apply. See below.
-	// +kubebuilder:validation:Optional
 	Condition []ConditionParameters `json:"condition,omitempty" tf:"condition,omitempty"`
 
 	// Configuration block for redirect information. See below.
-	// +kubebuilder:validation:Required
-	Redirect []RedirectParameters `json:"redirect" tf:"redirect,omitempty"`
+	Redirect []RedirectParameters `json:"redirect,omitempty" tf:"redirect,omitempty"`
 }
 
 // BucketWebsiteConfigurationSpec defines the desired state of BucketWebsiteConfiguration
 type BucketWebsiteConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BucketWebsiteConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BucketWebsiteConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // BucketWebsiteConfigurationStatus defines the observed state of BucketWebsiteConfiguration.

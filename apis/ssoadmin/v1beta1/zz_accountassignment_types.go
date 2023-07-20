@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AccountAssignmentInitParameters struct {
+
+	// The Amazon Resource Name (ARN) of the SSO Instance.
+	InstanceArn *string `json:"instanceArn,omitempty" tf:"instance_arn,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Permission Set that the admin wants to grant the principal access to.
+	PermissionSetArn *string `json:"permissionSetArn,omitempty" tf:"permission_set_arn,omitempty"`
+
+	// An identifier for an object in SSO, such as a user or group. PrincipalIds are GUIDs (For example, f81d4fae-7dec-11d0-a765-00a0c91e6bf6).
+	PrincipalID *string `json:"principalId,omitempty" tf:"principal_id,omitempty"`
+
+	// The entity type for which the assignment will be created. Valid values: USER, GROUP.
+	PrincipalType *string `json:"principalType,omitempty" tf:"principal_type,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// An AWS account identifier, typically a 10-12 digit string.
+	TargetID *string `json:"targetId,omitempty" tf:"target_id,omitempty"`
+
+	// The entity type for which the assignment will be created. Valid values: AWS_ACCOUNT.
+	TargetType *string `json:"targetType,omitempty" tf:"target_type,omitempty"`
+}
+
 type AccountAssignmentObservation struct {
 
 	// The identifier of the Account Assignment i.e., principal_id, principal_type, target_id, target_type, permission_set_arn, instance_arn separated by commas (,).
@@ -40,32 +65,25 @@ type AccountAssignmentObservation struct {
 type AccountAssignmentParameters struct {
 
 	// The Amazon Resource Name (ARN) of the SSO Instance.
-	// +kubebuilder:validation:Required
-	InstanceArn *string `json:"instanceArn" tf:"instance_arn,omitempty"`
+	InstanceArn *string `json:"instanceArn,omitempty" tf:"instance_arn,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the Permission Set that the admin wants to grant the principal access to.
-	// +kubebuilder:validation:Required
-	PermissionSetArn *string `json:"permissionSetArn" tf:"permission_set_arn,omitempty"`
+	PermissionSetArn *string `json:"permissionSetArn,omitempty" tf:"permission_set_arn,omitempty"`
 
 	// An identifier for an object in SSO, such as a user or group. PrincipalIds are GUIDs (For example, f81d4fae-7dec-11d0-a765-00a0c91e6bf6).
-	// +kubebuilder:validation:Required
-	PrincipalID *string `json:"principalId" tf:"principal_id,omitempty"`
+	PrincipalID *string `json:"principalId,omitempty" tf:"principal_id,omitempty"`
 
 	// The entity type for which the assignment will be created. Valid values: USER, GROUP.
-	// +kubebuilder:validation:Required
-	PrincipalType *string `json:"principalType" tf:"principal_type,omitempty"`
+	PrincipalType *string `json:"principalType,omitempty" tf:"principal_type,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// An AWS account identifier, typically a 10-12 digit string.
-	// +kubebuilder:validation:Required
-	TargetID *string `json:"targetId" tf:"target_id,omitempty"`
+	TargetID *string `json:"targetId,omitempty" tf:"target_id,omitempty"`
 
 	// The entity type for which the assignment will be created. Valid values: AWS_ACCOUNT.
-	// +kubebuilder:validation:Optional
 	TargetType *string `json:"targetType,omitempty" tf:"target_type,omitempty"`
 }
 
@@ -73,6 +91,10 @@ type AccountAssignmentParameters struct {
 type AccountAssignmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AccountAssignmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AccountAssignmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // AccountAssignmentStatus defines the observed state of AccountAssignment.

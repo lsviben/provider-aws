@@ -183,9 +183,6 @@ spec:
                                         type: string
                                     type: object
                                 type: object
-                            required:
-                            - fieldPatterns
-                            - providerId
                             type: object
                           type: array
                       type: object
@@ -197,8 +194,136 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  comment:
+                    description: An optional comment about the Field Level Encryption
+                      Profile.
+                    type: string
+                  encryptionEntities:
+                    description: The encryption entities config block for field-level
+                      encryption profiles that contains an attribute items which includes
+                      the encryption key and field pattern specifications.
+                    items:
+                      properties:
+                        items:
+                          items:
+                            properties:
+                              fieldPatterns:
+                                description: Object that contains an attribute items
+                                  that contains the list of field patterns in a field-level
+                                  encryption content type profile specify the fields
+                                  that you want to be encrypted.
+                                items:
+                                  properties:
+                                    items:
+                                      items:
+                                        type: string
+                                      type: array
+                                  type: object
+                                type: array
+                              providerId:
+                                description: The provider associated with the public
+                                  key being used for encryption.
+                                type: string
+                              publicKeyId:
+                                description: The public key associated with a set
+                                  of field-level encryption patterns, to be used when
+                                  encrypting the fields that match the patterns.
+                                type: string
+                              publicKeyIdRef:
+                                description: A Reference to a named object.
+                                properties:
+                                  name:
+                                    description: Name of the referenced object.
+                                    type: string
+                                  policy:
+                                    description: Policies for referencing.
+                                    properties:
+                                      resolution:
+                                        default: Required
+                                        description: Resolution specifies whether
+                                          resolution of this reference is required.
+                                          The default is 'Required', which means the
+                                          reconcile will fail if the reference cannot
+                                          be resolved. 'Optional' means this reference
+                                          will be a no-op if it cannot be resolved.
+                                        enum:
+                                        - Required
+                                        - Optional
+                                        type: string
+                                      resolve:
+                                        description: Resolve specifies when this reference
+                                          should be resolved. The default is 'IfNotPresent',
+                                          which will attempt to resolve the reference
+                                          only when the corresponding field is not
+                                          present. Use 'Always' to resolve the reference
+                                          on every reconcile.
+                                        enum:
+                                        - Always
+                                        - IfNotPresent
+                                        type: string
+                                    type: object
+                                required:
+                                - name
+                                type: object
+                              publicKeyIdSelector:
+                                description: A Selector selects an object.
+                                properties:
+                                  matchControllerRef:
+                                    description: MatchControllerRef ensures an object
+                                      with the same controller reference as the selecting
+                                      object is selected.
+                                    type: boolean
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    description: MatchLabels ensures an object with
+                                      matching labels is selected.
+                                    type: object
+                                  policy:
+                                    description: Policies for selection.
+                                    properties:
+                                      resolution:
+                                        default: Required
+                                        description: Resolution specifies whether
+                                          resolution of this reference is required.
+                                          The default is 'Required', which means the
+                                          reconcile will fail if the reference cannot
+                                          be resolved. 'Optional' means this reference
+                                          will be a no-op if it cannot be resolved.
+                                        enum:
+                                        - Required
+                                        - Optional
+                                        type: string
+                                      resolve:
+                                        description: Resolve specifies when this reference
+                                          should be resolved. The default is 'IfNotPresent',
+                                          which will attempt to resolve the reference
+                                          only when the corresponding field is not
+                                          present. Use 'Always' to resolve the reference
+                                          on every reconcile.
+                                        enum:
+                                        - Always
+                                        - IfNotPresent
+                                        type: string
+                                    type: object
+                                type: object
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                  name:
+                    description: The name of the Field Level Encryption Profile.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -398,12 +523,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: encryptionEntities is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.encryptionEntities)'
-            - message: name is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.encryptionEntities)
+                || has(self.initProvider.encryptionEntities)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)
+                || has(self.initProvider.name)'
           status:
             description: FieldLevelEncryptionProfileStatus defines the observed state
               of FieldLevelEncryptionProfile.

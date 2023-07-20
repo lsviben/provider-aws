@@ -13,6 +13,27 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BucketCorsConfigurationCorsRuleInitParameters struct {
+
+	// Set of Headers that are specified in the Access-Control-Request-Headers header.
+	AllowedHeaders []*string `json:"allowedHeaders,omitempty" tf:"allowed_headers,omitempty"`
+
+	// Set of HTTP methods that you allow the origin to execute. Valid values are GET, PUT, HEAD, POST, and DELETE.
+	AllowedMethods []*string `json:"allowedMethods,omitempty" tf:"allowed_methods,omitempty"`
+
+	// Set of origins you want customers to be able to access the bucket from.
+	AllowedOrigins []*string `json:"allowedOrigins,omitempty" tf:"allowed_origins,omitempty"`
+
+	// Set of headers in the response that you want customers to be able to access from their applications (for example, from a JavaScript XMLHttpRequest object).
+	ExposeHeaders []*string `json:"exposeHeaders,omitempty" tf:"expose_headers,omitempty"`
+
+	// Unique identifier for the rule. The value cannot be longer than 255 characters.
+	ID *string `json:"id,omitempty" tf:"id,omitempty"`
+
+	// Time in seconds that your browser is to cache the preflight response for the specified resource.
+	MaxAgeSeconds *float64 `json:"maxAgeSeconds,omitempty" tf:"max_age_seconds,omitempty"`
+}
+
 type BucketCorsConfigurationCorsRuleObservation struct {
 
 	// Set of Headers that are specified in the Access-Control-Request-Headers header.
@@ -37,28 +58,44 @@ type BucketCorsConfigurationCorsRuleObservation struct {
 type BucketCorsConfigurationCorsRuleParameters struct {
 
 	// Set of Headers that are specified in the Access-Control-Request-Headers header.
-	// +kubebuilder:validation:Optional
 	AllowedHeaders []*string `json:"allowedHeaders,omitempty" tf:"allowed_headers,omitempty"`
 
 	// Set of HTTP methods that you allow the origin to execute. Valid values are GET, PUT, HEAD, POST, and DELETE.
-	// +kubebuilder:validation:Required
-	AllowedMethods []*string `json:"allowedMethods" tf:"allowed_methods,omitempty"`
+	AllowedMethods []*string `json:"allowedMethods,omitempty" tf:"allowed_methods,omitempty"`
 
 	// Set of origins you want customers to be able to access the bucket from.
-	// +kubebuilder:validation:Required
-	AllowedOrigins []*string `json:"allowedOrigins" tf:"allowed_origins,omitempty"`
+	AllowedOrigins []*string `json:"allowedOrigins,omitempty" tf:"allowed_origins,omitempty"`
 
 	// Set of headers in the response that you want customers to be able to access from their applications (for example, from a JavaScript XMLHttpRequest object).
-	// +kubebuilder:validation:Optional
 	ExposeHeaders []*string `json:"exposeHeaders,omitempty" tf:"expose_headers,omitempty"`
 
 	// Unique identifier for the rule. The value cannot be longer than 255 characters.
-	// +kubebuilder:validation:Optional
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
 	// Time in seconds that your browser is to cache the preflight response for the specified resource.
-	// +kubebuilder:validation:Optional
 	MaxAgeSeconds *float64 `json:"maxAgeSeconds,omitempty" tf:"max_age_seconds,omitempty"`
+}
+
+type BucketCorsConfigurationInitParameters struct {
+
+	// Name of the bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	BucketRef *v1.Reference `json:"bucketRef,omitempty" tf:"-"`
+
+	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
+
+	// Set of origins and methods (cross-origin access that you want to allow). See below. You can configure up to 100 rules.
+	CorsRule []BucketCorsConfigurationCorsRuleInitParameters `json:"corsRule,omitempty" tf:"cors_rule,omitempty"`
+
+	// Account ID of the expected bucket owner.
+	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type BucketCorsConfigurationObservation struct {
@@ -81,7 +118,6 @@ type BucketCorsConfigurationParameters struct {
 	// Name of the bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucket.
@@ -93,23 +129,24 @@ type BucketCorsConfigurationParameters struct {
 	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
 
 	// Set of origins and methods (cross-origin access that you want to allow). See below. You can configure up to 100 rules.
-	// +kubebuilder:validation:Optional
 	CorsRule []BucketCorsConfigurationCorsRuleParameters `json:"corsRule,omitempty" tf:"cors_rule,omitempty"`
 
 	// Account ID of the expected bucket owner.
-	// +kubebuilder:validation:Optional
 	ExpectedBucketOwner *string `json:"expectedBucketOwner,omitempty" tf:"expected_bucket_owner,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // BucketCorsConfigurationSpec defines the desired state of BucketCorsConfiguration
 type BucketCorsConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BucketCorsConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BucketCorsConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // BucketCorsConfigurationStatus defines the observed state of BucketCorsConfiguration.
@@ -130,7 +167,7 @@ type BucketCorsConfigurationStatus struct {
 type BucketCorsConfiguration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.corsRule)",message="corsRule is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.corsRule) || has(self.initProvider.corsRule)",message="%!s(MISSING) is a required parameter"
 	Spec   BucketCorsConfigurationSpec   `json:"spec"`
 	Status BucketCorsConfigurationStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ControlPanelInitParameters struct {
+
+	// ARN of the cluster in which this control panel will reside.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53recoverycontrolconfig/v1beta1.Cluster
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
+	ClusterArn *string `json:"clusterArn,omitempty" tf:"cluster_arn,omitempty"`
+
+	ClusterArnRef *v1.Reference `json:"clusterArnRef,omitempty" tf:"-"`
+
+	ClusterArnSelector *v1.Selector `json:"clusterArnSelector,omitempty" tf:"-"`
+
+	// Name describing the control panel.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type ControlPanelObservation struct {
 
 	// ARN of the control panel.
@@ -41,7 +60,6 @@ type ControlPanelParameters struct {
 	// ARN of the cluster in which this control panel will reside.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/route53recoverycontrolconfig/v1beta1.Cluster
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
-	// +kubebuilder:validation:Optional
 	ClusterArn *string `json:"clusterArn,omitempty" tf:"cluster_arn,omitempty"`
 
 	// Reference to a Cluster in route53recoverycontrolconfig to populate clusterArn.
@@ -53,19 +71,21 @@ type ControlPanelParameters struct {
 	ClusterArnSelector *v1.Selector `json:"clusterArnSelector,omitempty" tf:"-"`
 
 	// Name describing the control panel.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // ControlPanelSpec defines the desired state of ControlPanel
 type ControlPanelSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ControlPanelParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ControlPanelInitParameters `json:"initProvider,omitempty"`
 }
 
 // ControlPanelStatus defines the observed state of ControlPanel.
@@ -86,7 +106,7 @@ type ControlPanelStatus struct {
 type ControlPanel struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   ControlPanelSpec   `json:"spec"`
 	Status ControlPanelStatus `json:"status,omitempty"`
 }

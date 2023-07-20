@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DomainEntryInitParameters struct {
+
+	// The name of the Lightsail domain in which to create the entry
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Domain
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("domain_name",false)
+	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
+
+	DomainNameRef *v1.Reference `json:"domainNameRef,omitempty" tf:"-"`
+
+	DomainNameSelector *v1.Selector `json:"domainNameSelector,omitempty" tf:"-"`
+
+	// If the entry should be an alias Defaults to false
+	IsAlias *bool `json:"isAlias,omitempty" tf:"is_alias,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Target of the domain entry
+	Target *string `json:"target,omitempty" tf:"target,omitempty"`
+
+	// Type of record
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type DomainEntryObservation struct {
 
 	// The name of the Lightsail domain in which to create the entry
@@ -36,7 +61,6 @@ type DomainEntryParameters struct {
 	// The name of the Lightsail domain in which to create the entry
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Domain
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("domain_name",false)
-	// +kubebuilder:validation:Optional
 	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
 
 	// Reference to a Domain in lightsail to populate domainName.
@@ -48,27 +72,27 @@ type DomainEntryParameters struct {
 	DomainNameSelector *v1.Selector `json:"domainNameSelector,omitempty" tf:"-"`
 
 	// If the entry should be an alias Defaults to false
-	// +kubebuilder:validation:Optional
 	IsAlias *bool `json:"isAlias,omitempty" tf:"is_alias,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Target of the domain entry
-	// +kubebuilder:validation:Optional
 	Target *string `json:"target,omitempty" tf:"target,omitempty"`
 
 	// Type of record
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 // DomainEntrySpec defines the desired state of DomainEntry
 type DomainEntrySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DomainEntryParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DomainEntryInitParameters `json:"initProvider,omitempty"`
 }
 
 // DomainEntryStatus defines the observed state of DomainEntry.
@@ -89,7 +113,7 @@ type DomainEntryStatus struct {
 type DomainEntry struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.target)",message="target is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.target) || has(self.initProvider.target)",message="%!s(MISSING) is a required parameter"
 	Spec   DomainEntrySpec   `json:"spec"`
 	Status DomainEntryStatus `json:"status,omitempty"`
 }

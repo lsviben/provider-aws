@@ -13,6 +13,40 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ContactFlowModuleInitParameters struct {
+
+	// Specifies the content of the Contact Flow Module, provided as a JSON string, written in Amazon Connect Contact Flow Language. If defined, the filename argument cannot be used.
+	Content *string `json:"content,omitempty" tf:"content,omitempty"`
+
+	// Used to trigger updates. Must be set to a base64-encoded SHA256 hash of the Contact Flow Module source specified with filename. The usual way to set this is filebase64sha256("contact_flow_module.11.12 and later) or base64sha256(file("contact_flow_module.11.11 and earlier), where "contact_flow_module.json" is the local filename of the Contact Flow Module source.
+	ContentHash *string `json:"contentHash,omitempty" tf:"content_hash,omitempty"`
+
+	// Specifies the description of the Contact Flow Module.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The path to the Contact Flow Module source within the local filesystem. Conflicts with content.
+	Filename *string `json:"filename,omitempty" tf:"filename,omitempty"`
+
+	// Specifies the identifier of the hosting Amazon Connect Instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
+
+	InstanceIDRef *v1.Reference `json:"instanceIdRef,omitempty" tf:"-"`
+
+	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
+
+	// Specifies the name of the Contact Flow Module.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ContactFlowModuleObservation struct {
 
 	// The Amazon Resource Name (ARN) of the Contact Flow Module.
@@ -52,25 +86,20 @@ type ContactFlowModuleObservation struct {
 type ContactFlowModuleParameters struct {
 
 	// Specifies the content of the Contact Flow Module, provided as a JSON string, written in Amazon Connect Contact Flow Language. If defined, the filename argument cannot be used.
-	// +kubebuilder:validation:Optional
 	Content *string `json:"content,omitempty" tf:"content,omitempty"`
 
 	// Used to trigger updates. Must be set to a base64-encoded SHA256 hash of the Contact Flow Module source specified with filename. The usual way to set this is filebase64sha256("contact_flow_module.11.12 and later) or base64sha256(file("contact_flow_module.11.11 and earlier), where "contact_flow_module.json" is the local filename of the Contact Flow Module source.
-	// +kubebuilder:validation:Optional
 	ContentHash *string `json:"contentHash,omitempty" tf:"content_hash,omitempty"`
 
 	// Specifies the description of the Contact Flow Module.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The path to the Contact Flow Module source within the local filesystem. Conflicts with content.
-	// +kubebuilder:validation:Optional
 	Filename *string `json:"filename,omitempty" tf:"filename,omitempty"`
 
 	// Specifies the identifier of the hosting Amazon Connect Instance.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
 
 	// Reference to a Instance in connect to populate instanceId.
@@ -82,16 +111,13 @@ type ContactFlowModuleParameters struct {
 	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
 
 	// Specifies the name of the Contact Flow Module.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -99,6 +125,10 @@ type ContactFlowModuleParameters struct {
 type ContactFlowModuleSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ContactFlowModuleParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ContactFlowModuleInitParameters `json:"initProvider,omitempty"`
 }
 
 // ContactFlowModuleStatus defines the observed state of ContactFlowModule.
@@ -119,7 +149,7 @@ type ContactFlowModuleStatus struct {
 type ContactFlowModule struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   ContactFlowModuleSpec   `json:"spec"`
 	Status ContactFlowModuleStatus `json:"status,omitempty"`
 }

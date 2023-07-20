@@ -13,6 +13,29 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ReplicationSubnetGroupInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Description for the subnet group.
+	ReplicationSubnetGroupDescription *string `json:"replicationSubnetGroupDescription,omitempty" tf:"replication_subnet_group_description,omitempty"`
+
+	SubnetIDRefs []v1.Reference `json:"subnetIdRefs,omitempty" tf:"-"`
+
+	SubnetIDSelector *v1.Selector `json:"subnetIdSelector,omitempty" tf:"-"`
+
+	// List of at least 2 EC2 subnet IDs for the subnet group. The subnets must cover at least 2 availability zones.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
+	// +crossplane:generate:reference:refFieldName=SubnetIDRefs
+	// +crossplane:generate:reference:selectorFieldName=SubnetIDSelector
+	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ReplicationSubnetGroupObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -38,11 +61,9 @@ type ReplicationSubnetGroupParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Description for the subnet group.
-	// +kubebuilder:validation:Optional
 	ReplicationSubnetGroupDescription *string `json:"replicationSubnetGroupDescription,omitempty" tf:"replication_subnet_group_description,omitempty"`
 
 	// References to Subnet in ec2 to populate subnetIds.
@@ -57,11 +78,9 @@ type ReplicationSubnetGroupParameters struct {
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
 	// +crossplane:generate:reference:refFieldName=SubnetIDRefs
 	// +crossplane:generate:reference:selectorFieldName=SubnetIDSelector
-	// +kubebuilder:validation:Optional
 	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -69,6 +88,10 @@ type ReplicationSubnetGroupParameters struct {
 type ReplicationSubnetGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ReplicationSubnetGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ReplicationSubnetGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // ReplicationSubnetGroupStatus defines the observed state of ReplicationSubnetGroup.
@@ -89,7 +112,7 @@ type ReplicationSubnetGroupStatus struct {
 type ReplicationSubnetGroup struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.replicationSubnetGroupDescription)",message="replicationSubnetGroupDescription is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.replicationSubnetGroupDescription) || has(self.initProvider.replicationSubnetGroupDescription)",message="%!s(MISSING) is a required parameter"
 	Spec   ReplicationSubnetGroupSpec   `json:"spec"`
 	Status ReplicationSubnetGroupStatus `json:"status,omitempty"`
 }

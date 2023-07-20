@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DeviceFleetInitParameters struct {
+
+	// A description of the fleet.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Whether to create an AWS IoT Role Alias during device fleet creation. The name of the role alias generated will match this pattern: "SageMakerEdge-{DeviceFleetName}".
+	EnableIotRoleAlias *bool `json:"enableIotRoleAlias,omitempty" tf:"enable_iot_role_alias,omitempty"`
+
+	// Specifies details about the repository. see Output Config details below.
+	OutputConfig []OutputConfigInitParameters `json:"outputConfig,omitempty" tf:"output_config,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The Amazon Resource Name (ARN) that has access to AWS Internet of Things (IoT).
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
+
+	RoleArnRef *v1.Reference `json:"roleArnRef,omitempty" tf:"-"`
+
+	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type DeviceFleetObservation struct {
 
 	// The Amazon Resource Name (ARN) assigned by AWS to this Device Fleet.
@@ -45,26 +73,21 @@ type DeviceFleetObservation struct {
 type DeviceFleetParameters struct {
 
 	// A description of the fleet.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Whether to create an AWS IoT Role Alias during device fleet creation. The name of the role alias generated will match this pattern: "SageMakerEdge-{DeviceFleetName}".
-	// +kubebuilder:validation:Optional
 	EnableIotRoleAlias *bool `json:"enableIotRoleAlias,omitempty" tf:"enable_iot_role_alias,omitempty"`
 
 	// Specifies details about the repository. see Output Config details below.
-	// +kubebuilder:validation:Optional
 	OutputConfig []OutputConfigParameters `json:"outputConfig,omitempty" tf:"output_config,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The Amazon Resource Name (ARN) that has access to AWS Internet of Things (IoT).
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	RoleArn *string `json:"roleArn,omitempty" tf:"role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate roleArn.
@@ -76,8 +99,16 @@ type DeviceFleetParameters struct {
 	RoleArnSelector *v1.Selector `json:"roleArnSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type OutputConfigInitParameters struct {
+
+	// The AWS Key Management Service (AWS KMS) key that Amazon SageMaker uses to encrypt data on the storage volume after compilation job. If you don't provide a KMS key ID, Amazon SageMaker uses the default KMS key for Amazon S3 for your role's account.
+	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
+
+	// The Amazon Simple Storage (S3) bucker URI.
+	S3OutputLocation *string `json:"s3OutputLocation,omitempty" tf:"s3_output_location,omitempty"`
 }
 
 type OutputConfigObservation struct {
@@ -92,18 +123,20 @@ type OutputConfigObservation struct {
 type OutputConfigParameters struct {
 
 	// The AWS Key Management Service (AWS KMS) key that Amazon SageMaker uses to encrypt data on the storage volume after compilation job. If you don't provide a KMS key ID, Amazon SageMaker uses the default KMS key for Amazon S3 for your role's account.
-	// +kubebuilder:validation:Optional
 	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
 
 	// The Amazon Simple Storage (S3) bucker URI.
-	// +kubebuilder:validation:Required
-	S3OutputLocation *string `json:"s3OutputLocation" tf:"s3_output_location,omitempty"`
+	S3OutputLocation *string `json:"s3OutputLocation,omitempty" tf:"s3_output_location,omitempty"`
 }
 
 // DeviceFleetSpec defines the desired state of DeviceFleet
 type DeviceFleetSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DeviceFleetParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DeviceFleetInitParameters `json:"initProvider,omitempty"`
 }
 
 // DeviceFleetStatus defines the observed state of DeviceFleet.
@@ -124,7 +157,7 @@ type DeviceFleetStatus struct {
 type DeviceFleet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.outputConfig)",message="outputConfig is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.outputConfig) || has(self.initProvider.outputConfig)",message="%!s(MISSING) is a required parameter"
 	Spec   DeviceFleetSpec   `json:"spec"`
 	Status DeviceFleetStatus `json:"status,omitempty"`
 }

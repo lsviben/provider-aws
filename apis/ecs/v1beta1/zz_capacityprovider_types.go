@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AutoScalingGroupProviderInitParameters struct {
+
+	// - ARN of the associated auto scaling group.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/autoscaling/v1beta1.AutoscalingGroup
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	AutoScalingGroupArn *string `json:"autoScalingGroupArn,omitempty" tf:"auto_scaling_group_arn,omitempty"`
+
+	AutoScalingGroupArnRef *v1.Reference `json:"autoScalingGroupArnRef,omitempty" tf:"-"`
+
+	AutoScalingGroupArnSelector *v1.Selector `json:"autoScalingGroupArnSelector,omitempty" tf:"-"`
+
+	// - Configuration block defining the parameters of the auto scaling. Detailed below.
+	ManagedScaling []ManagedScalingInitParameters `json:"managedScaling,omitempty" tf:"managed_scaling,omitempty"`
+
+	// - Enables or disables container-aware termination of instances in the auto scaling group when scale-in happens. Valid values are ENABLED and DISABLED.
+	ManagedTerminationProtection *string `json:"managedTerminationProtection,omitempty" tf:"managed_termination_protection,omitempty"`
+}
+
 type AutoScalingGroupProviderObservation struct {
 
 	// - ARN of the associated auto scaling group.
@@ -30,7 +48,6 @@ type AutoScalingGroupProviderParameters struct {
 	// - ARN of the associated auto scaling group.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/autoscaling/v1beta1.AutoscalingGroup
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	AutoScalingGroupArn *string `json:"autoScalingGroupArn,omitempty" tf:"auto_scaling_group_arn,omitempty"`
 
 	// Reference to a AutoscalingGroup in autoscaling to populate autoScalingGroupArn.
@@ -42,12 +59,23 @@ type AutoScalingGroupProviderParameters struct {
 	AutoScalingGroupArnSelector *v1.Selector `json:"autoScalingGroupArnSelector,omitempty" tf:"-"`
 
 	// - Configuration block defining the parameters of the auto scaling. Detailed below.
-	// +kubebuilder:validation:Optional
 	ManagedScaling []ManagedScalingParameters `json:"managedScaling,omitempty" tf:"managed_scaling,omitempty"`
 
 	// - Enables or disables container-aware termination of instances in the auto scaling group when scale-in happens. Valid values are ENABLED and DISABLED.
-	// +kubebuilder:validation:Optional
 	ManagedTerminationProtection *string `json:"managedTerminationProtection,omitempty" tf:"managed_termination_protection,omitempty"`
+}
+
+type CapacityProviderInitParameters struct {
+
+	// Configuration block for the provider for the ECS auto scaling group. Detailed below.
+	AutoScalingGroupProvider []AutoScalingGroupProviderInitParameters `json:"autoScalingGroupProvider,omitempty" tf:"auto_scaling_group_provider,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type CapacityProviderObservation struct {
@@ -71,17 +99,32 @@ type CapacityProviderObservation struct {
 type CapacityProviderParameters struct {
 
 	// Configuration block for the provider for the ECS auto scaling group. Detailed below.
-	// +kubebuilder:validation:Optional
 	AutoScalingGroupProvider []AutoScalingGroupProviderParameters `json:"autoScalingGroupProvider,omitempty" tf:"auto_scaling_group_provider,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type ManagedScalingInitParameters struct {
+
+	// Period of time, in seconds, after a newly launched Amazon EC2 instance can contribute to CloudWatch metrics for Auto Scaling group. If this parameter is omitted, the default value of 300 seconds is used.
+	InstanceWarmupPeriod *float64 `json:"instanceWarmupPeriod,omitempty" tf:"instance_warmup_period,omitempty"`
+
+	// Maximum step adjustment size. A number between 1 and 10,000.
+	MaximumScalingStepSize *float64 `json:"maximumScalingStepSize,omitempty" tf:"maximum_scaling_step_size,omitempty"`
+
+	// Minimum step adjustment size. A number between 1 and 10,000.
+	MinimumScalingStepSize *float64 `json:"minimumScalingStepSize,omitempty" tf:"minimum_scaling_step_size,omitempty"`
+
+	// Whether auto scaling is managed by ECS. Valid values are ENABLED and DISABLED.
+	Status *string `json:"status,omitempty" tf:"status,omitempty"`
+
+	// Target utilization for the capacity provider. A number between 1 and 100.
+	TargetCapacity *float64 `json:"targetCapacity,omitempty" tf:"target_capacity,omitempty"`
 }
 
 type ManagedScalingObservation struct {
@@ -105,23 +148,18 @@ type ManagedScalingObservation struct {
 type ManagedScalingParameters struct {
 
 	// Period of time, in seconds, after a newly launched Amazon EC2 instance can contribute to CloudWatch metrics for Auto Scaling group. If this parameter is omitted, the default value of 300 seconds is used.
-	// +kubebuilder:validation:Optional
 	InstanceWarmupPeriod *float64 `json:"instanceWarmupPeriod,omitempty" tf:"instance_warmup_period,omitempty"`
 
 	// Maximum step adjustment size. A number between 1 and 10,000.
-	// +kubebuilder:validation:Optional
 	MaximumScalingStepSize *float64 `json:"maximumScalingStepSize,omitempty" tf:"maximum_scaling_step_size,omitempty"`
 
 	// Minimum step adjustment size. A number between 1 and 10,000.
-	// +kubebuilder:validation:Optional
 	MinimumScalingStepSize *float64 `json:"minimumScalingStepSize,omitempty" tf:"minimum_scaling_step_size,omitempty"`
 
 	// Whether auto scaling is managed by ECS. Valid values are ENABLED and DISABLED.
-	// +kubebuilder:validation:Optional
 	Status *string `json:"status,omitempty" tf:"status,omitempty"`
 
 	// Target utilization for the capacity provider. A number between 1 and 100.
-	// +kubebuilder:validation:Optional
 	TargetCapacity *float64 `json:"targetCapacity,omitempty" tf:"target_capacity,omitempty"`
 }
 
@@ -129,6 +167,10 @@ type ManagedScalingParameters struct {
 type CapacityProviderSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     CapacityProviderParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider CapacityProviderInitParameters `json:"initProvider,omitempty"`
 }
 
 // CapacityProviderStatus defines the observed state of CapacityProvider.
@@ -149,7 +191,7 @@ type CapacityProviderStatus struct {
 type CapacityProvider struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.autoScalingGroupProvider)",message="autoScalingGroupProvider is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.autoScalingGroupProvider) || has(self.initProvider.autoScalingGroupProvider)",message="%!s(MISSING) is a required parameter"
 	Spec   CapacityProviderSpec   `json:"spec"`
 	Status CapacityProviderStatus `json:"status,omitempty"`
 }

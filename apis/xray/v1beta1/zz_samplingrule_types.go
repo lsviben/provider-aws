@@ -13,6 +13,49 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SamplingRuleInitParameters struct {
+
+	// Matches attributes derived from the request.
+	Attributes map[string]*string `json:"attributes,omitempty" tf:"attributes,omitempty"`
+
+	// The percentage of matching requests to instrument, after the reservoir is exhausted.
+	FixedRate *float64 `json:"fixedRate,omitempty" tf:"fixed_rate,omitempty"`
+
+	// Matches the HTTP method of a request.
+	HTTPMethod *string `json:"httpMethod,omitempty" tf:"http_method,omitempty"`
+
+	// Matches the hostname from a request URL.
+	Host *string `json:"host,omitempty" tf:"host,omitempty"`
+
+	// The priority of the sampling rule.
+	Priority *float64 `json:"priority,omitempty" tf:"priority,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A fixed number of matching requests to instrument per second, prior to applying the fixed rate. The reservoir is not used directly by services, but applies to all services using the rule collectively.
+	ReservoirSize *float64 `json:"reservoirSize,omitempty" tf:"reservoir_size,omitempty"`
+
+	// Matches the ARN of the AWS resource on which the service runs.
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
+
+	// Matches the name that the service uses to identify itself in segments.
+	ServiceName *string `json:"serviceName,omitempty" tf:"service_name,omitempty"`
+
+	// Matches the origin that the service uses to identify its type in segments.
+	ServiceType *string `json:"serviceType,omitempty" tf:"service_type,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Matches the path from a request URL.
+	URLPath *string `json:"urlPath,omitempty" tf:"url_path,omitempty"`
+
+	// The version of the sampling rule format (1 )
+	Version *float64 `json:"version,omitempty" tf:"version,omitempty"`
+}
+
 type SamplingRuleObservation struct {
 
 	// The ARN of the sampling rule.
@@ -64,56 +107,43 @@ type SamplingRuleObservation struct {
 type SamplingRuleParameters struct {
 
 	// Matches attributes derived from the request.
-	// +kubebuilder:validation:Optional
 	Attributes map[string]*string `json:"attributes,omitempty" tf:"attributes,omitempty"`
 
 	// The percentage of matching requests to instrument, after the reservoir is exhausted.
-	// +kubebuilder:validation:Optional
 	FixedRate *float64 `json:"fixedRate,omitempty" tf:"fixed_rate,omitempty"`
 
 	// Matches the HTTP method of a request.
-	// +kubebuilder:validation:Optional
 	HTTPMethod *string `json:"httpMethod,omitempty" tf:"http_method,omitempty"`
 
 	// Matches the hostname from a request URL.
-	// +kubebuilder:validation:Optional
 	Host *string `json:"host,omitempty" tf:"host,omitempty"`
 
 	// The priority of the sampling rule.
-	// +kubebuilder:validation:Optional
 	Priority *float64 `json:"priority,omitempty" tf:"priority,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A fixed number of matching requests to instrument per second, prior to applying the fixed rate. The reservoir is not used directly by services, but applies to all services using the rule collectively.
-	// +kubebuilder:validation:Optional
 	ReservoirSize *float64 `json:"reservoirSize,omitempty" tf:"reservoir_size,omitempty"`
 
 	// Matches the ARN of the AWS resource on which the service runs.
-	// +kubebuilder:validation:Optional
 	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
 
 	// Matches the name that the service uses to identify itself in segments.
-	// +kubebuilder:validation:Optional
 	ServiceName *string `json:"serviceName,omitempty" tf:"service_name,omitempty"`
 
 	// Matches the origin that the service uses to identify its type in segments.
-	// +kubebuilder:validation:Optional
 	ServiceType *string `json:"serviceType,omitempty" tf:"service_type,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Matches the path from a request URL.
-	// +kubebuilder:validation:Optional
 	URLPath *string `json:"urlPath,omitempty" tf:"url_path,omitempty"`
 
 	// The version of the sampling rule format (1 )
-	// +kubebuilder:validation:Optional
 	Version *float64 `json:"version,omitempty" tf:"version,omitempty"`
 }
 
@@ -121,6 +151,10 @@ type SamplingRuleParameters struct {
 type SamplingRuleSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SamplingRuleParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SamplingRuleInitParameters `json:"initProvider,omitempty"`
 }
 
 // SamplingRuleStatus defines the observed state of SamplingRule.
@@ -141,16 +175,16 @@ type SamplingRuleStatus struct {
 type SamplingRule struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.fixedRate)",message="fixedRate is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.host)",message="host is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.httpMethod)",message="httpMethod is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.priority)",message="priority is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.reservoirSize)",message="reservoirSize is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceArn)",message="resourceArn is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.serviceName)",message="serviceName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.serviceType)",message="serviceType is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.urlPath)",message="urlPath is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.version)",message="version is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.fixedRate) || has(self.initProvider.fixedRate)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.host) || has(self.initProvider.host)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.httpMethod) || has(self.initProvider.httpMethod)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.priority) || has(self.initProvider.priority)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.reservoirSize) || has(self.initProvider.reservoirSize)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceArn) || has(self.initProvider.resourceArn)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.serviceName) || has(self.initProvider.serviceName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.serviceType) || has(self.initProvider.serviceType)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.urlPath) || has(self.initProvider.urlPath)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.version) || has(self.initProvider.version)",message="%!s(MISSING) is a required parameter"
 	Spec   SamplingRuleSpec   `json:"spec"`
 	Status SamplingRuleStatus `json:"status,omitempty"`
 }

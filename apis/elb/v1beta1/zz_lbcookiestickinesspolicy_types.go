@@ -13,6 +13,35 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type LBCookieStickinessPolicyInitParameters struct {
+
+	// The time period after which
+	// the session cookie should be considered stale, expressed in seconds.
+	CookieExpirationPeriod *float64 `json:"cookieExpirationPeriod,omitempty" tf:"cookie_expiration_period,omitempty"`
+
+	// The load balancer port to which the policy
+	// should be applied. This must be an active listener on the load
+	// balancer.
+	LBPort *float64 `json:"lbPort,omitempty" tf:"lb_port,omitempty"`
+
+	// The load balancer to which the policy
+	// should be attached.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.ELB
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	LoadBalancer *string `json:"loadBalancer,omitempty" tf:"load_balancer,omitempty"`
+
+	LoadBalancerRef *v1.Reference `json:"loadBalancerRef,omitempty" tf:"-"`
+
+	LoadBalancerSelector *v1.Selector `json:"loadBalancerSelector,omitempty" tf:"-"`
+
+	// The name of the stickiness policy.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type LBCookieStickinessPolicyObservation struct {
 
 	// The time period after which
@@ -39,20 +68,17 @@ type LBCookieStickinessPolicyParameters struct {
 
 	// The time period after which
 	// the session cookie should be considered stale, expressed in seconds.
-	// +kubebuilder:validation:Optional
 	CookieExpirationPeriod *float64 `json:"cookieExpirationPeriod,omitempty" tf:"cookie_expiration_period,omitempty"`
 
 	// The load balancer port to which the policy
 	// should be applied. This must be an active listener on the load
 	// balancer.
-	// +kubebuilder:validation:Optional
 	LBPort *float64 `json:"lbPort,omitempty" tf:"lb_port,omitempty"`
 
 	// The load balancer to which the policy
 	// should be attached.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.ELB
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	LoadBalancer *string `json:"loadBalancer,omitempty" tf:"load_balancer,omitempty"`
 
 	// Reference to a ELB in elb to populate loadBalancer.
@@ -64,19 +90,21 @@ type LBCookieStickinessPolicyParameters struct {
 	LoadBalancerSelector *v1.Selector `json:"loadBalancerSelector,omitempty" tf:"-"`
 
 	// The name of the stickiness policy.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // LBCookieStickinessPolicySpec defines the desired state of LBCookieStickinessPolicy
 type LBCookieStickinessPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     LBCookieStickinessPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider LBCookieStickinessPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // LBCookieStickinessPolicyStatus defines the observed state of LBCookieStickinessPolicy.
@@ -97,8 +125,8 @@ type LBCookieStickinessPolicyStatus struct {
 type LBCookieStickinessPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.lbPort)",message="lbPort is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.lbPort) || has(self.initProvider.lbPort)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   LBCookieStickinessPolicySpec   `json:"spec"`
 	Status LBCookieStickinessPolicyStatus `json:"status,omitempty"`
 }

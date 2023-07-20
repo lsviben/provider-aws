@@ -13,6 +13,22 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DeploymentConfigInitParameters struct {
+
+	// The compute platform can be Server, Lambda, or ECS. Default is Server.
+	ComputePlatform *string `json:"computePlatform,omitempty" tf:"compute_platform,omitempty"`
+
+	// A minimum_healthy_hosts block. Required for Server compute platform. Minimum Healthy Hosts are documented below.
+	MinimumHealthyHosts []MinimumHealthyHostsInitParameters `json:"minimumHealthyHosts,omitempty" tf:"minimum_healthy_hosts,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A traffic_routing_config block. Traffic Routing Config is documented below.
+	TrafficRoutingConfig []TrafficRoutingConfigInitParameters `json:"trafficRoutingConfig,omitempty" tf:"traffic_routing_config,omitempty"`
+}
+
 type DeploymentConfigObservation struct {
 
 	// The compute platform can be Server, Lambda, or ECS. Default is Server.
@@ -34,21 +50,29 @@ type DeploymentConfigObservation struct {
 type DeploymentConfigParameters struct {
 
 	// The compute platform can be Server, Lambda, or ECS. Default is Server.
-	// +kubebuilder:validation:Optional
 	ComputePlatform *string `json:"computePlatform,omitempty" tf:"compute_platform,omitempty"`
 
 	// A minimum_healthy_hosts block. Required for Server compute platform. Minimum Healthy Hosts are documented below.
-	// +kubebuilder:validation:Optional
 	MinimumHealthyHosts []MinimumHealthyHostsParameters `json:"minimumHealthyHosts,omitempty" tf:"minimum_healthy_hosts,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A traffic_routing_config block. Traffic Routing Config is documented below.
-	// +kubebuilder:validation:Optional
 	TrafficRoutingConfig []TrafficRoutingConfigParameters `json:"trafficRoutingConfig,omitempty" tf:"traffic_routing_config,omitempty"`
+}
+
+type MinimumHealthyHostsInitParameters struct {
+
+	// The type can either be FLEET_PERCENT or HOST_COUNT.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+
+	// The value when the type is FLEET_PERCENT represents the minimum number of healthy instances as
+	// a percentage of the total number of instances in the deployment. If you specify FLEET_PERCENT, at the start of the
+	// deployment, AWS CodeDeploy converts the percentage to the equivalent number of instance and rounds up fractional instances.
+	// When the type is HOST_COUNT, the value represents the minimum number of healthy instances as an absolute value.
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type MinimumHealthyHostsObservation struct {
@@ -66,15 +90,22 @@ type MinimumHealthyHostsObservation struct {
 type MinimumHealthyHostsParameters struct {
 
 	// The type can either be FLEET_PERCENT or HOST_COUNT.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 
 	// The value when the type is FLEET_PERCENT represents the minimum number of healthy instances as
 	// a percentage of the total number of instances in the deployment. If you specify FLEET_PERCENT, at the start of the
 	// deployment, AWS CodeDeploy converts the percentage to the equivalent number of instance and rounds up fractional instances.
 	// When the type is HOST_COUNT, the value represents the minimum number of healthy instances as an absolute value.
-	// +kubebuilder:validation:Optional
 	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type TimeBasedCanaryInitParameters struct {
+
+	// The number of minutes between the first and second traffic shifts of a TimeBasedCanary deployment.
+	Interval *float64 `json:"interval,omitempty" tf:"interval,omitempty"`
+
+	// The percentage of traffic to shift in the first increment of a TimeBasedCanary deployment.
+	Percentage *float64 `json:"percentage,omitempty" tf:"percentage,omitempty"`
 }
 
 type TimeBasedCanaryObservation struct {
@@ -89,11 +120,18 @@ type TimeBasedCanaryObservation struct {
 type TimeBasedCanaryParameters struct {
 
 	// The number of minutes between the first and second traffic shifts of a TimeBasedCanary deployment.
-	// +kubebuilder:validation:Optional
 	Interval *float64 `json:"interval,omitempty" tf:"interval,omitempty"`
 
 	// The percentage of traffic to shift in the first increment of a TimeBasedCanary deployment.
-	// +kubebuilder:validation:Optional
+	Percentage *float64 `json:"percentage,omitempty" tf:"percentage,omitempty"`
+}
+
+type TimeBasedLinearInitParameters struct {
+
+	// The number of minutes between the first and second traffic shifts of a TimeBasedCanary deployment.
+	Interval *float64 `json:"interval,omitempty" tf:"interval,omitempty"`
+
+	// The percentage of traffic to shift in the first increment of a TimeBasedCanary deployment.
 	Percentage *float64 `json:"percentage,omitempty" tf:"percentage,omitempty"`
 }
 
@@ -109,12 +147,22 @@ type TimeBasedLinearObservation struct {
 type TimeBasedLinearParameters struct {
 
 	// The number of minutes between the first and second traffic shifts of a TimeBasedCanary deployment.
-	// +kubebuilder:validation:Optional
 	Interval *float64 `json:"interval,omitempty" tf:"interval,omitempty"`
 
 	// The percentage of traffic to shift in the first increment of a TimeBasedCanary deployment.
-	// +kubebuilder:validation:Optional
 	Percentage *float64 `json:"percentage,omitempty" tf:"percentage,omitempty"`
+}
+
+type TrafficRoutingConfigInitParameters struct {
+
+	// The time based canary configuration information. If type is TimeBasedLinear, use time_based_linear instead.
+	TimeBasedCanary []TimeBasedCanaryInitParameters `json:"timeBasedCanary,omitempty" tf:"time_based_canary,omitempty"`
+
+	// The time based linear configuration information. If type is TimeBasedCanary, use time_based_canary instead.
+	TimeBasedLinear []TimeBasedLinearInitParameters `json:"timeBasedLinear,omitempty" tf:"time_based_linear,omitempty"`
+
+	// Type of traffic routing config. One of TimeBasedCanary, TimeBasedLinear, AllAtOnce.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
 type TrafficRoutingConfigObservation struct {
@@ -132,15 +180,12 @@ type TrafficRoutingConfigObservation struct {
 type TrafficRoutingConfigParameters struct {
 
 	// The time based canary configuration information. If type is TimeBasedLinear, use time_based_linear instead.
-	// +kubebuilder:validation:Optional
 	TimeBasedCanary []TimeBasedCanaryParameters `json:"timeBasedCanary,omitempty" tf:"time_based_canary,omitempty"`
 
 	// The time based linear configuration information. If type is TimeBasedCanary, use time_based_canary instead.
-	// +kubebuilder:validation:Optional
 	TimeBasedLinear []TimeBasedLinearParameters `json:"timeBasedLinear,omitempty" tf:"time_based_linear,omitempty"`
 
 	// Type of traffic routing config. One of TimeBasedCanary, TimeBasedLinear, AllAtOnce.
-	// +kubebuilder:validation:Optional
 	Type *string `json:"type,omitempty" tf:"type,omitempty"`
 }
 
@@ -148,6 +193,10 @@ type TrafficRoutingConfigParameters struct {
 type DeploymentConfigSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DeploymentConfigParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DeploymentConfigInitParameters `json:"initProvider,omitempty"`
 }
 
 // DeploymentConfigStatus defines the observed state of DeploymentConfig.

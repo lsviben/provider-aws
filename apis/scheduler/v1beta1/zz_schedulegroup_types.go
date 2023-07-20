@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ScheduleGroupInitParameters struct {
+
+	// Name of the schedule group. Conflicts with name_prefix.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ScheduleGroupObservation struct {
 
 	// ARN of the schedule group.
@@ -43,16 +56,13 @@ type ScheduleGroupObservation struct {
 type ScheduleGroupParameters struct {
 
 	// Name of the schedule group. Conflicts with name_prefix.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -60,6 +70,10 @@ type ScheduleGroupParameters struct {
 type ScheduleGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ScheduleGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ScheduleGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // ScheduleGroupStatus defines the observed state of ScheduleGroup.

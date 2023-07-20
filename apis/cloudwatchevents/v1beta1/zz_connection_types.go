@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type APIKeyInitParameters struct {
+
+	// Header Name.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Header Value. Created and stored in AWS Secrets Manager.
+	ValueSecretRef v1.SecretKeySelector `json:"valueSecretRef" tf:"-"`
+}
+
 type APIKeyObservation struct {
 
 	// Header Name.
@@ -22,12 +31,25 @@ type APIKeyObservation struct {
 type APIKeyParameters struct {
 
 	// Header Name.
-	// +kubebuilder:validation:Required
-	Key *string `json:"key" tf:"key,omitempty"`
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Header Value. Created and stored in AWS Secrets Manager.
-	// +kubebuilder:validation:Required
 	ValueSecretRef v1.SecretKeySelector `json:"valueSecretRef" tf:"-"`
+}
+
+type AuthParametersInitParameters struct {
+
+	// Parameters used for API_KEY authorization. An API key to include in the header for each authentication request. A maximum of 1 are allowed. Conflicts with basic and oauth. Documented below.
+	APIKey []APIKeyInitParameters `json:"apiKey,omitempty" tf:"api_key,omitempty"`
+
+	// Parameters used for BASIC authorization. A maximum of 1 are allowed. Conflicts with api_key and oauth. Documented below.
+	Basic []BasicInitParameters `json:"basic,omitempty" tf:"basic,omitempty"`
+
+	// Invocation Http Parameters are additional credentials used to sign each Invocation of the ApiDestination created from this Connection. If the ApiDestination Rule Target has additional HttpParameters, the values will be merged together, with the Connection Invocation Http Parameters taking precedence. Secret values are stored and managed by AWS Secrets Manager. A maximum of 1 are allowed. Documented below.
+	InvocationHTTPParameters []InvocationHTTPParametersInitParameters `json:"invocationHttpParameters,omitempty" tf:"invocation_http_parameters,omitempty"`
+
+	// Parameters used for OAUTH_CLIENT_CREDENTIALS authorization. A maximum of 1 are allowed. Conflicts with basic and api_key. Documented below.
+	Oauth []OauthInitParameters `json:"oauth,omitempty" tf:"oauth,omitempty"`
 }
 
 type AuthParametersObservation struct {
@@ -48,20 +70,25 @@ type AuthParametersObservation struct {
 type AuthParametersParameters struct {
 
 	// Parameters used for API_KEY authorization. An API key to include in the header for each authentication request. A maximum of 1 are allowed. Conflicts with basic and oauth. Documented below.
-	// +kubebuilder:validation:Optional
 	APIKey []APIKeyParameters `json:"apiKey,omitempty" tf:"api_key,omitempty"`
 
 	// Parameters used for BASIC authorization. A maximum of 1 are allowed. Conflicts with api_key and oauth. Documented below.
-	// +kubebuilder:validation:Optional
 	Basic []BasicParameters `json:"basic,omitempty" tf:"basic,omitempty"`
 
 	// Invocation Http Parameters are additional credentials used to sign each Invocation of the ApiDestination created from this Connection. If the ApiDestination Rule Target has additional HttpParameters, the values will be merged together, with the Connection Invocation Http Parameters taking precedence. Secret values are stored and managed by AWS Secrets Manager. A maximum of 1 are allowed. Documented below.
-	// +kubebuilder:validation:Optional
 	InvocationHTTPParameters []InvocationHTTPParametersParameters `json:"invocationHttpParameters,omitempty" tf:"invocation_http_parameters,omitempty"`
 
 	// Parameters used for OAUTH_CLIENT_CREDENTIALS authorization. A maximum of 1 are allowed. Conflicts with basic and api_key. Documented below.
-	// +kubebuilder:validation:Optional
 	Oauth []OauthParameters `json:"oauth,omitempty" tf:"oauth,omitempty"`
+}
+
+type BasicInitParameters struct {
+
+	// A password for the authorization. Created and stored in AWS Secrets Manager.
+	PasswordSecretRef v1.SecretKeySelector `json:"passwordSecretRef" tf:"-"`
+
+	// A username for the authorization.
+	Username *string `json:"username,omitempty" tf:"username,omitempty"`
 }
 
 type BasicObservation struct {
@@ -73,12 +100,22 @@ type BasicObservation struct {
 type BasicParameters struct {
 
 	// A password for the authorization. Created and stored in AWS Secrets Manager.
-	// +kubebuilder:validation:Required
 	PasswordSecretRef v1.SecretKeySelector `json:"passwordSecretRef" tf:"-"`
 
 	// A username for the authorization.
-	// +kubebuilder:validation:Required
-	Username *string `json:"username" tf:"username,omitempty"`
+	Username *string `json:"username,omitempty" tf:"username,omitempty"`
+}
+
+type BodyInitParameters struct {
+
+	// Specified whether the value is secret.
+	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
+
+	// Header Name.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Header Value. Created and stored in AWS Secrets Manager.
+	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
 }
 
 type BodyObservation struct {
@@ -93,16 +130,22 @@ type BodyObservation struct {
 type BodyParameters struct {
 
 	// Specified whether the value is secret.
-	// +kubebuilder:validation:Optional
 	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
 
 	// Header Name.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Header Value. Created and stored in AWS Secrets Manager.
-	// +kubebuilder:validation:Optional
 	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
+}
+
+type ClientParametersInitParameters struct {
+
+	// The client ID for the credentials to use for authorization. Created and stored in AWS Secrets Manager.
+	ClientID *string `json:"clientId,omitempty" tf:"client_id,omitempty"`
+
+	// The client secret for the credentials to use for authorization. Created and stored in AWS Secrets Manager.
+	ClientSecretSecretRef v1.SecretKeySelector `json:"clientSecretSecretRef" tf:"-"`
 }
 
 type ClientParametersObservation struct {
@@ -114,12 +157,26 @@ type ClientParametersObservation struct {
 type ClientParametersParameters struct {
 
 	// The client ID for the credentials to use for authorization. Created and stored in AWS Secrets Manager.
-	// +kubebuilder:validation:Required
-	ClientID *string `json:"clientId" tf:"client_id,omitempty"`
+	ClientID *string `json:"clientId,omitempty" tf:"client_id,omitempty"`
 
 	// The client secret for the credentials to use for authorization. Created and stored in AWS Secrets Manager.
-	// +kubebuilder:validation:Required
 	ClientSecretSecretRef v1.SecretKeySelector `json:"clientSecretSecretRef" tf:"-"`
+}
+
+type ConnectionInitParameters struct {
+
+	// Parameters used for authorization. A maximum of 1 are allowed. Documented below.
+	AuthParameters []AuthParametersInitParameters `json:"authParameters,omitempty" tf:"auth_parameters,omitempty"`
+
+	// Choose the type of authorization to use for the connection. One of API_KEY,BASIC,OAUTH_CLIENT_CREDENTIALS.
+	AuthorizationType *string `json:"authorizationType,omitempty" tf:"authorization_type,omitempty"`
+
+	// Enter a description for the connection. Maximum of 512 characters.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type ConnectionObservation struct {
@@ -145,21 +202,29 @@ type ConnectionObservation struct {
 type ConnectionParameters struct {
 
 	// Parameters used for authorization. A maximum of 1 are allowed. Documented below.
-	// +kubebuilder:validation:Optional
 	AuthParameters []AuthParametersParameters `json:"authParameters,omitempty" tf:"auth_parameters,omitempty"`
 
 	// Choose the type of authorization to use for the connection. One of API_KEY,BASIC,OAUTH_CLIENT_CREDENTIALS.
-	// +kubebuilder:validation:Optional
 	AuthorizationType *string `json:"authorizationType,omitempty" tf:"authorization_type,omitempty"`
 
 	// Enter a description for the connection. Maximum of 512 characters.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
+type HeaderInitParameters struct {
+
+	// Specified whether the value is secret.
+	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
+
+	// Header Name.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Header Value. Created and stored in AWS Secrets Manager.
+	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
 }
 
 type HeaderObservation struct {
@@ -174,16 +239,25 @@ type HeaderObservation struct {
 type HeaderParameters struct {
 
 	// Specified whether the value is secret.
-	// +kubebuilder:validation:Optional
 	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
 
 	// Header Name.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Header Value. Created and stored in AWS Secrets Manager.
-	// +kubebuilder:validation:Optional
 	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
+}
+
+type InvocationHTTPParametersInitParameters struct {
+
+	// Contains additional body string parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
+	Body []BodyInitParameters `json:"body,omitempty" tf:"body,omitempty"`
+
+	// Contains additional header parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
+	Header []HeaderInitParameters `json:"header,omitempty" tf:"header,omitempty"`
+
+	// Contains additional query string parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
+	QueryString []QueryStringInitParameters `json:"queryString,omitempty" tf:"query_string,omitempty"`
 }
 
 type InvocationHTTPParametersObservation struct {
@@ -201,16 +275,25 @@ type InvocationHTTPParametersObservation struct {
 type InvocationHTTPParametersParameters struct {
 
 	// Contains additional body string parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
-	// +kubebuilder:validation:Optional
 	Body []BodyParameters `json:"body,omitempty" tf:"body,omitempty"`
 
 	// Contains additional header parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
-	// +kubebuilder:validation:Optional
 	Header []HeaderParameters `json:"header,omitempty" tf:"header,omitempty"`
 
 	// Contains additional query string parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
-	// +kubebuilder:validation:Optional
 	QueryString []QueryStringParameters `json:"queryString,omitempty" tf:"query_string,omitempty"`
+}
+
+type OauthHTTPParametersBodyInitParameters struct {
+
+	// Specified whether the value is secret.
+	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
+
+	// Header Name.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Header Value. Created and stored in AWS Secrets Manager.
+	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
 }
 
 type OauthHTTPParametersBodyObservation struct {
@@ -225,15 +308,24 @@ type OauthHTTPParametersBodyObservation struct {
 type OauthHTTPParametersBodyParameters struct {
 
 	// Specified whether the value is secret.
-	// +kubebuilder:validation:Optional
 	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
 
 	// Header Name.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Header Value. Created and stored in AWS Secrets Manager.
-	// +kubebuilder:validation:Optional
+	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
+}
+
+type OauthHTTPParametersHeaderInitParameters struct {
+
+	// Specified whether the value is secret.
+	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
+
+	// Header Name.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Header Value. Created and stored in AWS Secrets Manager.
 	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
 }
 
@@ -249,16 +341,25 @@ type OauthHTTPParametersHeaderObservation struct {
 type OauthHTTPParametersHeaderParameters struct {
 
 	// Specified whether the value is secret.
-	// +kubebuilder:validation:Optional
 	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
 
 	// Header Name.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Header Value. Created and stored in AWS Secrets Manager.
-	// +kubebuilder:validation:Optional
 	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
+}
+
+type OauthHTTPParametersInitParameters struct {
+
+	// Contains additional body string parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
+	Body []OauthHTTPParametersBodyInitParameters `json:"body,omitempty" tf:"body,omitempty"`
+
+	// Contains additional header parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
+	Header []OauthHTTPParametersHeaderInitParameters `json:"header,omitempty" tf:"header,omitempty"`
+
+	// Contains additional query string parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
+	QueryString []OauthHTTPParametersQueryStringInitParameters `json:"queryString,omitempty" tf:"query_string,omitempty"`
 }
 
 type OauthHTTPParametersObservation struct {
@@ -276,16 +377,25 @@ type OauthHTTPParametersObservation struct {
 type OauthHTTPParametersParameters struct {
 
 	// Contains additional body string parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
-	// +kubebuilder:validation:Optional
 	Body []OauthHTTPParametersBodyParameters `json:"body,omitempty" tf:"body,omitempty"`
 
 	// Contains additional header parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
-	// +kubebuilder:validation:Optional
 	Header []OauthHTTPParametersHeaderParameters `json:"header,omitempty" tf:"header,omitempty"`
 
 	// Contains additional query string parameters for the connection. You can include up to 100 additional body string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB. Each parameter can contain the following:
-	// +kubebuilder:validation:Optional
 	QueryString []OauthHTTPParametersQueryStringParameters `json:"queryString,omitempty" tf:"query_string,omitempty"`
+}
+
+type OauthHTTPParametersQueryStringInitParameters struct {
+
+	// Specified whether the value is secret.
+	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
+
+	// Header Name.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Header Value. Created and stored in AWS Secrets Manager.
+	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
 }
 
 type OauthHTTPParametersQueryStringObservation struct {
@@ -300,16 +410,28 @@ type OauthHTTPParametersQueryStringObservation struct {
 type OauthHTTPParametersQueryStringParameters struct {
 
 	// Specified whether the value is secret.
-	// +kubebuilder:validation:Optional
 	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
 
 	// Header Name.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Header Value. Created and stored in AWS Secrets Manager.
-	// +kubebuilder:validation:Optional
 	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
+}
+
+type OauthInitParameters struct {
+
+	// The URL to the authorization endpoint.
+	AuthorizationEndpoint *string `json:"authorizationEndpoint,omitempty" tf:"authorization_endpoint,omitempty"`
+
+	// Contains the client parameters for OAuth authorization. Contains the following two parameters.
+	ClientParameters []ClientParametersInitParameters `json:"clientParameters,omitempty" tf:"client_parameters,omitempty"`
+
+	// A password for the authorization. Created and stored in AWS Secrets Manager.
+	HTTPMethod *string `json:"httpMethod,omitempty" tf:"http_method,omitempty"`
+
+	// OAuth Http Parameters are additional credentials used to sign the request to the authorization endpoint to exchange the OAuth Client information for an access token. Secret values are stored and managed by AWS Secrets Manager. A maximum of 1 are allowed. Documented below.
+	OauthHTTPParameters []OauthHTTPParametersInitParameters `json:"oauthHttpParameters,omitempty" tf:"oauth_http_parameters,omitempty"`
 }
 
 type OauthObservation struct {
@@ -330,20 +452,28 @@ type OauthObservation struct {
 type OauthParameters struct {
 
 	// The URL to the authorization endpoint.
-	// +kubebuilder:validation:Required
-	AuthorizationEndpoint *string `json:"authorizationEndpoint" tf:"authorization_endpoint,omitempty"`
+	AuthorizationEndpoint *string `json:"authorizationEndpoint,omitempty" tf:"authorization_endpoint,omitempty"`
 
 	// Contains the client parameters for OAuth authorization. Contains the following two parameters.
-	// +kubebuilder:validation:Optional
 	ClientParameters []ClientParametersParameters `json:"clientParameters,omitempty" tf:"client_parameters,omitempty"`
 
 	// A password for the authorization. Created and stored in AWS Secrets Manager.
-	// +kubebuilder:validation:Required
-	HTTPMethod *string `json:"httpMethod" tf:"http_method,omitempty"`
+	HTTPMethod *string `json:"httpMethod,omitempty" tf:"http_method,omitempty"`
 
 	// OAuth Http Parameters are additional credentials used to sign the request to the authorization endpoint to exchange the OAuth Client information for an access token. Secret values are stored and managed by AWS Secrets Manager. A maximum of 1 are allowed. Documented below.
-	// +kubebuilder:validation:Required
-	OauthHTTPParameters []OauthHTTPParametersParameters `json:"oauthHttpParameters" tf:"oauth_http_parameters,omitempty"`
+	OauthHTTPParameters []OauthHTTPParametersParameters `json:"oauthHttpParameters,omitempty" tf:"oauth_http_parameters,omitempty"`
+}
+
+type QueryStringInitParameters struct {
+
+	// Specified whether the value is secret.
+	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
+
+	// Header Name.
+	Key *string `json:"key,omitempty" tf:"key,omitempty"`
+
+	// Header Value. Created and stored in AWS Secrets Manager.
+	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
 }
 
 type QueryStringObservation struct {
@@ -358,15 +488,12 @@ type QueryStringObservation struct {
 type QueryStringParameters struct {
 
 	// Specified whether the value is secret.
-	// +kubebuilder:validation:Optional
 	IsValueSecret *bool `json:"isValueSecret,omitempty" tf:"is_value_secret,omitempty"`
 
 	// Header Name.
-	// +kubebuilder:validation:Optional
 	Key *string `json:"key,omitempty" tf:"key,omitempty"`
 
 	// Header Value. Created and stored in AWS Secrets Manager.
-	// +kubebuilder:validation:Optional
 	ValueSecretRef *v1.SecretKeySelector `json:"valueSecretRef,omitempty" tf:"-"`
 }
 
@@ -374,6 +501,10 @@ type QueryStringParameters struct {
 type ConnectionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ConnectionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ConnectionInitParameters `json:"initProvider,omitempty"`
 }
 
 // ConnectionStatus defines the observed state of Connection.
@@ -394,8 +525,8 @@ type ConnectionStatus struct {
 type Connection struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.authParameters)",message="authParameters is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.authorizationType)",message="authorizationType is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.authParameters) || has(self.initProvider.authParameters)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.authorizationType) || has(self.initProvider.authorizationType)",message="%!s(MISSING) is a required parameter"
 	Spec   ConnectionSpec   `json:"spec"`
 	Status ConnectionStatus `json:"status,omitempty"`
 }

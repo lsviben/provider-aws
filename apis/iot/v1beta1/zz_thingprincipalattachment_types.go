@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ThingPrincipalAttachmentInitParameters struct {
+
+	// The AWS IoT Certificate ARN or Amazon Cognito Identity ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iot/v1beta1.Certificate
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	Principal *string `json:"principal,omitempty" tf:"principal,omitempty"`
+
+	PrincipalRef *v1.Reference `json:"principalRef,omitempty" tf:"-"`
+
+	PrincipalSelector *v1.Selector `json:"principalSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The name of the thing.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iot/v1beta1.Thing
+	Thing *string `json:"thing,omitempty" tf:"thing,omitempty"`
+
+	ThingRef *v1.Reference `json:"thingRef,omitempty" tf:"-"`
+
+	ThingSelector *v1.Selector `json:"thingSelector,omitempty" tf:"-"`
+}
+
 type ThingPrincipalAttachmentObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -28,7 +52,6 @@ type ThingPrincipalAttachmentParameters struct {
 	// The AWS IoT Certificate ARN or Amazon Cognito Identity ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iot/v1beta1.Certificate
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	Principal *string `json:"principal,omitempty" tf:"principal,omitempty"`
 
 	// Reference to a Certificate in iot to populate principal.
@@ -41,12 +64,10 @@ type ThingPrincipalAttachmentParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The name of the thing.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iot/v1beta1.Thing
-	// +kubebuilder:validation:Optional
 	Thing *string `json:"thing,omitempty" tf:"thing,omitempty"`
 
 	// Reference to a Thing in iot to populate thing.
@@ -62,6 +83,10 @@ type ThingPrincipalAttachmentParameters struct {
 type ThingPrincipalAttachmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ThingPrincipalAttachmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ThingPrincipalAttachmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // ThingPrincipalAttachmentStatus defines the observed state of ThingPrincipalAttachment.

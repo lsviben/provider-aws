@@ -97,7 +97,43 @@ spec:
                       be created in.
                     type: string
                 required:
-                - region
+                - encodedKeySecretRef
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  comment:
+                    description: An optional comment about the public key.
+                    type: string
+                  encodedKeySecretRef:
+                    description: The encoded public key that you want to add to CloudFront
+                      to use with features like field-level encryption.
+                    properties:
+                      key:
+                        description: The key to select.
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                      namespace:
+                        description: Namespace of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    - namespace
+                    type: object
+                  name:
+                    description: The name for the public key.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                required:
+                - encodedKeySecretRef
                 type: object
               managementPolicies:
                 default:
@@ -297,9 +333,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: encodedKeySecretRef is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.encodedKeySecretRef)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.encodedKeySecretRef)
+                || has(self.initProvider.encodedKeySecretRef)'
           status:
             description: PublicKeyStatus defines the observed state of PublicKey.
             properties:

@@ -13,11 +13,17 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AccessControlTranslationInitParameters struct {
+}
+
 type AccessControlTranslationObservation struct {
 	Owner *string `json:"owner,omitempty" tf:"owner,omitempty"`
 }
 
 type AccessControlTranslationParameters struct {
+}
+
+type ApplyServerSideEncryptionByDefaultInitParameters struct {
 }
 
 type ApplyServerSideEncryptionByDefaultObservation struct {
@@ -30,6 +36,23 @@ type ApplyServerSideEncryptionByDefaultObservation struct {
 }
 
 type ApplyServerSideEncryptionByDefaultParameters struct {
+}
+
+type BucketInitParameters struct {
+
+	// Boolean that indicates all objects (including any locked objects) should be deleted from the bucket when the bucket is destroyed so that the bucket can be destroyed without error. These objects are not recoverable. This only deletes objects when the bucket is destroyed, not when setting this parameter to true.
+	ForceDestroy *bool `json:"forceDestroy,omitempty" tf:"force_destroy,omitempty"`
+
+	// Indicates whether this bucket has an Object Lock configuration enabled. Valid values are true or false. This argument is not supported in all regions or partitions.
+	ObjectLockEnabled *bool `json:"objectLockEnabled,omitempty" tf:"object_lock_enabled,omitempty"`
+
+	// AWS region this bucket resides in.
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type BucketObservation struct {
@@ -121,22 +144,21 @@ type BucketObservation struct {
 type BucketParameters struct {
 
 	// Boolean that indicates all objects (including any locked objects) should be deleted from the bucket when the bucket is destroyed so that the bucket can be destroyed without error. These objects are not recoverable. This only deletes objects when the bucket is destroyed, not when setting this parameter to true.
-	// +kubebuilder:validation:Optional
 	ForceDestroy *bool `json:"forceDestroy,omitempty" tf:"force_destroy,omitempty"`
 
 	// Indicates whether this bucket has an Object Lock configuration enabled. Valid values are true or false. This argument is not supported in all regions or partitions.
-	// +kubebuilder:validation:Optional
 	ObjectLockEnabled *bool `json:"objectLockEnabled,omitempty" tf:"object_lock_enabled,omitempty"`
 
 	// AWS region this bucket resides in.
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type CorsRuleInitParameters struct {
 }
 
 type CorsRuleObservation struct {
@@ -160,6 +182,9 @@ type CorsRuleObservation struct {
 type CorsRuleParameters struct {
 }
 
+type DefaultRetentionInitParameters struct {
+}
+
 type DefaultRetentionObservation struct {
 
 	// Number of days that you want to specify for the default retention period.
@@ -173,6 +198,9 @@ type DefaultRetentionObservation struct {
 }
 
 type DefaultRetentionParameters struct {
+}
+
+type DestinationInitParameters struct {
 }
 
 type DestinationObservation struct {
@@ -203,6 +231,9 @@ type DestinationObservation struct {
 type DestinationParameters struct {
 }
 
+type ExpirationInitParameters struct {
+}
+
 type ExpirationObservation struct {
 
 	// Specifies the date after which you want the corresponding action to take effect.
@@ -218,6 +249,9 @@ type ExpirationObservation struct {
 type ExpirationParameters struct {
 }
 
+type FilterInitParameters struct {
+}
+
 type FilterObservation struct {
 
 	// Object keyname prefix that identifies subset of objects to which the rule applies. Must be less than or equal to 1024 characters in length.
@@ -229,6 +263,9 @@ type FilterObservation struct {
 }
 
 type FilterParameters struct {
+}
+
+type GrantInitParameters struct {
 }
 
 type GrantObservation struct {
@@ -247,6 +284,9 @@ type GrantObservation struct {
 }
 
 type GrantParameters struct {
+}
+
+type LifecycleRuleInitParameters struct {
 }
 
 type LifecycleRuleObservation struct {
@@ -282,6 +322,9 @@ type LifecycleRuleObservation struct {
 type LifecycleRuleParameters struct {
 }
 
+type LoggingInitParameters struct {
+}
+
 type LoggingObservation struct {
 
 	// Name of the bucket that will receive the log objects.
@@ -292,6 +335,9 @@ type LoggingObservation struct {
 }
 
 type LoggingParameters struct {
+}
+
+type MetricsInitParameters struct {
 }
 
 type MetricsObservation struct {
@@ -306,6 +352,9 @@ type MetricsObservation struct {
 type MetricsParameters struct {
 }
 
+type NoncurrentVersionExpirationInitParameters struct {
+}
+
 type NoncurrentVersionExpirationObservation struct {
 
 	// Specifies the number of days after object creation when the specific rule action takes effect.
@@ -313,6 +362,9 @@ type NoncurrentVersionExpirationObservation struct {
 }
 
 type NoncurrentVersionExpirationParameters struct {
+}
+
+type NoncurrentVersionTransitionInitParameters struct {
 }
 
 type NoncurrentVersionTransitionObservation struct {
@@ -327,6 +379,9 @@ type NoncurrentVersionTransitionObservation struct {
 type NoncurrentVersionTransitionParameters struct {
 }
 
+type ObjectLockConfigurationInitParameters struct {
+}
+
 type ObjectLockConfigurationObservation struct {
 
 	// Indicates whether this bucket has an Object Lock configuration enabled. Valid value is Enabled. Use the top-level argument object_lock_enabled instead.
@@ -337,6 +392,9 @@ type ObjectLockConfigurationObservation struct {
 }
 
 type ObjectLockConfigurationParameters struct {
+}
+
+type ReplicationConfigurationInitParameters struct {
 }
 
 type ReplicationConfigurationObservation struct {
@@ -351,6 +409,9 @@ type ReplicationConfigurationObservation struct {
 type ReplicationConfigurationParameters struct {
 }
 
+type ReplicationTimeInitParameters struct {
+}
+
 type ReplicationTimeObservation struct {
 
 	// Threshold within which objects are to be replicated. The only valid value is 15.
@@ -363,6 +424,9 @@ type ReplicationTimeObservation struct {
 type ReplicationTimeParameters struct {
 }
 
+type RuleInitParameters struct {
+}
+
 type RuleObservation struct {
 
 	// Default retention period that you want to apply to new objects placed in this bucket (documented below).
@@ -370,6 +434,9 @@ type RuleObservation struct {
 }
 
 type RuleParameters struct {
+}
+
+type RulesInitParameters struct {
 }
 
 type RulesObservation struct {
@@ -402,6 +469,9 @@ type RulesObservation struct {
 type RulesParameters struct {
 }
 
+type ServerSideEncryptionConfigurationInitParameters struct {
+}
+
 type ServerSideEncryptionConfigurationObservation struct {
 
 	// Single object for server-side encryption by default configuration. (documented below)
@@ -409,6 +479,9 @@ type ServerSideEncryptionConfigurationObservation struct {
 }
 
 type ServerSideEncryptionConfigurationParameters struct {
+}
+
+type ServerSideEncryptionConfigurationRuleInitParameters struct {
 }
 
 type ServerSideEncryptionConfigurationRuleObservation struct {
@@ -423,6 +496,9 @@ type ServerSideEncryptionConfigurationRuleObservation struct {
 type ServerSideEncryptionConfigurationRuleParameters struct {
 }
 
+type SourceSelectionCriteriaInitParameters struct {
+}
+
 type SourceSelectionCriteriaObservation struct {
 
 	// Match SSE-KMS encrypted objects (documented below). If specified, replica_kms_key_id
@@ -433,6 +509,9 @@ type SourceSelectionCriteriaObservation struct {
 type SourceSelectionCriteriaParameters struct {
 }
 
+type SseKMSEncryptedObjectsInitParameters struct {
+}
+
 type SseKMSEncryptedObjectsObservation struct {
 
 	// Enable versioning. Once you version-enable a bucket, it can never return to an unversioned state. You can, however, suspend versioning on that bucket.
@@ -440,6 +519,9 @@ type SseKMSEncryptedObjectsObservation struct {
 }
 
 type SseKMSEncryptedObjectsParameters struct {
+}
+
+type TransitionInitParameters struct {
 }
 
 type TransitionObservation struct {
@@ -457,6 +539,9 @@ type TransitionObservation struct {
 type TransitionParameters struct {
 }
 
+type VersioningInitParameters struct {
+}
+
 type VersioningObservation struct {
 
 	// Enable versioning. Once you version-enable a bucket, it can never return to an unversioned state. You can, however, suspend versioning on that bucket.
@@ -467,6 +552,9 @@ type VersioningObservation struct {
 }
 
 type VersioningParameters struct {
+}
+
+type WebsiteInitParameters struct {
 }
 
 type WebsiteObservation struct {
@@ -492,6 +580,10 @@ type WebsiteParameters struct {
 type BucketSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BucketParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BucketInitParameters `json:"initProvider,omitempty"`
 }
 
 // BucketStatus defines the observed state of Bucket.

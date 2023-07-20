@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type LBInitParameters struct {
+
+	// The health check path of the load balancer. Default value "/".
+	HealthCheckPath *string `json:"healthCheckPath,omitempty" tf:"health_check_path,omitempty"`
+
+	IPAddressType *string `json:"ipAddressType,omitempty" tf:"ip_address_type,omitempty"`
+
+	// The instance port the load balancer will connect.
+	InstancePort *float64 `json:"instancePort,omitempty" tf:"instance_port,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type LBObservation struct {
 
 	// The ARN of the Lightsail load balancer.
@@ -54,23 +72,18 @@ type LBObservation struct {
 type LBParameters struct {
 
 	// The health check path of the load balancer. Default value "/".
-	// +kubebuilder:validation:Optional
 	HealthCheckPath *string `json:"healthCheckPath,omitempty" tf:"health_check_path,omitempty"`
 
-	// +kubebuilder:validation:Optional
 	IPAddressType *string `json:"ipAddressType,omitempty" tf:"ip_address_type,omitempty"`
 
 	// The instance port the load balancer will connect.
-	// +kubebuilder:validation:Optional
 	InstancePort *float64 `json:"instancePort,omitempty" tf:"instance_port,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -78,6 +91,10 @@ type LBParameters struct {
 type LBSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     LBParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider LBInitParameters `json:"initProvider,omitempty"`
 }
 
 // LBStatus defines the observed state of LB.
@@ -98,7 +115,7 @@ type LBStatus struct {
 type LB struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.instancePort)",message="instancePort is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.instancePort) || has(self.initProvider.instancePort)",message="%!s(MISSING) is a required parameter"
 	Spec   LBSpec   `json:"spec"`
 	Status LBStatus `json:"status,omitempty"`
 }

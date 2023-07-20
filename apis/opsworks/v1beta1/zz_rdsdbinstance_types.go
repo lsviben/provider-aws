@@ -13,6 +13,33 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RDSDBInstanceInitParameters struct {
+
+	// A db password
+	DBPasswordSecretRef v1.SecretKeySelector `json:"dbPasswordSecretRef" tf:"-"`
+
+	// A db username
+	DBUser *string `json:"dbUser,omitempty" tf:"db_user,omitempty"`
+
+	// The db instance to register for this stack. Changing this will force a new resource.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/rds/v1beta1.Instance
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	RDSDBInstanceArn *string `json:"rdsDbInstanceArn,omitempty" tf:"rds_db_instance_arn,omitempty"`
+
+	RDSDBInstanceArnRef *v1.Reference `json:"rdsDbInstanceArnRef,omitempty" tf:"-"`
+
+	RDSDBInstanceArnSelector *v1.Selector `json:"rdsDbInstanceArnSelector,omitempty" tf:"-"`
+
+	// The stack to register a db instance for. Changing this will force a new resource.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/opsworks/v1beta1.Stack
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	StackID *string `json:"stackId,omitempty" tf:"stack_id,omitempty"`
+
+	StackIDRef *v1.Reference `json:"stackIdRef,omitempty" tf:"-"`
+
+	StackIDSelector *v1.Selector `json:"stackIdSelector,omitempty" tf:"-"`
+}
+
 type RDSDBInstanceObservation struct {
 
 	// A db username
@@ -31,17 +58,14 @@ type RDSDBInstanceObservation struct {
 type RDSDBInstanceParameters struct {
 
 	// A db password
-	// +kubebuilder:validation:Optional
 	DBPasswordSecretRef v1.SecretKeySelector `json:"dbPasswordSecretRef" tf:"-"`
 
 	// A db username
-	// +kubebuilder:validation:Optional
 	DBUser *string `json:"dbUser,omitempty" tf:"db_user,omitempty"`
 
 	// The db instance to register for this stack. Changing this will force a new resource.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/rds/v1beta1.Instance
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	RDSDBInstanceArn *string `json:"rdsDbInstanceArn,omitempty" tf:"rds_db_instance_arn,omitempty"`
 
 	// Reference to a Instance in rds to populate rdsDbInstanceArn.
@@ -55,7 +79,6 @@ type RDSDBInstanceParameters struct {
 	// The stack to register a db instance for. Changing this will force a new resource.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/opsworks/v1beta1.Stack
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	StackID *string `json:"stackId,omitempty" tf:"stack_id,omitempty"`
 
 	// Reference to a Stack in opsworks to populate stackId.
@@ -71,6 +94,10 @@ type RDSDBInstanceParameters struct {
 type RDSDBInstanceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RDSDBInstanceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RDSDBInstanceInitParameters `json:"initProvider,omitempty"`
 }
 
 // RDSDBInstanceStatus defines the observed state of RDSDBInstance.
@@ -91,8 +118,8 @@ type RDSDBInstanceStatus struct {
 type RDSDBInstance struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dbPasswordSecretRef)",message="dbPasswordSecretRef is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dbUser)",message="dbUser is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dbPasswordSecretRef) || has(self.initProvider.dbPasswordSecretRef)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dbUser) || has(self.initProvider.dbUser)",message="%!s(MISSING) is a required parameter"
 	Spec   RDSDBInstanceSpec   `json:"spec"`
 	Status RDSDBInstanceStatus `json:"status,omitempty"`
 }

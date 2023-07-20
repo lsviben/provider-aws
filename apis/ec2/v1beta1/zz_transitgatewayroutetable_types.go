@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type TransitGatewayRouteTableInitParameters_2 struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Identifier of EC2 Transit Gateway.
+	// +crossplane:generate:reference:type=TransitGateway
+	TransitGatewayID *string `json:"transitGatewayId,omitempty" tf:"transit_gateway_id,omitempty"`
+
+	TransitGatewayIDRef *v1.Reference `json:"transitGatewayIdRef,omitempty" tf:"-"`
+
+	TransitGatewayIDSelector *v1.Selector `json:"transitGatewayIdSelector,omitempty" tf:"-"`
+}
+
 type TransitGatewayRouteTableObservation_2 struct {
 
 	// EC2 Transit Gateway Route Table Amazon Resource Name (ARN).
@@ -41,16 +59,13 @@ type TransitGatewayRouteTableParameters_2 struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Identifier of EC2 Transit Gateway.
 	// +crossplane:generate:reference:type=TransitGateway
-	// +kubebuilder:validation:Optional
 	TransitGatewayID *string `json:"transitGatewayId,omitempty" tf:"transit_gateway_id,omitempty"`
 
 	// Reference to a TransitGateway to populate transitGatewayId.
@@ -66,6 +81,10 @@ type TransitGatewayRouteTableParameters_2 struct {
 type TransitGatewayRouteTableSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     TransitGatewayRouteTableParameters_2 `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider TransitGatewayRouteTableInitParameters_2 `json:"initProvider,omitempty"`
 }
 
 // TransitGatewayRouteTableStatus defines the observed state of TransitGatewayRouteTable.

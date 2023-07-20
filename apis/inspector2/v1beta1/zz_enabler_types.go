@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EnablerInitParameters struct {
+
+	// Set of account IDs.
+	AccountIds []*string `json:"accountIds,omitempty" tf:"account_ids,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Type of resources to scan. Valid values are EC2, ECR, and LAMBDA.
+	ResourceTypes []*string `json:"resourceTypes,omitempty" tf:"resource_types,omitempty"`
+}
+
 type EnablerObservation struct {
 
 	// Set of account IDs.
@@ -27,16 +40,13 @@ type EnablerObservation struct {
 type EnablerParameters struct {
 
 	// Set of account IDs.
-	// +kubebuilder:validation:Optional
 	AccountIds []*string `json:"accountIds,omitempty" tf:"account_ids,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Type of resources to scan. Valid values are EC2, ECR, and LAMBDA.
-	// +kubebuilder:validation:Optional
 	ResourceTypes []*string `json:"resourceTypes,omitempty" tf:"resource_types,omitempty"`
 }
 
@@ -44,6 +54,10 @@ type EnablerParameters struct {
 type EnablerSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EnablerParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EnablerInitParameters `json:"initProvider,omitempty"`
 }
 
 // EnablerStatus defines the observed state of Enabler.
@@ -64,8 +78,8 @@ type EnablerStatus struct {
 type Enabler struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accountIds)",message="accountIds is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceTypes)",message="resourceTypes is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.accountIds) || has(self.initProvider.accountIds)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.resourceTypes) || has(self.initProvider.resourceTypes)",message="%!s(MISSING) is a required parameter"
 	Spec   EnablerSpec   `json:"spec"`
 	Status EnablerStatus `json:"status,omitempty"`
 }

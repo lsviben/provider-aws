@@ -13,6 +13,29 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type NotificationInitParameters struct {
+
+	// List of AutoScaling Group Names
+	GroupNames []*string `json:"groupNames,omitempty" tf:"group_names,omitempty"`
+
+	// List of Notification Types that trigger
+	// notifications. Acceptable values are documented in the AWS documentation here
+	Notifications []*string `json:"notifications,omitempty" tf:"notifications,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Topic ARN for notifications to be sent through
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	TopicArn *string `json:"topicArn,omitempty" tf:"topic_arn,omitempty"`
+
+	TopicArnRef *v1.Reference `json:"topicArnRef,omitempty" tf:"-"`
+
+	TopicArnSelector *v1.Selector `json:"topicArnSelector,omitempty" tf:"-"`
+}
+
 type NotificationObservation struct {
 
 	// List of AutoScaling Group Names
@@ -31,23 +54,19 @@ type NotificationObservation struct {
 type NotificationParameters struct {
 
 	// List of AutoScaling Group Names
-	// +kubebuilder:validation:Optional
 	GroupNames []*string `json:"groupNames,omitempty" tf:"group_names,omitempty"`
 
 	// List of Notification Types that trigger
 	// notifications. Acceptable values are documented in the AWS documentation here
-	// +kubebuilder:validation:Optional
 	Notifications []*string `json:"notifications,omitempty" tf:"notifications,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Topic ARN for notifications to be sent through
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	TopicArn *string `json:"topicArn,omitempty" tf:"topic_arn,omitempty"`
 
 	// Reference to a Topic in sns to populate topicArn.
@@ -63,6 +82,10 @@ type NotificationParameters struct {
 type NotificationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     NotificationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider NotificationInitParameters `json:"initProvider,omitempty"`
 }
 
 // NotificationStatus defines the observed state of Notification.
@@ -83,8 +106,8 @@ type NotificationStatus struct {
 type Notification struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.groupNames)",message="groupNames is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.notifications)",message="notifications is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.groupNames) || has(self.initProvider.groupNames)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.notifications) || has(self.initProvider.notifications)",message="%!s(MISSING) is a required parameter"
 	Spec   NotificationSpec   `json:"spec"`
 	Status NotificationStatus `json:"status,omitempty"`
 }

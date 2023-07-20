@@ -13,6 +13,39 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type NATGatewayInitParameters_2 struct {
+
+	// The Allocation ID of the Elastic IP address for the gateway. Required for connectivity_type of public.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.EIP
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	AllocationID *string `json:"allocationId,omitempty" tf:"allocation_id,omitempty"`
+
+	AllocationIDRef *v1.Reference `json:"allocationIdRef,omitempty" tf:"-"`
+
+	AllocationIDSelector *v1.Selector `json:"allocationIdSelector,omitempty" tf:"-"`
+
+	// Connectivity type for the gateway. Valid values are private and public. Defaults to public.
+	ConnectivityType *string `json:"connectivityType,omitempty" tf:"connectivity_type,omitempty"`
+
+	// The private IPv4 address to assign to the NAT gateway. If you don't provide an address, a private IPv4 address will be automatically assigned.
+	PrivateIP *string `json:"privateIp,omitempty" tf:"private_ip,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The Subnet ID of the subnet in which to place the gateway.
+	// +crossplane:generate:reference:type=Subnet
+	SubnetID *string `json:"subnetId,omitempty" tf:"subnet_id,omitempty"`
+
+	SubnetIDRef *v1.Reference `json:"subnetIdRef,omitempty" tf:"-"`
+
+	SubnetIDSelector *v1.Selector `json:"subnetIdSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type NATGatewayObservation_2 struct {
 
 	// The Allocation ID of the Elastic IP address for the gateway. Required for connectivity_type of public.
@@ -48,7 +81,6 @@ type NATGatewayParameters_2 struct {
 	// The Allocation ID of the Elastic IP address for the gateway. Required for connectivity_type of public.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.EIP
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	AllocationID *string `json:"allocationId,omitempty" tf:"allocation_id,omitempty"`
 
 	// Reference to a EIP in ec2 to populate allocationId.
@@ -60,21 +92,17 @@ type NATGatewayParameters_2 struct {
 	AllocationIDSelector *v1.Selector `json:"allocationIdSelector,omitempty" tf:"-"`
 
 	// Connectivity type for the gateway. Valid values are private and public. Defaults to public.
-	// +kubebuilder:validation:Optional
 	ConnectivityType *string `json:"connectivityType,omitempty" tf:"connectivity_type,omitempty"`
 
 	// The private IPv4 address to assign to the NAT gateway. If you don't provide an address, a private IPv4 address will be automatically assigned.
-	// +kubebuilder:validation:Optional
 	PrivateIP *string `json:"privateIp,omitempty" tf:"private_ip,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The Subnet ID of the subnet in which to place the gateway.
 	// +crossplane:generate:reference:type=Subnet
-	// +kubebuilder:validation:Optional
 	SubnetID *string `json:"subnetId,omitempty" tf:"subnet_id,omitempty"`
 
 	// Reference to a Subnet to populate subnetId.
@@ -86,7 +114,6 @@ type NATGatewayParameters_2 struct {
 	SubnetIDSelector *v1.Selector `json:"subnetIdSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -94,6 +121,10 @@ type NATGatewayParameters_2 struct {
 type NATGatewaySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     NATGatewayParameters_2 `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider NATGatewayInitParameters_2 `json:"initProvider,omitempty"`
 }
 
 // NATGatewayStatus defines the observed state of NATGateway.

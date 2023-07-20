@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AttachmentAccepterInitParameters struct {
+
+	// The ID of the attachment.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.VPCAttachment
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	AttachmentID *string `json:"attachmentId,omitempty" tf:"attachment_id,omitempty"`
+
+	AttachmentIDRef *v1.Reference `json:"attachmentIdRef,omitempty" tf:"-"`
+
+	AttachmentIDSelector *v1.Selector `json:"attachmentIdSelector,omitempty" tf:"-"`
+
+	// The type of attachment. Valid values can be found in the AWS Documentation
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.VPCAttachment
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("attachment_type",true)
+	AttachmentType *string `json:"attachmentType,omitempty" tf:"attachment_type,omitempty"`
+
+	AttachmentTypeRef *v1.Reference `json:"attachmentTypeRef,omitempty" tf:"-"`
+
+	AttachmentTypeSelector *v1.Selector `json:"attachmentTypeSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type AttachmentAccepterObservation struct {
 
 	// The ID of the attachment.
@@ -53,7 +78,6 @@ type AttachmentAccepterParameters struct {
 	// The ID of the attachment.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.VPCAttachment
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	AttachmentID *string `json:"attachmentId,omitempty" tf:"attachment_id,omitempty"`
 
 	// Reference to a VPCAttachment in networkmanager to populate attachmentId.
@@ -67,7 +91,6 @@ type AttachmentAccepterParameters struct {
 	// The type of attachment. Valid values can be found in the AWS Documentation
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.VPCAttachment
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("attachment_type",true)
-	// +kubebuilder:validation:Optional
 	AttachmentType *string `json:"attachmentType,omitempty" tf:"attachment_type,omitempty"`
 
 	// Reference to a VPCAttachment in networkmanager to populate attachmentType.
@@ -80,14 +103,17 @@ type AttachmentAccepterParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // AttachmentAccepterSpec defines the desired state of AttachmentAccepter
 type AttachmentAccepterSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AttachmentAccepterParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AttachmentAccepterInitParameters `json:"initProvider,omitempty"`
 }
 
 // AttachmentAccepterStatus defines the observed state of AttachmentAccepter.

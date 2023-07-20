@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ActionThresholdInitParameters struct {
+
+	// The type of threshold for a notification. Valid values are PERCENTAGE or ABSOLUTE_VALUE.
+	ActionThresholdType *string `json:"actionThresholdType,omitempty" tf:"action_threshold_type,omitempty"`
+
+	// The threshold of a notification.
+	ActionThresholdValue *float64 `json:"actionThresholdValue,omitempty" tf:"action_threshold_value,omitempty"`
+}
+
 type ActionThresholdObservation struct {
 
 	// The type of threshold for a notification. Valid values are PERCENTAGE or ABSOLUTE_VALUE.
@@ -25,12 +34,56 @@ type ActionThresholdObservation struct {
 type ActionThresholdParameters struct {
 
 	// The type of threshold for a notification. Valid values are PERCENTAGE or ABSOLUTE_VALUE.
-	// +kubebuilder:validation:Required
-	ActionThresholdType *string `json:"actionThresholdType" tf:"action_threshold_type,omitempty"`
+	ActionThresholdType *string `json:"actionThresholdType,omitempty" tf:"action_threshold_type,omitempty"`
 
 	// The threshold of a notification.
-	// +kubebuilder:validation:Required
-	ActionThresholdValue *float64 `json:"actionThresholdValue" tf:"action_threshold_value,omitempty"`
+	ActionThresholdValue *float64 `json:"actionThresholdValue,omitempty" tf:"action_threshold_value,omitempty"`
+}
+
+type BudgetActionInitParameters struct {
+
+	// The ID of the target account for budget. Will use current user's account_id by default if omitted.
+	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
+
+	// The trigger threshold of the action. See Action Threshold.
+	ActionThreshold []ActionThresholdInitParameters `json:"actionThreshold,omitempty" tf:"action_threshold,omitempty"`
+
+	// The type of action. This defines the type of tasks that can be carried out by this action. This field also determines the format for definition. Valid values are APPLY_IAM_POLICY, APPLY_SCP_POLICY, and RUN_SSM_DOCUMENTS.
+	ActionType *string `json:"actionType,omitempty" tf:"action_type,omitempty"`
+
+	// This specifies if the action needs manual or automatic approval. Valid values are AUTOMATIC and MANUAL.
+	ApprovalModel *string `json:"approvalModel,omitempty" tf:"approval_model,omitempty"`
+
+	// The name of a budget.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/budgets/v1beta1.Budget
+	BudgetName *string `json:"budgetName,omitempty" tf:"budget_name,omitempty"`
+
+	BudgetNameRef *v1.Reference `json:"budgetNameRef,omitempty" tf:"-"`
+
+	BudgetNameSelector *v1.Selector `json:"budgetNameSelector,omitempty" tf:"-"`
+
+	// Specifies all of the type-specific parameters. See Definition.
+	Definition []DefinitionInitParameters `json:"definition,omitempty" tf:"definition,omitempty"`
+
+	// The role passed for action execution and reversion. Roles and actions must be in the same account.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	ExecutionRoleArn *string `json:"executionRoleArn,omitempty" tf:"execution_role_arn,omitempty"`
+
+	ExecutionRoleArnRef *v1.Reference `json:"executionRoleArnRef,omitempty" tf:"-"`
+
+	ExecutionRoleArnSelector *v1.Selector `json:"executionRoleArnSelector,omitempty" tf:"-"`
+
+	// The type of a notification. Valid values are ACTUAL or FORECASTED.
+	NotificationType *string `json:"notificationType,omitempty" tf:"notification_type,omitempty"`
+
+	// The Region to run the SSM document.
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A list of subscribers. See Subscriber.
+	Subscriber []SubscriberInitParameters `json:"subscriber,omitempty" tf:"subscriber,omitempty"`
 }
 
 type BudgetActionObservation struct {
@@ -78,24 +131,19 @@ type BudgetActionObservation struct {
 type BudgetActionParameters struct {
 
 	// The ID of the target account for budget. Will use current user's account_id by default if omitted.
-	// +kubebuilder:validation:Optional
 	AccountID *string `json:"accountId,omitempty" tf:"account_id,omitempty"`
 
 	// The trigger threshold of the action. See Action Threshold.
-	// +kubebuilder:validation:Optional
 	ActionThreshold []ActionThresholdParameters `json:"actionThreshold,omitempty" tf:"action_threshold,omitempty"`
 
 	// The type of action. This defines the type of tasks that can be carried out by this action. This field also determines the format for definition. Valid values are APPLY_IAM_POLICY, APPLY_SCP_POLICY, and RUN_SSM_DOCUMENTS.
-	// +kubebuilder:validation:Optional
 	ActionType *string `json:"actionType,omitempty" tf:"action_type,omitempty"`
 
 	// This specifies if the action needs manual or automatic approval. Valid values are AUTOMATIC and MANUAL.
-	// +kubebuilder:validation:Optional
 	ApprovalModel *string `json:"approvalModel,omitempty" tf:"approval_model,omitempty"`
 
 	// The name of a budget.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/budgets/v1beta1.Budget
-	// +kubebuilder:validation:Optional
 	BudgetName *string `json:"budgetName,omitempty" tf:"budget_name,omitempty"`
 
 	// Reference to a Budget in budgets to populate budgetName.
@@ -107,13 +155,11 @@ type BudgetActionParameters struct {
 	BudgetNameSelector *v1.Selector `json:"budgetNameSelector,omitempty" tf:"-"`
 
 	// Specifies all of the type-specific parameters. See Definition.
-	// +kubebuilder:validation:Optional
 	Definition []DefinitionParameters `json:"definition,omitempty" tf:"definition,omitempty"`
 
 	// The role passed for action execution and reversion. Roles and actions must be in the same account.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	ExecutionRoleArn *string `json:"executionRoleArn,omitempty" tf:"execution_role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate executionRoleArn.
@@ -125,18 +171,27 @@ type BudgetActionParameters struct {
 	ExecutionRoleArnSelector *v1.Selector `json:"executionRoleArnSelector,omitempty" tf:"-"`
 
 	// The type of a notification. Valid values are ACTUAL or FORECASTED.
-	// +kubebuilder:validation:Optional
 	NotificationType *string `json:"notificationType,omitempty" tf:"notification_type,omitempty"`
 
 	// The Region to run the SSM document.
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A list of subscribers. See Subscriber.
-	// +kubebuilder:validation:Optional
 	Subscriber []SubscriberParameters `json:"subscriber,omitempty" tf:"subscriber,omitempty"`
+}
+
+type DefinitionInitParameters struct {
+
+	// The AWS Identity and Access Management (IAM) action definition details. See IAM Action Definition.
+	IAMActionDefinition []IAMActionDefinitionInitParameters `json:"iamActionDefinition,omitempty" tf:"iam_action_definition,omitempty"`
+
+	// The service control policies (SCPs) action definition details. See SCP Action Definition.
+	ScpActionDefinition []ScpActionDefinitionInitParameters `json:"scpActionDefinition,omitempty" tf:"scp_action_definition,omitempty"`
+
+	// The AWS Systems Manager (SSM) action definition details. See SSM Action Definition.
+	SsmActionDefinition []SsmActionDefinitionInitParameters `json:"ssmActionDefinition,omitempty" tf:"ssm_action_definition,omitempty"`
 }
 
 type DefinitionObservation struct {
@@ -154,16 +209,34 @@ type DefinitionObservation struct {
 type DefinitionParameters struct {
 
 	// The AWS Identity and Access Management (IAM) action definition details. See IAM Action Definition.
-	// +kubebuilder:validation:Optional
 	IAMActionDefinition []IAMActionDefinitionParameters `json:"iamActionDefinition,omitempty" tf:"iam_action_definition,omitempty"`
 
 	// The service control policies (SCPs) action definition details. See SCP Action Definition.
-	// +kubebuilder:validation:Optional
 	ScpActionDefinition []ScpActionDefinitionParameters `json:"scpActionDefinition,omitempty" tf:"scp_action_definition,omitempty"`
 
 	// The AWS Systems Manager (SSM) action definition details. See SSM Action Definition.
-	// +kubebuilder:validation:Optional
 	SsmActionDefinition []SsmActionDefinitionParameters `json:"ssmActionDefinition,omitempty" tf:"ssm_action_definition,omitempty"`
+}
+
+type IAMActionDefinitionInitParameters struct {
+
+	// A list of groups to be attached. There must be at least one group.
+	Groups []*string `json:"groups,omitempty" tf:"groups,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the policy to be attached.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Policy
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	PolicyArn *string `json:"policyArn,omitempty" tf:"policy_arn,omitempty"`
+
+	PolicyArnRef *v1.Reference `json:"policyArnRef,omitempty" tf:"-"`
+
+	PolicyArnSelector *v1.Selector `json:"policyArnSelector,omitempty" tf:"-"`
+
+	// A list of roles to be attached. There must be at least one role.
+	Roles []*string `json:"roles,omitempty" tf:"roles,omitempty"`
+
+	// A list of users to be attached. There must be at least one user.
+	Users []*string `json:"users,omitempty" tf:"users,omitempty"`
 }
 
 type IAMActionDefinitionObservation struct {
@@ -184,13 +257,11 @@ type IAMActionDefinitionObservation struct {
 type IAMActionDefinitionParameters struct {
 
 	// A list of groups to be attached. There must be at least one group.
-	// +kubebuilder:validation:Optional
 	Groups []*string `json:"groups,omitempty" tf:"groups,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the policy to be attached.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Policy
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	PolicyArn *string `json:"policyArn,omitempty" tf:"policy_arn,omitempty"`
 
 	// Reference to a Policy in iam to populate policyArn.
@@ -202,12 +273,19 @@ type IAMActionDefinitionParameters struct {
 	PolicyArnSelector *v1.Selector `json:"policyArnSelector,omitempty" tf:"-"`
 
 	// A list of roles to be attached. There must be at least one role.
-	// +kubebuilder:validation:Optional
 	Roles []*string `json:"roles,omitempty" tf:"roles,omitempty"`
 
 	// A list of users to be attached. There must be at least one user.
-	// +kubebuilder:validation:Optional
 	Users []*string `json:"users,omitempty" tf:"users,omitempty"`
+}
+
+type ScpActionDefinitionInitParameters struct {
+
+	// The policy ID attached.
+	PolicyID *string `json:"policyId,omitempty" tf:"policy_id,omitempty"`
+
+	// A list of target IDs.
+	TargetIds []*string `json:"targetIds,omitempty" tf:"target_ids,omitempty"`
 }
 
 type ScpActionDefinitionObservation struct {
@@ -222,12 +300,22 @@ type ScpActionDefinitionObservation struct {
 type ScpActionDefinitionParameters struct {
 
 	// The policy ID attached.
-	// +kubebuilder:validation:Required
-	PolicyID *string `json:"policyId" tf:"policy_id,omitempty"`
+	PolicyID *string `json:"policyId,omitempty" tf:"policy_id,omitempty"`
 
 	// A list of target IDs.
-	// +kubebuilder:validation:Required
-	TargetIds []*string `json:"targetIds" tf:"target_ids,omitempty"`
+	TargetIds []*string `json:"targetIds,omitempty" tf:"target_ids,omitempty"`
+}
+
+type SsmActionDefinitionInitParameters struct {
+
+	// The action subType. Valid values are STOP_EC2_INSTANCES or STOP_RDS_INSTANCES.
+	ActionSubType *string `json:"actionSubType,omitempty" tf:"action_sub_type,omitempty"`
+
+	// The EC2 and RDS instance IDs.
+	InstanceIds []*string `json:"instanceIds,omitempty" tf:"instance_ids,omitempty"`
+
+	// The Region to run the SSM document.
+	Region *string `json:"region,omitempty" tf:"region,omitempty"`
 }
 
 type SsmActionDefinitionObservation struct {
@@ -245,16 +333,22 @@ type SsmActionDefinitionObservation struct {
 type SsmActionDefinitionParameters struct {
 
 	// The action subType. Valid values are STOP_EC2_INSTANCES or STOP_RDS_INSTANCES.
-	// +kubebuilder:validation:Required
-	ActionSubType *string `json:"actionSubType" tf:"action_sub_type,omitempty"`
+	ActionSubType *string `json:"actionSubType,omitempty" tf:"action_sub_type,omitempty"`
 
 	// The EC2 and RDS instance IDs.
-	// +kubebuilder:validation:Required
-	InstanceIds []*string `json:"instanceIds" tf:"instance_ids,omitempty"`
+	InstanceIds []*string `json:"instanceIds,omitempty" tf:"instance_ids,omitempty"`
 
 	// The Region to run the SSM document.
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"region,omitempty"`
+	Region *string `json:"region,omitempty" tf:"region,omitempty"`
+}
+
+type SubscriberInitParameters struct {
+
+	// The address that AWS sends budget notifications to, either an SNS topic or an email.
+	Address *string `json:"address,omitempty" tf:"address,omitempty"`
+
+	// The type of notification that AWS sends to a subscriber. Valid values are SNS or EMAIL.
+	SubscriptionType *string `json:"subscriptionType,omitempty" tf:"subscription_type,omitempty"`
 }
 
 type SubscriberObservation struct {
@@ -269,18 +363,20 @@ type SubscriberObservation struct {
 type SubscriberParameters struct {
 
 	// The address that AWS sends budget notifications to, either an SNS topic or an email.
-	// +kubebuilder:validation:Required
-	Address *string `json:"address" tf:"address,omitempty"`
+	Address *string `json:"address,omitempty" tf:"address,omitempty"`
 
 	// The type of notification that AWS sends to a subscriber. Valid values are SNS or EMAIL.
-	// +kubebuilder:validation:Required
-	SubscriptionType *string `json:"subscriptionType" tf:"subscription_type,omitempty"`
+	SubscriptionType *string `json:"subscriptionType,omitempty" tf:"subscription_type,omitempty"`
 }
 
 // BudgetActionSpec defines the desired state of BudgetAction
 type BudgetActionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BudgetActionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BudgetActionInitParameters `json:"initProvider,omitempty"`
 }
 
 // BudgetActionStatus defines the observed state of BudgetAction.
@@ -301,12 +397,12 @@ type BudgetActionStatus struct {
 type BudgetAction struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.actionThreshold)",message="actionThreshold is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.actionType)",message="actionType is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.approvalModel)",message="approvalModel is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.definition)",message="definition is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.notificationType)",message="notificationType is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.subscriber)",message="subscriber is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.actionThreshold) || has(self.initProvider.actionThreshold)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.actionType) || has(self.initProvider.actionType)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.approvalModel) || has(self.initProvider.approvalModel)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.definition) || has(self.initProvider.definition)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.notificationType) || has(self.initProvider.notificationType)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.subscriber) || has(self.initProvider.subscriber)",message="%!s(MISSING) is a required parameter"
 	Spec   BudgetActionSpec   `json:"spec"`
 	Status BudgetActionStatus `json:"status,omitempty"`
 }

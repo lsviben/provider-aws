@@ -13,6 +13,9 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ACLInitParameters struct {
+}
+
 type ACLObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -25,6 +28,9 @@ type ACLObservation struct {
 }
 
 type ACLParameters struct {
+}
+
+type ACLRuleInitParameters struct {
 }
 
 type ACLRuleObservation struct {
@@ -44,6 +50,9 @@ type ACLRuleObservation struct {
 type ACLRuleParameters struct {
 }
 
+type ACLRulePortRangeInitParameters struct {
+}
+
 type ACLRulePortRangeObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -51,6 +60,9 @@ type ACLRulePortRangeObservation struct {
 }
 
 type ACLRulePortRangeParameters struct {
+}
+
+type AdditionalDetailsComponentInitParameters struct {
 }
 
 type AdditionalDetailsComponentObservation struct {
@@ -67,6 +79,9 @@ type AdditionalDetailsComponentObservation struct {
 type AdditionalDetailsComponentParameters struct {
 }
 
+type AdditionalDetailsInitParameters struct {
+}
+
 type AdditionalDetailsObservation struct {
 	AdditionalDetailType *string `json:"additionalDetailType,omitempty" tf:"additional_detail_type,omitempty"`
 
@@ -74,6 +89,9 @@ type AdditionalDetailsObservation struct {
 }
 
 type AdditionalDetailsParameters struct {
+}
+
+type AlternatePathHintsInitParameters struct {
 }
 
 type AlternatePathHintsObservation struct {
@@ -86,6 +104,9 @@ type AlternatePathHintsObservation struct {
 }
 
 type AlternatePathHintsParameters struct {
+}
+
+type AttachedToInitParameters struct {
 }
 
 type AttachedToObservation struct {
@@ -102,6 +123,9 @@ type AttachedToObservation struct {
 type AttachedToParameters struct {
 }
 
+type ClassicLoadBalancerListenerInitParameters struct {
+}
+
 type ClassicLoadBalancerListenerObservation struct {
 	InstancePort *float64 `json:"instancePort,omitempty" tf:"instance_port,omitempty"`
 
@@ -109,6 +133,9 @@ type ClassicLoadBalancerListenerObservation struct {
 }
 
 type ClassicLoadBalancerListenerParameters struct {
+}
+
+type ComponentInitParameters struct {
 }
 
 type ComponentObservation struct {
@@ -125,6 +152,9 @@ type ComponentObservation struct {
 type ComponentParameters struct {
 }
 
+type DestinationInitParameters struct {
+}
+
 type DestinationObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -139,6 +169,9 @@ type DestinationObservation struct {
 type DestinationParameters struct {
 }
 
+type DestinationPortRangesInitParameters struct {
+}
+
 type DestinationPortRangesObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -146,6 +179,9 @@ type DestinationPortRangesObservation struct {
 }
 
 type DestinationPortRangesParameters struct {
+}
+
+type DestinationVPCInitParameters struct {
 }
 
 type DestinationVPCObservation struct {
@@ -162,6 +198,9 @@ type DestinationVPCObservation struct {
 type DestinationVPCParameters struct {
 }
 
+type ElasticLoadBalancerListenerInitParameters struct {
+}
+
 type ElasticLoadBalancerListenerObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -176,6 +215,9 @@ type ElasticLoadBalancerListenerObservation struct {
 type ElasticLoadBalancerListenerParameters struct {
 }
 
+type ExplanationsCustomerGatewayInitParameters struct {
+}
+
 type ExplanationsCustomerGatewayObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -188,6 +230,9 @@ type ExplanationsCustomerGatewayObservation struct {
 }
 
 type ExplanationsCustomerGatewayParameters struct {
+}
+
+type ExplanationsInitParameters struct {
 }
 
 type ExplanationsObservation struct {
@@ -292,6 +337,9 @@ type ExplanationsObservation struct {
 type ExplanationsParameters struct {
 }
 
+type ForwardPathComponentsACLRuleInitParameters struct {
+}
+
 type ForwardPathComponentsACLRuleObservation struct {
 	Cidr *string `json:"cidr,omitempty" tf:"cidr,omitempty"`
 
@@ -309,6 +357,9 @@ type ForwardPathComponentsACLRuleObservation struct {
 type ForwardPathComponentsACLRuleParameters struct {
 }
 
+type ForwardPathComponentsAttachedToInitParameters struct {
+}
+
 type ForwardPathComponentsAttachedToObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -321,6 +372,9 @@ type ForwardPathComponentsAttachedToObservation struct {
 }
 
 type ForwardPathComponentsAttachedToParameters struct {
+}
+
+type ForwardPathComponentsComponentInitParameters struct {
 }
 
 type ForwardPathComponentsComponentObservation struct {
@@ -337,6 +391,9 @@ type ForwardPathComponentsComponentObservation struct {
 type ForwardPathComponentsComponentParameters struct {
 }
 
+type ForwardPathComponentsDestinationVPCInitParameters struct {
+}
+
 type ForwardPathComponentsDestinationVPCObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -349,6 +406,9 @@ type ForwardPathComponentsDestinationVPCObservation struct {
 }
 
 type ForwardPathComponentsDestinationVPCParameters struct {
+}
+
+type ForwardPathComponentsInitParameters struct {
 }
 
 type ForwardPathComponentsObservation struct {
@@ -386,6 +446,9 @@ type ForwardPathComponentsObservation struct {
 type ForwardPathComponentsParameters struct {
 }
 
+type ForwardPathComponentsRouteTableRouteInitParameters struct {
+}
+
 type ForwardPathComponentsRouteTableRouteObservation struct {
 	DestinationCidr *string `json:"destinationCidr,omitempty" tf:"destination_cidr,omitempty"`
 
@@ -419,6 +482,9 @@ type ForwardPathComponentsRouteTableRouteObservation struct {
 type ForwardPathComponentsRouteTableRouteParameters struct {
 }
 
+type ForwardPathComponentsSecurityGroupRuleInitParameters struct {
+}
+
 type ForwardPathComponentsSecurityGroupRuleObservation struct {
 	Cidr *string `json:"cidr,omitempty" tf:"cidr,omitempty"`
 
@@ -438,6 +504,9 @@ type ForwardPathComponentsSecurityGroupRuleObservation struct {
 type ForwardPathComponentsSecurityGroupRuleParameters struct {
 }
 
+type ForwardPathComponentsSecurityGroupRulePortRangeInitParameters struct {
+}
+
 type ForwardPathComponentsSecurityGroupRulePortRangeObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -445,6 +514,9 @@ type ForwardPathComponentsSecurityGroupRulePortRangeObservation struct {
 }
 
 type ForwardPathComponentsSecurityGroupRulePortRangeParameters struct {
+}
+
+type ForwardPathComponentsSourceVPCInitParameters struct {
 }
 
 type ForwardPathComponentsSourceVPCObservation struct {
@@ -461,6 +533,9 @@ type ForwardPathComponentsSourceVPCObservation struct {
 type ForwardPathComponentsSourceVPCParameters struct {
 }
 
+type ForwardPathComponentsSubnetInitParameters struct {
+}
+
 type ForwardPathComponentsSubnetObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -475,6 +550,9 @@ type ForwardPathComponentsSubnetObservation struct {
 type ForwardPathComponentsSubnetParameters struct {
 }
 
+type ForwardPathComponentsTransitGatewayInitParameters struct {
+}
+
 type ForwardPathComponentsTransitGatewayObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -487,6 +565,9 @@ type ForwardPathComponentsTransitGatewayObservation struct {
 }
 
 type ForwardPathComponentsTransitGatewayParameters struct {
+}
+
+type ForwardPathComponentsTransitGatewayRouteTableRouteInitParameters struct {
 }
 
 type ForwardPathComponentsTransitGatewayRouteTableRouteObservation struct {
@@ -512,6 +593,9 @@ type ForwardPathComponentsTransitGatewayRouteTableRouteObservation struct {
 type ForwardPathComponentsTransitGatewayRouteTableRouteParameters struct {
 }
 
+type ForwardPathComponentsVPCInitParameters struct {
+}
+
 type ForwardPathComponentsVPCObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -526,6 +610,9 @@ type ForwardPathComponentsVPCObservation struct {
 type ForwardPathComponentsVPCParameters struct {
 }
 
+type InboundHeaderDestinationPortRangesInitParameters struct {
+}
+
 type InboundHeaderDestinationPortRangesObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -533,6 +620,9 @@ type InboundHeaderDestinationPortRangesObservation struct {
 }
 
 type InboundHeaderDestinationPortRangesParameters struct {
+}
+
+type InboundHeaderInitParameters struct {
 }
 
 type InboundHeaderObservation struct {
@@ -550,6 +640,9 @@ type InboundHeaderObservation struct {
 type InboundHeaderParameters struct {
 }
 
+type InboundHeaderSourcePortRangesInitParameters struct {
+}
+
 type InboundHeaderSourcePortRangesObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -557,6 +650,9 @@ type InboundHeaderSourcePortRangesObservation struct {
 }
 
 type InboundHeaderSourcePortRangesParameters struct {
+}
+
+type IngressRouteTableInitParameters struct {
 }
 
 type IngressRouteTableObservation struct {
@@ -573,6 +669,9 @@ type IngressRouteTableObservation struct {
 type IngressRouteTableParameters struct {
 }
 
+type InternetGatewayInitParameters struct {
+}
+
 type InternetGatewayObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -585,6 +684,9 @@ type InternetGatewayObservation struct {
 }
 
 type InternetGatewayParameters struct {
+}
+
+type LoadBalancerTargetGroupInitParameters struct {
 }
 
 type LoadBalancerTargetGroupObservation struct {
@@ -601,6 +703,9 @@ type LoadBalancerTargetGroupObservation struct {
 type LoadBalancerTargetGroupParameters struct {
 }
 
+type LoadBalancerTargetGroupsInitParameters struct {
+}
+
 type LoadBalancerTargetGroupsObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -615,6 +720,9 @@ type LoadBalancerTargetGroupsObservation struct {
 type LoadBalancerTargetGroupsParameters struct {
 }
 
+type NATGatewayInitParameters struct {
+}
+
 type NATGatewayObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -627,6 +735,31 @@ type NATGatewayObservation struct {
 }
 
 type NATGatewayParameters struct {
+}
+
+type NetworkInsightsAnalysisInitParameters struct {
+
+	// A list of ARNs for resources the path must traverse.
+	FilterInArns []*string `json:"filterInArns,omitempty" tf:"filter_in_arns,omitempty"`
+
+	// ID of the Network Insights Path to run an analysis on.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.NetworkInsightsPath
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	NetworkInsightsPathID *string `json:"networkInsightsPathId,omitempty" tf:"network_insights_path_id,omitempty"`
+
+	NetworkInsightsPathIDRef *v1.Reference `json:"networkInsightsPathIdRef,omitempty" tf:"-"`
+
+	NetworkInsightsPathIDSelector *v1.Selector `json:"networkInsightsPathIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// If enabled, the resource will wait for the Network Insights Analysis status to change to succeeded or failed. Setting this to false will skip the process. Default: true.
+	WaitForCompletion *bool `json:"waitForCompletion,omitempty" tf:"wait_for_completion,omitempty"`
 }
 
 type NetworkInsightsAnalysisObservation struct {
@@ -683,13 +816,11 @@ type NetworkInsightsAnalysisObservation struct {
 type NetworkInsightsAnalysisParameters struct {
 
 	// A list of ARNs for resources the path must traverse.
-	// +kubebuilder:validation:Optional
 	FilterInArns []*string `json:"filterInArns,omitempty" tf:"filter_in_arns,omitempty"`
 
 	// ID of the Network Insights Path to run an analysis on.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.NetworkInsightsPath
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	NetworkInsightsPathID *string `json:"networkInsightsPathId,omitempty" tf:"network_insights_path_id,omitempty"`
 
 	// Reference to a NetworkInsightsPath in ec2 to populate networkInsightsPathId.
@@ -702,16 +833,16 @@ type NetworkInsightsAnalysisParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// If enabled, the resource will wait for the Network Insights Analysis status to change to succeeded or failed. Setting this to false will skip the process. Default: true.
-	// +kubebuilder:validation:Optional
 	WaitForCompletion *bool `json:"waitForCompletion,omitempty" tf:"wait_for_completion,omitempty"`
+}
+
+type NetworkInterfaceInitParameters struct {
 }
 
 type NetworkInterfaceObservation struct {
@@ -728,6 +859,9 @@ type NetworkInterfaceObservation struct {
 type NetworkInterfaceParameters struct {
 }
 
+type OutboundHeaderDestinationPortRangesInitParameters struct {
+}
+
 type OutboundHeaderDestinationPortRangesObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -735,6 +869,9 @@ type OutboundHeaderDestinationPortRangesObservation struct {
 }
 
 type OutboundHeaderDestinationPortRangesParameters struct {
+}
+
+type OutboundHeaderInitParameters struct {
 }
 
 type OutboundHeaderObservation struct {
@@ -752,6 +889,9 @@ type OutboundHeaderObservation struct {
 type OutboundHeaderParameters struct {
 }
 
+type OutboundHeaderSourcePortRangesInitParameters struct {
+}
+
 type OutboundHeaderSourcePortRangesObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -759,6 +899,9 @@ type OutboundHeaderSourcePortRangesObservation struct {
 }
 
 type OutboundHeaderSourcePortRangesParameters struct {
+}
+
+type PortRangeInitParameters struct {
 }
 
 type PortRangeObservation struct {
@@ -770,6 +913,9 @@ type PortRangeObservation struct {
 type PortRangeParameters struct {
 }
 
+type PortRangesInitParameters struct {
+}
+
 type PortRangesObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -777,6 +923,9 @@ type PortRangesObservation struct {
 }
 
 type PortRangesParameters struct {
+}
+
+type PrefixListInitParameters struct {
 }
 
 type PrefixListObservation struct {
@@ -791,6 +940,9 @@ type PrefixListObservation struct {
 }
 
 type PrefixListParameters struct {
+}
+
+type ReturnPathComponentsACLRuleInitParameters struct {
 }
 
 type ReturnPathComponentsACLRuleObservation struct {
@@ -810,6 +962,9 @@ type ReturnPathComponentsACLRuleObservation struct {
 type ReturnPathComponentsACLRuleParameters struct {
 }
 
+type ReturnPathComponentsACLRulePortRangeInitParameters struct {
+}
+
 type ReturnPathComponentsACLRulePortRangeObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -817,6 +972,9 @@ type ReturnPathComponentsACLRulePortRangeObservation struct {
 }
 
 type ReturnPathComponentsACLRulePortRangeParameters struct {
+}
+
+type ReturnPathComponentsAdditionalDetailsComponentInitParameters struct {
 }
 
 type ReturnPathComponentsAdditionalDetailsComponentObservation struct {
@@ -833,6 +991,9 @@ type ReturnPathComponentsAdditionalDetailsComponentObservation struct {
 type ReturnPathComponentsAdditionalDetailsComponentParameters struct {
 }
 
+type ReturnPathComponentsAdditionalDetailsInitParameters struct {
+}
+
 type ReturnPathComponentsAdditionalDetailsObservation struct {
 	AdditionalDetailType *string `json:"additionalDetailType,omitempty" tf:"additional_detail_type,omitempty"`
 
@@ -840,6 +1001,9 @@ type ReturnPathComponentsAdditionalDetailsObservation struct {
 }
 
 type ReturnPathComponentsAdditionalDetailsParameters struct {
+}
+
+type ReturnPathComponentsAttachedToInitParameters struct {
 }
 
 type ReturnPathComponentsAttachedToObservation struct {
@@ -856,6 +1020,9 @@ type ReturnPathComponentsAttachedToObservation struct {
 type ReturnPathComponentsAttachedToParameters struct {
 }
 
+type ReturnPathComponentsComponentInitParameters struct {
+}
+
 type ReturnPathComponentsComponentObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -868,6 +1035,9 @@ type ReturnPathComponentsComponentObservation struct {
 }
 
 type ReturnPathComponentsComponentParameters struct {
+}
+
+type ReturnPathComponentsDestinationVPCInitParameters struct {
 }
 
 type ReturnPathComponentsDestinationVPCObservation struct {
@@ -884,6 +1054,9 @@ type ReturnPathComponentsDestinationVPCObservation struct {
 type ReturnPathComponentsDestinationVPCParameters struct {
 }
 
+type ReturnPathComponentsInboundHeaderInitParameters struct {
+}
+
 type ReturnPathComponentsInboundHeaderObservation struct {
 	DestinationAddresses []*string `json:"destinationAddresses,omitempty" tf:"destination_addresses,omitempty"`
 
@@ -897,6 +1070,9 @@ type ReturnPathComponentsInboundHeaderObservation struct {
 }
 
 type ReturnPathComponentsInboundHeaderParameters struct {
+}
+
+type ReturnPathComponentsInitParameters struct {
 }
 
 type ReturnPathComponentsObservation struct {
@@ -931,6 +1107,9 @@ type ReturnPathComponentsObservation struct {
 	VPC []ReturnPathComponentsVPCObservation `json:"vpc,omitempty" tf:"vpc,omitempty"`
 }
 
+type ReturnPathComponentsOutboundHeaderDestinationPortRangesInitParameters struct {
+}
+
 type ReturnPathComponentsOutboundHeaderDestinationPortRangesObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -938,6 +1117,9 @@ type ReturnPathComponentsOutboundHeaderDestinationPortRangesObservation struct {
 }
 
 type ReturnPathComponentsOutboundHeaderDestinationPortRangesParameters struct {
+}
+
+type ReturnPathComponentsOutboundHeaderInitParameters struct {
 }
 
 type ReturnPathComponentsOutboundHeaderObservation struct {
@@ -955,6 +1137,9 @@ type ReturnPathComponentsOutboundHeaderObservation struct {
 type ReturnPathComponentsOutboundHeaderParameters struct {
 }
 
+type ReturnPathComponentsOutboundHeaderSourcePortRangesInitParameters struct {
+}
+
 type ReturnPathComponentsOutboundHeaderSourcePortRangesObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -965,6 +1150,9 @@ type ReturnPathComponentsOutboundHeaderSourcePortRangesParameters struct {
 }
 
 type ReturnPathComponentsParameters struct {
+}
+
+type ReturnPathComponentsRouteTableRouteInitParameters struct {
 }
 
 type ReturnPathComponentsRouteTableRouteObservation struct {
@@ -1000,6 +1188,9 @@ type ReturnPathComponentsRouteTableRouteObservation struct {
 type ReturnPathComponentsRouteTableRouteParameters struct {
 }
 
+type ReturnPathComponentsSecurityGroupRuleInitParameters struct {
+}
+
 type ReturnPathComponentsSecurityGroupRuleObservation struct {
 	Cidr *string `json:"cidr,omitempty" tf:"cidr,omitempty"`
 
@@ -1019,6 +1210,9 @@ type ReturnPathComponentsSecurityGroupRuleObservation struct {
 type ReturnPathComponentsSecurityGroupRuleParameters struct {
 }
 
+type ReturnPathComponentsSecurityGroupRulePortRangeInitParameters struct {
+}
+
 type ReturnPathComponentsSecurityGroupRulePortRangeObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -1026,6 +1220,9 @@ type ReturnPathComponentsSecurityGroupRulePortRangeObservation struct {
 }
 
 type ReturnPathComponentsSecurityGroupRulePortRangeParameters struct {
+}
+
+type ReturnPathComponentsSourceVPCInitParameters struct {
 }
 
 type ReturnPathComponentsSourceVPCObservation struct {
@@ -1042,6 +1239,9 @@ type ReturnPathComponentsSourceVPCObservation struct {
 type ReturnPathComponentsSourceVPCParameters struct {
 }
 
+type ReturnPathComponentsSubnetInitParameters struct {
+}
+
 type ReturnPathComponentsSubnetObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -1056,6 +1256,9 @@ type ReturnPathComponentsSubnetObservation struct {
 type ReturnPathComponentsSubnetParameters struct {
 }
 
+type ReturnPathComponentsTransitGatewayInitParameters struct {
+}
+
 type ReturnPathComponentsTransitGatewayObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -1068,6 +1271,9 @@ type ReturnPathComponentsTransitGatewayObservation struct {
 }
 
 type ReturnPathComponentsTransitGatewayParameters struct {
+}
+
+type ReturnPathComponentsTransitGatewayRouteTableRouteInitParameters struct {
 }
 
 type ReturnPathComponentsTransitGatewayRouteTableRouteObservation struct {
@@ -1093,6 +1299,9 @@ type ReturnPathComponentsTransitGatewayRouteTableRouteObservation struct {
 type ReturnPathComponentsTransitGatewayRouteTableRouteParameters struct {
 }
 
+type ReturnPathComponentsVPCInitParameters struct {
+}
+
 type ReturnPathComponentsVPCObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -1107,6 +1316,9 @@ type ReturnPathComponentsVPCObservation struct {
 type ReturnPathComponentsVPCParameters struct {
 }
 
+type RouteTableInitParameters struct {
+}
+
 type RouteTableObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -1119,6 +1331,9 @@ type RouteTableObservation struct {
 }
 
 type RouteTableParameters struct {
+}
+
+type RouteTableRouteInitParameters struct {
 }
 
 type RouteTableRouteObservation struct {
@@ -1154,6 +1369,9 @@ type RouteTableRouteObservation struct {
 type RouteTableRouteParameters struct {
 }
 
+type SecurityGroupInitParameters struct {
+}
+
 type SecurityGroupObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -1166,6 +1384,9 @@ type SecurityGroupObservation struct {
 }
 
 type SecurityGroupParameters struct {
+}
+
+type SecurityGroupRuleInitParameters struct {
 }
 
 type SecurityGroupRuleObservation struct {
@@ -1187,6 +1408,9 @@ type SecurityGroupRuleObservation struct {
 type SecurityGroupRuleParameters struct {
 }
 
+type SecurityGroupRulePortRangeInitParameters struct {
+}
+
 type SecurityGroupRulePortRangeObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -1194,6 +1418,9 @@ type SecurityGroupRulePortRangeObservation struct {
 }
 
 type SecurityGroupRulePortRangeParameters struct {
+}
+
+type SecurityGroupsInitParameters struct {
 }
 
 type SecurityGroupsObservation struct {
@@ -1210,6 +1437,9 @@ type SecurityGroupsObservation struct {
 type SecurityGroupsParameters struct {
 }
 
+type SourcePortRangesInitParameters struct {
+}
+
 type SourcePortRangesObservation struct {
 	From *float64 `json:"from,omitempty" tf:"from,omitempty"`
 
@@ -1217,6 +1447,9 @@ type SourcePortRangesObservation struct {
 }
 
 type SourcePortRangesParameters struct {
+}
+
+type SourceVPCInitParameters struct {
 }
 
 type SourceVPCObservation struct {
@@ -1233,6 +1466,9 @@ type SourceVPCObservation struct {
 type SourceVPCParameters struct {
 }
 
+type SubnetInitParameters struct {
+}
+
 type SubnetObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -1245,6 +1481,9 @@ type SubnetObservation struct {
 }
 
 type SubnetParameters struct {
+}
+
+type SubnetRouteTableInitParameters struct {
 }
 
 type SubnetRouteTableObservation struct {
@@ -1261,6 +1500,9 @@ type SubnetRouteTableObservation struct {
 type SubnetRouteTableParameters struct {
 }
 
+type TransitGatewayAttachmentInitParameters struct {
+}
+
 type TransitGatewayAttachmentObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -1273,6 +1515,9 @@ type TransitGatewayAttachmentObservation struct {
 }
 
 type TransitGatewayAttachmentParameters struct {
+}
+
+type TransitGatewayInitParameters struct {
 }
 
 type TransitGatewayObservation struct {
@@ -1289,6 +1534,9 @@ type TransitGatewayObservation struct {
 type TransitGatewayParameters struct {
 }
 
+type TransitGatewayRouteTableInitParameters struct {
+}
+
 type TransitGatewayRouteTableObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -1301,6 +1549,9 @@ type TransitGatewayRouteTableObservation struct {
 }
 
 type TransitGatewayRouteTableParameters struct {
+}
+
+type TransitGatewayRouteTableRouteInitParameters struct {
 }
 
 type TransitGatewayRouteTableRouteObservation struct {
@@ -1326,6 +1577,9 @@ type TransitGatewayRouteTableRouteObservation struct {
 type TransitGatewayRouteTableRouteParameters struct {
 }
 
+type VPCEndpointInitParameters struct {
+}
+
 type VPCEndpointObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -1338,6 +1592,9 @@ type VPCEndpointObservation struct {
 }
 
 type VPCEndpointParameters struct {
+}
+
+type VPCInitParameters struct {
 }
 
 type VPCObservation struct {
@@ -1354,6 +1611,9 @@ type VPCObservation struct {
 type VPCParameters struct {
 }
 
+type VPCPeeringConnectionInitParameters struct {
+}
+
 type VPCPeeringConnectionObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -1368,6 +1628,9 @@ type VPCPeeringConnectionObservation struct {
 type VPCPeeringConnectionParameters struct {
 }
 
+type VPNConnectionInitParameters struct {
+}
+
 type VPNConnectionObservation struct {
 
 	// ARN of the Network Insights Analysis.
@@ -1380,6 +1643,9 @@ type VPNConnectionObservation struct {
 }
 
 type VPNConnectionParameters struct {
+}
+
+type VPNGatewayInitParameters struct {
 }
 
 type VPNGatewayObservation struct {
@@ -1400,6 +1666,10 @@ type VPNGatewayParameters struct {
 type NetworkInsightsAnalysisSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     NetworkInsightsAnalysisParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider NetworkInsightsAnalysisInitParameters `json:"initProvider,omitempty"`
 }
 
 // NetworkInsightsAnalysisStatus defines the observed state of NetworkInsightsAnalysis.

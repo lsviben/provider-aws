@@ -13,6 +13,37 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ActivationInitParameters struct {
+
+	// The description of the resource that you want to register.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// UTC timestamp in RFC3339 format by which this activation request should expire. The default value is 24 hours from resource creation time.
+	ExpirationDate *string `json:"expirationDate,omitempty" tf:"expiration_date,omitempty"`
+
+	// The IAM Role to attach to the managed instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	IAMRole *string `json:"iamRole,omitempty" tf:"iam_role,omitempty"`
+
+	IAMRoleRef *v1.Reference `json:"iamRoleRef,omitempty" tf:"-"`
+
+	IAMRoleSelector *v1.Selector `json:"iamRoleSelector,omitempty" tf:"-"`
+
+	// The default name of the registered managed instance.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The maximum number of managed instances you want to register. The default value is 1 instance.
+	RegistrationLimit *float64 `json:"registrationLimit,omitempty" tf:"registration_limit,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ActivationObservation struct {
 
 	// The code the system generates when it processes the activation.
@@ -52,17 +83,14 @@ type ActivationObservation struct {
 type ActivationParameters struct {
 
 	// The description of the resource that you want to register.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// UTC timestamp in RFC3339 format by which this activation request should expire. The default value is 24 hours from resource creation time.
-	// +kubebuilder:validation:Optional
 	ExpirationDate *string `json:"expirationDate,omitempty" tf:"expiration_date,omitempty"`
 
 	// The IAM Role to attach to the managed instance.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	IAMRole *string `json:"iamRole,omitempty" tf:"iam_role,omitempty"`
 
 	// Reference to a Role in iam to populate iamRole.
@@ -74,20 +102,16 @@ type ActivationParameters struct {
 	IAMRoleSelector *v1.Selector `json:"iamRoleSelector,omitempty" tf:"-"`
 
 	// The default name of the registered managed instance.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The maximum number of managed instances you want to register. The default value is 1 instance.
-	// +kubebuilder:validation:Optional
 	RegistrationLimit *float64 `json:"registrationLimit,omitempty" tf:"registration_limit,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -95,6 +119,10 @@ type ActivationParameters struct {
 type ActivationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ActivationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ActivationInitParameters `json:"initProvider,omitempty"`
 }
 
 // ActivationStatus defines the observed state of Activation.

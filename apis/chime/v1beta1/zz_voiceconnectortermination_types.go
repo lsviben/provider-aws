@@ -13,6 +13,37 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type VoiceConnectorTerminationInitParameters struct {
+
+	// The countries to which calls are allowed, in ISO 3166-1 alpha-2 format.
+	CallingRegions []*string `json:"callingRegions,omitempty" tf:"calling_regions,omitempty"`
+
+	// The IP addresses allowed to make calls, in CIDR format.
+	CidrAllowList []*string `json:"cidrAllowList,omitempty" tf:"cidr_allow_list,omitempty"`
+
+	// The limit on calls per second. Max value based on account service quota. Default value of 1.
+	CpsLimit *float64 `json:"cpsLimit,omitempty" tf:"cps_limit,omitempty"`
+
+	// The default caller ID phone number.
+	DefaultPhoneNumber *string `json:"defaultPhoneNumber,omitempty" tf:"default_phone_number,omitempty"`
+
+	// When termination settings are disabled, outbound calls can not be made.
+	Disabled *bool `json:"disabled,omitempty" tf:"disabled,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The Amazon Chime Voice Connector ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/chime/v1beta1.VoiceConnector
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	VoiceConnectorID *string `json:"voiceConnectorId,omitempty" tf:"voice_connector_id,omitempty"`
+
+	VoiceConnectorIDRef *v1.Reference `json:"voiceConnectorIdRef,omitempty" tf:"-"`
+
+	VoiceConnectorIDSelector *v1.Selector `json:"voiceConnectorIdSelector,omitempty" tf:"-"`
+}
+
 type VoiceConnectorTerminationObservation struct {
 
 	// The countries to which calls are allowed, in ISO 3166-1 alpha-2 format.
@@ -40,34 +71,27 @@ type VoiceConnectorTerminationObservation struct {
 type VoiceConnectorTerminationParameters struct {
 
 	// The countries to which calls are allowed, in ISO 3166-1 alpha-2 format.
-	// +kubebuilder:validation:Optional
 	CallingRegions []*string `json:"callingRegions,omitempty" tf:"calling_regions,omitempty"`
 
 	// The IP addresses allowed to make calls, in CIDR format.
-	// +kubebuilder:validation:Optional
 	CidrAllowList []*string `json:"cidrAllowList,omitempty" tf:"cidr_allow_list,omitempty"`
 
 	// The limit on calls per second. Max value based on account service quota. Default value of 1.
-	// +kubebuilder:validation:Optional
 	CpsLimit *float64 `json:"cpsLimit,omitempty" tf:"cps_limit,omitempty"`
 
 	// The default caller ID phone number.
-	// +kubebuilder:validation:Optional
 	DefaultPhoneNumber *string `json:"defaultPhoneNumber,omitempty" tf:"default_phone_number,omitempty"`
 
 	// When termination settings are disabled, outbound calls can not be made.
-	// +kubebuilder:validation:Optional
 	Disabled *bool `json:"disabled,omitempty" tf:"disabled,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The Amazon Chime Voice Connector ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/chime/v1beta1.VoiceConnector
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	VoiceConnectorID *string `json:"voiceConnectorId,omitempty" tf:"voice_connector_id,omitempty"`
 
 	// Reference to a VoiceConnector in chime to populate voiceConnectorId.
@@ -83,6 +107,10 @@ type VoiceConnectorTerminationParameters struct {
 type VoiceConnectorTerminationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VoiceConnectorTerminationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VoiceConnectorTerminationInitParameters `json:"initProvider,omitempty"`
 }
 
 // VoiceConnectorTerminationStatus defines the observed state of VoiceConnectorTermination.
@@ -103,8 +131,8 @@ type VoiceConnectorTerminationStatus struct {
 type VoiceConnectorTermination struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.callingRegions)",message="callingRegions is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.cidrAllowList)",message="cidrAllowList is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.callingRegions) || has(self.initProvider.callingRegions)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.cidrAllowList) || has(self.initProvider.cidrAllowList)",message="%!s(MISSING) is a required parameter"
 	Spec   VoiceConnectorTerminationSpec   `json:"spec"`
 	Status VoiceConnectorTerminationStatus `json:"status,omitempty"`
 }

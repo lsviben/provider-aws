@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ClusterModeInitParameters struct {
+
+	// Number of node groups (shards) for this Redis replication group.
+	// Changing this number will trigger a resizing operation before other settings modifications.
+	NumNodeGroups *float64 `json:"numNodeGroups,omitempty" tf:"num_node_groups,omitempty"`
+
+	// Number of replica nodes in each node group.
+	// Changing this number will trigger a resizing operation before other settings modifications.
+	// Valid values are 0 to 5.
+	ReplicasPerNodeGroup *float64 `json:"replicasPerNodeGroup,omitempty" tf:"replicas_per_node_group,omitempty"`
+}
+
 type ClusterModeObservation struct {
 
 	// Number of node groups (shards) for this Redis replication group.
@@ -29,14 +41,171 @@ type ClusterModeParameters struct {
 
 	// Number of node groups (shards) for this Redis replication group.
 	// Changing this number will trigger a resizing operation before other settings modifications.
-	// +kubebuilder:validation:Optional
 	NumNodeGroups *float64 `json:"numNodeGroups,omitempty" tf:"num_node_groups,omitempty"`
 
 	// Number of replica nodes in each node group.
 	// Changing this number will trigger a resizing operation before other settings modifications.
 	// Valid values are 0 to 5.
-	// +kubebuilder:validation:Optional
 	ReplicasPerNodeGroup *float64 `json:"replicasPerNodeGroup,omitempty" tf:"replicas_per_node_group,omitempty"`
+}
+
+type ReplicationGroupInitParameters struct {
+
+	// Specifies whether any modifications are applied immediately, or during the next maintenance window. Default is false.
+	ApplyImmediately *bool `json:"applyImmediately,omitempty" tf:"apply_immediately,omitempty"`
+
+	// Whether to enable encryption at rest.
+	AtRestEncryptionEnabled *bool `json:"atRestEncryptionEnabled,omitempty" tf:"at_rest_encryption_enabled,omitempty"`
+
+	// Password used to access a password protected server. Can be specified only if transit_encryption_enabled = true.
+	AuthTokenSecretRef *v1.SecretKeySelector `json:"authTokenSecretRef,omitempty" tf:"-"`
+
+	// Specifies whether minor version engine upgrades will be applied automatically to the underlying Cache Cluster instances during the maintenance window.
+	// Only supported for engine type "redis" and if the engine version is 6 or higher.
+	// Defaults to true.
+	AutoMinorVersionUpgrade *string `json:"autoMinorVersionUpgrade,omitempty" tf:"auto_minor_version_upgrade,omitempty"`
+
+	// Specifies whether a read-only replica will be automatically promoted to read/write primary if the existing primary fails. If enabled, num_cache_clusters must be greater than 1. Must be enabled for Redis (cluster mode enabled) replication groups. Defaults to false.
+	AutomaticFailoverEnabled *bool `json:"automaticFailoverEnabled,omitempty" tf:"automatic_failover_enabled,omitempty"`
+
+	// List of EC2 availability zones in which the replication group's cache clusters will be created. The order of the availability zones in the list is not considered.
+	AvailabilityZones []*string `json:"availabilityZones,omitempty" tf:"availability_zones,omitempty"`
+
+	// Create a native Redis cluster. automatic_failover_enabled must be set to true. Cluster Mode documented below. Only 1 cluster_mode block is allowed. Note that configuring this block does not enable cluster mode, i.e., data sharding, this requires using a parameter group that has the parameter cluster-enabled set to true.
+	ClusterMode []ClusterModeInitParameters `json:"clusterMode,omitempty" tf:"cluster_mode,omitempty"`
+
+	// Enables data tiering. Data tiering is only supported for replication groups using the r6gd node type. This parameter must be set to true when using r6gd nodes.
+	DataTieringEnabled *bool `json:"dataTieringEnabled,omitempty" tf:"data_tiering_enabled,omitempty"`
+
+	// created description for the replication group. Must not be empty.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Name of the cache engine to be used for the clusters in this replication group. The only valid value is redis.
+	Engine *string `json:"engine,omitempty" tf:"engine,omitempty"`
+
+	// Version number of the cache engine to be used for the cache clusters in this replication group.
+	// If the version is 6 or higher, the major and minor version can be set, e.g., 6.2,
+	// or the minor version can be unspecified which will use the latest version at creation time, e.g., 6.x.
+	// Otherwise, specify the full version desired, e.g., 5.0.6.
+	// The actual engine version used is returned in the attribute engine_version_actual, see Attributes Reference below.
+	EngineVersion *string `json:"engineVersion,omitempty" tf:"engine_version,omitempty"`
+
+	// The name of your final node group (shard) snapshot. ElastiCache creates the snapshot from the primary node in the cluster. If omitted, no final snapshot will be made.
+	FinalSnapshotIdentifier *string `json:"finalSnapshotIdentifier,omitempty" tf:"final_snapshot_identifier,omitempty"`
+
+	// The ID of the global replication group to which this replication group should belong. If this parameter is specified, the replication group is added to the specified global replication group as a secondary replication group; otherwise, the replication group is not part of any global replication group. If global_replication_group_id is set, the num_node_groups parameter (or the num_node_groups parameter of the deprecated cluster_mode block) cannot be set.
+	GlobalReplicationGroupID *string `json:"globalReplicationGroupId,omitempty" tf:"global_replication_group_id,omitempty"`
+
+	// The ARN of the key that you wish to use if encrypting at rest. If not supplied, uses service managed encryption. Can be specified only if at_rest_encryption_enabled = true.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
+	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
+
+	KMSKeyIDRef *v1.Reference `json:"kmsKeyIdRef,omitempty" tf:"-"`
+
+	KMSKeyIDSelector *v1.Selector `json:"kmsKeyIdSelector,omitempty" tf:"-"`
+
+	// Specifies the destination and format of Redis SLOWLOG or Redis Engine Log. See the documentation on Amazon ElastiCache. See Log Delivery Configuration below for more details.
+	LogDeliveryConfiguration []ReplicationGroupLogDeliveryConfigurationInitParameters `json:"logDeliveryConfiguration,omitempty" tf:"log_delivery_configuration,omitempty"`
+
+	// ddd:hh24:mi (24H Clock UTC). The minimum maintenance window is a 60 minute period. Example: sun:05:00-sun:09:00
+	MaintenanceWindow *string `json:"maintenanceWindow,omitempty" tf:"maintenance_window,omitempty"`
+
+	// Specifies whether to enable Multi-AZ Support for the replication group. If true, automatic_failover_enabled must also be enabled. Defaults to false.
+	MultiAzEnabled *bool `json:"multiAzEnabled,omitempty" tf:"multi_az_enabled,omitempty"`
+
+	// Instance class to be used. See AWS documentation for information on supported node types and guidance on selecting node types. Required unless global_replication_group_id is set. Cannot be set if global_replication_group_id is set.
+	NodeType *string `json:"nodeType,omitempty" tf:"node_type,omitempty"`
+
+	// east-1:012345678999:my_sns_topic
+	NotificationTopicArn *string `json:"notificationTopicArn,omitempty" tf:"notification_topic_arn,omitempty"`
+
+	// 00#.
+	NumCacheClusters *float64 `json:"numCacheClusters,omitempty" tf:"num_cache_clusters,omitempty"`
+
+	// Number of node groups (shards) for this Redis replication group.
+	// Changing this number will trigger a resizing operation before other settings modifications.
+	NumNodeGroups *float64 `json:"numNodeGroups,omitempty" tf:"num_node_groups,omitempty"`
+
+	// Number of cache clusters (primary and replicas) this replication group will have. If Multi-AZ is enabled, the value of this parameter must be at least 2. Updates will occur before other modifications. Conflicts with num_cache_clusters, num_node_groups, or the deprecated cluster_mode. Defaults to 1.
+	NumberCacheClusters *float64 `json:"numberCacheClusters,omitempty" tf:"number_cache_clusters,omitempty"`
+
+	// Name of the parameter group to associate with this replication group. If this argument is omitted, the default cache parameter group for the specified engine is used. To enable "cluster mode", i.e., data sharding, use a parameter group that has the parameter cluster-enabled set to true.
+	ParameterGroupName *string `json:"parameterGroupName,omitempty" tf:"parameter_group_name,omitempty"`
+
+	// –  Port number on which each of the cache nodes will accept connections. For Memcache the default is 11211, and for Redis the default port is 6379.
+	Port *float64 `json:"port,omitempty" tf:"port,omitempty"`
+
+	// List of EC2 availability zones in which the replication group's cache clusters will be created. The order of the availability zones in the list is considered. The first item in the list will be the primary node. Ignored when updating.
+	PreferredCacheClusterAzs []*string `json:"preferredCacheClusterAzs,omitempty" tf:"preferred_cache_cluster_azs,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Number of replica nodes in each node group.
+	// Changing this number will trigger a resizing operation before other settings modifications.
+	// Valid values are 0 to 5.
+	ReplicasPerNodeGroup *float64 `json:"replicasPerNodeGroup,omitempty" tf:"replicas_per_node_group,omitempty"`
+
+	// created description for the replication group. Must not be empty.
+	ReplicationGroupDescription *string `json:"replicationGroupDescription,omitempty" tf:"replication_group_description,omitempty"`
+
+	SecurityGroupIDRefs []v1.Reference `json:"securityGroupIdRefs,omitempty" tf:"-"`
+
+	SecurityGroupIDSelector *v1.Selector `json:"securityGroupIdSelector,omitempty" tf:"-"`
+
+	// One or more Amazon VPC security groups associated with this replication group. Use this parameter only when you are creating a replication group in an Amazon Virtual Private Cloud
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.SecurityGroup
+	// +crossplane:generate:reference:refFieldName=SecurityGroupIDRefs
+	// +crossplane:generate:reference:selectorFieldName=SecurityGroupIDSelector
+	SecurityGroupIds []*string `json:"securityGroupIds,omitempty" tf:"security_group_ids,omitempty"`
+
+	// List of cache security group names to associate with this replication group.
+	SecurityGroupNames []*string `json:"securityGroupNames,omitempty" tf:"security_group_names,omitempty"`
+
+	// –  List of ARNs that identify Redis RDB snapshot files stored in Amazon S3. The names object names cannot contain any commas.
+	SnapshotArns []*string `json:"snapshotArns,omitempty" tf:"snapshot_arns,omitempty"`
+
+	// Name of a snapshot from which to restore data into the new node group. Changing the snapshot_name forces a new resource.
+	SnapshotName *string `json:"snapshotName,omitempty" tf:"snapshot_name,omitempty"`
+
+	// Number of days for which ElastiCache will retain automatic cache cluster snapshots before deleting them. For example, if you set SnapshotRetentionLimit to 5, then a snapshot that was taken today will be retained for 5 days before being deleted. If the value of snapshot_retention_limit is set to zero (0), backups are turned off. Please note that setting a snapshot_retention_limit is not supported on cache.t1.micro cache nodes
+	SnapshotRetentionLimit *float64 `json:"snapshotRetentionLimit,omitempty" tf:"snapshot_retention_limit,omitempty"`
+
+	// Daily time range (in UTC) during which ElastiCache will begin taking a daily snapshot of your cache cluster. The minimum snapshot window is a 60 minute period. Example: 05:00-09:00
+	SnapshotWindow *string `json:"snapshotWindow,omitempty" tf:"snapshot_window,omitempty"`
+
+	// Name of the cache subnet group to be used for the replication group.
+	// +crossplane:generate:reference:type=SubnetGroup
+	SubnetGroupName *string `json:"subnetGroupName,omitempty" tf:"subnet_group_name,omitempty"`
+
+	SubnetGroupNameRef *v1.Reference `json:"subnetGroupNameRef,omitempty" tf:"-"`
+
+	SubnetGroupNameSelector *v1.Selector `json:"subnetGroupNameSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// Whether to enable encryption in transit.
+	TransitEncryptionEnabled *bool `json:"transitEncryptionEnabled,omitempty" tf:"transit_encryption_enabled,omitempty"`
+
+	// User Group ID to associate with the replication group. Only a maximum of one (1) user group ID is valid. NOTE: This argument is a set because the AWS specification allows for multiple IDs. However, in practice, AWS only allows a maximum size of one.
+	UserGroupIds []*string `json:"userGroupIds,omitempty" tf:"user_group_ids,omitempty"`
+}
+
+type ReplicationGroupLogDeliveryConfigurationInitParameters struct {
+
+	// Name of either the CloudWatch Logs LogGroup or Kinesis Data Firehose resource.
+	Destination *string `json:"destination,omitempty" tf:"destination,omitempty"`
+
+	// For CloudWatch Logs use cloudwatch-logs or for Kinesis Data Firehose use kinesis-firehose.
+	DestinationType *string `json:"destinationType,omitempty" tf:"destination_type,omitempty"`
+
+	// Valid values are json or text
+	LogFormat *string `json:"logFormat,omitempty" tf:"log_format,omitempty"`
+
+	// Valid values are  slow-log or engine-log. Max 1 of each.
+	LogType *string `json:"logType,omitempty" tf:"log_type,omitempty"`
 }
 
 type ReplicationGroupLogDeliveryConfigurationObservation struct {
@@ -57,20 +226,16 @@ type ReplicationGroupLogDeliveryConfigurationObservation struct {
 type ReplicationGroupLogDeliveryConfigurationParameters struct {
 
 	// Name of either the CloudWatch Logs LogGroup or Kinesis Data Firehose resource.
-	// +kubebuilder:validation:Required
-	Destination *string `json:"destination" tf:"destination,omitempty"`
+	Destination *string `json:"destination,omitempty" tf:"destination,omitempty"`
 
 	// For CloudWatch Logs use cloudwatch-logs or for Kinesis Data Firehose use kinesis-firehose.
-	// +kubebuilder:validation:Required
-	DestinationType *string `json:"destinationType" tf:"destination_type,omitempty"`
+	DestinationType *string `json:"destinationType,omitempty" tf:"destination_type,omitempty"`
 
 	// Valid values are json or text
-	// +kubebuilder:validation:Required
-	LogFormat *string `json:"logFormat" tf:"log_format,omitempty"`
+	LogFormat *string `json:"logFormat,omitempty" tf:"log_format,omitempty"`
 
 	// Valid values are  slow-log or engine-log. Max 1 of each.
-	// +kubebuilder:validation:Required
-	LogType *string `json:"logType" tf:"log_type,omitempty"`
+	LogType *string `json:"logType,omitempty" tf:"log_type,omitempty"`
 }
 
 type ReplicationGroupObservation struct {
@@ -223,45 +388,35 @@ type ReplicationGroupObservation struct {
 type ReplicationGroupParameters struct {
 
 	// Specifies whether any modifications are applied immediately, or during the next maintenance window. Default is false.
-	// +kubebuilder:validation:Optional
 	ApplyImmediately *bool `json:"applyImmediately,omitempty" tf:"apply_immediately,omitempty"`
 
 	// Whether to enable encryption at rest.
-	// +kubebuilder:validation:Optional
 	AtRestEncryptionEnabled *bool `json:"atRestEncryptionEnabled,omitempty" tf:"at_rest_encryption_enabled,omitempty"`
 
 	// Password used to access a password protected server. Can be specified only if transit_encryption_enabled = true.
-	// +kubebuilder:validation:Optional
 	AuthTokenSecretRef *v1.SecretKeySelector `json:"authTokenSecretRef,omitempty" tf:"-"`
 
 	// Specifies whether minor version engine upgrades will be applied automatically to the underlying Cache Cluster instances during the maintenance window.
 	// Only supported for engine type "redis" and if the engine version is 6 or higher.
 	// Defaults to true.
-	// +kubebuilder:validation:Optional
 	AutoMinorVersionUpgrade *string `json:"autoMinorVersionUpgrade,omitempty" tf:"auto_minor_version_upgrade,omitempty"`
 
 	// Specifies whether a read-only replica will be automatically promoted to read/write primary if the existing primary fails. If enabled, num_cache_clusters must be greater than 1. Must be enabled for Redis (cluster mode enabled) replication groups. Defaults to false.
-	// +kubebuilder:validation:Optional
 	AutomaticFailoverEnabled *bool `json:"automaticFailoverEnabled,omitempty" tf:"automatic_failover_enabled,omitempty"`
 
 	// List of EC2 availability zones in which the replication group's cache clusters will be created. The order of the availability zones in the list is not considered.
-	// +kubebuilder:validation:Optional
 	AvailabilityZones []*string `json:"availabilityZones,omitempty" tf:"availability_zones,omitempty"`
 
 	// Create a native Redis cluster. automatic_failover_enabled must be set to true. Cluster Mode documented below. Only 1 cluster_mode block is allowed. Note that configuring this block does not enable cluster mode, i.e., data sharding, this requires using a parameter group that has the parameter cluster-enabled set to true.
-	// +kubebuilder:validation:Optional
 	ClusterMode []ClusterModeParameters `json:"clusterMode,omitempty" tf:"cluster_mode,omitempty"`
 
 	// Enables data tiering. Data tiering is only supported for replication groups using the r6gd node type. This parameter must be set to true when using r6gd nodes.
-	// +kubebuilder:validation:Optional
 	DataTieringEnabled *bool `json:"dataTieringEnabled,omitempty" tf:"data_tiering_enabled,omitempty"`
 
 	// created description for the replication group. Must not be empty.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Name of the cache engine to be used for the clusters in this replication group. The only valid value is redis.
-	// +kubebuilder:validation:Optional
 	Engine *string `json:"engine,omitempty" tf:"engine,omitempty"`
 
 	// Version number of the cache engine to be used for the cache clusters in this replication group.
@@ -269,20 +424,16 @@ type ReplicationGroupParameters struct {
 	// or the minor version can be unspecified which will use the latest version at creation time, e.g., 6.x.
 	// Otherwise, specify the full version desired, e.g., 5.0.6.
 	// The actual engine version used is returned in the attribute engine_version_actual, see Attributes Reference below.
-	// +kubebuilder:validation:Optional
 	EngineVersion *string `json:"engineVersion,omitempty" tf:"engine_version,omitempty"`
 
 	// The name of your final node group (shard) snapshot. ElastiCache creates the snapshot from the primary node in the cluster. If omitted, no final snapshot will be made.
-	// +kubebuilder:validation:Optional
 	FinalSnapshotIdentifier *string `json:"finalSnapshotIdentifier,omitempty" tf:"final_snapshot_identifier,omitempty"`
 
 	// The ID of the global replication group to which this replication group should belong. If this parameter is specified, the replication group is added to the specified global replication group as a secondary replication group; otherwise, the replication group is not part of any global replication group. If global_replication_group_id is set, the num_node_groups parameter (or the num_node_groups parameter of the deprecated cluster_mode block) cannot be set.
-	// +kubebuilder:validation:Optional
 	GlobalReplicationGroupID *string `json:"globalReplicationGroupId,omitempty" tf:"global_replication_group_id,omitempty"`
 
 	// The ARN of the key that you wish to use if encrypting at rest. If not supplied, uses service managed encryption. Can be specified only if at_rest_encryption_enabled = true.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kms/v1beta1.Key
-	// +kubebuilder:validation:Optional
 	KMSKeyID *string `json:"kmsKeyId,omitempty" tf:"kms_key_id,omitempty"`
 
 	// Reference to a Key in kms to populate kmsKeyId.
@@ -294,63 +445,49 @@ type ReplicationGroupParameters struct {
 	KMSKeyIDSelector *v1.Selector `json:"kmsKeyIdSelector,omitempty" tf:"-"`
 
 	// Specifies the destination and format of Redis SLOWLOG or Redis Engine Log. See the documentation on Amazon ElastiCache. See Log Delivery Configuration below for more details.
-	// +kubebuilder:validation:Optional
 	LogDeliveryConfiguration []ReplicationGroupLogDeliveryConfigurationParameters `json:"logDeliveryConfiguration,omitempty" tf:"log_delivery_configuration,omitempty"`
 
 	// ddd:hh24:mi (24H Clock UTC). The minimum maintenance window is a 60 minute period. Example: sun:05:00-sun:09:00
-	// +kubebuilder:validation:Optional
 	MaintenanceWindow *string `json:"maintenanceWindow,omitempty" tf:"maintenance_window,omitempty"`
 
 	// Specifies whether to enable Multi-AZ Support for the replication group. If true, automatic_failover_enabled must also be enabled. Defaults to false.
-	// +kubebuilder:validation:Optional
 	MultiAzEnabled *bool `json:"multiAzEnabled,omitempty" tf:"multi_az_enabled,omitempty"`
 
 	// Instance class to be used. See AWS documentation for information on supported node types and guidance on selecting node types. Required unless global_replication_group_id is set. Cannot be set if global_replication_group_id is set.
-	// +kubebuilder:validation:Optional
 	NodeType *string `json:"nodeType,omitempty" tf:"node_type,omitempty"`
 
 	// east-1:012345678999:my_sns_topic
-	// +kubebuilder:validation:Optional
 	NotificationTopicArn *string `json:"notificationTopicArn,omitempty" tf:"notification_topic_arn,omitempty"`
 
 	// 00#.
-	// +kubebuilder:validation:Optional
 	NumCacheClusters *float64 `json:"numCacheClusters,omitempty" tf:"num_cache_clusters,omitempty"`
 
 	// Number of node groups (shards) for this Redis replication group.
 	// Changing this number will trigger a resizing operation before other settings modifications.
-	// +kubebuilder:validation:Optional
 	NumNodeGroups *float64 `json:"numNodeGroups,omitempty" tf:"num_node_groups,omitempty"`
 
 	// Number of cache clusters (primary and replicas) this replication group will have. If Multi-AZ is enabled, the value of this parameter must be at least 2. Updates will occur before other modifications. Conflicts with num_cache_clusters, num_node_groups, or the deprecated cluster_mode. Defaults to 1.
-	// +kubebuilder:validation:Optional
 	NumberCacheClusters *float64 `json:"numberCacheClusters,omitempty" tf:"number_cache_clusters,omitempty"`
 
 	// Name of the parameter group to associate with this replication group. If this argument is omitted, the default cache parameter group for the specified engine is used. To enable "cluster mode", i.e., data sharding, use a parameter group that has the parameter cluster-enabled set to true.
-	// +kubebuilder:validation:Optional
 	ParameterGroupName *string `json:"parameterGroupName,omitempty" tf:"parameter_group_name,omitempty"`
 
 	// –  Port number on which each of the cache nodes will accept connections. For Memcache the default is 11211, and for Redis the default port is 6379.
-	// +kubebuilder:validation:Optional
 	Port *float64 `json:"port,omitempty" tf:"port,omitempty"`
 
 	// List of EC2 availability zones in which the replication group's cache clusters will be created. The order of the availability zones in the list is considered. The first item in the list will be the primary node. Ignored when updating.
-	// +kubebuilder:validation:Optional
 	PreferredCacheClusterAzs []*string `json:"preferredCacheClusterAzs,omitempty" tf:"preferred_cache_cluster_azs,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Number of replica nodes in each node group.
 	// Changing this number will trigger a resizing operation before other settings modifications.
 	// Valid values are 0 to 5.
-	// +kubebuilder:validation:Optional
 	ReplicasPerNodeGroup *float64 `json:"replicasPerNodeGroup,omitempty" tf:"replicas_per_node_group,omitempty"`
 
 	// created description for the replication group. Must not be empty.
-	// +kubebuilder:validation:Optional
 	ReplicationGroupDescription *string `json:"replicationGroupDescription,omitempty" tf:"replication_group_description,omitempty"`
 
 	// References to SecurityGroup in ec2 to populate securityGroupIds.
@@ -365,32 +502,25 @@ type ReplicationGroupParameters struct {
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.SecurityGroup
 	// +crossplane:generate:reference:refFieldName=SecurityGroupIDRefs
 	// +crossplane:generate:reference:selectorFieldName=SecurityGroupIDSelector
-	// +kubebuilder:validation:Optional
 	SecurityGroupIds []*string `json:"securityGroupIds,omitempty" tf:"security_group_ids,omitempty"`
 
 	// List of cache security group names to associate with this replication group.
-	// +kubebuilder:validation:Optional
 	SecurityGroupNames []*string `json:"securityGroupNames,omitempty" tf:"security_group_names,omitempty"`
 
 	// –  List of ARNs that identify Redis RDB snapshot files stored in Amazon S3. The names object names cannot contain any commas.
-	// +kubebuilder:validation:Optional
 	SnapshotArns []*string `json:"snapshotArns,omitempty" tf:"snapshot_arns,omitempty"`
 
 	// Name of a snapshot from which to restore data into the new node group. Changing the snapshot_name forces a new resource.
-	// +kubebuilder:validation:Optional
 	SnapshotName *string `json:"snapshotName,omitempty" tf:"snapshot_name,omitempty"`
 
 	// Number of days for which ElastiCache will retain automatic cache cluster snapshots before deleting them. For example, if you set SnapshotRetentionLimit to 5, then a snapshot that was taken today will be retained for 5 days before being deleted. If the value of snapshot_retention_limit is set to zero (0), backups are turned off. Please note that setting a snapshot_retention_limit is not supported on cache.t1.micro cache nodes
-	// +kubebuilder:validation:Optional
 	SnapshotRetentionLimit *float64 `json:"snapshotRetentionLimit,omitempty" tf:"snapshot_retention_limit,omitempty"`
 
 	// Daily time range (in UTC) during which ElastiCache will begin taking a daily snapshot of your cache cluster. The minimum snapshot window is a 60 minute period. Example: 05:00-09:00
-	// +kubebuilder:validation:Optional
 	SnapshotWindow *string `json:"snapshotWindow,omitempty" tf:"snapshot_window,omitempty"`
 
 	// Name of the cache subnet group to be used for the replication group.
 	// +crossplane:generate:reference:type=SubnetGroup
-	// +kubebuilder:validation:Optional
 	SubnetGroupName *string `json:"subnetGroupName,omitempty" tf:"subnet_group_name,omitempty"`
 
 	// Reference to a SubnetGroup to populate subnetGroupName.
@@ -402,15 +532,12 @@ type ReplicationGroupParameters struct {
 	SubnetGroupNameSelector *v1.Selector `json:"subnetGroupNameSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// Whether to enable encryption in transit.
-	// +kubebuilder:validation:Optional
 	TransitEncryptionEnabled *bool `json:"transitEncryptionEnabled,omitempty" tf:"transit_encryption_enabled,omitempty"`
 
 	// User Group ID to associate with the replication group. Only a maximum of one (1) user group ID is valid. NOTE: This argument is a set because the AWS specification allows for multiple IDs. However, in practice, AWS only allows a maximum size of one.
-	// +kubebuilder:validation:Optional
 	UserGroupIds []*string `json:"userGroupIds,omitempty" tf:"user_group_ids,omitempty"`
 }
 
@@ -418,6 +545,10 @@ type ReplicationGroupParameters struct {
 type ReplicationGroupSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ReplicationGroupParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ReplicationGroupInitParameters `json:"initProvider,omitempty"`
 }
 
 // ReplicationGroupStatus defines the observed state of ReplicationGroup.

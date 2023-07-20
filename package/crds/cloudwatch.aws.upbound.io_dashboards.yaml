@@ -76,8 +76,21 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  dashboardBody:
+                    description: The detailed information about the dashboard, including
+                      what widgets are included and their location on the dashboard.
+                      You can read more about the body structure in the documentation.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -277,9 +290,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: dashboardBody is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.dashboardBody)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.dashboardBody)
+                || has(self.initProvider.dashboardBody)'
           status:
             description: DashboardStatus defines the observed state of Dashboard.
             properties:

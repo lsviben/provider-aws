@@ -13,6 +13,21 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AccessLogsInitParameters struct {
+
+	// The S3 bucket name to store the logs in.
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	// The S3 bucket prefix. Logs are stored in the root if not configured.
+	BucketPrefix *string `json:"bucketPrefix,omitempty" tf:"bucket_prefix,omitempty"`
+
+	// Boolean to enable / disable access_logs. Default is true
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// The publishing interval in minutes. Valid values: 5 and 60. Default: 60
+	Interval *float64 `json:"interval,omitempty" tf:"interval,omitempty"`
+}
+
 type AccessLogsObservation struct {
 
 	// The S3 bucket name to store the logs in.
@@ -31,20 +46,81 @@ type AccessLogsObservation struct {
 type AccessLogsParameters struct {
 
 	// The S3 bucket name to store the logs in.
-	// +kubebuilder:validation:Required
-	Bucket *string `json:"bucket" tf:"bucket,omitempty"`
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// The S3 bucket prefix. Logs are stored in the root if not configured.
-	// +kubebuilder:validation:Optional
 	BucketPrefix *string `json:"bucketPrefix,omitempty" tf:"bucket_prefix,omitempty"`
 
 	// Boolean to enable / disable access_logs. Default is true
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// The publishing interval in minutes. Valid values: 5 and 60. Default: 60
-	// +kubebuilder:validation:Optional
 	Interval *float64 `json:"interval,omitempty" tf:"interval,omitempty"`
+}
+
+type ELBInitParameters struct {
+
+	// An Access Logs block. Access Logs documented below.
+	AccessLogs []AccessLogsInitParameters `json:"accessLogs,omitempty" tf:"access_logs,omitempty"`
+
+	// The AZ's to serve traffic in.
+	AvailabilityZones []*string `json:"availabilityZones,omitempty" tf:"availability_zones,omitempty"`
+
+	// Boolean to enable connection draining. Default: false
+	ConnectionDraining *bool `json:"connectionDraining,omitempty" tf:"connection_draining,omitempty"`
+
+	// The time in seconds to allow for connections to drain. Default: 300
+	ConnectionDrainingTimeout *float64 `json:"connectionDrainingTimeout,omitempty" tf:"connection_draining_timeout,omitempty"`
+
+	// Enable cross-zone load balancing. Default: true
+	CrossZoneLoadBalancing *bool `json:"crossZoneLoadBalancing,omitempty" tf:"cross_zone_load_balancing,omitempty"`
+
+	// Determines how the load balancer handles requests that might pose a security risk to an application due to HTTP desync. Valid values are monitor, defensive (default), strictest.
+	DesyncMitigationMode *string `json:"desyncMitigationMode,omitempty" tf:"desync_mitigation_mode,omitempty"`
+
+	// A health_check block. Health Check documented below.
+	HealthCheck []HealthCheckInitParameters `json:"healthCheck,omitempty" tf:"health_check,omitempty"`
+
+	// The time in seconds that the connection is allowed to be idle. Default: 60
+	IdleTimeout *float64 `json:"idleTimeout,omitempty" tf:"idle_timeout,omitempty"`
+
+	// A list of instance ids to place in the ELB pool.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Instance
+	Instances []*string `json:"instances,omitempty" tf:"instances,omitempty"`
+
+	InstancesRefs []v1.Reference `json:"instancesRefs,omitempty" tf:"-"`
+
+	InstancesSelector *v1.Selector `json:"instancesSelector,omitempty" tf:"-"`
+
+	// If true, ELB will be an internal ELB.
+	Internal *bool `json:"internal,omitempty" tf:"internal,omitempty"`
+
+	// A list of listener blocks. Listeners documented below.
+	Listener []ListenerInitParameters `json:"listener,omitempty" tf:"listener,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// A list of security group IDs to assign to the ELB.
+	// Only valid if creating an ELB within a VPC
+	SecurityGroups []*string `json:"securityGroups,omitempty" tf:"security_groups,omitempty"`
+
+	// The name of the security group that you can use as
+	// part of your inbound rules for your load balancer's back-end application
+	// instances. Use this for Classic or Default VPC only.
+	SourceSecurityGroup *string `json:"sourceSecurityGroup,omitempty" tf:"source_security_group,omitempty"`
+
+	// A list of subnet IDs to attach to the ELB.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
+	Subnets []*string `json:"subnets,omitempty" tf:"subnets,omitempty"`
+
+	SubnetsRefs []v1.Reference `json:"subnetsRefs,omitempty" tf:"-"`
+
+	SubnetsSelector *v1.Selector `json:"subnetsSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type ELBObservation struct {
@@ -121,40 +197,31 @@ type ELBObservation struct {
 type ELBParameters struct {
 
 	// An Access Logs block. Access Logs documented below.
-	// +kubebuilder:validation:Optional
 	AccessLogs []AccessLogsParameters `json:"accessLogs,omitempty" tf:"access_logs,omitempty"`
 
 	// The AZ's to serve traffic in.
-	// +kubebuilder:validation:Optional
 	AvailabilityZones []*string `json:"availabilityZones,omitempty" tf:"availability_zones,omitempty"`
 
 	// Boolean to enable connection draining. Default: false
-	// +kubebuilder:validation:Optional
 	ConnectionDraining *bool `json:"connectionDraining,omitempty" tf:"connection_draining,omitempty"`
 
 	// The time in seconds to allow for connections to drain. Default: 300
-	// +kubebuilder:validation:Optional
 	ConnectionDrainingTimeout *float64 `json:"connectionDrainingTimeout,omitempty" tf:"connection_draining_timeout,omitempty"`
 
 	// Enable cross-zone load balancing. Default: true
-	// +kubebuilder:validation:Optional
 	CrossZoneLoadBalancing *bool `json:"crossZoneLoadBalancing,omitempty" tf:"cross_zone_load_balancing,omitempty"`
 
 	// Determines how the load balancer handles requests that might pose a security risk to an application due to HTTP desync. Valid values are monitor, defensive (default), strictest.
-	// +kubebuilder:validation:Optional
 	DesyncMitigationMode *string `json:"desyncMitigationMode,omitempty" tf:"desync_mitigation_mode,omitempty"`
 
 	// A health_check block. Health Check documented below.
-	// +kubebuilder:validation:Optional
 	HealthCheck []HealthCheckParameters `json:"healthCheck,omitempty" tf:"health_check,omitempty"`
 
 	// The time in seconds that the connection is allowed to be idle. Default: 60
-	// +kubebuilder:validation:Optional
 	IdleTimeout *float64 `json:"idleTimeout,omitempty" tf:"idle_timeout,omitempty"`
 
 	// A list of instance ids to place in the ELB pool.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Instance
-	// +kubebuilder:validation:Optional
 	Instances []*string `json:"instances,omitempty" tf:"instances,omitempty"`
 
 	// References to Instance in ec2 to populate instances.
@@ -166,32 +233,26 @@ type ELBParameters struct {
 	InstancesSelector *v1.Selector `json:"instancesSelector,omitempty" tf:"-"`
 
 	// If true, ELB will be an internal ELB.
-	// +kubebuilder:validation:Optional
 	Internal *bool `json:"internal,omitempty" tf:"internal,omitempty"`
 
 	// A list of listener blocks. Listeners documented below.
-	// +kubebuilder:validation:Optional
 	Listener []ListenerParameters `json:"listener,omitempty" tf:"listener,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// A list of security group IDs to assign to the ELB.
 	// Only valid if creating an ELB within a VPC
-	// +kubebuilder:validation:Optional
 	SecurityGroups []*string `json:"securityGroups,omitempty" tf:"security_groups,omitempty"`
 
 	// The name of the security group that you can use as
 	// part of your inbound rules for your load balancer's back-end application
 	// instances. Use this for Classic or Default VPC only.
-	// +kubebuilder:validation:Optional
 	SourceSecurityGroup *string `json:"sourceSecurityGroup,omitempty" tf:"source_security_group,omitempty"`
 
 	// A list of subnet IDs to attach to the ELB.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ec2/v1beta1.Subnet
-	// +kubebuilder:validation:Optional
 	Subnets []*string `json:"subnets,omitempty" tf:"subnets,omitempty"`
 
 	// References to Subnet in ec2 to populate subnets.
@@ -203,8 +264,26 @@ type ELBParameters struct {
 	SubnetsSelector *v1.Selector `json:"subnetsSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type HealthCheckInitParameters struct {
+
+	// The number of checks before the instance is declared healthy.
+	HealthyThreshold *float64 `json:"healthyThreshold,omitempty" tf:"healthy_threshold,omitempty"`
+
+	// The publishing interval in minutes. Valid values: 5 and 60. Default: 60
+	Interval *float64 `json:"interval,omitempty" tf:"interval,omitempty"`
+
+	// The target of the check. Valid pattern is "${PROTOCOL}:${PORT}${PATH}", where PROTOCOL
+	// values are:
+	Target *string `json:"target,omitempty" tf:"target,omitempty"`
+
+	// The length of time before the check times out.
+	Timeout *float64 `json:"timeout,omitempty" tf:"timeout,omitempty"`
+
+	// The number of checks before the instance is declared unhealthy.
+	UnhealthyThreshold *float64 `json:"unhealthyThreshold,omitempty" tf:"unhealthy_threshold,omitempty"`
 }
 
 type HealthCheckObservation struct {
@@ -229,25 +308,41 @@ type HealthCheckObservation struct {
 type HealthCheckParameters struct {
 
 	// The number of checks before the instance is declared healthy.
-	// +kubebuilder:validation:Required
-	HealthyThreshold *float64 `json:"healthyThreshold" tf:"healthy_threshold,omitempty"`
+	HealthyThreshold *float64 `json:"healthyThreshold,omitempty" tf:"healthy_threshold,omitempty"`
 
 	// The publishing interval in minutes. Valid values: 5 and 60. Default: 60
-	// +kubebuilder:validation:Required
-	Interval *float64 `json:"interval" tf:"interval,omitempty"`
+	Interval *float64 `json:"interval,omitempty" tf:"interval,omitempty"`
 
 	// The target of the check. Valid pattern is "${PROTOCOL}:${PORT}${PATH}", where PROTOCOL
 	// values are:
-	// +kubebuilder:validation:Required
-	Target *string `json:"target" tf:"target,omitempty"`
+	Target *string `json:"target,omitempty" tf:"target,omitempty"`
 
 	// The length of time before the check times out.
-	// +kubebuilder:validation:Required
-	Timeout *float64 `json:"timeout" tf:"timeout,omitempty"`
+	Timeout *float64 `json:"timeout,omitempty" tf:"timeout,omitempty"`
 
 	// The number of checks before the instance is declared unhealthy.
-	// +kubebuilder:validation:Required
-	UnhealthyThreshold *float64 `json:"unhealthyThreshold" tf:"unhealthy_threshold,omitempty"`
+	UnhealthyThreshold *float64 `json:"unhealthyThreshold,omitempty" tf:"unhealthy_threshold,omitempty"`
+}
+
+type ListenerInitParameters struct {
+
+	// The port on the instance to route to
+	InstancePort *float64 `json:"instancePort,omitempty" tf:"instance_port,omitempty"`
+
+	// The protocol to use to the instance. Valid
+	// values are HTTP, HTTPS, TCP, or SSL
+	InstanceProtocol *string `json:"instanceProtocol,omitempty" tf:"instance_protocol,omitempty"`
+
+	// The port to listen on for the load balancer
+	LBPort *float64 `json:"lbPort,omitempty" tf:"lb_port,omitempty"`
+
+	// The protocol to listen on. Valid values are HTTP,
+	// HTTPS, TCP, or SSL
+	LBProtocol *string `json:"lbProtocol,omitempty" tf:"lb_protocol,omitempty"`
+
+	// The ARN of an SSL certificate you have
+	// uploaded to AWS IAM. Note ECDSA-specific restrictions below.  Only valid when
+	SSLCertificateID *string `json:"sslCertificateId,omitempty" tf:"ssl_certificate_id,omitempty"`
 }
 
 type ListenerObservation struct {
@@ -274,26 +369,21 @@ type ListenerObservation struct {
 type ListenerParameters struct {
 
 	// The port on the instance to route to
-	// +kubebuilder:validation:Required
-	InstancePort *float64 `json:"instancePort" tf:"instance_port,omitempty"`
+	InstancePort *float64 `json:"instancePort,omitempty" tf:"instance_port,omitempty"`
 
 	// The protocol to use to the instance. Valid
 	// values are HTTP, HTTPS, TCP, or SSL
-	// +kubebuilder:validation:Required
-	InstanceProtocol *string `json:"instanceProtocol" tf:"instance_protocol,omitempty"`
+	InstanceProtocol *string `json:"instanceProtocol,omitempty" tf:"instance_protocol,omitempty"`
 
 	// The port to listen on for the load balancer
-	// +kubebuilder:validation:Required
-	LBPort *float64 `json:"lbPort" tf:"lb_port,omitempty"`
+	LBPort *float64 `json:"lbPort,omitempty" tf:"lb_port,omitempty"`
 
 	// The protocol to listen on. Valid values are HTTP,
 	// HTTPS, TCP, or SSL
-	// +kubebuilder:validation:Required
-	LBProtocol *string `json:"lbProtocol" tf:"lb_protocol,omitempty"`
+	LBProtocol *string `json:"lbProtocol,omitempty" tf:"lb_protocol,omitempty"`
 
 	// The ARN of an SSL certificate you have
 	// uploaded to AWS IAM. Note ECDSA-specific restrictions below.  Only valid when
-	// +kubebuilder:validation:Optional
 	SSLCertificateID *string `json:"sslCertificateId,omitempty" tf:"ssl_certificate_id,omitempty"`
 }
 
@@ -301,6 +391,10 @@ type ListenerParameters struct {
 type ELBSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ELBParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ELBInitParameters `json:"initProvider,omitempty"`
 }
 
 // ELBStatus defines the observed state of ELB.
@@ -321,7 +415,7 @@ type ELBStatus struct {
 type ELB struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.listener)",message="listener is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.listener) || has(self.initProvider.listener)",message="%!s(MISSING) is a required parameter"
 	Spec   ELBSpec   `json:"spec"`
 	Status ELBStatus `json:"status,omitempty"`
 }

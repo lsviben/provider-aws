@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type InvocationInitParameters struct {
+
+	// Name of the lambda function.
+	// +crossplane:generate:reference:type=Function
+	FunctionName *string `json:"functionName,omitempty" tf:"function_name,omitempty"`
+
+	FunctionNameRef *v1.Reference `json:"functionNameRef,omitempty" tf:"-"`
+
+	FunctionNameSelector *v1.Selector `json:"functionNameSelector,omitempty" tf:"-"`
+
+	// JSON payload to the lambda function.
+	Input *string `json:"input,omitempty" tf:"input,omitempty"`
+
+	// Qualifier (i.e., version) of the lambda function. Defaults to $LATEST.
+	Qualifier *string `json:"qualifier,omitempty" tf:"qualifier,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Map of arbitrary keys and values that, when changed, will trigger a re-invocation.
+	Triggers map[string]*string `json:"triggers,omitempty" tf:"triggers,omitempty"`
+}
+
 type InvocationObservation struct {
 
 	// Name of the lambda function.
@@ -37,7 +61,6 @@ type InvocationParameters struct {
 
 	// Name of the lambda function.
 	// +crossplane:generate:reference:type=Function
-	// +kubebuilder:validation:Optional
 	FunctionName *string `json:"functionName,omitempty" tf:"function_name,omitempty"`
 
 	// Reference to a Function to populate functionName.
@@ -49,20 +72,16 @@ type InvocationParameters struct {
 	FunctionNameSelector *v1.Selector `json:"functionNameSelector,omitempty" tf:"-"`
 
 	// JSON payload to the lambda function.
-	// +kubebuilder:validation:Optional
 	Input *string `json:"input,omitempty" tf:"input,omitempty"`
 
 	// Qualifier (i.e., version) of the lambda function. Defaults to $LATEST.
-	// +kubebuilder:validation:Optional
 	Qualifier *string `json:"qualifier,omitempty" tf:"qualifier,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Map of arbitrary keys and values that, when changed, will trigger a re-invocation.
-	// +kubebuilder:validation:Optional
 	Triggers map[string]*string `json:"triggers,omitempty" tf:"triggers,omitempty"`
 }
 
@@ -70,6 +89,10 @@ type InvocationParameters struct {
 type InvocationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     InvocationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider InvocationInitParameters `json:"initProvider,omitempty"`
 }
 
 // InvocationStatus defines the observed state of Invocation.
@@ -90,7 +113,7 @@ type InvocationStatus struct {
 type Invocation struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.input)",message="input is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.input) || has(self.initProvider.input)",message="%!s(MISSING) is a required parameter"
 	Spec   InvocationSpec   `json:"spec"`
 	Status InvocationStatus `json:"status,omitempty"`
 }

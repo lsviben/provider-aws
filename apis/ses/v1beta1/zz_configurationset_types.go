@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConfigurationSetInitParameters struct {
+
+	// Whether messages that use the configuration set are required to use TLS. See below.
+	DeliveryOptions []DeliveryOptionsInitParameters `json:"deliveryOptions,omitempty" tf:"delivery_options,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Whether or not Amazon SES publishes reputation metrics for the configuration set, such as bounce and complaint rates, to Amazon CloudWatch. The default value is false.
+	ReputationMetricsEnabled *bool `json:"reputationMetricsEnabled,omitempty" tf:"reputation_metrics_enabled,omitempty"`
+
+	// Whether email sending is enabled or disabled for the configuration set. The default value is true.
+	SendingEnabled *bool `json:"sendingEnabled,omitempty" tf:"sending_enabled,omitempty"`
+
+	// Domain that is used to redirect email recipients to an Amazon SES-operated domain. See below. NOTE: This functionality is best effort.
+	TrackingOptions []TrackingOptionsInitParameters `json:"trackingOptions,omitempty" tf:"tracking_options,omitempty"`
+}
+
 type ConfigurationSetObservation struct {
 
 	// SES configuration set ARN.
@@ -40,25 +59,26 @@ type ConfigurationSetObservation struct {
 type ConfigurationSetParameters struct {
 
 	// Whether messages that use the configuration set are required to use TLS. See below.
-	// +kubebuilder:validation:Optional
 	DeliveryOptions []DeliveryOptionsParameters `json:"deliveryOptions,omitempty" tf:"delivery_options,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Whether or not Amazon SES publishes reputation metrics for the configuration set, such as bounce and complaint rates, to Amazon CloudWatch. The default value is false.
-	// +kubebuilder:validation:Optional
 	ReputationMetricsEnabled *bool `json:"reputationMetricsEnabled,omitempty" tf:"reputation_metrics_enabled,omitempty"`
 
 	// Whether email sending is enabled or disabled for the configuration set. The default value is true.
-	// +kubebuilder:validation:Optional
 	SendingEnabled *bool `json:"sendingEnabled,omitempty" tf:"sending_enabled,omitempty"`
 
 	// Domain that is used to redirect email recipients to an Amazon SES-operated domain. See below. NOTE: This functionality is best effort.
-	// +kubebuilder:validation:Optional
 	TrackingOptions []TrackingOptionsParameters `json:"trackingOptions,omitempty" tf:"tracking_options,omitempty"`
+}
+
+type DeliveryOptionsInitParameters struct {
+
+	// Whether messages that use the configuration set are required to use Transport Layer Security (TLS). If the value is Require, messages are only delivered if a TLS connection can be established. If the value is Optional, messages can be delivered in plain text if a TLS connection can't be established. Valid values: Require or Optional. Defaults to Optional.
+	TLSPolicy *string `json:"tlsPolicy,omitempty" tf:"tls_policy,omitempty"`
 }
 
 type DeliveryOptionsObservation struct {
@@ -70,8 +90,13 @@ type DeliveryOptionsObservation struct {
 type DeliveryOptionsParameters struct {
 
 	// Whether messages that use the configuration set are required to use Transport Layer Security (TLS). If the value is Require, messages are only delivered if a TLS connection can be established. If the value is Optional, messages can be delivered in plain text if a TLS connection can't be established. Valid values: Require or Optional. Defaults to Optional.
-	// +kubebuilder:validation:Optional
 	TLSPolicy *string `json:"tlsPolicy,omitempty" tf:"tls_policy,omitempty"`
+}
+
+type TrackingOptionsInitParameters struct {
+
+	// Custom subdomain that is used to redirect email recipients to the Amazon SES event tracking domain.
+	CustomRedirectDomain *string `json:"customRedirectDomain,omitempty" tf:"custom_redirect_domain,omitempty"`
 }
 
 type TrackingOptionsObservation struct {
@@ -83,7 +108,6 @@ type TrackingOptionsObservation struct {
 type TrackingOptionsParameters struct {
 
 	// Custom subdomain that is used to redirect email recipients to the Amazon SES event tracking domain.
-	// +kubebuilder:validation:Optional
 	CustomRedirectDomain *string `json:"customRedirectDomain,omitempty" tf:"custom_redirect_domain,omitempty"`
 }
 
@@ -91,6 +115,10 @@ type TrackingOptionsParameters struct {
 type ConfigurationSetSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ConfigurationSetParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ConfigurationSetInitParameters `json:"initProvider,omitempty"`
 }
 
 // ConfigurationSetStatus defines the observed state of ConfigurationSet.

@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type HSMConfigurationInitParameters struct {
+
+	// A text description of the HSM configuration to be created.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The IP address that the Amazon Redshift cluster must use to access the HSM.
+	HSMIPAddress *string `json:"hsmIpAddress,omitempty" tf:"hsm_ip_address,omitempty"`
+
+	// The name of the partition in the HSM where the Amazon Redshift clusters will store their database encryption keys.
+	HSMPartitionName *string `json:"hsmPartitionName,omitempty" tf:"hsm_partition_name,omitempty"`
+
+	// The password required to access the HSM partition.
+	HSMPartitionPasswordSecretRef v1.SecretKeySelector `json:"hsmPartitionPasswordSecretRef" tf:"-"`
+
+	// The HSMs public certificate file. When using Cloud HSM, the file name is server.pem.
+	HSMServerPublicCertificate *string `json:"hsmServerPublicCertificate,omitempty" tf:"hsm_server_public_certificate,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type HSMConfigurationObservation struct {
 
 	// Amazon Resource Name (ARN) of the Hsm Client Certificate.
@@ -42,32 +67,25 @@ type HSMConfigurationObservation struct {
 type HSMConfigurationParameters struct {
 
 	// A text description of the HSM configuration to be created.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The IP address that the Amazon Redshift cluster must use to access the HSM.
-	// +kubebuilder:validation:Optional
 	HSMIPAddress *string `json:"hsmIpAddress,omitempty" tf:"hsm_ip_address,omitempty"`
 
 	// The name of the partition in the HSM where the Amazon Redshift clusters will store their database encryption keys.
-	// +kubebuilder:validation:Optional
 	HSMPartitionName *string `json:"hsmPartitionName,omitempty" tf:"hsm_partition_name,omitempty"`
 
 	// The password required to access the HSM partition.
-	// +kubebuilder:validation:Optional
 	HSMPartitionPasswordSecretRef v1.SecretKeySelector `json:"hsmPartitionPasswordSecretRef" tf:"-"`
 
 	// The HSMs public certificate file. When using Cloud HSM, the file name is server.pem.
-	// +kubebuilder:validation:Optional
 	HSMServerPublicCertificate *string `json:"hsmServerPublicCertificate,omitempty" tf:"hsm_server_public_certificate,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -75,6 +93,10 @@ type HSMConfigurationParameters struct {
 type HSMConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     HSMConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider HSMConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // HSMConfigurationStatus defines the observed state of HSMConfiguration.
@@ -95,11 +117,11 @@ type HSMConfigurationStatus struct {
 type HSMConfiguration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.description)",message="description is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hsmIpAddress)",message="hsmIpAddress is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hsmPartitionName)",message="hsmPartitionName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hsmPartitionPasswordSecretRef)",message="hsmPartitionPasswordSecretRef is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hsmServerPublicCertificate)",message="hsmServerPublicCertificate is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.description) || has(self.initProvider.description)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hsmIpAddress) || has(self.initProvider.hsmIpAddress)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hsmPartitionName) || has(self.initProvider.hsmPartitionName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hsmPartitionPasswordSecretRef) || has(self.initProvider.hsmPartitionPasswordSecretRef)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hsmServerPublicCertificate) || has(self.initProvider.hsmServerPublicCertificate)",message="%!s(MISSING) is a required parameter"
 	Spec   HSMConfigurationSpec   `json:"spec"`
 	Status HSMConfigurationStatus `json:"status,omitempty"`
 }

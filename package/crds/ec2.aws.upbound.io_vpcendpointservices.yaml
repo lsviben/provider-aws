@@ -102,8 +102,47 @@ spec:
                       type: string
                     description: Key-value map of resource tags.
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  acceptanceRequired:
+                    description: Whether or not VPC endpoint connection requests to
+                      the service must be accepted by the service owner - true or
+                      false.
+                    type: boolean
+                  gatewayLoadBalancerArns:
+                    description: Amazon Resource Names (ARNs) of one or more Gateway
+                      Load Balancers for the endpoint service.
+                    items:
+                      type: string
+                    type: array
+                  networkLoadBalancerArns:
+                    description: Amazon Resource Names (ARNs) of one or more Network
+                      Load Balancers for the endpoint service.
+                    items:
+                      type: string
+                    type: array
+                  privateDnsName:
+                    description: The private DNS name for the service.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  supportedIpAddressTypes:
+                    description: The supported IP address types. The possible values
+                      are ipv4 and ipv6.
+                    items:
+                      type: string
+                    type: array
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
                 type: object
               managementPolicies:
                 default:
@@ -303,9 +342,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: acceptanceRequired is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.acceptanceRequired)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.acceptanceRequired)
+                || has(self.initProvider.acceptanceRequired)'
           status:
             description: VPCEndpointServiceStatus defines the observed state of VPCEndpointService.
             properties:

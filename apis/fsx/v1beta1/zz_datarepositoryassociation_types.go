@@ -13,6 +13,12 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AutoExportPolicyInitParameters struct {
+
+	// A list of file event types to automatically export to your linked S3 bucket or import from the linked S3 bucket. Valid values are NEW, CHANGED, DELETED. Max of 3.
+	Events []*string `json:"events,omitempty" tf:"events,omitempty"`
+}
+
 type AutoExportPolicyObservation struct {
 
 	// A list of file event types to automatically export to your linked S3 bucket or import from the linked S3 bucket. Valid values are NEW, CHANGED, DELETED. Max of 3.
@@ -22,7 +28,12 @@ type AutoExportPolicyObservation struct {
 type AutoExportPolicyParameters struct {
 
 	// A list of file event types to automatically export to your linked S3 bucket or import from the linked S3 bucket. Valid values are NEW, CHANGED, DELETED. Max of 3.
-	// +kubebuilder:validation:Optional
+	Events []*string `json:"events,omitempty" tf:"events,omitempty"`
+}
+
+type AutoImportPolicyInitParameters struct {
+
+	// A list of file event types to automatically export to your linked S3 bucket or import from the linked S3 bucket. Valid values are NEW, CHANGED, DELETED. Max of 3.
 	Events []*string `json:"events,omitempty" tf:"events,omitempty"`
 }
 
@@ -35,8 +46,45 @@ type AutoImportPolicyObservation struct {
 type AutoImportPolicyParameters struct {
 
 	// A list of file event types to automatically export to your linked S3 bucket or import from the linked S3 bucket. Valid values are NEW, CHANGED, DELETED. Max of 3.
-	// +kubebuilder:validation:Optional
 	Events []*string `json:"events,omitempty" tf:"events,omitempty"`
+}
+
+type DataRepositoryAssociationInitParameters struct {
+
+	// Set to true to run an import data repository task to import metadata from the data repository to the file system after the data repository association is created. Defaults to false.
+	BatchImportMetaDataOnCreate *bool `json:"batchImportMetaDataOnCreate,omitempty" tf:"batch_import_meta_data_on_create,omitempty"`
+
+	// The path to the Amazon S3 data repository that will be linked to the file system. The path must be an S3 bucket s3://myBucket/myPrefix/. This path specifies where in the S3 data repository files will be imported from or exported to. The same S3 bucket cannot be linked more than once to the same file system.
+	DataRepositoryPath *string `json:"dataRepositoryPath,omitempty" tf:"data_repository_path,omitempty"`
+
+	// Set to true to delete files from the file system upon deleting this data repository association. Defaults to false.
+	DeleteDataInFilesystem *bool `json:"deleteDataInFilesystem,omitempty" tf:"delete_data_in_filesystem,omitempty"`
+
+	// The ID of the Amazon FSx file system to on which to create a data repository association.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/fsx/v1beta1.LustreFileSystem
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	FileSystemID *string `json:"fileSystemId,omitempty" tf:"file_system_id,omitempty"`
+
+	FileSystemIDRef *v1.Reference `json:"fileSystemIdRef,omitempty" tf:"-"`
+
+	FileSystemIDSelector *v1.Selector `json:"fileSystemIdSelector,omitempty" tf:"-"`
+
+	// A path on the file system that points to a high-level directory (such as /ns1/) or subdirectory (such as /ns1/subdir/) that will be mapped 1-1 with data_repository_path. The leading forward slash in the name is required. Two data repository associations cannot have overlapping file system paths. For example, if a data repository is associated with file system path /ns1/, then you cannot link another data repository with file system path /ns1/ns2. This path specifies where in your file system files will be exported from or imported to. This file system directory can be linked to only one Amazon S3 bucket, and no other S3 bucket can be linked to the directory.
+	FileSystemPath *string `json:"fileSystemPath,omitempty" tf:"file_system_path,omitempty"`
+
+	// For files imported from a data repository, this value determines the stripe count and maximum amount of data per file (in MiB) stored on a single physical disk. The maximum number of disks that a single file can be striped across is limited by the total number of disks that make up the file system.
+	ImportedFileChunkSize *float64 `json:"importedFileChunkSize,omitempty" tf:"imported_file_chunk_size,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// See the s3 configuration block. Max of 1.
+	// The configuration for an Amazon S3 data repository linked to an Amazon FSx Lustre file system with a data repository association. The configuration defines which file events (new, changed, or deleted files or directories) are automatically imported from the linked data repository to the file system or automatically exported from the file system to the data repository.
+	S3 []S3InitParameters `json:"s3,omitempty" tf:"s3,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type DataRepositoryAssociationObservation struct {
@@ -82,21 +130,17 @@ type DataRepositoryAssociationObservation struct {
 type DataRepositoryAssociationParameters struct {
 
 	// Set to true to run an import data repository task to import metadata from the data repository to the file system after the data repository association is created. Defaults to false.
-	// +kubebuilder:validation:Optional
 	BatchImportMetaDataOnCreate *bool `json:"batchImportMetaDataOnCreate,omitempty" tf:"batch_import_meta_data_on_create,omitempty"`
 
 	// The path to the Amazon S3 data repository that will be linked to the file system. The path must be an S3 bucket s3://myBucket/myPrefix/. This path specifies where in the S3 data repository files will be imported from or exported to. The same S3 bucket cannot be linked more than once to the same file system.
-	// +kubebuilder:validation:Optional
 	DataRepositoryPath *string `json:"dataRepositoryPath,omitempty" tf:"data_repository_path,omitempty"`
 
 	// Set to true to delete files from the file system upon deleting this data repository association. Defaults to false.
-	// +kubebuilder:validation:Optional
 	DeleteDataInFilesystem *bool `json:"deleteDataInFilesystem,omitempty" tf:"delete_data_in_filesystem,omitempty"`
 
 	// The ID of the Amazon FSx file system to on which to create a data repository association.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/fsx/v1beta1.LustreFileSystem
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	FileSystemID *string `json:"fileSystemId,omitempty" tf:"file_system_id,omitempty"`
 
 	// Reference to a LustreFileSystem in fsx to populate fileSystemId.
@@ -108,26 +152,30 @@ type DataRepositoryAssociationParameters struct {
 	FileSystemIDSelector *v1.Selector `json:"fileSystemIdSelector,omitempty" tf:"-"`
 
 	// A path on the file system that points to a high-level directory (such as /ns1/) or subdirectory (such as /ns1/subdir/) that will be mapped 1-1 with data_repository_path. The leading forward slash in the name is required. Two data repository associations cannot have overlapping file system paths. For example, if a data repository is associated with file system path /ns1/, then you cannot link another data repository with file system path /ns1/ns2. This path specifies where in your file system files will be exported from or imported to. This file system directory can be linked to only one Amazon S3 bucket, and no other S3 bucket can be linked to the directory.
-	// +kubebuilder:validation:Optional
 	FileSystemPath *string `json:"fileSystemPath,omitempty" tf:"file_system_path,omitempty"`
 
 	// For files imported from a data repository, this value determines the stripe count and maximum amount of data per file (in MiB) stored on a single physical disk. The maximum number of disks that a single file can be striped across is limited by the total number of disks that make up the file system.
-	// +kubebuilder:validation:Optional
 	ImportedFileChunkSize *float64 `json:"importedFileChunkSize,omitempty" tf:"imported_file_chunk_size,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// See the s3 configuration block. Max of 1.
 	// The configuration for an Amazon S3 data repository linked to an Amazon FSx Lustre file system with a data repository association. The configuration defines which file events (new, changed, or deleted files or directories) are automatically imported from the linked data repository to the file system or automatically exported from the file system to the data repository.
-	// +kubebuilder:validation:Optional
 	S3 []S3Parameters `json:"s3,omitempty" tf:"s3,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type S3InitParameters struct {
+
+	// Specifies the type of updated objects that will be automatically exported from your file system to the linked S3 bucket. See the events configuration block.
+	AutoExportPolicy []AutoExportPolicyInitParameters `json:"autoExportPolicy,omitempty" tf:"auto_export_policy,omitempty"`
+
+	// Specifies the type of updated objects that will be automatically imported from the linked S3 bucket to your file system. See the events configuration block.
+	AutoImportPolicy []AutoImportPolicyInitParameters `json:"autoImportPolicy,omitempty" tf:"auto_import_policy,omitempty"`
 }
 
 type S3Observation struct {
@@ -142,11 +190,9 @@ type S3Observation struct {
 type S3Parameters struct {
 
 	// Specifies the type of updated objects that will be automatically exported from your file system to the linked S3 bucket. See the events configuration block.
-	// +kubebuilder:validation:Optional
 	AutoExportPolicy []AutoExportPolicyParameters `json:"autoExportPolicy,omitempty" tf:"auto_export_policy,omitempty"`
 
 	// Specifies the type of updated objects that will be automatically imported from the linked S3 bucket to your file system. See the events configuration block.
-	// +kubebuilder:validation:Optional
 	AutoImportPolicy []AutoImportPolicyParameters `json:"autoImportPolicy,omitempty" tf:"auto_import_policy,omitempty"`
 }
 
@@ -154,6 +200,10 @@ type S3Parameters struct {
 type DataRepositoryAssociationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DataRepositoryAssociationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DataRepositoryAssociationInitParameters `json:"initProvider,omitempty"`
 }
 
 // DataRepositoryAssociationStatus defines the observed state of DataRepositoryAssociation.
@@ -174,8 +224,8 @@ type DataRepositoryAssociationStatus struct {
 type DataRepositoryAssociation struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dataRepositoryPath)",message="dataRepositoryPath is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.fileSystemPath)",message="fileSystemPath is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dataRepositoryPath) || has(self.initProvider.dataRepositoryPath)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.fileSystemPath) || has(self.initProvider.fileSystemPath)",message="%!s(MISSING) is a required parameter"
 	Spec   DataRepositoryAssociationSpec   `json:"spec"`
 	Status DataRepositoryAssociationStatus `json:"status,omitempty"`
 }

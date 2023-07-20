@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PreProvisioningHookInitParameters struct {
+
+	// The version of the payload that was sent to the target function. The only valid (and the default) payload version is "2020-04-01".
+	PayloadVersion *string `json:"payloadVersion,omitempty" tf:"payload_version,omitempty"`
+
+	// The ARN of the target function.
+	TargetArn *string `json:"targetArn,omitempty" tf:"target_arn,omitempty"`
+}
+
 type PreProvisioningHookObservation struct {
 
 	// The version of the payload that was sent to the target function. The only valid (and the default) payload version is "2020-04-01".
@@ -25,12 +34,41 @@ type PreProvisioningHookObservation struct {
 type PreProvisioningHookParameters struct {
 
 	// The version of the payload that was sent to the target function. The only valid (and the default) payload version is "2020-04-01".
-	// +kubebuilder:validation:Optional
 	PayloadVersion *string `json:"payloadVersion,omitempty" tf:"payload_version,omitempty"`
 
 	// The ARN of the target function.
-	// +kubebuilder:validation:Required
-	TargetArn *string `json:"targetArn" tf:"target_arn,omitempty"`
+	TargetArn *string `json:"targetArn,omitempty" tf:"target_arn,omitempty"`
+}
+
+type ProvisioningTemplateInitParameters struct {
+
+	// The description of the fleet provisioning template.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// True to enable the fleet provisioning template, otherwise false.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// Creates a pre-provisioning hook template. Details below.
+	PreProvisioningHook []PreProvisioningHookInitParameters `json:"preProvisioningHook,omitempty" tf:"pre_provisioning_hook,omitempty"`
+
+	// The role ARN for the role associated with the fleet provisioning template. This IoT role grants permission to provision a device.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	ProvisioningRoleArn *string `json:"provisioningRoleArn,omitempty" tf:"provisioning_role_arn,omitempty"`
+
+	ProvisioningRoleArnRef *v1.Reference `json:"provisioningRoleArnRef,omitempty" tf:"-"`
+
+	ProvisioningRoleArnSelector *v1.Selector `json:"provisioningRoleArnSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The JSON formatted contents of the fleet provisioning template.
+	TemplateBody *string `json:"templateBody,omitempty" tf:"template_body,omitempty"`
 }
 
 type ProvisioningTemplateObservation struct {
@@ -68,21 +106,17 @@ type ProvisioningTemplateObservation struct {
 type ProvisioningTemplateParameters struct {
 
 	// The description of the fleet provisioning template.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// True to enable the fleet provisioning template, otherwise false.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// Creates a pre-provisioning hook template. Details below.
-	// +kubebuilder:validation:Optional
 	PreProvisioningHook []PreProvisioningHookParameters `json:"preProvisioningHook,omitempty" tf:"pre_provisioning_hook,omitempty"`
 
 	// The role ARN for the role associated with the fleet provisioning template. This IoT role grants permission to provision a device.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	ProvisioningRoleArn *string `json:"provisioningRoleArn,omitempty" tf:"provisioning_role_arn,omitempty"`
 
 	// Reference to a Role in iam to populate provisioningRoleArn.
@@ -95,15 +129,12 @@ type ProvisioningTemplateParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The JSON formatted contents of the fleet provisioning template.
-	// +kubebuilder:validation:Optional
 	TemplateBody *string `json:"templateBody,omitempty" tf:"template_body,omitempty"`
 }
 
@@ -111,6 +142,10 @@ type ProvisioningTemplateParameters struct {
 type ProvisioningTemplateSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ProvisioningTemplateParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ProvisioningTemplateInitParameters `json:"initProvider,omitempty"`
 }
 
 // ProvisioningTemplateStatus defines the observed state of ProvisioningTemplate.
@@ -131,7 +166,7 @@ type ProvisioningTemplateStatus struct {
 type ProvisioningTemplate struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.templateBody)",message="templateBody is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.templateBody) || has(self.initProvider.templateBody)",message="%!s(MISSING) is a required parameter"
 	Spec   ProvisioningTemplateSpec   `json:"spec"`
 	Status ProvisioningTemplateStatus `json:"status,omitempty"`
 }

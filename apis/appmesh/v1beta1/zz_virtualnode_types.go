@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AwsCloudMapInitParameters struct {
+
+	// String map that contains attributes with values that you can use to filter instances by any custom attribute that you specified when you registered the instance. Only instances that match all of the specified key/value pairs will be returned.
+	Attributes map[string]*string `json:"attributes,omitempty" tf:"attributes,omitempty"`
+
+	// Name of the AWS Cloud Map namespace to use.
+	// Use the aws_service_discovery_http_namespace resource to configure a Cloud Map namespace. Must be between 1 and 1024 characters in length.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/servicediscovery/v1beta1.HTTPNamespace
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
+	NamespaceName *string `json:"namespaceName,omitempty" tf:"namespace_name,omitempty"`
+
+	NamespaceNameRef *v1.Reference `json:"namespaceNameRef,omitempty" tf:"-"`
+
+	NamespaceNameSelector *v1.Selector `json:"namespaceNameSelector,omitempty" tf:"-"`
+
+	// attribute of the dns object to hostname.
+	ServiceName *string `json:"serviceName,omitempty" tf:"service_name,omitempty"`
+}
+
 type AwsCloudMapObservation struct {
 
 	// String map that contains attributes with values that you can use to filter instances by any custom attribute that you specified when you registered the instance. Only instances that match all of the specified key/value pairs will be returned.
@@ -29,14 +48,12 @@ type AwsCloudMapObservation struct {
 type AwsCloudMapParameters struct {
 
 	// String map that contains attributes with values that you can use to filter instances by any custom attribute that you specified when you registered the instance. Only instances that match all of the specified key/value pairs will be returned.
-	// +kubebuilder:validation:Optional
 	Attributes map[string]*string `json:"attributes,omitempty" tf:"attributes,omitempty"`
 
 	// Name of the AWS Cloud Map namespace to use.
 	// Use the aws_service_discovery_http_namespace resource to configure a Cloud Map namespace. Must be between 1 and 1024 characters in length.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/servicediscovery/v1beta1.HTTPNamespace
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("name",false)
-	// +kubebuilder:validation:Optional
 	NamespaceName *string `json:"namespaceName,omitempty" tf:"namespace_name,omitempty"`
 
 	// Reference to a HTTPNamespace in servicediscovery to populate namespaceName.
@@ -48,8 +65,13 @@ type AwsCloudMapParameters struct {
 	NamespaceNameSelector *v1.Selector `json:"namespaceNameSelector,omitempty" tf:"-"`
 
 	// attribute of the dns object to hostname.
-	// +kubebuilder:validation:Required
-	ServiceName *string `json:"serviceName" tf:"service_name,omitempty"`
+	ServiceName *string `json:"serviceName,omitempty" tf:"service_name,omitempty"`
+}
+
+type BackendDefaultsClientPolicyInitParameters struct {
+
+	// Transport Layer Security (TLS) client policy.
+	TLS []BackendDefaultsClientPolicyTLSInitParameters `json:"tls,omitempty" tf:"tls,omitempty"`
 }
 
 type BackendDefaultsClientPolicyObservation struct {
@@ -61,8 +83,16 @@ type BackendDefaultsClientPolicyObservation struct {
 type BackendDefaultsClientPolicyParameters struct {
 
 	// Transport Layer Security (TLS) client policy.
-	// +kubebuilder:validation:Optional
 	TLS []BackendDefaultsClientPolicyTLSParameters `json:"tls,omitempty" tf:"tls,omitempty"`
+}
+
+type BackendDefaultsClientPolicyTLSCertificateInitParameters struct {
+
+	// Local file certificate.
+	File []ClientPolicyTLSCertificateFileInitParameters `json:"file,omitempty" tf:"file,omitempty"`
+
+	// A Secret Discovery Service certificate.
+	Sds []ClientPolicyTLSCertificateSdsInitParameters `json:"sds,omitempty" tf:"sds,omitempty"`
 }
 
 type BackendDefaultsClientPolicyTLSCertificateObservation struct {
@@ -77,12 +107,25 @@ type BackendDefaultsClientPolicyTLSCertificateObservation struct {
 type BackendDefaultsClientPolicyTLSCertificateParameters struct {
 
 	// Local file certificate.
-	// +kubebuilder:validation:Optional
 	File []ClientPolicyTLSCertificateFileParameters `json:"file,omitempty" tf:"file,omitempty"`
 
 	// A Secret Discovery Service certificate.
-	// +kubebuilder:validation:Optional
 	Sds []ClientPolicyTLSCertificateSdsParameters `json:"sds,omitempty" tf:"sds,omitempty"`
+}
+
+type BackendDefaultsClientPolicyTLSInitParameters struct {
+
+	// Virtual node's client's Transport Layer Security (TLS) certificate.
+	Certificate []BackendDefaultsClientPolicyTLSCertificateInitParameters `json:"certificate,omitempty" tf:"certificate,omitempty"`
+
+	// Whether the policy is enforced. Default is true.
+	Enforce *bool `json:"enforce,omitempty" tf:"enforce,omitempty"`
+
+	// One or more ports that the policy is enforced for.
+	Ports []*float64 `json:"ports,omitempty" tf:"ports,omitempty"`
+
+	// TLS validation context.
+	Validation []BackendDefaultsClientPolicyTLSValidationInitParameters `json:"validation,omitempty" tf:"validation,omitempty"`
 }
 
 type BackendDefaultsClientPolicyTLSObservation struct {
@@ -103,20 +146,25 @@ type BackendDefaultsClientPolicyTLSObservation struct {
 type BackendDefaultsClientPolicyTLSParameters struct {
 
 	// Virtual node's client's Transport Layer Security (TLS) certificate.
-	// +kubebuilder:validation:Optional
 	Certificate []BackendDefaultsClientPolicyTLSCertificateParameters `json:"certificate,omitempty" tf:"certificate,omitempty"`
 
 	// Whether the policy is enforced. Default is true.
-	// +kubebuilder:validation:Optional
 	Enforce *bool `json:"enforce,omitempty" tf:"enforce,omitempty"`
 
 	// One or more ports that the policy is enforced for.
-	// +kubebuilder:validation:Optional
 	Ports []*float64 `json:"ports,omitempty" tf:"ports,omitempty"`
 
 	// TLS validation context.
-	// +kubebuilder:validation:Required
-	Validation []BackendDefaultsClientPolicyTLSValidationParameters `json:"validation" tf:"validation,omitempty"`
+	Validation []BackendDefaultsClientPolicyTLSValidationParameters `json:"validation,omitempty" tf:"validation,omitempty"`
+}
+
+type BackendDefaultsClientPolicyTLSValidationInitParameters struct {
+
+	// SANs for a TLS validation context.
+	SubjectAlternativeNames []ClientPolicyTLSValidationSubjectAlternativeNamesInitParameters `json:"subjectAlternativeNames,omitempty" tf:"subject_alternative_names,omitempty"`
+
+	// TLS validation context trust.
+	Trust []ClientPolicyTLSValidationTrustInitParameters `json:"trust,omitempty" tf:"trust,omitempty"`
 }
 
 type BackendDefaultsClientPolicyTLSValidationObservation struct {
@@ -131,12 +179,16 @@ type BackendDefaultsClientPolicyTLSValidationObservation struct {
 type BackendDefaultsClientPolicyTLSValidationParameters struct {
 
 	// SANs for a TLS validation context.
-	// +kubebuilder:validation:Optional
 	SubjectAlternativeNames []ClientPolicyTLSValidationSubjectAlternativeNamesParameters `json:"subjectAlternativeNames,omitempty" tf:"subject_alternative_names,omitempty"`
 
 	// TLS validation context trust.
-	// +kubebuilder:validation:Required
-	Trust []ClientPolicyTLSValidationTrustParameters `json:"trust" tf:"trust,omitempty"`
+	Trust []ClientPolicyTLSValidationTrustParameters `json:"trust,omitempty" tf:"trust,omitempty"`
+}
+
+type BackendInitParameters struct {
+
+	// Virtual service to use as a backend for a virtual node.
+	VirtualService []BackendVirtualServiceInitParameters `json:"virtualService,omitempty" tf:"virtual_service,omitempty"`
 }
 
 type BackendObservation struct {
@@ -148,8 +200,16 @@ type BackendObservation struct {
 type BackendParameters struct {
 
 	// Virtual service to use as a backend for a virtual node.
-	// +kubebuilder:validation:Required
-	VirtualService []BackendVirtualServiceParameters `json:"virtualService" tf:"virtual_service,omitempty"`
+	VirtualService []BackendVirtualServiceParameters `json:"virtualService,omitempty" tf:"virtual_service,omitempty"`
+}
+
+type BackendVirtualServiceInitParameters struct {
+
+	// Client policy for the backend.
+	ClientPolicy []VirtualServiceClientPolicyInitParameters `json:"clientPolicy,omitempty" tf:"client_policy,omitempty"`
+
+	// Name of the virtual service that is acting as a virtual node backend. Must be between 1 and 255 characters in length.
+	VirtualServiceName *string `json:"virtualServiceName,omitempty" tf:"virtual_service_name,omitempty"`
 }
 
 type BackendVirtualServiceObservation struct {
@@ -164,12 +224,19 @@ type BackendVirtualServiceObservation struct {
 type BackendVirtualServiceParameters struct {
 
 	// Client policy for the backend.
-	// +kubebuilder:validation:Optional
 	ClientPolicy []VirtualServiceClientPolicyParameters `json:"clientPolicy,omitempty" tf:"client_policy,omitempty"`
 
 	// Name of the virtual service that is acting as a virtual node backend. Must be between 1 and 255 characters in length.
-	// +kubebuilder:validation:Required
-	VirtualServiceName *string `json:"virtualServiceName" tf:"virtual_service_name,omitempty"`
+	VirtualServiceName *string `json:"virtualServiceName,omitempty" tf:"virtual_service_name,omitempty"`
+}
+
+type BaseEjectionDurationInitParameters struct {
+
+	// Unit of time. Valid values: ms, s.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+
+	// Number of time units. Minimum value of 0.
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type BaseEjectionDurationObservation struct {
@@ -184,12 +251,19 @@ type BaseEjectionDurationObservation struct {
 type BaseEjectionDurationParameters struct {
 
 	// Unit of time. Valid values: ms, s.
-	// +kubebuilder:validation:Required
-	Unit *string `json:"unit" tf:"unit,omitempty"`
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
 
 	// Number of time units. Minimum value of 0.
-	// +kubebuilder:validation:Required
-	Value *float64 `json:"value" tf:"value,omitempty"`
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type ClientPolicyTLSCertificateFileInitParameters struct {
+
+	// Certificate chain for the certificate.
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
+
+	// Private key for a certificate stored on the file system of the mesh endpoint that the proxy is running on.
+	PrivateKey *string `json:"privateKey,omitempty" tf:"private_key,omitempty"`
 }
 
 type ClientPolicyTLSCertificateFileObservation struct {
@@ -204,12 +278,19 @@ type ClientPolicyTLSCertificateFileObservation struct {
 type ClientPolicyTLSCertificateFileParameters struct {
 
 	// Certificate chain for the certificate.
-	// +kubebuilder:validation:Required
-	CertificateChain *string `json:"certificateChain" tf:"certificate_chain,omitempty"`
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
 
 	// Private key for a certificate stored on the file system of the mesh endpoint that the proxy is running on.
-	// +kubebuilder:validation:Required
-	PrivateKey *string `json:"privateKey" tf:"private_key,omitempty"`
+	PrivateKey *string `json:"privateKey,omitempty" tf:"private_key,omitempty"`
+}
+
+type ClientPolicyTLSCertificateInitParameters struct {
+
+	// Local file certificate.
+	File []TLSCertificateFileInitParameters `json:"file,omitempty" tf:"file,omitempty"`
+
+	// A Secret Discovery Service certificate.
+	Sds []TLSCertificateSdsInitParameters `json:"sds,omitempty" tf:"sds,omitempty"`
 }
 
 type ClientPolicyTLSCertificateObservation struct {
@@ -224,12 +305,16 @@ type ClientPolicyTLSCertificateObservation struct {
 type ClientPolicyTLSCertificateParameters struct {
 
 	// Local file certificate.
-	// +kubebuilder:validation:Optional
 	File []TLSCertificateFileParameters `json:"file,omitempty" tf:"file,omitempty"`
 
 	// A Secret Discovery Service certificate.
-	// +kubebuilder:validation:Optional
 	Sds []TLSCertificateSdsParameters `json:"sds,omitempty" tf:"sds,omitempty"`
+}
+
+type ClientPolicyTLSCertificateSdsInitParameters struct {
+
+	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
 }
 
 type ClientPolicyTLSCertificateSdsObservation struct {
@@ -241,8 +326,22 @@ type ClientPolicyTLSCertificateSdsObservation struct {
 type ClientPolicyTLSCertificateSdsParameters struct {
 
 	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
-	// +kubebuilder:validation:Required
-	SecretName *string `json:"secretName" tf:"secret_name,omitempty"`
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
+}
+
+type ClientPolicyTLSInitParameters struct {
+
+	// Virtual node's client's Transport Layer Security (TLS) certificate.
+	Certificate []ClientPolicyTLSCertificateInitParameters `json:"certificate,omitempty" tf:"certificate,omitempty"`
+
+	// Whether the policy is enforced. Default is true.
+	Enforce *bool `json:"enforce,omitempty" tf:"enforce,omitempty"`
+
+	// One or more ports that the policy is enforced for.
+	Ports []*float64 `json:"ports,omitempty" tf:"ports,omitempty"`
+
+	// TLS validation context.
+	Validation []ClientPolicyTLSValidationInitParameters `json:"validation,omitempty" tf:"validation,omitempty"`
 }
 
 type ClientPolicyTLSObservation struct {
@@ -263,20 +362,25 @@ type ClientPolicyTLSObservation struct {
 type ClientPolicyTLSParameters struct {
 
 	// Virtual node's client's Transport Layer Security (TLS) certificate.
-	// +kubebuilder:validation:Optional
 	Certificate []ClientPolicyTLSCertificateParameters `json:"certificate,omitempty" tf:"certificate,omitempty"`
 
 	// Whether the policy is enforced. Default is true.
-	// +kubebuilder:validation:Optional
 	Enforce *bool `json:"enforce,omitempty" tf:"enforce,omitempty"`
 
 	// One or more ports that the policy is enforced for.
-	// +kubebuilder:validation:Optional
 	Ports []*float64 `json:"ports,omitempty" tf:"ports,omitempty"`
 
 	// TLS validation context.
-	// +kubebuilder:validation:Required
-	Validation []ClientPolicyTLSValidationParameters `json:"validation" tf:"validation,omitempty"`
+	Validation []ClientPolicyTLSValidationParameters `json:"validation,omitempty" tf:"validation,omitempty"`
+}
+
+type ClientPolicyTLSValidationInitParameters struct {
+
+	// SANs for a TLS validation context.
+	SubjectAlternativeNames []TLSValidationSubjectAlternativeNamesInitParameters `json:"subjectAlternativeNames,omitempty" tf:"subject_alternative_names,omitempty"`
+
+	// TLS validation context trust.
+	Trust []TLSValidationTrustInitParameters `json:"trust,omitempty" tf:"trust,omitempty"`
 }
 
 type ClientPolicyTLSValidationObservation struct {
@@ -291,12 +395,22 @@ type ClientPolicyTLSValidationObservation struct {
 type ClientPolicyTLSValidationParameters struct {
 
 	// SANs for a TLS validation context.
-	// +kubebuilder:validation:Optional
 	SubjectAlternativeNames []TLSValidationSubjectAlternativeNamesParameters `json:"subjectAlternativeNames,omitempty" tf:"subject_alternative_names,omitempty"`
 
 	// TLS validation context trust.
-	// +kubebuilder:validation:Required
-	Trust []TLSValidationTrustParameters `json:"trust" tf:"trust,omitempty"`
+	Trust []TLSValidationTrustParameters `json:"trust,omitempty" tf:"trust,omitempty"`
+}
+
+type ClientPolicyTLSValidationSubjectAlternativeNamesInitParameters struct {
+
+	// Criteria for determining a SAN's match.
+	Match []ClientPolicyTLSValidationSubjectAlternativeNamesMatchInitParameters `json:"match,omitempty" tf:"match,omitempty"`
+}
+
+type ClientPolicyTLSValidationSubjectAlternativeNamesMatchInitParameters struct {
+
+	// Values sent must match the specified values exactly.
+	Exact []*string `json:"exact,omitempty" tf:"exact,omitempty"`
 }
 
 type ClientPolicyTLSValidationSubjectAlternativeNamesMatchObservation struct {
@@ -308,8 +422,7 @@ type ClientPolicyTLSValidationSubjectAlternativeNamesMatchObservation struct {
 type ClientPolicyTLSValidationSubjectAlternativeNamesMatchParameters struct {
 
 	// Values sent must match the specified values exactly.
-	// +kubebuilder:validation:Required
-	Exact []*string `json:"exact" tf:"exact,omitempty"`
+	Exact []*string `json:"exact,omitempty" tf:"exact,omitempty"`
 }
 
 type ClientPolicyTLSValidationSubjectAlternativeNamesObservation struct {
@@ -321,8 +434,13 @@ type ClientPolicyTLSValidationSubjectAlternativeNamesObservation struct {
 type ClientPolicyTLSValidationSubjectAlternativeNamesParameters struct {
 
 	// Criteria for determining a SAN's match.
-	// +kubebuilder:validation:Required
-	Match []ClientPolicyTLSValidationSubjectAlternativeNamesMatchParameters `json:"match" tf:"match,omitempty"`
+	Match []ClientPolicyTLSValidationSubjectAlternativeNamesMatchParameters `json:"match,omitempty" tf:"match,omitempty"`
+}
+
+type ClientPolicyTLSValidationTrustFileInitParameters struct {
+
+	// Certificate chain for the certificate.
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
 }
 
 type ClientPolicyTLSValidationTrustFileObservation struct {
@@ -334,8 +452,19 @@ type ClientPolicyTLSValidationTrustFileObservation struct {
 type ClientPolicyTLSValidationTrustFileParameters struct {
 
 	// Certificate chain for the certificate.
-	// +kubebuilder:validation:Required
-	CertificateChain *string `json:"certificateChain" tf:"certificate_chain,omitempty"`
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
+}
+
+type ClientPolicyTLSValidationTrustInitParameters struct {
+
+	// TLS validation context trust for an AWS Certificate Manager (ACM) certificate.
+	Acm []ValidationTrustAcmInitParameters `json:"acm,omitempty" tf:"acm,omitempty"`
+
+	// Local file certificate.
+	File []ClientPolicyTLSValidationTrustFileInitParameters `json:"file,omitempty" tf:"file,omitempty"`
+
+	// A Secret Discovery Service certificate.
+	Sds []ClientPolicyTLSValidationTrustSdsInitParameters `json:"sds,omitempty" tf:"sds,omitempty"`
 }
 
 type ClientPolicyTLSValidationTrustObservation struct {
@@ -353,16 +482,19 @@ type ClientPolicyTLSValidationTrustObservation struct {
 type ClientPolicyTLSValidationTrustParameters struct {
 
 	// TLS validation context trust for an AWS Certificate Manager (ACM) certificate.
-	// +kubebuilder:validation:Optional
 	Acm []ValidationTrustAcmParameters `json:"acm,omitempty" tf:"acm,omitempty"`
 
 	// Local file certificate.
-	// +kubebuilder:validation:Optional
 	File []ClientPolicyTLSValidationTrustFileParameters `json:"file,omitempty" tf:"file,omitempty"`
 
 	// A Secret Discovery Service certificate.
-	// +kubebuilder:validation:Optional
 	Sds []ClientPolicyTLSValidationTrustSdsParameters `json:"sds,omitempty" tf:"sds,omitempty"`
+}
+
+type ClientPolicyTLSValidationTrustSdsInitParameters struct {
+
+	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
 }
 
 type ClientPolicyTLSValidationTrustSdsObservation struct {
@@ -374,8 +506,13 @@ type ClientPolicyTLSValidationTrustSdsObservation struct {
 type ClientPolicyTLSValidationTrustSdsParameters struct {
 
 	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
-	// +kubebuilder:validation:Required
-	SecretName *string `json:"secretName" tf:"secret_name,omitempty"`
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
+}
+
+type ConnectionPoolGRPCInitParameters struct {
+
+	// Maximum number of inflight requests Envoy can concurrently support across hosts in upstream cluster. Minimum value of 1.
+	MaxRequests *float64 `json:"maxRequests,omitempty" tf:"max_requests,omitempty"`
 }
 
 type ConnectionPoolGRPCObservation struct {
@@ -387,8 +524,16 @@ type ConnectionPoolGRPCObservation struct {
 type ConnectionPoolGRPCParameters struct {
 
 	// Maximum number of inflight requests Envoy can concurrently support across hosts in upstream cluster. Minimum value of 1.
-	// +kubebuilder:validation:Required
-	MaxRequests *float64 `json:"maxRequests" tf:"max_requests,omitempty"`
+	MaxRequests *float64 `json:"maxRequests,omitempty" tf:"max_requests,omitempty"`
+}
+
+type ConnectionPoolHTTPInitParameters struct {
+
+	// Maximum number of outbound TCP connections Envoy can establish concurrently with all hosts in upstream cluster. Minimum value of 1.
+	MaxConnections *float64 `json:"maxConnections,omitempty" tf:"max_connections,omitempty"`
+
+	// Number of overflowing requests after max_connections Envoy will queue to upstream cluster. Minimum value of 1.
+	MaxPendingRequests *float64 `json:"maxPendingRequests,omitempty" tf:"max_pending_requests,omitempty"`
 }
 
 type ConnectionPoolHTTPObservation struct {
@@ -403,12 +548,16 @@ type ConnectionPoolHTTPObservation struct {
 type ConnectionPoolHTTPParameters struct {
 
 	// Maximum number of outbound TCP connections Envoy can establish concurrently with all hosts in upstream cluster. Minimum value of 1.
-	// +kubebuilder:validation:Required
-	MaxConnections *float64 `json:"maxConnections" tf:"max_connections,omitempty"`
+	MaxConnections *float64 `json:"maxConnections,omitempty" tf:"max_connections,omitempty"`
 
 	// Number of overflowing requests after max_connections Envoy will queue to upstream cluster. Minimum value of 1.
-	// +kubebuilder:validation:Optional
 	MaxPendingRequests *float64 `json:"maxPendingRequests,omitempty" tf:"max_pending_requests,omitempty"`
+}
+
+type ConnectionPoolHttp2InitParameters struct {
+
+	// Maximum number of inflight requests Envoy can concurrently support across hosts in upstream cluster. Minimum value of 1.
+	MaxRequests *float64 `json:"maxRequests,omitempty" tf:"max_requests,omitempty"`
 }
 
 type ConnectionPoolHttp2Observation struct {
@@ -420,8 +569,13 @@ type ConnectionPoolHttp2Observation struct {
 type ConnectionPoolHttp2Parameters struct {
 
 	// Maximum number of inflight requests Envoy can concurrently support across hosts in upstream cluster. Minimum value of 1.
-	// +kubebuilder:validation:Required
-	MaxRequests *float64 `json:"maxRequests" tf:"max_requests,omitempty"`
+	MaxRequests *float64 `json:"maxRequests,omitempty" tf:"max_requests,omitempty"`
+}
+
+type DNSInitParameters struct {
+
+	// DNS host name for your virtual node.
+	Hostname *string `json:"hostname,omitempty" tf:"hostname,omitempty"`
 }
 
 type DNSObservation struct {
@@ -433,8 +587,16 @@ type DNSObservation struct {
 type DNSParameters struct {
 
 	// DNS host name for your virtual node.
-	// +kubebuilder:validation:Required
-	Hostname *string `json:"hostname" tf:"hostname,omitempty"`
+	Hostname *string `json:"hostname,omitempty" tf:"hostname,omitempty"`
+}
+
+type GRPCIdleInitParameters struct {
+
+	// Unit of time. Valid values: ms, s.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+
+	// Number of time units. Minimum value of 0.
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type GRPCIdleObservation struct {
@@ -449,12 +611,19 @@ type GRPCIdleObservation struct {
 type GRPCIdleParameters struct {
 
 	// Unit of time. Valid values: ms, s.
-	// +kubebuilder:validation:Required
-	Unit *string `json:"unit" tf:"unit,omitempty"`
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
 
 	// Number of time units. Minimum value of 0.
-	// +kubebuilder:validation:Required
-	Value *float64 `json:"value" tf:"value,omitempty"`
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type GRPCPerRequestInitParameters struct {
+
+	// Unit of time. Valid values: ms, s.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+
+	// Number of time units. Minimum value of 0.
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type GRPCPerRequestObservation struct {
@@ -469,12 +638,19 @@ type GRPCPerRequestObservation struct {
 type GRPCPerRequestParameters struct {
 
 	// Unit of time. Valid values: ms, s.
-	// +kubebuilder:validation:Required
-	Unit *string `json:"unit" tf:"unit,omitempty"`
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
 
 	// Number of time units. Minimum value of 0.
-	// +kubebuilder:validation:Required
-	Value *float64 `json:"value" tf:"value,omitempty"`
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type HTTPIdleInitParameters struct {
+
+	// Unit of time. Valid values: ms, s.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+
+	// Number of time units. Minimum value of 0.
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type HTTPIdleObservation struct {
@@ -489,12 +665,19 @@ type HTTPIdleObservation struct {
 type HTTPIdleParameters struct {
 
 	// Unit of time. Valid values: ms, s.
-	// +kubebuilder:validation:Required
-	Unit *string `json:"unit" tf:"unit,omitempty"`
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
 
 	// Number of time units. Minimum value of 0.
-	// +kubebuilder:validation:Required
-	Value *float64 `json:"value" tf:"value,omitempty"`
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type HTTPPerRequestInitParameters struct {
+
+	// Unit of time. Valid values: ms, s.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+
+	// Number of time units. Minimum value of 0.
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type HTTPPerRequestObservation struct {
@@ -509,12 +692,19 @@ type HTTPPerRequestObservation struct {
 type HTTPPerRequestParameters struct {
 
 	// Unit of time. Valid values: ms, s.
-	// +kubebuilder:validation:Required
-	Unit *string `json:"unit" tf:"unit,omitempty"`
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
 
 	// Number of time units. Minimum value of 0.
-	// +kubebuilder:validation:Required
-	Value *float64 `json:"value" tf:"value,omitempty"`
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type Http2IdleInitParameters struct {
+
+	// Unit of time. Valid values: ms, s.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+
+	// Number of time units. Minimum value of 0.
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type Http2IdleObservation struct {
@@ -529,12 +719,19 @@ type Http2IdleObservation struct {
 type Http2IdleParameters struct {
 
 	// Unit of time. Valid values: ms, s.
-	// +kubebuilder:validation:Required
-	Unit *string `json:"unit" tf:"unit,omitempty"`
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
 
 	// Number of time units. Minimum value of 0.
-	// +kubebuilder:validation:Required
-	Value *float64 `json:"value" tf:"value,omitempty"`
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type Http2PerRequestInitParameters struct {
+
+	// Unit of time. Valid values: ms, s.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+
+	// Number of time units. Minimum value of 0.
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type Http2PerRequestObservation struct {
@@ -549,12 +746,19 @@ type Http2PerRequestObservation struct {
 type Http2PerRequestParameters struct {
 
 	// Unit of time. Valid values: ms, s.
-	// +kubebuilder:validation:Required
-	Unit *string `json:"unit" tf:"unit,omitempty"`
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
 
 	// Number of time units. Minimum value of 0.
-	// +kubebuilder:validation:Required
-	Value *float64 `json:"value" tf:"value,omitempty"`
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type IntervalInitParameters struct {
+
+	// Unit of time. Valid values: ms, s.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+
+	// Number of time units. Minimum value of 0.
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type IntervalObservation struct {
@@ -569,12 +773,25 @@ type IntervalObservation struct {
 type IntervalParameters struct {
 
 	// Unit of time. Valid values: ms, s.
-	// +kubebuilder:validation:Required
-	Unit *string `json:"unit" tf:"unit,omitempty"`
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
 
 	// Number of time units. Minimum value of 0.
-	// +kubebuilder:validation:Required
-	Value *float64 `json:"value" tf:"value,omitempty"`
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type ListenerConnectionPoolInitParameters struct {
+
+	// Connection pool information for gRPC listeners.
+	GRPC []ConnectionPoolGRPCInitParameters `json:"grpc,omitempty" tf:"grpc,omitempty"`
+
+	// Connection pool information for HTTP listeners.
+	HTTP []ConnectionPoolHTTPInitParameters `json:"http,omitempty" tf:"http,omitempty"`
+
+	// Connection pool information for HTTP2 listeners.
+	Http2 []ConnectionPoolHttp2InitParameters `json:"http2,omitempty" tf:"http2,omitempty"`
+
+	// Connection pool information for TCP listeners.
+	TCP []TCPInitParameters `json:"tcp,omitempty" tf:"tcp,omitempty"`
 }
 
 type ListenerConnectionPoolObservation struct {
@@ -595,20 +812,40 @@ type ListenerConnectionPoolObservation struct {
 type ListenerConnectionPoolParameters struct {
 
 	// Connection pool information for gRPC listeners.
-	// +kubebuilder:validation:Optional
 	GRPC []ConnectionPoolGRPCParameters `json:"grpc,omitempty" tf:"grpc,omitempty"`
 
 	// Connection pool information for HTTP listeners.
-	// +kubebuilder:validation:Optional
 	HTTP []ConnectionPoolHTTPParameters `json:"http,omitempty" tf:"http,omitempty"`
 
 	// Connection pool information for HTTP2 listeners.
-	// +kubebuilder:validation:Optional
 	Http2 []ConnectionPoolHttp2Parameters `json:"http2,omitempty" tf:"http2,omitempty"`
 
 	// Connection pool information for TCP listeners.
-	// +kubebuilder:validation:Optional
 	TCP []TCPParameters `json:"tcp,omitempty" tf:"tcp,omitempty"`
+}
+
+type ListenerHealthCheckInitParameters struct {
+
+	// Number of consecutive successful health checks that must occur before declaring listener healthy.
+	HealthyThreshold *float64 `json:"healthyThreshold,omitempty" tf:"healthy_threshold,omitempty"`
+
+	// Time period in milliseconds between each health check execution.
+	IntervalMillis *float64 `json:"intervalMillis,omitempty" tf:"interval_millis,omitempty"`
+
+	// File path to write access logs to. You can use /dev/stdout to send access logs to standard out. Must be between 1 and 255 characters in length.
+	Path *string `json:"path,omitempty" tf:"path,omitempty"`
+
+	// Port used for the port mapping.
+	Port *float64 `json:"port,omitempty" tf:"port,omitempty"`
+
+	// Protocol used for the port mapping. Valid values are http, http2, tcp and grpc.
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
+
+	// Amount of time to wait when receiving a response from the health check, in milliseconds.
+	TimeoutMillis *float64 `json:"timeoutMillis,omitempty" tf:"timeout_millis,omitempty"`
+
+	// Number of consecutive failed health checks that must occur before declaring a virtual node unhealthy.
+	UnhealthyThreshold *float64 `json:"unhealthyThreshold,omitempty" tf:"unhealthy_threshold,omitempty"`
 }
 
 type ListenerHealthCheckObservation struct {
@@ -638,32 +875,34 @@ type ListenerHealthCheckObservation struct {
 type ListenerHealthCheckParameters struct {
 
 	// Number of consecutive successful health checks that must occur before declaring listener healthy.
-	// +kubebuilder:validation:Required
-	HealthyThreshold *float64 `json:"healthyThreshold" tf:"healthy_threshold,omitempty"`
+	HealthyThreshold *float64 `json:"healthyThreshold,omitempty" tf:"healthy_threshold,omitempty"`
 
 	// Time period in milliseconds between each health check execution.
-	// +kubebuilder:validation:Required
-	IntervalMillis *float64 `json:"intervalMillis" tf:"interval_millis,omitempty"`
+	IntervalMillis *float64 `json:"intervalMillis,omitempty" tf:"interval_millis,omitempty"`
 
 	// File path to write access logs to. You can use /dev/stdout to send access logs to standard out. Must be between 1 and 255 characters in length.
-	// +kubebuilder:validation:Optional
 	Path *string `json:"path,omitempty" tf:"path,omitempty"`
 
 	// Port used for the port mapping.
-	// +kubebuilder:validation:Optional
 	Port *float64 `json:"port,omitempty" tf:"port,omitempty"`
 
 	// Protocol used for the port mapping. Valid values are http, http2, tcp and grpc.
-	// +kubebuilder:validation:Required
-	Protocol *string `json:"protocol" tf:"protocol,omitempty"`
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
 
 	// Amount of time to wait when receiving a response from the health check, in milliseconds.
-	// +kubebuilder:validation:Required
-	TimeoutMillis *float64 `json:"timeoutMillis" tf:"timeout_millis,omitempty"`
+	TimeoutMillis *float64 `json:"timeoutMillis,omitempty" tf:"timeout_millis,omitempty"`
 
 	// Number of consecutive failed health checks that must occur before declaring a virtual node unhealthy.
-	// +kubebuilder:validation:Required
-	UnhealthyThreshold *float64 `json:"unhealthyThreshold" tf:"unhealthy_threshold,omitempty"`
+	UnhealthyThreshold *float64 `json:"unhealthyThreshold,omitempty" tf:"unhealthy_threshold,omitempty"`
+}
+
+type ListenerPortMappingInitParameters struct {
+
+	// Port used for the port mapping.
+	Port *float64 `json:"port,omitempty" tf:"port,omitempty"`
+
+	// Protocol used for the port mapping. Valid values are http, http2, tcp and grpc.
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
 }
 
 type ListenerPortMappingObservation struct {
@@ -678,12 +917,19 @@ type ListenerPortMappingObservation struct {
 type ListenerPortMappingParameters struct {
 
 	// Port used for the port mapping.
-	// +kubebuilder:validation:Required
-	Port *float64 `json:"port" tf:"port,omitempty"`
+	Port *float64 `json:"port,omitempty" tf:"port,omitempty"`
 
 	// Protocol used for the port mapping. Valid values are http, http2, tcp and grpc.
-	// +kubebuilder:validation:Required
-	Protocol *string `json:"protocol" tf:"protocol,omitempty"`
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
+}
+
+type ListenerTLSCertificateFileInitParameters struct {
+
+	// Certificate chain for the certificate.
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
+
+	// Private key for a certificate stored on the file system of the mesh endpoint that the proxy is running on.
+	PrivateKey *string `json:"privateKey,omitempty" tf:"private_key,omitempty"`
 }
 
 type ListenerTLSCertificateFileObservation struct {
@@ -698,12 +944,22 @@ type ListenerTLSCertificateFileObservation struct {
 type ListenerTLSCertificateFileParameters struct {
 
 	// Certificate chain for the certificate.
-	// +kubebuilder:validation:Required
-	CertificateChain *string `json:"certificateChain" tf:"certificate_chain,omitempty"`
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
 
 	// Private key for a certificate stored on the file system of the mesh endpoint that the proxy is running on.
-	// +kubebuilder:validation:Required
-	PrivateKey *string `json:"privateKey" tf:"private_key,omitempty"`
+	PrivateKey *string `json:"privateKey,omitempty" tf:"private_key,omitempty"`
+}
+
+type ListenerTLSCertificateInitParameters struct {
+
+	// TLS validation context trust for an AWS Certificate Manager (ACM) certificate.
+	Acm []TLSCertificateAcmInitParameters `json:"acm,omitempty" tf:"acm,omitempty"`
+
+	// Local file certificate.
+	File []ListenerTLSCertificateFileInitParameters `json:"file,omitempty" tf:"file,omitempty"`
+
+	// A Secret Discovery Service certificate.
+	Sds []ListenerTLSCertificateSdsInitParameters `json:"sds,omitempty" tf:"sds,omitempty"`
 }
 
 type ListenerTLSCertificateObservation struct {
@@ -721,16 +977,19 @@ type ListenerTLSCertificateObservation struct {
 type ListenerTLSCertificateParameters struct {
 
 	// TLS validation context trust for an AWS Certificate Manager (ACM) certificate.
-	// +kubebuilder:validation:Optional
 	Acm []TLSCertificateAcmParameters `json:"acm,omitempty" tf:"acm,omitempty"`
 
 	// Local file certificate.
-	// +kubebuilder:validation:Optional
 	File []ListenerTLSCertificateFileParameters `json:"file,omitempty" tf:"file,omitempty"`
 
 	// A Secret Discovery Service certificate.
-	// +kubebuilder:validation:Optional
 	Sds []ListenerTLSCertificateSdsParameters `json:"sds,omitempty" tf:"sds,omitempty"`
+}
+
+type ListenerTLSCertificateSdsInitParameters struct {
+
+	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
 }
 
 type ListenerTLSCertificateSdsObservation struct {
@@ -742,8 +1001,16 @@ type ListenerTLSCertificateSdsObservation struct {
 type ListenerTLSCertificateSdsParameters struct {
 
 	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
-	// +kubebuilder:validation:Required
-	SecretName *string `json:"secretName" tf:"secret_name,omitempty"`
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
+}
+
+type ListenerTLSValidationInitParameters struct {
+
+	// SANs for a TLS validation context.
+	SubjectAlternativeNames []ListenerTLSValidationSubjectAlternativeNamesInitParameters `json:"subjectAlternativeNames,omitempty" tf:"subject_alternative_names,omitempty"`
+
+	// TLS validation context trust.
+	Trust []ListenerTLSValidationTrustInitParameters `json:"trust,omitempty" tf:"trust,omitempty"`
 }
 
 type ListenerTLSValidationObservation struct {
@@ -758,12 +1025,22 @@ type ListenerTLSValidationObservation struct {
 type ListenerTLSValidationParameters struct {
 
 	// SANs for a TLS validation context.
-	// +kubebuilder:validation:Optional
 	SubjectAlternativeNames []ListenerTLSValidationSubjectAlternativeNamesParameters `json:"subjectAlternativeNames,omitempty" tf:"subject_alternative_names,omitempty"`
 
 	// TLS validation context trust.
-	// +kubebuilder:validation:Required
-	Trust []ListenerTLSValidationTrustParameters `json:"trust" tf:"trust,omitempty"`
+	Trust []ListenerTLSValidationTrustParameters `json:"trust,omitempty" tf:"trust,omitempty"`
+}
+
+type ListenerTLSValidationSubjectAlternativeNamesInitParameters struct {
+
+	// Criteria for determining a SAN's match.
+	Match []ListenerTLSValidationSubjectAlternativeNamesMatchInitParameters `json:"match,omitempty" tf:"match,omitempty"`
+}
+
+type ListenerTLSValidationSubjectAlternativeNamesMatchInitParameters struct {
+
+	// Values sent must match the specified values exactly.
+	Exact []*string `json:"exact,omitempty" tf:"exact,omitempty"`
 }
 
 type ListenerTLSValidationSubjectAlternativeNamesMatchObservation struct {
@@ -775,8 +1052,7 @@ type ListenerTLSValidationSubjectAlternativeNamesMatchObservation struct {
 type ListenerTLSValidationSubjectAlternativeNamesMatchParameters struct {
 
 	// Values sent must match the specified values exactly.
-	// +kubebuilder:validation:Required
-	Exact []*string `json:"exact" tf:"exact,omitempty"`
+	Exact []*string `json:"exact,omitempty" tf:"exact,omitempty"`
 }
 
 type ListenerTLSValidationSubjectAlternativeNamesObservation struct {
@@ -788,8 +1064,13 @@ type ListenerTLSValidationSubjectAlternativeNamesObservation struct {
 type ListenerTLSValidationSubjectAlternativeNamesParameters struct {
 
 	// Criteria for determining a SAN's match.
-	// +kubebuilder:validation:Required
-	Match []ListenerTLSValidationSubjectAlternativeNamesMatchParameters `json:"match" tf:"match,omitempty"`
+	Match []ListenerTLSValidationSubjectAlternativeNamesMatchParameters `json:"match,omitempty" tf:"match,omitempty"`
+}
+
+type ListenerTLSValidationTrustFileInitParameters struct {
+
+	// Certificate chain for the certificate.
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
 }
 
 type ListenerTLSValidationTrustFileObservation struct {
@@ -801,8 +1082,16 @@ type ListenerTLSValidationTrustFileObservation struct {
 type ListenerTLSValidationTrustFileParameters struct {
 
 	// Certificate chain for the certificate.
-	// +kubebuilder:validation:Required
-	CertificateChain *string `json:"certificateChain" tf:"certificate_chain,omitempty"`
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
+}
+
+type ListenerTLSValidationTrustInitParameters struct {
+
+	// Local file certificate.
+	File []ListenerTLSValidationTrustFileInitParameters `json:"file,omitempty" tf:"file,omitempty"`
+
+	// A Secret Discovery Service certificate.
+	Sds []ListenerTLSValidationTrustSdsInitParameters `json:"sds,omitempty" tf:"sds,omitempty"`
 }
 
 type ListenerTLSValidationTrustObservation struct {
@@ -817,12 +1106,16 @@ type ListenerTLSValidationTrustObservation struct {
 type ListenerTLSValidationTrustParameters struct {
 
 	// Local file certificate.
-	// +kubebuilder:validation:Optional
 	File []ListenerTLSValidationTrustFileParameters `json:"file,omitempty" tf:"file,omitempty"`
 
 	// A Secret Discovery Service certificate.
-	// +kubebuilder:validation:Optional
 	Sds []ListenerTLSValidationTrustSdsParameters `json:"sds,omitempty" tf:"sds,omitempty"`
+}
+
+type ListenerTLSValidationTrustSdsInitParameters struct {
+
+	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
 }
 
 type ListenerTLSValidationTrustSdsObservation struct {
@@ -834,8 +1127,22 @@ type ListenerTLSValidationTrustSdsObservation struct {
 type ListenerTLSValidationTrustSdsParameters struct {
 
 	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
-	// +kubebuilder:validation:Required
-	SecretName *string `json:"secretName" tf:"secret_name,omitempty"`
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
+}
+
+type ListenerTimeoutInitParameters struct {
+
+	// Connection pool information for gRPC listeners.
+	GRPC []TimeoutGRPCInitParameters `json:"grpc,omitempty" tf:"grpc,omitempty"`
+
+	// Connection pool information for HTTP listeners.
+	HTTP []TimeoutHTTPInitParameters `json:"http,omitempty" tf:"http,omitempty"`
+
+	// Connection pool information for HTTP2 listeners.
+	Http2 []TimeoutHttp2InitParameters `json:"http2,omitempty" tf:"http2,omitempty"`
+
+	// Connection pool information for TCP listeners.
+	TCP []TimeoutTCPInitParameters `json:"tcp,omitempty" tf:"tcp,omitempty"`
 }
 
 type ListenerTimeoutObservation struct {
@@ -856,20 +1163,22 @@ type ListenerTimeoutObservation struct {
 type ListenerTimeoutParameters struct {
 
 	// Connection pool information for gRPC listeners.
-	// +kubebuilder:validation:Optional
 	GRPC []TimeoutGRPCParameters `json:"grpc,omitempty" tf:"grpc,omitempty"`
 
 	// Connection pool information for HTTP listeners.
-	// +kubebuilder:validation:Optional
 	HTTP []TimeoutHTTPParameters `json:"http,omitempty" tf:"http,omitempty"`
 
 	// Connection pool information for HTTP2 listeners.
-	// +kubebuilder:validation:Optional
 	Http2 []TimeoutHttp2Parameters `json:"http2,omitempty" tf:"http2,omitempty"`
 
 	// Connection pool information for TCP listeners.
-	// +kubebuilder:validation:Optional
 	TCP []TimeoutTCPParameters `json:"tcp,omitempty" tf:"tcp,omitempty"`
+}
+
+type LoggingAccessLogFileInitParameters struct {
+
+	// File path to write access logs to. You can use /dev/stdout to send access logs to standard out. Must be between 1 and 255 characters in length.
+	Path *string `json:"path,omitempty" tf:"path,omitempty"`
 }
 
 type LoggingAccessLogFileObservation struct {
@@ -881,8 +1190,13 @@ type LoggingAccessLogFileObservation struct {
 type LoggingAccessLogFileParameters struct {
 
 	// File path to write access logs to. You can use /dev/stdout to send access logs to standard out. Must be between 1 and 255 characters in length.
-	// +kubebuilder:validation:Required
-	Path *string `json:"path" tf:"path,omitempty"`
+	Path *string `json:"path,omitempty" tf:"path,omitempty"`
+}
+
+type LoggingAccessLogInitParameters struct {
+
+	// Local file certificate.
+	File []LoggingAccessLogFileInitParameters `json:"file,omitempty" tf:"file,omitempty"`
 }
 
 type LoggingAccessLogObservation struct {
@@ -894,8 +1208,23 @@ type LoggingAccessLogObservation struct {
 type LoggingAccessLogParameters struct {
 
 	// Local file certificate.
-	// +kubebuilder:validation:Optional
 	File []LoggingAccessLogFileParameters `json:"file,omitempty" tf:"file,omitempty"`
+}
+
+type OutlierDetectionInitParameters struct {
+
+	// Base amount of time for which a host is ejected.
+	BaseEjectionDuration []BaseEjectionDurationInitParameters `json:"baseEjectionDuration,omitempty" tf:"base_ejection_duration,omitempty"`
+
+	// Time interval between ejection sweep analysis.
+	Interval []IntervalInitParameters `json:"interval,omitempty" tf:"interval,omitempty"`
+
+	// Maximum percentage of hosts in load balancing pool for upstream service that can be ejected. Will eject at least one host regardless of the value.
+	// Minimum value of 0. Maximum value of 100.
+	MaxEjectionPercent *float64 `json:"maxEjectionPercent,omitempty" tf:"max_ejection_percent,omitempty"`
+
+	// Number of consecutive 5xx errors required for ejection. Minimum value of 1.
+	MaxServerErrors *float64 `json:"maxServerErrors,omitempty" tf:"max_server_errors,omitempty"`
 }
 
 type OutlierDetectionObservation struct {
@@ -917,21 +1246,26 @@ type OutlierDetectionObservation struct {
 type OutlierDetectionParameters struct {
 
 	// Base amount of time for which a host is ejected.
-	// +kubebuilder:validation:Required
-	BaseEjectionDuration []BaseEjectionDurationParameters `json:"baseEjectionDuration" tf:"base_ejection_duration,omitempty"`
+	BaseEjectionDuration []BaseEjectionDurationParameters `json:"baseEjectionDuration,omitempty" tf:"base_ejection_duration,omitempty"`
 
 	// Time interval between ejection sweep analysis.
-	// +kubebuilder:validation:Required
-	Interval []IntervalParameters `json:"interval" tf:"interval,omitempty"`
+	Interval []IntervalParameters `json:"interval,omitempty" tf:"interval,omitempty"`
 
 	// Maximum percentage of hosts in load balancing pool for upstream service that can be ejected. Will eject at least one host regardless of the value.
 	// Minimum value of 0. Maximum value of 100.
-	// +kubebuilder:validation:Required
-	MaxEjectionPercent *float64 `json:"maxEjectionPercent" tf:"max_ejection_percent,omitempty"`
+	MaxEjectionPercent *float64 `json:"maxEjectionPercent,omitempty" tf:"max_ejection_percent,omitempty"`
 
 	// Number of consecutive 5xx errors required for ejection. Minimum value of 1.
-	// +kubebuilder:validation:Required
-	MaxServerErrors *float64 `json:"maxServerErrors" tf:"max_server_errors,omitempty"`
+	MaxServerErrors *float64 `json:"maxServerErrors,omitempty" tf:"max_server_errors,omitempty"`
+}
+
+type ServiceDiscoveryInitParameters struct {
+
+	// Any AWS Cloud Map information for the virtual node.
+	AwsCloudMap []AwsCloudMapInitParameters `json:"awsCloudMap,omitempty" tf:"aws_cloud_map,omitempty"`
+
+	// DNS service name for the virtual node.
+	DNS []DNSInitParameters `json:"dns,omitempty" tf:"dns,omitempty"`
 }
 
 type ServiceDiscoveryObservation struct {
@@ -946,12 +1280,16 @@ type ServiceDiscoveryObservation struct {
 type ServiceDiscoveryParameters struct {
 
 	// Any AWS Cloud Map information for the virtual node.
-	// +kubebuilder:validation:Optional
 	AwsCloudMap []AwsCloudMapParameters `json:"awsCloudMap,omitempty" tf:"aws_cloud_map,omitempty"`
 
 	// DNS service name for the virtual node.
-	// +kubebuilder:validation:Optional
 	DNS []DNSParameters `json:"dns,omitempty" tf:"dns,omitempty"`
+}
+
+type SpecBackendDefaultsInitParameters struct {
+
+	// Client policy for the backend.
+	ClientPolicy []BackendDefaultsClientPolicyInitParameters `json:"clientPolicy,omitempty" tf:"client_policy,omitempty"`
 }
 
 type SpecBackendDefaultsObservation struct {
@@ -963,8 +1301,28 @@ type SpecBackendDefaultsObservation struct {
 type SpecBackendDefaultsParameters struct {
 
 	// Client policy for the backend.
-	// +kubebuilder:validation:Optional
 	ClientPolicy []BackendDefaultsClientPolicyParameters `json:"clientPolicy,omitempty" tf:"client_policy,omitempty"`
+}
+
+type SpecListenerInitParameters struct {
+
+	// Connection pool information for the listener.
+	ConnectionPool []ListenerConnectionPoolInitParameters `json:"connectionPool,omitempty" tf:"connection_pool,omitempty"`
+
+	// Health check information for the listener.
+	HealthCheck []ListenerHealthCheckInitParameters `json:"healthCheck,omitempty" tf:"health_check,omitempty"`
+
+	// Outlier detection information for the listener.
+	OutlierDetection []OutlierDetectionInitParameters `json:"outlierDetection,omitempty" tf:"outlier_detection,omitempty"`
+
+	// Port mapping information for the listener.
+	PortMapping []ListenerPortMappingInitParameters `json:"portMapping,omitempty" tf:"port_mapping,omitempty"`
+
+	// Transport Layer Security (TLS) client policy.
+	TLS []SpecListenerTLSInitParameters `json:"tls,omitempty" tf:"tls,omitempty"`
+
+	// Timeouts for different protocols.
+	Timeout []ListenerTimeoutInitParameters `json:"timeout,omitempty" tf:"timeout,omitempty"`
 }
 
 type SpecListenerObservation struct {
@@ -991,28 +1349,34 @@ type SpecListenerObservation struct {
 type SpecListenerParameters struct {
 
 	// Connection pool information for the listener.
-	// +kubebuilder:validation:Optional
 	ConnectionPool []ListenerConnectionPoolParameters `json:"connectionPool,omitempty" tf:"connection_pool,omitempty"`
 
 	// Health check information for the listener.
-	// +kubebuilder:validation:Optional
 	HealthCheck []ListenerHealthCheckParameters `json:"healthCheck,omitempty" tf:"health_check,omitempty"`
 
 	// Outlier detection information for the listener.
-	// +kubebuilder:validation:Optional
 	OutlierDetection []OutlierDetectionParameters `json:"outlierDetection,omitempty" tf:"outlier_detection,omitempty"`
 
 	// Port mapping information for the listener.
-	// +kubebuilder:validation:Required
-	PortMapping []ListenerPortMappingParameters `json:"portMapping" tf:"port_mapping,omitempty"`
+	PortMapping []ListenerPortMappingParameters `json:"portMapping,omitempty" tf:"port_mapping,omitempty"`
 
 	// Transport Layer Security (TLS) client policy.
-	// +kubebuilder:validation:Optional
 	TLS []SpecListenerTLSParameters `json:"tls,omitempty" tf:"tls,omitempty"`
 
 	// Timeouts for different protocols.
-	// +kubebuilder:validation:Optional
 	Timeout []ListenerTimeoutParameters `json:"timeout,omitempty" tf:"timeout,omitempty"`
+}
+
+type SpecListenerTLSInitParameters struct {
+
+	// Virtual node's client's Transport Layer Security (TLS) certificate.
+	Certificate []ListenerTLSCertificateInitParameters `json:"certificate,omitempty" tf:"certificate,omitempty"`
+
+	// Listener's TLS mode. Valid values: DISABLED, PERMISSIVE, STRICT.
+	Mode *string `json:"mode,omitempty" tf:"mode,omitempty"`
+
+	// TLS validation context.
+	Validation []ListenerTLSValidationInitParameters `json:"validation,omitempty" tf:"validation,omitempty"`
 }
 
 type SpecListenerTLSObservation struct {
@@ -1030,16 +1394,19 @@ type SpecListenerTLSObservation struct {
 type SpecListenerTLSParameters struct {
 
 	// Virtual node's client's Transport Layer Security (TLS) certificate.
-	// +kubebuilder:validation:Required
-	Certificate []ListenerTLSCertificateParameters `json:"certificate" tf:"certificate,omitempty"`
+	Certificate []ListenerTLSCertificateParameters `json:"certificate,omitempty" tf:"certificate,omitempty"`
 
 	// Listener's TLS mode. Valid values: DISABLED, PERMISSIVE, STRICT.
-	// +kubebuilder:validation:Required
-	Mode *string `json:"mode" tf:"mode,omitempty"`
+	Mode *string `json:"mode,omitempty" tf:"mode,omitempty"`
 
 	// TLS validation context.
-	// +kubebuilder:validation:Optional
 	Validation []ListenerTLSValidationParameters `json:"validation,omitempty" tf:"validation,omitempty"`
+}
+
+type SpecLoggingInitParameters struct {
+
+	// Access log configuration for a virtual node.
+	AccessLog []LoggingAccessLogInitParameters `json:"accessLog,omitempty" tf:"access_log,omitempty"`
 }
 
 type SpecLoggingObservation struct {
@@ -1051,8 +1418,16 @@ type SpecLoggingObservation struct {
 type SpecLoggingParameters struct {
 
 	// Access log configuration for a virtual node.
-	// +kubebuilder:validation:Optional
 	AccessLog []LoggingAccessLogParameters `json:"accessLog,omitempty" tf:"access_log,omitempty"`
+}
+
+type TCPIdleInitParameters struct {
+
+	// Unit of time. Valid values: ms, s.
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
+
+	// Number of time units. Minimum value of 0.
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
 }
 
 type TCPIdleObservation struct {
@@ -1067,12 +1442,16 @@ type TCPIdleObservation struct {
 type TCPIdleParameters struct {
 
 	// Unit of time. Valid values: ms, s.
-	// +kubebuilder:validation:Required
-	Unit *string `json:"unit" tf:"unit,omitempty"`
+	Unit *string `json:"unit,omitempty" tf:"unit,omitempty"`
 
 	// Number of time units. Minimum value of 0.
-	// +kubebuilder:validation:Required
-	Value *float64 `json:"value" tf:"value,omitempty"`
+	Value *float64 `json:"value,omitempty" tf:"value,omitempty"`
+}
+
+type TCPInitParameters struct {
+
+	// Maximum number of outbound TCP connections Envoy can establish concurrently with all hosts in upstream cluster. Minimum value of 1.
+	MaxConnections *float64 `json:"maxConnections,omitempty" tf:"max_connections,omitempty"`
 }
 
 type TCPObservation struct {
@@ -1084,8 +1463,13 @@ type TCPObservation struct {
 type TCPParameters struct {
 
 	// Maximum number of outbound TCP connections Envoy can establish concurrently with all hosts in upstream cluster. Minimum value of 1.
-	// +kubebuilder:validation:Required
-	MaxConnections *float64 `json:"maxConnections" tf:"max_connections,omitempty"`
+	MaxConnections *float64 `json:"maxConnections,omitempty" tf:"max_connections,omitempty"`
+}
+
+type TLSCertificateAcmInitParameters struct {
+
+	// ARN for the certificate.
+	CertificateArn *string `json:"certificateArn,omitempty" tf:"certificate_arn,omitempty"`
 }
 
 type TLSCertificateAcmObservation struct {
@@ -1097,8 +1481,16 @@ type TLSCertificateAcmObservation struct {
 type TLSCertificateAcmParameters struct {
 
 	// ARN for the certificate.
-	// +kubebuilder:validation:Required
-	CertificateArn *string `json:"certificateArn" tf:"certificate_arn,omitempty"`
+	CertificateArn *string `json:"certificateArn,omitempty" tf:"certificate_arn,omitempty"`
+}
+
+type TLSCertificateFileInitParameters struct {
+
+	// Certificate chain for the certificate.
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
+
+	// Private key for a certificate stored on the file system of the mesh endpoint that the proxy is running on.
+	PrivateKey *string `json:"privateKey,omitempty" tf:"private_key,omitempty"`
 }
 
 type TLSCertificateFileObservation struct {
@@ -1113,12 +1505,16 @@ type TLSCertificateFileObservation struct {
 type TLSCertificateFileParameters struct {
 
 	// Certificate chain for the certificate.
-	// +kubebuilder:validation:Required
-	CertificateChain *string `json:"certificateChain" tf:"certificate_chain,omitempty"`
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
 
 	// Private key for a certificate stored on the file system of the mesh endpoint that the proxy is running on.
-	// +kubebuilder:validation:Required
-	PrivateKey *string `json:"privateKey" tf:"private_key,omitempty"`
+	PrivateKey *string `json:"privateKey,omitempty" tf:"private_key,omitempty"`
+}
+
+type TLSCertificateSdsInitParameters struct {
+
+	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
 }
 
 type TLSCertificateSdsObservation struct {
@@ -1130,8 +1526,19 @@ type TLSCertificateSdsObservation struct {
 type TLSCertificateSdsParameters struct {
 
 	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
-	// +kubebuilder:validation:Required
-	SecretName *string `json:"secretName" tf:"secret_name,omitempty"`
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
+}
+
+type TLSValidationSubjectAlternativeNamesInitParameters struct {
+
+	// Criteria for determining a SAN's match.
+	Match []TLSValidationSubjectAlternativeNamesMatchInitParameters `json:"match,omitempty" tf:"match,omitempty"`
+}
+
+type TLSValidationSubjectAlternativeNamesMatchInitParameters struct {
+
+	// Values sent must match the specified values exactly.
+	Exact []*string `json:"exact,omitempty" tf:"exact,omitempty"`
 }
 
 type TLSValidationSubjectAlternativeNamesMatchObservation struct {
@@ -1143,8 +1550,7 @@ type TLSValidationSubjectAlternativeNamesMatchObservation struct {
 type TLSValidationSubjectAlternativeNamesMatchParameters struct {
 
 	// Values sent must match the specified values exactly.
-	// +kubebuilder:validation:Required
-	Exact []*string `json:"exact" tf:"exact,omitempty"`
+	Exact []*string `json:"exact,omitempty" tf:"exact,omitempty"`
 }
 
 type TLSValidationSubjectAlternativeNamesObservation struct {
@@ -1156,8 +1562,13 @@ type TLSValidationSubjectAlternativeNamesObservation struct {
 type TLSValidationSubjectAlternativeNamesParameters struct {
 
 	// Criteria for determining a SAN's match.
-	// +kubebuilder:validation:Required
-	Match []TLSValidationSubjectAlternativeNamesMatchParameters `json:"match" tf:"match,omitempty"`
+	Match []TLSValidationSubjectAlternativeNamesMatchParameters `json:"match,omitempty" tf:"match,omitempty"`
+}
+
+type TLSValidationTrustFileInitParameters struct {
+
+	// Certificate chain for the certificate.
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
 }
 
 type TLSValidationTrustFileObservation struct {
@@ -1169,8 +1580,19 @@ type TLSValidationTrustFileObservation struct {
 type TLSValidationTrustFileParameters struct {
 
 	// Certificate chain for the certificate.
-	// +kubebuilder:validation:Required
-	CertificateChain *string `json:"certificateChain" tf:"certificate_chain,omitempty"`
+	CertificateChain *string `json:"certificateChain,omitempty" tf:"certificate_chain,omitempty"`
+}
+
+type TLSValidationTrustInitParameters struct {
+
+	// TLS validation context trust for an AWS Certificate Manager (ACM) certificate.
+	Acm []TrustAcmInitParameters `json:"acm,omitempty" tf:"acm,omitempty"`
+
+	// Local file certificate.
+	File []TLSValidationTrustFileInitParameters `json:"file,omitempty" tf:"file,omitempty"`
+
+	// A Secret Discovery Service certificate.
+	Sds []TLSValidationTrustSdsInitParameters `json:"sds,omitempty" tf:"sds,omitempty"`
 }
 
 type TLSValidationTrustObservation struct {
@@ -1188,16 +1610,19 @@ type TLSValidationTrustObservation struct {
 type TLSValidationTrustParameters struct {
 
 	// TLS validation context trust for an AWS Certificate Manager (ACM) certificate.
-	// +kubebuilder:validation:Optional
 	Acm []TrustAcmParameters `json:"acm,omitempty" tf:"acm,omitempty"`
 
 	// Local file certificate.
-	// +kubebuilder:validation:Optional
 	File []TLSValidationTrustFileParameters `json:"file,omitempty" tf:"file,omitempty"`
 
 	// A Secret Discovery Service certificate.
-	// +kubebuilder:validation:Optional
 	Sds []TLSValidationTrustSdsParameters `json:"sds,omitempty" tf:"sds,omitempty"`
+}
+
+type TLSValidationTrustSdsInitParameters struct {
+
+	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
 }
 
 type TLSValidationTrustSdsObservation struct {
@@ -1209,8 +1634,16 @@ type TLSValidationTrustSdsObservation struct {
 type TLSValidationTrustSdsParameters struct {
 
 	// Name of the secret secret requested from the Secret Discovery Service provider representing Transport Layer Security (TLS) materials like a certificate or certificate chain.
-	// +kubebuilder:validation:Required
-	SecretName *string `json:"secretName" tf:"secret_name,omitempty"`
+	SecretName *string `json:"secretName,omitempty" tf:"secret_name,omitempty"`
+}
+
+type TimeoutGRPCInitParameters struct {
+
+	// Idle timeout. An idle timeout bounds the amount of time that a connection may be idle.
+	Idle []GRPCIdleInitParameters `json:"idle,omitempty" tf:"idle,omitempty"`
+
+	// Per request timeout.
+	PerRequest []GRPCPerRequestInitParameters `json:"perRequest,omitempty" tf:"per_request,omitempty"`
 }
 
 type TimeoutGRPCObservation struct {
@@ -1225,12 +1658,19 @@ type TimeoutGRPCObservation struct {
 type TimeoutGRPCParameters struct {
 
 	// Idle timeout. An idle timeout bounds the amount of time that a connection may be idle.
-	// +kubebuilder:validation:Optional
 	Idle []GRPCIdleParameters `json:"idle,omitempty" tf:"idle,omitempty"`
 
 	// Per request timeout.
-	// +kubebuilder:validation:Optional
 	PerRequest []GRPCPerRequestParameters `json:"perRequest,omitempty" tf:"per_request,omitempty"`
+}
+
+type TimeoutHTTPInitParameters struct {
+
+	// Idle timeout. An idle timeout bounds the amount of time that a connection may be idle.
+	Idle []HTTPIdleInitParameters `json:"idle,omitempty" tf:"idle,omitempty"`
+
+	// Per request timeout.
+	PerRequest []HTTPPerRequestInitParameters `json:"perRequest,omitempty" tf:"per_request,omitempty"`
 }
 
 type TimeoutHTTPObservation struct {
@@ -1245,12 +1685,19 @@ type TimeoutHTTPObservation struct {
 type TimeoutHTTPParameters struct {
 
 	// Idle timeout. An idle timeout bounds the amount of time that a connection may be idle.
-	// +kubebuilder:validation:Optional
 	Idle []HTTPIdleParameters `json:"idle,omitempty" tf:"idle,omitempty"`
 
 	// Per request timeout.
-	// +kubebuilder:validation:Optional
 	PerRequest []HTTPPerRequestParameters `json:"perRequest,omitempty" tf:"per_request,omitempty"`
+}
+
+type TimeoutHttp2InitParameters struct {
+
+	// Idle timeout. An idle timeout bounds the amount of time that a connection may be idle.
+	Idle []Http2IdleInitParameters `json:"idle,omitempty" tf:"idle,omitempty"`
+
+	// Per request timeout.
+	PerRequest []Http2PerRequestInitParameters `json:"perRequest,omitempty" tf:"per_request,omitempty"`
 }
 
 type TimeoutHttp2Observation struct {
@@ -1265,12 +1712,16 @@ type TimeoutHttp2Observation struct {
 type TimeoutHttp2Parameters struct {
 
 	// Idle timeout. An idle timeout bounds the amount of time that a connection may be idle.
-	// +kubebuilder:validation:Optional
 	Idle []Http2IdleParameters `json:"idle,omitempty" tf:"idle,omitempty"`
 
 	// Per request timeout.
-	// +kubebuilder:validation:Optional
 	PerRequest []Http2PerRequestParameters `json:"perRequest,omitempty" tf:"per_request,omitempty"`
+}
+
+type TimeoutTCPInitParameters struct {
+
+	// Idle timeout. An idle timeout bounds the amount of time that a connection may be idle.
+	Idle []TCPIdleInitParameters `json:"idle,omitempty" tf:"idle,omitempty"`
 }
 
 type TimeoutTCPObservation struct {
@@ -1282,8 +1733,13 @@ type TimeoutTCPObservation struct {
 type TimeoutTCPParameters struct {
 
 	// Idle timeout. An idle timeout bounds the amount of time that a connection may be idle.
-	// +kubebuilder:validation:Optional
 	Idle []TCPIdleParameters `json:"idle,omitempty" tf:"idle,omitempty"`
+}
+
+type TrustAcmInitParameters struct {
+
+	// One or more ACM ARNs.
+	CertificateAuthorityArns []*string `json:"certificateAuthorityArns,omitempty" tf:"certificate_authority_arns,omitempty"`
 }
 
 type TrustAcmObservation struct {
@@ -1295,8 +1751,13 @@ type TrustAcmObservation struct {
 type TrustAcmParameters struct {
 
 	// One or more ACM ARNs.
-	// +kubebuilder:validation:Required
-	CertificateAuthorityArns []*string `json:"certificateAuthorityArns" tf:"certificate_authority_arns,omitempty"`
+	CertificateAuthorityArns []*string `json:"certificateAuthorityArns,omitempty" tf:"certificate_authority_arns,omitempty"`
+}
+
+type ValidationTrustAcmInitParameters struct {
+
+	// One or more ACM ARNs.
+	CertificateAuthorityArns []*string `json:"certificateAuthorityArns,omitempty" tf:"certificate_authority_arns,omitempty"`
 }
 
 type ValidationTrustAcmObservation struct {
@@ -1308,8 +1769,35 @@ type ValidationTrustAcmObservation struct {
 type ValidationTrustAcmParameters struct {
 
 	// One or more ACM ARNs.
-	// +kubebuilder:validation:Required
-	CertificateAuthorityArns []*string `json:"certificateAuthorityArns" tf:"certificate_authority_arns,omitempty"`
+	CertificateAuthorityArns []*string `json:"certificateAuthorityArns,omitempty" tf:"certificate_authority_arns,omitempty"`
+}
+
+type VirtualNodeInitParameters struct {
+
+	// Name of the service mesh in which to create the virtual node. Must be between 1 and 255 characters in length.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appmesh/v1beta1.Mesh
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	MeshName *string `json:"meshName,omitempty" tf:"mesh_name,omitempty"`
+
+	MeshNameRef *v1.Reference `json:"meshNameRef,omitempty" tf:"-"`
+
+	MeshNameSelector *v1.Selector `json:"meshNameSelector,omitempty" tf:"-"`
+
+	// AWS account ID of the service mesh's owner. Defaults to the account ID the AWS provider is currently connected to.
+	MeshOwner *string `json:"meshOwner,omitempty" tf:"mesh_owner,omitempty"`
+
+	// Name to use for the virtual node. Must be between 1 and 255 characters in length.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Virtual node specification to apply.
+	Spec []VirtualNodeSpecInitParameters `json:"spec,omitempty" tf:"spec,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type VirtualNodeObservation struct {
@@ -1353,7 +1841,6 @@ type VirtualNodeParameters struct {
 	// Name of the service mesh in which to create the virtual node. Must be between 1 and 255 characters in length.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appmesh/v1beta1.Mesh
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	MeshName *string `json:"meshName,omitempty" tf:"mesh_name,omitempty"`
 
 	// Reference to a Mesh in appmesh to populate meshName.
@@ -1365,25 +1852,38 @@ type VirtualNodeParameters struct {
 	MeshNameSelector *v1.Selector `json:"meshNameSelector,omitempty" tf:"-"`
 
 	// AWS account ID of the service mesh's owner. Defaults to the account ID the AWS provider is currently connected to.
-	// +kubebuilder:validation:Optional
 	MeshOwner *string `json:"meshOwner,omitempty" tf:"mesh_owner,omitempty"`
 
 	// Name to use for the virtual node. Must be between 1 and 255 characters in length.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Virtual node specification to apply.
-	// +kubebuilder:validation:Optional
 	Spec []VirtualNodeSpecParameters `json:"spec,omitempty" tf:"spec,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type VirtualNodeSpecInitParameters struct {
+
+	// Backends to which the virtual node is expected to send outbound traffic.
+	Backend []BackendInitParameters `json:"backend,omitempty" tf:"backend,omitempty"`
+
+	// Defaults for backends.
+	BackendDefaults []SpecBackendDefaultsInitParameters `json:"backendDefaults,omitempty" tf:"backend_defaults,omitempty"`
+
+	// Listeners from which the virtual node is expected to receive inbound traffic.
+	Listener []SpecListenerInitParameters `json:"listener,omitempty" tf:"listener,omitempty"`
+
+	// Inbound and outbound access logging information for the virtual node.
+	Logging []SpecLoggingInitParameters `json:"logging,omitempty" tf:"logging,omitempty"`
+
+	// Service discovery information for the virtual node.
+	ServiceDiscovery []ServiceDiscoveryInitParameters `json:"serviceDiscovery,omitempty" tf:"service_discovery,omitempty"`
 }
 
 type VirtualNodeSpecObservation struct {
@@ -1407,24 +1907,25 @@ type VirtualNodeSpecObservation struct {
 type VirtualNodeSpecParameters struct {
 
 	// Backends to which the virtual node is expected to send outbound traffic.
-	// +kubebuilder:validation:Optional
 	Backend []BackendParameters `json:"backend,omitempty" tf:"backend,omitempty"`
 
 	// Defaults for backends.
-	// +kubebuilder:validation:Optional
 	BackendDefaults []SpecBackendDefaultsParameters `json:"backendDefaults,omitempty" tf:"backend_defaults,omitempty"`
 
 	// Listeners from which the virtual node is expected to receive inbound traffic.
-	// +kubebuilder:validation:Optional
 	Listener []SpecListenerParameters `json:"listener,omitempty" tf:"listener,omitempty"`
 
 	// Inbound and outbound access logging information for the virtual node.
-	// +kubebuilder:validation:Optional
 	Logging []SpecLoggingParameters `json:"logging,omitempty" tf:"logging,omitempty"`
 
 	// Service discovery information for the virtual node.
-	// +kubebuilder:validation:Optional
 	ServiceDiscovery []ServiceDiscoveryParameters `json:"serviceDiscovery,omitempty" tf:"service_discovery,omitempty"`
+}
+
+type VirtualServiceClientPolicyInitParameters struct {
+
+	// Transport Layer Security (TLS) client policy.
+	TLS []ClientPolicyTLSInitParameters `json:"tls,omitempty" tf:"tls,omitempty"`
 }
 
 type VirtualServiceClientPolicyObservation struct {
@@ -1436,7 +1937,6 @@ type VirtualServiceClientPolicyObservation struct {
 type VirtualServiceClientPolicyParameters struct {
 
 	// Transport Layer Security (TLS) client policy.
-	// +kubebuilder:validation:Optional
 	TLS []ClientPolicyTLSParameters `json:"tls,omitempty" tf:"tls,omitempty"`
 }
 
@@ -1444,6 +1944,10 @@ type VirtualServiceClientPolicyParameters struct {
 type VirtualNodeSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VirtualNodeParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VirtualNodeInitParameters `json:"initProvider,omitempty"`
 }
 
 // VirtualNodeStatus defines the observed state of VirtualNode.
@@ -1464,8 +1968,8 @@ type VirtualNodeStatus struct {
 type VirtualNode struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.spec)",message="spec is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.spec) || has(self.initProvider.spec)",message="%!s(MISSING) is a required parameter"
 	Spec   VirtualNodeSpec   `json:"spec"`
 	Status VirtualNodeStatus `json:"status,omitempty"`
 }

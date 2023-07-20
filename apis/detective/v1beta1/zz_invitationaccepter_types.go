@@ -13,6 +13,22 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type InvitationAccepterInitParameters struct {
+
+	// ARN of the behavior graph that the member account is accepting the invitation for.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/detective/v1beta1.Graph
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("graph_arn",true)
+	GraphArn *string `json:"graphArn,omitempty" tf:"graph_arn,omitempty"`
+
+	GraphArnRef *v1.Reference `json:"graphArnRef,omitempty" tf:"-"`
+
+	GraphArnSelector *v1.Selector `json:"graphArnSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type InvitationAccepterObservation struct {
 
 	// ARN of the behavior graph that the member account is accepting the invitation for.
@@ -27,7 +43,6 @@ type InvitationAccepterParameters struct {
 	// ARN of the behavior graph that the member account is accepting the invitation for.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/detective/v1beta1.Graph
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("graph_arn",true)
-	// +kubebuilder:validation:Optional
 	GraphArn *string `json:"graphArn,omitempty" tf:"graph_arn,omitempty"`
 
 	// Reference to a Graph in detective to populate graphArn.
@@ -40,14 +55,17 @@ type InvitationAccepterParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // InvitationAccepterSpec defines the desired state of InvitationAccepter
 type InvitationAccepterSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     InvitationAccepterParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider InvitationAccepterInitParameters `json:"initProvider,omitempty"`
 }
 
 // InvitationAccepterStatus defines the observed state of InvitationAccepter.

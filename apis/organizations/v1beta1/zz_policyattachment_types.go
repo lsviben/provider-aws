@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PolicyAttachmentInitParameters struct {
+
+	// The unique identifier (ID) of the policy that you want to attach to the target.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/organizations/v1beta1.Policy
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	PolicyID *string `json:"policyId,omitempty" tf:"policy_id,omitempty"`
+
+	PolicyIDRef *v1.Reference `json:"policyIdRef,omitempty" tf:"-"`
+
+	PolicyIDSelector *v1.Selector `json:"policyIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// If set to true, destroy will not detach the policy and instead just remove the resource from state. This can be useful in situations where the attachment must be preserved to meet the AWS minimum requirement of 1 attached policy.
+	SkipDestroy *bool `json:"skipDestroy,omitempty" tf:"skip_destroy,omitempty"`
+
+	// The unique identifier (ID) of the root, organizational unit, or account number that you want to attach the policy to.
+	TargetID *string `json:"targetId,omitempty" tf:"target_id,omitempty"`
+}
+
 type PolicyAttachmentObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -31,7 +53,6 @@ type PolicyAttachmentParameters struct {
 	// The unique identifier (ID) of the policy that you want to attach to the target.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/organizations/v1beta1.Policy
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	PolicyID *string `json:"policyId,omitempty" tf:"policy_id,omitempty"`
 
 	// Reference to a Policy in organizations to populate policyId.
@@ -44,15 +65,12 @@ type PolicyAttachmentParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// If set to true, destroy will not detach the policy and instead just remove the resource from state. This can be useful in situations where the attachment must be preserved to meet the AWS minimum requirement of 1 attached policy.
-	// +kubebuilder:validation:Optional
 	SkipDestroy *bool `json:"skipDestroy,omitempty" tf:"skip_destroy,omitempty"`
 
 	// The unique identifier (ID) of the root, organizational unit, or account number that you want to attach the policy to.
-	// +kubebuilder:validation:Optional
 	TargetID *string `json:"targetId,omitempty" tf:"target_id,omitempty"`
 }
 
@@ -60,6 +78,10 @@ type PolicyAttachmentParameters struct {
 type PolicyAttachmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     PolicyAttachmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider PolicyAttachmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // PolicyAttachmentStatus defines the observed state of PolicyAttachment.
@@ -80,7 +102,7 @@ type PolicyAttachmentStatus struct {
 type PolicyAttachment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.targetId)",message="targetId is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.targetId) || has(self.initProvider.targetId)",message="%!s(MISSING) is a required parameter"
 	Spec   PolicyAttachmentSpec   `json:"spec"`
 	Status PolicyAttachmentStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SpaceInitParameters struct {
+
+	// The ID of the associated Domain.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.Domain
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DomainID *string `json:"domainId,omitempty" tf:"domain_id,omitempty"`
+
+	DomainIDRef *v1.Reference `json:"domainIdRef,omitempty" tf:"-"`
+
+	DomainIDSelector *v1.Selector `json:"domainIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The name of the space.
+	SpaceName *string `json:"spaceName,omitempty" tf:"space_name,omitempty"`
+
+	// A collection of space settings. See Space Settings below.
+	SpaceSettings []SpaceSettingsInitParameters `json:"spaceSettings,omitempty" tf:"space_settings,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type SpaceObservation struct {
 
 	// The space's Amazon Resource Name (ARN).
@@ -45,7 +70,6 @@ type SpaceParameters struct {
 	// The ID of the associated Domain.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.Domain
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DomainID *string `json:"domainId,omitempty" tf:"domain_id,omitempty"`
 
 	// Reference to a Domain in sagemaker to populate domainId.
@@ -58,20 +82,31 @@ type SpaceParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The name of the space.
-	// +kubebuilder:validation:Optional
 	SpaceName *string `json:"spaceName,omitempty" tf:"space_name,omitempty"`
 
 	// A collection of space settings. See Space Settings below.
-	// +kubebuilder:validation:Optional
 	SpaceSettings []SpaceSettingsParameters `json:"spaceSettings,omitempty" tf:"space_settings,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type SpaceSettingsInitParameters struct {
+
+	// The Jupyter server's app settings. See Jupyter Server App Settings below.
+	JupyterServerAppSettings []SpaceSettingsJupyterServerAppSettingsInitParameters `json:"jupyterServerAppSettings,omitempty" tf:"jupyter_server_app_settings,omitempty"`
+
+	// The kernel gateway app settings. See Kernel Gateway App Settings below.
+	KernelGatewayAppSettings []SpaceSettingsKernelGatewayAppSettingsInitParameters `json:"kernelGatewayAppSettings,omitempty" tf:"kernel_gateway_app_settings,omitempty"`
+}
+
+type SpaceSettingsJupyterServerAppSettingsCodeRepositoryInitParameters struct {
+
+	// The URL of the Git repository.
+	RepositoryURL *string `json:"repositoryUrl,omitempty" tf:"repository_url,omitempty"`
 }
 
 type SpaceSettingsJupyterServerAppSettingsCodeRepositoryObservation struct {
@@ -83,8 +118,22 @@ type SpaceSettingsJupyterServerAppSettingsCodeRepositoryObservation struct {
 type SpaceSettingsJupyterServerAppSettingsCodeRepositoryParameters struct {
 
 	// The URL of the Git repository.
-	// +kubebuilder:validation:Required
-	RepositoryURL *string `json:"repositoryUrl" tf:"repository_url,omitempty"`
+	RepositoryURL *string `json:"repositoryUrl,omitempty" tf:"repository_url,omitempty"`
+}
+
+type SpaceSettingsJupyterServerAppSettingsDefaultResourceSpecInitParameters struct {
+
+	// The instance type.
+	InstanceType *string `json:"instanceType,omitempty" tf:"instance_type,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.
+	LifecycleConfigArn *string `json:"lifecycleConfigArn,omitempty" tf:"lifecycle_config_arn,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the SageMaker image created on the instance.
+	SagemakerImageArn *string `json:"sagemakerImageArn,omitempty" tf:"sagemaker_image_arn,omitempty"`
+
+	// The ARN of the image version created on the instance.
+	SagemakerImageVersionArn *string `json:"sagemakerImageVersionArn,omitempty" tf:"sagemaker_image_version_arn,omitempty"`
 }
 
 type SpaceSettingsJupyterServerAppSettingsDefaultResourceSpecObservation struct {
@@ -105,20 +154,28 @@ type SpaceSettingsJupyterServerAppSettingsDefaultResourceSpecObservation struct 
 type SpaceSettingsJupyterServerAppSettingsDefaultResourceSpecParameters struct {
 
 	// The instance type.
-	// +kubebuilder:validation:Optional
 	InstanceType *string `json:"instanceType,omitempty" tf:"instance_type,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.
-	// +kubebuilder:validation:Optional
 	LifecycleConfigArn *string `json:"lifecycleConfigArn,omitempty" tf:"lifecycle_config_arn,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the SageMaker image created on the instance.
-	// +kubebuilder:validation:Optional
 	SagemakerImageArn *string `json:"sagemakerImageArn,omitempty" tf:"sagemaker_image_arn,omitempty"`
 
 	// The ARN of the image version created on the instance.
-	// +kubebuilder:validation:Optional
 	SagemakerImageVersionArn *string `json:"sagemakerImageVersionArn,omitempty" tf:"sagemaker_image_version_arn,omitempty"`
+}
+
+type SpaceSettingsJupyterServerAppSettingsInitParameters struct {
+
+	// A list of Git repositories that SageMaker automatically displays to users for cloning in the JupyterServer application. see Code Repository below.
+	CodeRepository []SpaceSettingsJupyterServerAppSettingsCodeRepositoryInitParameters `json:"codeRepository,omitempty" tf:"code_repository,omitempty"`
+
+	// The default instance type and the Amazon Resource Name (ARN) of the SageMaker image created on the instance. see Default Resource Spec below.
+	DefaultResourceSpec []SpaceSettingsJupyterServerAppSettingsDefaultResourceSpecInitParameters `json:"defaultResourceSpec,omitempty" tf:"default_resource_spec,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Lifecycle Configurations.
+	LifecycleConfigArns []*string `json:"lifecycleConfigArns,omitempty" tf:"lifecycle_config_arns,omitempty"`
 }
 
 type SpaceSettingsJupyterServerAppSettingsObservation struct {
@@ -136,16 +193,25 @@ type SpaceSettingsJupyterServerAppSettingsObservation struct {
 type SpaceSettingsJupyterServerAppSettingsParameters struct {
 
 	// A list of Git repositories that SageMaker automatically displays to users for cloning in the JupyterServer application. see Code Repository below.
-	// +kubebuilder:validation:Optional
 	CodeRepository []SpaceSettingsJupyterServerAppSettingsCodeRepositoryParameters `json:"codeRepository,omitempty" tf:"code_repository,omitempty"`
 
 	// The default instance type and the Amazon Resource Name (ARN) of the SageMaker image created on the instance. see Default Resource Spec below.
-	// +kubebuilder:validation:Required
-	DefaultResourceSpec []SpaceSettingsJupyterServerAppSettingsDefaultResourceSpecParameters `json:"defaultResourceSpec" tf:"default_resource_spec,omitempty"`
+	DefaultResourceSpec []SpaceSettingsJupyterServerAppSettingsDefaultResourceSpecParameters `json:"defaultResourceSpec,omitempty" tf:"default_resource_spec,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the Lifecycle Configurations.
-	// +kubebuilder:validation:Optional
 	LifecycleConfigArns []*string `json:"lifecycleConfigArns,omitempty" tf:"lifecycle_config_arns,omitempty"`
+}
+
+type SpaceSettingsKernelGatewayAppSettingsCustomImageInitParameters struct {
+
+	// The name of the App Image Config.
+	AppImageConfigName *string `json:"appImageConfigName,omitempty" tf:"app_image_config_name,omitempty"`
+
+	// The name of the Custom Image.
+	ImageName *string `json:"imageName,omitempty" tf:"image_name,omitempty"`
+
+	// The version number of the Custom Image.
+	ImageVersionNumber *float64 `json:"imageVersionNumber,omitempty" tf:"image_version_number,omitempty"`
 }
 
 type SpaceSettingsKernelGatewayAppSettingsCustomImageObservation struct {
@@ -163,16 +229,28 @@ type SpaceSettingsKernelGatewayAppSettingsCustomImageObservation struct {
 type SpaceSettingsKernelGatewayAppSettingsCustomImageParameters struct {
 
 	// The name of the App Image Config.
-	// +kubebuilder:validation:Required
-	AppImageConfigName *string `json:"appImageConfigName" tf:"app_image_config_name,omitempty"`
+	AppImageConfigName *string `json:"appImageConfigName,omitempty" tf:"app_image_config_name,omitempty"`
 
 	// The name of the Custom Image.
-	// +kubebuilder:validation:Required
-	ImageName *string `json:"imageName" tf:"image_name,omitempty"`
+	ImageName *string `json:"imageName,omitempty" tf:"image_name,omitempty"`
 
 	// The version number of the Custom Image.
-	// +kubebuilder:validation:Optional
 	ImageVersionNumber *float64 `json:"imageVersionNumber,omitempty" tf:"image_version_number,omitempty"`
+}
+
+type SpaceSettingsKernelGatewayAppSettingsDefaultResourceSpecInitParameters struct {
+
+	// The instance type.
+	InstanceType *string `json:"instanceType,omitempty" tf:"instance_type,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.
+	LifecycleConfigArn *string `json:"lifecycleConfigArn,omitempty" tf:"lifecycle_config_arn,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the SageMaker image created on the instance.
+	SagemakerImageArn *string `json:"sagemakerImageArn,omitempty" tf:"sagemaker_image_arn,omitempty"`
+
+	// The ARN of the image version created on the instance.
+	SagemakerImageVersionArn *string `json:"sagemakerImageVersionArn,omitempty" tf:"sagemaker_image_version_arn,omitempty"`
 }
 
 type SpaceSettingsKernelGatewayAppSettingsDefaultResourceSpecObservation struct {
@@ -193,20 +271,28 @@ type SpaceSettingsKernelGatewayAppSettingsDefaultResourceSpecObservation struct 
 type SpaceSettingsKernelGatewayAppSettingsDefaultResourceSpecParameters struct {
 
 	// The instance type.
-	// +kubebuilder:validation:Optional
 	InstanceType *string `json:"instanceType,omitempty" tf:"instance_type,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.
-	// +kubebuilder:validation:Optional
 	LifecycleConfigArn *string `json:"lifecycleConfigArn,omitempty" tf:"lifecycle_config_arn,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the SageMaker image created on the instance.
-	// +kubebuilder:validation:Optional
 	SagemakerImageArn *string `json:"sagemakerImageArn,omitempty" tf:"sagemaker_image_arn,omitempty"`
 
 	// The ARN of the image version created on the instance.
-	// +kubebuilder:validation:Optional
 	SagemakerImageVersionArn *string `json:"sagemakerImageVersionArn,omitempty" tf:"sagemaker_image_version_arn,omitempty"`
+}
+
+type SpaceSettingsKernelGatewayAppSettingsInitParameters struct {
+
+	// A list of custom SageMaker images that are configured to run as a KernelGateway app. see Custom Image below.
+	CustomImage []SpaceSettingsKernelGatewayAppSettingsCustomImageInitParameters `json:"customImage,omitempty" tf:"custom_image,omitempty"`
+
+	// The default instance type and the Amazon Resource Name (ARN) of the SageMaker image created on the instance. see Default Resource Spec below.
+	DefaultResourceSpec []SpaceSettingsKernelGatewayAppSettingsDefaultResourceSpecInitParameters `json:"defaultResourceSpec,omitempty" tf:"default_resource_spec,omitempty"`
+
+	// The Amazon Resource Name (ARN) of the Lifecycle Configurations.
+	LifecycleConfigArns []*string `json:"lifecycleConfigArns,omitempty" tf:"lifecycle_config_arns,omitempty"`
 }
 
 type SpaceSettingsKernelGatewayAppSettingsObservation struct {
@@ -224,15 +310,12 @@ type SpaceSettingsKernelGatewayAppSettingsObservation struct {
 type SpaceSettingsKernelGatewayAppSettingsParameters struct {
 
 	// A list of custom SageMaker images that are configured to run as a KernelGateway app. see Custom Image below.
-	// +kubebuilder:validation:Optional
 	CustomImage []SpaceSettingsKernelGatewayAppSettingsCustomImageParameters `json:"customImage,omitempty" tf:"custom_image,omitempty"`
 
 	// The default instance type and the Amazon Resource Name (ARN) of the SageMaker image created on the instance. see Default Resource Spec below.
-	// +kubebuilder:validation:Required
-	DefaultResourceSpec []SpaceSettingsKernelGatewayAppSettingsDefaultResourceSpecParameters `json:"defaultResourceSpec" tf:"default_resource_spec,omitempty"`
+	DefaultResourceSpec []SpaceSettingsKernelGatewayAppSettingsDefaultResourceSpecParameters `json:"defaultResourceSpec,omitempty" tf:"default_resource_spec,omitempty"`
 
 	// The Amazon Resource Name (ARN) of the Lifecycle Configurations.
-	// +kubebuilder:validation:Optional
 	LifecycleConfigArns []*string `json:"lifecycleConfigArns,omitempty" tf:"lifecycle_config_arns,omitempty"`
 }
 
@@ -248,11 +331,9 @@ type SpaceSettingsObservation struct {
 type SpaceSettingsParameters struct {
 
 	// The Jupyter server's app settings. See Jupyter Server App Settings below.
-	// +kubebuilder:validation:Optional
 	JupyterServerAppSettings []SpaceSettingsJupyterServerAppSettingsParameters `json:"jupyterServerAppSettings,omitempty" tf:"jupyter_server_app_settings,omitempty"`
 
 	// The kernel gateway app settings. See Kernel Gateway App Settings below.
-	// +kubebuilder:validation:Optional
 	KernelGatewayAppSettings []SpaceSettingsKernelGatewayAppSettingsParameters `json:"kernelGatewayAppSettings,omitempty" tf:"kernel_gateway_app_settings,omitempty"`
 }
 
@@ -260,6 +341,10 @@ type SpaceSettingsParameters struct {
 type SpaceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SpaceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SpaceInitParameters `json:"initProvider,omitempty"`
 }
 
 // SpaceStatus defines the observed state of Space.
@@ -280,7 +365,7 @@ type SpaceStatus struct {
 type Space struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.spaceName)",message="spaceName is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.spaceName) || has(self.initProvider.spaceName)",message="%!s(MISSING) is a required parameter"
 	Spec   SpaceSpec   `json:"spec"`
 	Status SpaceStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ClientCertificateInitParameters struct {
+
+	// Description of the client certificate.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type ClientCertificateObservation struct {
 
 	// ARN
@@ -43,16 +56,13 @@ type ClientCertificateObservation struct {
 type ClientCertificateParameters struct {
 
 	// Description of the client certificate.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -60,6 +70,10 @@ type ClientCertificateParameters struct {
 type ClientCertificateSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ClientCertificateParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ClientCertificateInitParameters `json:"initProvider,omitempty"`
 }
 
 // ClientCertificateStatus defines the observed state of ClientCertificate.

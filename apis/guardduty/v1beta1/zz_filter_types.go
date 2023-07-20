@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CriterionInitParameters struct {
+
+	// List of string values to be evaluated.
+	Equals []*string `json:"equals,omitempty" tf:"equals,omitempty"`
+
+	// The name of the field to be evaluated. The full list of field names can be found in AWS documentation.
+	Field *string `json:"field,omitempty" tf:"field,omitempty"`
+
+	// A value to be evaluated. Accepts either an integer or a date in RFC 3339 format.
+	GreaterThan *string `json:"greaterThan,omitempty" tf:"greater_than,omitempty"`
+
+	// A value to be evaluated. Accepts either an integer or a date in RFC 3339 format.
+	GreaterThanOrEqual *string `json:"greaterThanOrEqual,omitempty" tf:"greater_than_or_equal,omitempty"`
+
+	// A value to be evaluated. Accepts either an integer or a date in RFC 3339 format.
+	LessThan *string `json:"lessThan,omitempty" tf:"less_than,omitempty"`
+
+	// A value to be evaluated. Accepts either an integer or a date in RFC 3339 format.
+	LessThanOrEqual *string `json:"lessThanOrEqual,omitempty" tf:"less_than_or_equal,omitempty"`
+
+	// List of string values to be evaluated.
+	NotEquals []*string `json:"notEquals,omitempty" tf:"not_equals,omitempty"`
+}
+
 type CriterionObservation struct {
 
 	// List of string values to be evaluated.
@@ -40,32 +64,56 @@ type CriterionObservation struct {
 type CriterionParameters struct {
 
 	// List of string values to be evaluated.
-	// +kubebuilder:validation:Optional
 	Equals []*string `json:"equals,omitempty" tf:"equals,omitempty"`
 
 	// The name of the field to be evaluated. The full list of field names can be found in AWS documentation.
-	// +kubebuilder:validation:Required
-	Field *string `json:"field" tf:"field,omitempty"`
+	Field *string `json:"field,omitempty" tf:"field,omitempty"`
 
 	// A value to be evaluated. Accepts either an integer or a date in RFC 3339 format.
-	// +kubebuilder:validation:Optional
 	GreaterThan *string `json:"greaterThan,omitempty" tf:"greater_than,omitempty"`
 
 	// A value to be evaluated. Accepts either an integer or a date in RFC 3339 format.
-	// +kubebuilder:validation:Optional
 	GreaterThanOrEqual *string `json:"greaterThanOrEqual,omitempty" tf:"greater_than_or_equal,omitempty"`
 
 	// A value to be evaluated. Accepts either an integer or a date in RFC 3339 format.
-	// +kubebuilder:validation:Optional
 	LessThan *string `json:"lessThan,omitempty" tf:"less_than,omitempty"`
 
 	// A value to be evaluated. Accepts either an integer or a date in RFC 3339 format.
-	// +kubebuilder:validation:Optional
 	LessThanOrEqual *string `json:"lessThanOrEqual,omitempty" tf:"less_than_or_equal,omitempty"`
 
 	// List of string values to be evaluated.
-	// +kubebuilder:validation:Optional
 	NotEquals []*string `json:"notEquals,omitempty" tf:"not_equals,omitempty"`
+}
+
+type FilterInitParameters struct {
+
+	// Specifies the action that is to be applied to the findings that match the filter. Can be one of ARCHIVE or NOOP.
+	Action *string `json:"action,omitempty" tf:"action,omitempty"`
+
+	// Description of the filter.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// ID of a GuardDuty detector, attached to your account.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/guardduty/v1beta1.Detector
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DetectorID *string `json:"detectorId,omitempty" tf:"detector_id,omitempty"`
+
+	DetectorIDRef *v1.Reference `json:"detectorIdRef,omitempty" tf:"-"`
+
+	DetectorIDSelector *v1.Selector `json:"detectorIdSelector,omitempty" tf:"-"`
+
+	// Represents the criteria to be used in the filter for querying findings. Contains one or more criterion blocks, documented below.
+	FindingCriteria []FindingCriteriaInitParameters `json:"findingCriteria,omitempty" tf:"finding_criteria,omitempty"`
+
+	// Specifies the position of the filter in the list of current filters. Also specifies the order in which this filter is applied to the findings.
+	Rank *float64 `json:"rank,omitempty" tf:"rank,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type FilterObservation struct {
@@ -101,17 +149,14 @@ type FilterObservation struct {
 type FilterParameters struct {
 
 	// Specifies the action that is to be applied to the findings that match the filter. Can be one of ARCHIVE or NOOP.
-	// +kubebuilder:validation:Optional
 	Action *string `json:"action,omitempty" tf:"action,omitempty"`
 
 	// Description of the filter.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// ID of a GuardDuty detector, attached to your account.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/guardduty/v1beta1.Detector
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DetectorID *string `json:"detectorId,omitempty" tf:"detector_id,omitempty"`
 
 	// Reference to a Detector in guardduty to populate detectorId.
@@ -123,21 +168,21 @@ type FilterParameters struct {
 	DetectorIDSelector *v1.Selector `json:"detectorIdSelector,omitempty" tf:"-"`
 
 	// Represents the criteria to be used in the filter for querying findings. Contains one or more criterion blocks, documented below.
-	// +kubebuilder:validation:Optional
 	FindingCriteria []FindingCriteriaParameters `json:"findingCriteria,omitempty" tf:"finding_criteria,omitempty"`
 
 	// Specifies the position of the filter in the list of current filters. Also specifies the order in which this filter is applied to the findings.
-	// +kubebuilder:validation:Optional
 	Rank *float64 `json:"rank,omitempty" tf:"rank,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type FindingCriteriaInitParameters struct {
+	Criterion []CriterionInitParameters `json:"criterion,omitempty" tf:"criterion,omitempty"`
 }
 
 type FindingCriteriaObservation struct {
@@ -145,15 +190,17 @@ type FindingCriteriaObservation struct {
 }
 
 type FindingCriteriaParameters struct {
-
-	// +kubebuilder:validation:Required
-	Criterion []CriterionParameters `json:"criterion" tf:"criterion,omitempty"`
+	Criterion []CriterionParameters `json:"criterion,omitempty" tf:"criterion,omitempty"`
 }
 
 // FilterSpec defines the desired state of Filter
 type FilterSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     FilterParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider FilterInitParameters `json:"initProvider,omitempty"`
 }
 
 // FilterStatus defines the observed state of Filter.
@@ -174,9 +221,9 @@ type FilterStatus struct {
 type Filter struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.action)",message="action is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.findingCriteria)",message="findingCriteria is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rank)",message="rank is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.action) || has(self.initProvider.action)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.findingCriteria) || has(self.initProvider.findingCriteria)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rank) || has(self.initProvider.rank)",message="%!s(MISSING) is a required parameter"
 	Spec   FilterSpec   `json:"spec"`
 	Status FilterStatus `json:"status,omitempty"`
 }

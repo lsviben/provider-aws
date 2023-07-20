@@ -131,8 +131,6 @@ spec:
                                       type: array
                                   type: object
                                 type: array
-                            required:
-                            - domainName
                             type: object
                           type: array
                         readinessScopes:
@@ -229,8 +227,170 @@ spec:
                       type: string
                     description: Key-value map of resource tags.
                     type: object
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  resourceSetType:
+                    description: Type of the resources in the resource set.
+                    type: string
+                  resources:
+                    description: List of resources to add to this resource set. See
+                      below.
+                    items:
+                      properties:
+                        dnsTargetResource:
+                          description: Component for DNS/Routing Control Readiness
+                            Checks.
+                          items:
+                            properties:
+                              domainName:
+                                description: DNS Name that acts as the ingress point
+                                  to a portion of application.
+                                type: string
+                              hostedZoneArn:
+                                description: Hosted Zone ARN that contains the DNS
+                                  record with the provided name of target resource.
+                                type: string
+                              recordSetId:
+                                description: Route53 record set id to uniquely identify
+                                  a record given a domain_name and a record_type.
+                                type: string
+                              recordType:
+                                description: Type of DNS Record of target resource.
+                                type: string
+                              targetResource:
+                                description: Target resource the R53 record specified
+                                  with the above params points to.
+                                items:
+                                  properties:
+                                    nlbResource:
+                                      description: NLB resource a DNS Target Resource
+                                        points to. Required if r53_resource is not
+                                        set.
+                                      items:
+                                        properties:
+                                          arn:
+                                            description: NLB resource ARN.
+                                            type: string
+                                        type: object
+                                      type: array
+                                    r53Resource:
+                                      description: Route53 resource a DNS Target Resource
+                                        record points to.
+                                      items:
+                                        properties:
+                                          domainName:
+                                            description: Domain name that is targeted.
+                                            type: string
+                                          recordSetId:
+                                            description: Resource record set ID that
+                                              is targeted.
+                                            type: string
+                                        type: object
+                                      type: array
+                                  type: object
+                                type: array
+                            type: object
+                          type: array
+                        readinessScopes:
+                          description: Recovery group ARN or cell ARN that contains
+                            this resource set.
+                          items:
+                            type: string
+                          type: array
+                        resourceArn:
+                          description: ARN of the resource.
+                          type: string
+                        resourceArnRef:
+                          description: A Reference to a named object.
+                          properties:
+                            name:
+                              description: Name of the referenced object.
+                              type: string
+                            policy:
+                              description: Policies for referencing.
+                              properties:
+                                resolution:
+                                  default: Required
+                                  description: Resolution specifies whether resolution
+                                    of this reference is required. The default is
+                                    'Required', which means the reconcile will fail
+                                    if the reference cannot be resolved. 'Optional'
+                                    means this reference will be a no-op if it cannot
+                                    be resolved.
+                                  enum:
+                                  - Required
+                                  - Optional
+                                  type: string
+                                resolve:
+                                  description: Resolve specifies when this reference
+                                    should be resolved. The default is 'IfNotPresent',
+                                    which will attempt to resolve the reference only
+                                    when the corresponding field is not present. Use
+                                    'Always' to resolve the reference on every reconcile.
+                                  enum:
+                                  - Always
+                                  - IfNotPresent
+                                  type: string
+                              type: object
+                          required:
+                          - name
+                          type: object
+                        resourceArnSelector:
+                          description: A Selector selects an object.
+                          properties:
+                            matchControllerRef:
+                              description: MatchControllerRef ensures an object with
+                                the same controller reference as the selecting object
+                                is selected.
+                              type: boolean
+                            matchLabels:
+                              additionalProperties:
+                                type: string
+                              description: MatchLabels ensures an object with matching
+                                labels is selected.
+                              type: object
+                            policy:
+                              description: Policies for selection.
+                              properties:
+                                resolution:
+                                  default: Required
+                                  description: Resolution specifies whether resolution
+                                    of this reference is required. The default is
+                                    'Required', which means the reconcile will fail
+                                    if the reference cannot be resolved. 'Optional'
+                                    means this reference will be a no-op if it cannot
+                                    be resolved.
+                                  enum:
+                                  - Required
+                                  - Optional
+                                  type: string
+                                resolve:
+                                  description: Resolve specifies when this reference
+                                    should be resolved. The default is 'IfNotPresent',
+                                    which will attempt to resolve the reference only
+                                    when the corresponding field is not present. Use
+                                    'Always' to resolve the reference on every reconcile.
+                                  enum:
+                                  - Always
+                                  - IfNotPresent
+                                  type: string
+                              type: object
+                          type: object
+                      type: object
+                    type: array
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
                 type: object
               managementPolicies:
                 default:
@@ -430,12 +590,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: resourceSetType is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.resourceSetType)'
-            - message: resources is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.resourceSetType)
+                || has(self.initProvider.resourceSetType)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.resources)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.resources)
+                || has(self.initProvider.resources)'
           status:
             description: ResourceSetStatus defines the observed state of ResourceSet.
             properties:

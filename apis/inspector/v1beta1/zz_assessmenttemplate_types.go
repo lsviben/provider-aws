@@ -13,6 +13,37 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type AssessmentTemplateInitParameters struct {
+
+	// The duration of the inspector run.
+	Duration *float64 `json:"duration,omitempty" tf:"duration,omitempty"`
+
+	// A block that enables sending notifications about a specified assessment template event to a designated SNS topic. See Event Subscriptions for details.
+	EventSubscription []EventSubscriptionInitParameters `json:"eventSubscription,omitempty" tf:"event_subscription,omitempty"`
+
+	// The name of the assessment template.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The rules to be used during the run.
+	RulesPackageArns []*string `json:"rulesPackageArns,omitempty" tf:"rules_package_arns,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The assessment target ARN to attach the template to.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/inspector/v1beta1.AssessmentTarget
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	TargetArn *string `json:"targetArn,omitempty" tf:"target_arn,omitempty"`
+
+	TargetArnRef *v1.Reference `json:"targetArnRef,omitempty" tf:"-"`
+
+	TargetArnSelector *v1.Selector `json:"targetArnSelector,omitempty" tf:"-"`
+}
+
 type AssessmentTemplateObservation struct {
 
 	// The template assessment ARN.
@@ -45,34 +76,27 @@ type AssessmentTemplateObservation struct {
 type AssessmentTemplateParameters struct {
 
 	// The duration of the inspector run.
-	// +kubebuilder:validation:Optional
 	Duration *float64 `json:"duration,omitempty" tf:"duration,omitempty"`
 
 	// A block that enables sending notifications about a specified assessment template event to a designated SNS topic. See Event Subscriptions for details.
-	// +kubebuilder:validation:Optional
 	EventSubscription []EventSubscriptionParameters `json:"eventSubscription,omitempty" tf:"event_subscription,omitempty"`
 
 	// The name of the assessment template.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The rules to be used during the run.
-	// +kubebuilder:validation:Optional
 	RulesPackageArns []*string `json:"rulesPackageArns,omitempty" tf:"rules_package_arns,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The assessment target ARN to attach the template to.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/inspector/v1beta1.AssessmentTarget
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	TargetArn *string `json:"targetArn,omitempty" tf:"target_arn,omitempty"`
 
 	// Reference to a AssessmentTarget in inspector to populate targetArn.
@@ -82,6 +106,21 @@ type AssessmentTemplateParameters struct {
 	// Selector for a AssessmentTarget in inspector to populate targetArn.
 	// +kubebuilder:validation:Optional
 	TargetArnSelector *v1.Selector `json:"targetArnSelector,omitempty" tf:"-"`
+}
+
+type EventSubscriptionInitParameters struct {
+
+	// The event for which you want to receive SNS notifications. Valid values are ASSESSMENT_RUN_STARTED, ASSESSMENT_RUN_COMPLETED, ASSESSMENT_RUN_STATE_CHANGED, and FINDING_REPORTED.
+	Event *string `json:"event,omitempty" tf:"event,omitempty"`
+
+	// The ARN of the SNS topic to which notifications are sent.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	TopicArn *string `json:"topicArn,omitempty" tf:"topic_arn,omitempty"`
+
+	TopicArnRef *v1.Reference `json:"topicArnRef,omitempty" tf:"-"`
+
+	TopicArnSelector *v1.Selector `json:"topicArnSelector,omitempty" tf:"-"`
 }
 
 type EventSubscriptionObservation struct {
@@ -96,13 +135,11 @@ type EventSubscriptionObservation struct {
 type EventSubscriptionParameters struct {
 
 	// The event for which you want to receive SNS notifications. Valid values are ASSESSMENT_RUN_STARTED, ASSESSMENT_RUN_COMPLETED, ASSESSMENT_RUN_STATE_CHANGED, and FINDING_REPORTED.
-	// +kubebuilder:validation:Required
-	Event *string `json:"event" tf:"event,omitempty"`
+	Event *string `json:"event,omitempty" tf:"event,omitempty"`
 
 	// The ARN of the SNS topic to which notifications are sent.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sns/v1beta1.Topic
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	TopicArn *string `json:"topicArn,omitempty" tf:"topic_arn,omitempty"`
 
 	// Reference to a Topic in sns to populate topicArn.
@@ -118,6 +155,10 @@ type EventSubscriptionParameters struct {
 type AssessmentTemplateSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     AssessmentTemplateParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider AssessmentTemplateInitParameters `json:"initProvider,omitempty"`
 }
 
 // AssessmentTemplateStatus defines the observed state of AssessmentTemplate.
@@ -138,9 +179,9 @@ type AssessmentTemplateStatus struct {
 type AssessmentTemplate struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.duration)",message="duration is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rulesPackageArns)",message="rulesPackageArns is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.duration) || has(self.initProvider.duration)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rulesPackageArns) || has(self.initProvider.rulesPackageArns)",message="%!s(MISSING) is a required parameter"
 	Spec   AssessmentTemplateSpec   `json:"spec"`
 	Status AssessmentTemplateStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ApplicationCodeConfigurationInitParameters struct {
+
+	// The location and type of the application code.
+	CodeContent []CodeContentInitParameters `json:"codeContent,omitempty" tf:"code_content,omitempty"`
+
+	// Specifies whether the code content is in text or zip format. Valid values: PLAINTEXT, ZIPFILE.
+	CodeContentType *string `json:"codeContentType,omitempty" tf:"code_content_type,omitempty"`
+}
+
 type ApplicationCodeConfigurationObservation struct {
 
 	// The location and type of the application code.
@@ -25,12 +34,34 @@ type ApplicationCodeConfigurationObservation struct {
 type ApplicationCodeConfigurationParameters struct {
 
 	// The location and type of the application code.
-	// +kubebuilder:validation:Optional
 	CodeContent []CodeContentParameters `json:"codeContent,omitempty" tf:"code_content,omitempty"`
 
 	// Specifies whether the code content is in text or zip format. Valid values: PLAINTEXT, ZIPFILE.
-	// +kubebuilder:validation:Required
-	CodeContentType *string `json:"codeContentType" tf:"code_content_type,omitempty"`
+	CodeContentType *string `json:"codeContentType,omitempty" tf:"code_content_type,omitempty"`
+}
+
+type ApplicationConfigurationInitParameters struct {
+
+	// The code location and type parameters for the application.
+	ApplicationCodeConfiguration []ApplicationCodeConfigurationInitParameters `json:"applicationCodeConfiguration,omitempty" tf:"application_code_configuration,omitempty"`
+
+	// Describes whether snapshots are enabled for a Flink-based application.
+	ApplicationSnapshotConfiguration []ApplicationSnapshotConfigurationInitParameters `json:"applicationSnapshotConfiguration,omitempty" tf:"application_snapshot_configuration,omitempty"`
+
+	// Describes execution properties for a Flink-based application.
+	EnvironmentProperties []EnvironmentPropertiesInitParameters `json:"environmentProperties,omitempty" tf:"environment_properties,omitempty"`
+
+	// The configuration of a Flink-based application.
+	FlinkApplicationConfiguration []FlinkApplicationConfigurationInitParameters `json:"flinkApplicationConfiguration,omitempty" tf:"flink_application_configuration,omitempty"`
+
+	// Describes the starting properties for a Flink-based application.
+	RunConfiguration []RunConfigurationInitParameters `json:"runConfiguration,omitempty" tf:"run_configuration,omitempty"`
+
+	// The configuration of a SQL-based application.
+	SQLApplicationConfiguration []SQLApplicationConfigurationInitParameters `json:"sqlApplicationConfiguration,omitempty" tf:"sql_application_configuration,omitempty"`
+
+	// The VPC configuration of a Flink-based application.
+	VPCConfiguration []VPCConfigurationInitParameters `json:"vpcConfiguration,omitempty" tf:"vpc_configuration,omitempty"`
 }
 
 type ApplicationConfigurationObservation struct {
@@ -60,32 +91,62 @@ type ApplicationConfigurationObservation struct {
 type ApplicationConfigurationParameters struct {
 
 	// The code location and type parameters for the application.
-	// +kubebuilder:validation:Required
-	ApplicationCodeConfiguration []ApplicationCodeConfigurationParameters `json:"applicationCodeConfiguration" tf:"application_code_configuration,omitempty"`
+	ApplicationCodeConfiguration []ApplicationCodeConfigurationParameters `json:"applicationCodeConfiguration,omitempty" tf:"application_code_configuration,omitempty"`
 
 	// Describes whether snapshots are enabled for a Flink-based application.
-	// +kubebuilder:validation:Optional
 	ApplicationSnapshotConfiguration []ApplicationSnapshotConfigurationParameters `json:"applicationSnapshotConfiguration,omitempty" tf:"application_snapshot_configuration,omitempty"`
 
 	// Describes execution properties for a Flink-based application.
-	// +kubebuilder:validation:Optional
 	EnvironmentProperties []EnvironmentPropertiesParameters `json:"environmentProperties,omitempty" tf:"environment_properties,omitempty"`
 
 	// The configuration of a Flink-based application.
-	// +kubebuilder:validation:Optional
 	FlinkApplicationConfiguration []FlinkApplicationConfigurationParameters `json:"flinkApplicationConfiguration,omitempty" tf:"flink_application_configuration,omitempty"`
 
 	// Describes the starting properties for a Flink-based application.
-	// +kubebuilder:validation:Optional
 	RunConfiguration []RunConfigurationParameters `json:"runConfiguration,omitempty" tf:"run_configuration,omitempty"`
 
 	// The configuration of a SQL-based application.
-	// +kubebuilder:validation:Optional
 	SQLApplicationConfiguration []SQLApplicationConfigurationParameters `json:"sqlApplicationConfiguration,omitempty" tf:"sql_application_configuration,omitempty"`
 
 	// The VPC configuration of a Flink-based application.
-	// +kubebuilder:validation:Optional
 	VPCConfiguration []VPCConfigurationParameters `json:"vpcConfiguration,omitempty" tf:"vpc_configuration,omitempty"`
+}
+
+type ApplicationInitParameters struct {
+
+	// The application's configuration
+	ApplicationConfiguration []ApplicationConfigurationInitParameters `json:"applicationConfiguration,omitempty" tf:"application_configuration,omitempty"`
+
+	// A CloudWatch log stream to monitor application configuration errors.
+	CloudwatchLoggingOptions []CloudwatchLoggingOptionsInitParameters `json:"cloudwatchLoggingOptions,omitempty" tf:"cloudwatch_logging_options,omitempty"`
+
+	// A summary description of the application.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Whether to force stop an unresponsive Flink-based application.
+	ForceStop *bool `json:"forceStop,omitempty" tf:"force_stop,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The runtime environment for the application. Valid values: SQL-1_0, FLINK-1_6, FLINK-1_8, FLINK-1_11, FLINK-1_13, FLINK-1_15.
+	RuntimeEnvironment *string `json:"runtimeEnvironment,omitempty" tf:"runtime_environment,omitempty"`
+
+	// The ARN of the IAM role used by the application to access Kinesis data streams, Kinesis Data Firehose delivery streams, Amazon S3 objects, and other external resources.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	ServiceExecutionRole *string `json:"serviceExecutionRole,omitempty" tf:"service_execution_role,omitempty"`
+
+	ServiceExecutionRoleRef *v1.Reference `json:"serviceExecutionRoleRef,omitempty" tf:"-"`
+
+	ServiceExecutionRoleSelector *v1.Selector `json:"serviceExecutionRoleSelector,omitempty" tf:"-"`
+
+	// Whether to start or stop the application.
+	StartApplication *bool `json:"startApplication,omitempty" tf:"start_application,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type ApplicationObservation struct {
@@ -139,34 +200,27 @@ type ApplicationObservation struct {
 type ApplicationParameters struct {
 
 	// The application's configuration
-	// +kubebuilder:validation:Optional
 	ApplicationConfiguration []ApplicationConfigurationParameters `json:"applicationConfiguration,omitempty" tf:"application_configuration,omitempty"`
 
 	// A CloudWatch log stream to monitor application configuration errors.
-	// +kubebuilder:validation:Optional
 	CloudwatchLoggingOptions []CloudwatchLoggingOptionsParameters `json:"cloudwatchLoggingOptions,omitempty" tf:"cloudwatch_logging_options,omitempty"`
 
 	// A summary description of the application.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Whether to force stop an unresponsive Flink-based application.
-	// +kubebuilder:validation:Optional
 	ForceStop *bool `json:"forceStop,omitempty" tf:"force_stop,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The runtime environment for the application. Valid values: SQL-1_0, FLINK-1_6, FLINK-1_8, FLINK-1_11, FLINK-1_13, FLINK-1_15.
-	// +kubebuilder:validation:Optional
 	RuntimeEnvironment *string `json:"runtimeEnvironment,omitempty" tf:"runtime_environment,omitempty"`
 
 	// The ARN of the IAM role used by the application to access Kinesis data streams, Kinesis Data Firehose delivery streams, Amazon S3 objects, and other external resources.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/iam/v1beta1.Role
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	ServiceExecutionRole *string `json:"serviceExecutionRole,omitempty" tf:"service_execution_role,omitempty"`
 
 	// Reference to a Role in iam to populate serviceExecutionRole.
@@ -178,12 +232,19 @@ type ApplicationParameters struct {
 	ServiceExecutionRoleSelector *v1.Selector `json:"serviceExecutionRoleSelector,omitempty" tf:"-"`
 
 	// Whether to start or stop the application.
-	// +kubebuilder:validation:Optional
 	StartApplication *bool `json:"startApplication,omitempty" tf:"start_application,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type ApplicationRestoreConfigurationInitParameters struct {
+
+	// Specifies how the application should be restored. Valid values: RESTORE_FROM_CUSTOM_SNAPSHOT, RESTORE_FROM_LATEST_SNAPSHOT, SKIP_RESTORE_FROM_SNAPSHOT.
+	ApplicationRestoreType *string `json:"applicationRestoreType,omitempty" tf:"application_restore_type,omitempty"`
+
+	// The identifier of an existing snapshot of application state to use to restart an application. The application uses this value if RESTORE_FROM_CUSTOM_SNAPSHOT is specified for application_restore_type.
+	SnapshotName *string `json:"snapshotName,omitempty" tf:"snapshot_name,omitempty"`
 }
 
 type ApplicationRestoreConfigurationObservation struct {
@@ -198,12 +259,16 @@ type ApplicationRestoreConfigurationObservation struct {
 type ApplicationRestoreConfigurationParameters struct {
 
 	// Specifies how the application should be restored. Valid values: RESTORE_FROM_CUSTOM_SNAPSHOT, RESTORE_FROM_LATEST_SNAPSHOT, SKIP_RESTORE_FROM_SNAPSHOT.
-	// +kubebuilder:validation:Optional
 	ApplicationRestoreType *string `json:"applicationRestoreType,omitempty" tf:"application_restore_type,omitempty"`
 
 	// The identifier of an existing snapshot of application state to use to restart an application. The application uses this value if RESTORE_FROM_CUSTOM_SNAPSHOT is specified for application_restore_type.
-	// +kubebuilder:validation:Optional
 	SnapshotName *string `json:"snapshotName,omitempty" tf:"snapshot_name,omitempty"`
+}
+
+type ApplicationSnapshotConfigurationInitParameters struct {
+
+	// Describes whether snapshots are enabled for a Flink-based Kinesis Data Analytics application.
+	SnapshotsEnabled *bool `json:"snapshotsEnabled,omitempty" tf:"snapshots_enabled,omitempty"`
 }
 
 type ApplicationSnapshotConfigurationObservation struct {
@@ -215,8 +280,22 @@ type ApplicationSnapshotConfigurationObservation struct {
 type ApplicationSnapshotConfigurationParameters struct {
 
 	// Describes whether snapshots are enabled for a Flink-based Kinesis Data Analytics application.
-	// +kubebuilder:validation:Required
-	SnapshotsEnabled *bool `json:"snapshotsEnabled" tf:"snapshots_enabled,omitempty"`
+	SnapshotsEnabled *bool `json:"snapshotsEnabled,omitempty" tf:"snapshots_enabled,omitempty"`
+}
+
+type CheckpointConfigurationInitParameters struct {
+
+	// Describes the interval in milliseconds between checkpoint operations.
+	CheckpointInterval *float64 `json:"checkpointInterval,omitempty" tf:"checkpoint_interval,omitempty"`
+
+	// Describes whether checkpointing is enabled for a Flink-based Kinesis Data Analytics application.
+	CheckpointingEnabled *bool `json:"checkpointingEnabled,omitempty" tf:"checkpointing_enabled,omitempty"`
+
+	// Describes whether the application uses Kinesis Data Analytics' default checkpointing behavior. Valid values: CUSTOM, DEFAULT. Set this attribute to CUSTOM in order for any specified checkpointing_enabled, checkpoint_interval, or min_pause_between_checkpoints attribute values to be effective. If this attribute is set to DEFAULT, the application will always use the following values:
+	ConfigurationType *string `json:"configurationType,omitempty" tf:"configuration_type,omitempty"`
+
+	// Describes the minimum time in milliseconds after a checkpoint operation completes that a new checkpoint operation can start.
+	MinPauseBetweenCheckpoints *float64 `json:"minPauseBetweenCheckpoints,omitempty" tf:"min_pause_between_checkpoints,omitempty"`
 }
 
 type CheckpointConfigurationObservation struct {
@@ -237,20 +316,28 @@ type CheckpointConfigurationObservation struct {
 type CheckpointConfigurationParameters struct {
 
 	// Describes the interval in milliseconds between checkpoint operations.
-	// +kubebuilder:validation:Optional
 	CheckpointInterval *float64 `json:"checkpointInterval,omitempty" tf:"checkpoint_interval,omitempty"`
 
 	// Describes whether checkpointing is enabled for a Flink-based Kinesis Data Analytics application.
-	// +kubebuilder:validation:Optional
 	CheckpointingEnabled *bool `json:"checkpointingEnabled,omitempty" tf:"checkpointing_enabled,omitempty"`
 
 	// Describes whether the application uses Kinesis Data Analytics' default checkpointing behavior. Valid values: CUSTOM, DEFAULT. Set this attribute to CUSTOM in order for any specified checkpointing_enabled, checkpoint_interval, or min_pause_between_checkpoints attribute values to be effective. If this attribute is set to DEFAULT, the application will always use the following values:
-	// +kubebuilder:validation:Required
-	ConfigurationType *string `json:"configurationType" tf:"configuration_type,omitempty"`
+	ConfigurationType *string `json:"configurationType,omitempty" tf:"configuration_type,omitempty"`
 
 	// Describes the minimum time in milliseconds after a checkpoint operation completes that a new checkpoint operation can start.
-	// +kubebuilder:validation:Optional
 	MinPauseBetweenCheckpoints *float64 `json:"minPauseBetweenCheckpoints,omitempty" tf:"min_pause_between_checkpoints,omitempty"`
+}
+
+type CloudwatchLoggingOptionsInitParameters struct {
+
+	// The ARN of the CloudWatch log stream to receive application messages.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudwatchlogs/v1beta1.Stream
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	LogStreamArn *string `json:"logStreamArn,omitempty" tf:"log_stream_arn,omitempty"`
+
+	LogStreamArnRef *v1.Reference `json:"logStreamArnRef,omitempty" tf:"-"`
+
+	LogStreamArnSelector *v1.Selector `json:"logStreamArnSelector,omitempty" tf:"-"`
 }
 
 type CloudwatchLoggingOptionsObservation struct {
@@ -267,7 +354,6 @@ type CloudwatchLoggingOptionsParameters struct {
 	// The ARN of the CloudWatch log stream to receive application messages.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/cloudwatchlogs/v1beta1.Stream
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	LogStreamArn *string `json:"logStreamArn,omitempty" tf:"log_stream_arn,omitempty"`
 
 	// Reference to a Stream in cloudwatchlogs to populate logStreamArn.
@@ -277,6 +363,15 @@ type CloudwatchLoggingOptionsParameters struct {
 	// Selector for a Stream in cloudwatchlogs to populate logStreamArn.
 	// +kubebuilder:validation:Optional
 	LogStreamArnSelector *v1.Selector `json:"logStreamArnSelector,omitempty" tf:"-"`
+}
+
+type CodeContentInitParameters struct {
+
+	// Information about the Amazon S3 bucket containing the application code.
+	S3ContentLocation []S3ContentLocationInitParameters `json:"s3ContentLocation,omitempty" tf:"s3_content_location,omitempty"`
+
+	// The text-format code for the application.
+	TextContent *string `json:"textContent,omitempty" tf:"text_content,omitempty"`
 }
 
 type CodeContentObservation struct {
@@ -291,12 +386,19 @@ type CodeContentObservation struct {
 type CodeContentParameters struct {
 
 	// Information about the Amazon S3 bucket containing the application code.
-	// +kubebuilder:validation:Optional
 	S3ContentLocation []S3ContentLocationParameters `json:"s3ContentLocation,omitempty" tf:"s3_content_location,omitempty"`
 
 	// The text-format code for the application.
-	// +kubebuilder:validation:Optional
 	TextContent *string `json:"textContent,omitempty" tf:"text_content,omitempty"`
+}
+
+type CsvMappingParametersInitParameters struct {
+
+	// The column delimiter. For example, in a CSV format, a comma (,) is the typical column delimiter.
+	RecordColumnDelimiter *string `json:"recordColumnDelimiter,omitempty" tf:"record_column_delimiter,omitempty"`
+
+	// The row delimiter. For example, in a CSV format, \n is the typical row delimiter.
+	RecordRowDelimiter *string `json:"recordRowDelimiter,omitempty" tf:"record_row_delimiter,omitempty"`
 }
 
 type CsvMappingParametersObservation struct {
@@ -311,12 +413,16 @@ type CsvMappingParametersObservation struct {
 type CsvMappingParametersParameters struct {
 
 	// The column delimiter. For example, in a CSV format, a comma (,) is the typical column delimiter.
-	// +kubebuilder:validation:Required
-	RecordColumnDelimiter *string `json:"recordColumnDelimiter" tf:"record_column_delimiter,omitempty"`
+	RecordColumnDelimiter *string `json:"recordColumnDelimiter,omitempty" tf:"record_column_delimiter,omitempty"`
 
 	// The row delimiter. For example, in a CSV format, \n is the typical row delimiter.
-	// +kubebuilder:validation:Required
-	RecordRowDelimiter *string `json:"recordRowDelimiter" tf:"record_row_delimiter,omitempty"`
+	RecordRowDelimiter *string `json:"recordRowDelimiter,omitempty" tf:"record_row_delimiter,omitempty"`
+}
+
+type DestinationSchemaInitParameters struct {
+
+	// The type of record format. Valid values: CSV, JSON.
+	RecordFormatType *string `json:"recordFormatType,omitempty" tf:"record_format_type,omitempty"`
 }
 
 type DestinationSchemaObservation struct {
@@ -328,8 +434,13 @@ type DestinationSchemaObservation struct {
 type DestinationSchemaParameters struct {
 
 	// The type of record format. Valid values: CSV, JSON.
-	// +kubebuilder:validation:Required
-	RecordFormatType *string `json:"recordFormatType" tf:"record_format_type,omitempty"`
+	RecordFormatType *string `json:"recordFormatType,omitempty" tf:"record_format_type,omitempty"`
+}
+
+type EnvironmentPropertiesInitParameters struct {
+
+	// Describes the execution property groups.
+	PropertyGroup []PropertyGroupInitParameters `json:"propertyGroup,omitempty" tf:"property_group,omitempty"`
 }
 
 type EnvironmentPropertiesObservation struct {
@@ -341,8 +452,19 @@ type EnvironmentPropertiesObservation struct {
 type EnvironmentPropertiesParameters struct {
 
 	// Describes the execution property groups.
-	// +kubebuilder:validation:Required
-	PropertyGroup []PropertyGroupParameters `json:"propertyGroup" tf:"property_group,omitempty"`
+	PropertyGroup []PropertyGroupParameters `json:"propertyGroup,omitempty" tf:"property_group,omitempty"`
+}
+
+type FlinkApplicationConfigurationInitParameters struct {
+
+	// Describes an application's checkpointing configuration.
+	CheckpointConfiguration []CheckpointConfigurationInitParameters `json:"checkpointConfiguration,omitempty" tf:"checkpoint_configuration,omitempty"`
+
+	// Describes configuration parameters for CloudWatch logging for an application.
+	MonitoringConfiguration []MonitoringConfigurationInitParameters `json:"monitoringConfiguration,omitempty" tf:"monitoring_configuration,omitempty"`
+
+	// Describes parameters for how an application executes multiple tasks simultaneously.
+	ParallelismConfiguration []ParallelismConfigurationInitParameters `json:"parallelismConfiguration,omitempty" tf:"parallelism_configuration,omitempty"`
 }
 
 type FlinkApplicationConfigurationObservation struct {
@@ -360,16 +482,19 @@ type FlinkApplicationConfigurationObservation struct {
 type FlinkApplicationConfigurationParameters struct {
 
 	// Describes an application's checkpointing configuration.
-	// +kubebuilder:validation:Optional
 	CheckpointConfiguration []CheckpointConfigurationParameters `json:"checkpointConfiguration,omitempty" tf:"checkpoint_configuration,omitempty"`
 
 	// Describes configuration parameters for CloudWatch logging for an application.
-	// +kubebuilder:validation:Optional
 	MonitoringConfiguration []MonitoringConfigurationParameters `json:"monitoringConfiguration,omitempty" tf:"monitoring_configuration,omitempty"`
 
 	// Describes parameters for how an application executes multiple tasks simultaneously.
-	// +kubebuilder:validation:Optional
 	ParallelismConfiguration []ParallelismConfigurationParameters `json:"parallelismConfiguration,omitempty" tf:"parallelism_configuration,omitempty"`
+}
+
+type FlinkRunConfigurationInitParameters struct {
+
+	// When restoring from a snapshot, specifies whether the runtime is allowed to skip a state that cannot be mapped to the new program. Default is false.
+	AllowNonRestoredState *bool `json:"allowNonRestoredState,omitempty" tf:"allow_non_restored_state,omitempty"`
 }
 
 type FlinkRunConfigurationObservation struct {
@@ -381,8 +506,38 @@ type FlinkRunConfigurationObservation struct {
 type FlinkRunConfigurationParameters struct {
 
 	// When restoring from a snapshot, specifies whether the runtime is allowed to skip a state that cannot be mapped to the new program. Default is false.
-	// +kubebuilder:validation:Optional
 	AllowNonRestoredState *bool `json:"allowNonRestoredState,omitempty" tf:"allow_non_restored_state,omitempty"`
+}
+
+type InputInitParameters struct {
+
+	// Describes the number of in-application streams to create.
+	InputParallelism []InputParallelismInitParameters `json:"inputParallelism,omitempty" tf:"input_parallelism,omitempty"`
+
+	// The input processing configuration for the input.
+	// An input processor transforms records as they are received from the stream, before the application's SQL code executes.
+	InputProcessingConfiguration []InputProcessingConfigurationInitParameters `json:"inputProcessingConfiguration,omitempty" tf:"input_processing_configuration,omitempty"`
+
+	// Describes the format of the data in the streaming source, and how each data element maps to corresponding columns in the in-application stream that is being created.
+	InputSchema []InputSchemaInitParameters `json:"inputSchema,omitempty" tf:"input_schema,omitempty"`
+
+	// The point at which the application starts processing records from the streaming source.
+	InputStartingPositionConfiguration []InputStartingPositionConfigurationInitParameters `json:"inputStartingPositionConfiguration,omitempty" tf:"input_starting_position_configuration,omitempty"`
+
+	// If the streaming source is a Kinesis Data Firehose delivery stream, identifies the delivery stream's ARN.
+	KinesisFirehoseInput []KinesisFirehoseInputInitParameters `json:"kinesisFirehoseInput,omitempty" tf:"kinesis_firehose_input,omitempty"`
+
+	// If the streaming source is a Kinesis data stream, identifies the stream's Amazon Resource Name (ARN).
+	KinesisStreamsInput []KinesisStreamsInputInitParameters `json:"kinesisStreamsInput,omitempty" tf:"kinesis_streams_input,omitempty"`
+
+	// The name prefix to use when creating an in-application stream.
+	NamePrefix *string `json:"namePrefix,omitempty" tf:"name_prefix,omitempty"`
+}
+
+type InputLambdaProcessorInitParameters struct {
+
+	// The ARN of the Lambda function that operates on records in the stream.
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
 }
 
 type InputLambdaProcessorObservation struct {
@@ -394,8 +549,7 @@ type InputLambdaProcessorObservation struct {
 type InputLambdaProcessorParameters struct {
 
 	// The ARN of the Lambda function that operates on records in the stream.
-	// +kubebuilder:validation:Required
-	ResourceArn *string `json:"resourceArn" tf:"resource_arn,omitempty"`
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
 }
 
 type InputObservation struct {
@@ -427,6 +581,12 @@ type InputObservation struct {
 	NamePrefix *string `json:"namePrefix,omitempty" tf:"name_prefix,omitempty"`
 }
 
+type InputParallelismInitParameters struct {
+
+	// The number of in-application streams to create.
+	Count *float64 `json:"count,omitempty" tf:"count,omitempty"`
+}
+
 type InputParallelismObservation struct {
 
 	// The number of in-application streams to create.
@@ -436,40 +596,38 @@ type InputParallelismObservation struct {
 type InputParallelismParameters struct {
 
 	// The number of in-application streams to create.
-	// +kubebuilder:validation:Optional
 	Count *float64 `json:"count,omitempty" tf:"count,omitempty"`
 }
 
 type InputParameters struct {
 
 	// Describes the number of in-application streams to create.
-	// +kubebuilder:validation:Optional
 	InputParallelism []InputParallelismParameters `json:"inputParallelism,omitempty" tf:"input_parallelism,omitempty"`
 
 	// The input processing configuration for the input.
 	// An input processor transforms records as they are received from the stream, before the application's SQL code executes.
-	// +kubebuilder:validation:Optional
 	InputProcessingConfiguration []InputProcessingConfigurationParameters `json:"inputProcessingConfiguration,omitempty" tf:"input_processing_configuration,omitempty"`
 
 	// Describes the format of the data in the streaming source, and how each data element maps to corresponding columns in the in-application stream that is being created.
-	// +kubebuilder:validation:Required
-	InputSchema []InputSchemaParameters `json:"inputSchema" tf:"input_schema,omitempty"`
+	InputSchema []InputSchemaParameters `json:"inputSchema,omitempty" tf:"input_schema,omitempty"`
 
 	// The point at which the application starts processing records from the streaming source.
-	// +kubebuilder:validation:Optional
 	InputStartingPositionConfiguration []InputStartingPositionConfigurationParameters `json:"inputStartingPositionConfiguration,omitempty" tf:"input_starting_position_configuration,omitempty"`
 
 	// If the streaming source is a Kinesis Data Firehose delivery stream, identifies the delivery stream's ARN.
-	// +kubebuilder:validation:Optional
 	KinesisFirehoseInput []KinesisFirehoseInputParameters `json:"kinesisFirehoseInput,omitempty" tf:"kinesis_firehose_input,omitempty"`
 
 	// If the streaming source is a Kinesis data stream, identifies the stream's Amazon Resource Name (ARN).
-	// +kubebuilder:validation:Optional
 	KinesisStreamsInput []KinesisStreamsInputParameters `json:"kinesisStreamsInput,omitempty" tf:"kinesis_streams_input,omitempty"`
 
 	// The name prefix to use when creating an in-application stream.
-	// +kubebuilder:validation:Required
-	NamePrefix *string `json:"namePrefix" tf:"name_prefix,omitempty"`
+	NamePrefix *string `json:"namePrefix,omitempty" tf:"name_prefix,omitempty"`
+}
+
+type InputProcessingConfigurationInitParameters struct {
+
+	// Describes the Lambda function that is used to preprocess the records in the stream before being processed by your application code.
+	InputLambdaProcessor []InputLambdaProcessorInitParameters `json:"inputLambdaProcessor,omitempty" tf:"input_lambda_processor,omitempty"`
 }
 
 type InputProcessingConfigurationObservation struct {
@@ -481,8 +639,19 @@ type InputProcessingConfigurationObservation struct {
 type InputProcessingConfigurationParameters struct {
 
 	// Describes the Lambda function that is used to preprocess the records in the stream before being processed by your application code.
-	// +kubebuilder:validation:Required
-	InputLambdaProcessor []InputLambdaProcessorParameters `json:"inputLambdaProcessor" tf:"input_lambda_processor,omitempty"`
+	InputLambdaProcessor []InputLambdaProcessorParameters `json:"inputLambdaProcessor,omitempty" tf:"input_lambda_processor,omitempty"`
+}
+
+type InputSchemaInitParameters struct {
+
+	// Describes the mapping of each data element in the streaming source to the corresponding column in the in-application stream.
+	RecordColumn []RecordColumnInitParameters `json:"recordColumn,omitempty" tf:"record_column,omitempty"`
+
+	// Specifies the encoding of the records in the streaming source. For example, UTF-8.
+	RecordEncoding *string `json:"recordEncoding,omitempty" tf:"record_encoding,omitempty"`
+
+	// Specifies the format of the records on the streaming source.
+	RecordFormat []RecordFormatInitParameters `json:"recordFormat,omitempty" tf:"record_format,omitempty"`
 }
 
 type InputSchemaObservation struct {
@@ -500,16 +669,19 @@ type InputSchemaObservation struct {
 type InputSchemaParameters struct {
 
 	// Describes the mapping of each data element in the streaming source to the corresponding column in the in-application stream.
-	// +kubebuilder:validation:Required
-	RecordColumn []RecordColumnParameters `json:"recordColumn" tf:"record_column,omitempty"`
+	RecordColumn []RecordColumnParameters `json:"recordColumn,omitempty" tf:"record_column,omitempty"`
 
 	// Specifies the encoding of the records in the streaming source. For example, UTF-8.
-	// +kubebuilder:validation:Optional
 	RecordEncoding *string `json:"recordEncoding,omitempty" tf:"record_encoding,omitempty"`
 
 	// Specifies the format of the records on the streaming source.
-	// +kubebuilder:validation:Required
-	RecordFormat []RecordFormatParameters `json:"recordFormat" tf:"record_format,omitempty"`
+	RecordFormat []RecordFormatParameters `json:"recordFormat,omitempty" tf:"record_format,omitempty"`
+}
+
+type InputStartingPositionConfigurationInitParameters struct {
+
+	// The starting position on the stream. Valid values: LAST_STOPPED_POINT, NOW, TRIM_HORIZON.
+	InputStartingPosition *string `json:"inputStartingPosition,omitempty" tf:"input_starting_position,omitempty"`
 }
 
 type InputStartingPositionConfigurationObservation struct {
@@ -521,8 +693,13 @@ type InputStartingPositionConfigurationObservation struct {
 type InputStartingPositionConfigurationParameters struct {
 
 	// The starting position on the stream. Valid values: LAST_STOPPED_POINT, NOW, TRIM_HORIZON.
-	// +kubebuilder:validation:Optional
 	InputStartingPosition *string `json:"inputStartingPosition,omitempty" tf:"input_starting_position,omitempty"`
+}
+
+type JSONMappingParametersInitParameters struct {
+
+	// The path to the top-level parent that contains the records.
+	RecordRowPath *string `json:"recordRowPath,omitempty" tf:"record_row_path,omitempty"`
 }
 
 type JSONMappingParametersObservation struct {
@@ -534,8 +711,13 @@ type JSONMappingParametersObservation struct {
 type JSONMappingParametersParameters struct {
 
 	// The path to the top-level parent that contains the records.
-	// +kubebuilder:validation:Required
-	RecordRowPath *string `json:"recordRowPath" tf:"record_row_path,omitempty"`
+	RecordRowPath *string `json:"recordRowPath,omitempty" tf:"record_row_path,omitempty"`
+}
+
+type KinesisFirehoseInputInitParameters struct {
+
+	// The ARN of the Lambda function that operates on records in the stream.
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
 }
 
 type KinesisFirehoseInputObservation struct {
@@ -547,8 +729,19 @@ type KinesisFirehoseInputObservation struct {
 type KinesisFirehoseInputParameters struct {
 
 	// The ARN of the Lambda function that operates on records in the stream.
-	// +kubebuilder:validation:Required
-	ResourceArn *string `json:"resourceArn" tf:"resource_arn,omitempty"`
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
+}
+
+type KinesisFirehoseOutputInitParameters struct {
+
+	// The ARN of the Lambda function that operates on records in the stream.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/firehose/v1beta1.DeliveryStream
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",false)
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
+
+	ResourceArnRef *v1.Reference `json:"resourceArnRef,omitempty" tf:"-"`
+
+	ResourceArnSelector *v1.Selector `json:"resourceArnSelector,omitempty" tf:"-"`
 }
 
 type KinesisFirehoseOutputObservation struct {
@@ -562,7 +755,6 @@ type KinesisFirehoseOutputParameters struct {
 	// The ARN of the Lambda function that operates on records in the stream.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/firehose/v1beta1.DeliveryStream
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",false)
-	// +kubebuilder:validation:Optional
 	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
 
 	// Reference to a DeliveryStream in firehose to populate resourceArn.
@@ -571,6 +763,18 @@ type KinesisFirehoseOutputParameters struct {
 
 	// Selector for a DeliveryStream in firehose to populate resourceArn.
 	// +kubebuilder:validation:Optional
+	ResourceArnSelector *v1.Selector `json:"resourceArnSelector,omitempty" tf:"-"`
+}
+
+type KinesisStreamsInputInitParameters struct {
+
+	// The ARN of the Lambda function that operates on records in the stream.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kinesis/v1beta1.Stream
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
+
+	ResourceArnRef *v1.Reference `json:"resourceArnRef,omitempty" tf:"-"`
+
 	ResourceArnSelector *v1.Selector `json:"resourceArnSelector,omitempty" tf:"-"`
 }
 
@@ -585,7 +789,6 @@ type KinesisStreamsInputParameters struct {
 	// The ARN of the Lambda function that operates on records in the stream.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/kinesis/v1beta1.Stream
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.TerraformID()
-	// +kubebuilder:validation:Optional
 	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
 
 	// Reference to a Stream in kinesis to populate resourceArn.
@@ -597,6 +800,12 @@ type KinesisStreamsInputParameters struct {
 	ResourceArnSelector *v1.Selector `json:"resourceArnSelector,omitempty" tf:"-"`
 }
 
+type KinesisStreamsOutputInitParameters struct {
+
+	// The ARN of the Lambda function that operates on records in the stream.
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
+}
+
 type KinesisStreamsOutputObservation struct {
 
 	// The ARN of the Lambda function that operates on records in the stream.
@@ -606,8 +815,19 @@ type KinesisStreamsOutputObservation struct {
 type KinesisStreamsOutputParameters struct {
 
 	// The ARN of the Lambda function that operates on records in the stream.
-	// +kubebuilder:validation:Required
-	ResourceArn *string `json:"resourceArn" tf:"resource_arn,omitempty"`
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
+}
+
+type LambdaOutputInitParameters struct {
+
+	// The ARN of the Lambda function that operates on records in the stream.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lambda/v1beta1.Function
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
+
+	ResourceArnRef *v1.Reference `json:"resourceArnRef,omitempty" tf:"-"`
+
+	ResourceArnSelector *v1.Selector `json:"resourceArnSelector,omitempty" tf:"-"`
 }
 
 type LambdaOutputObservation struct {
@@ -621,7 +841,6 @@ type LambdaOutputParameters struct {
 	// The ARN of the Lambda function that operates on records in the stream.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lambda/v1beta1.Function
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	ResourceArn *string `json:"resourceArn,omitempty" tf:"resource_arn,omitempty"`
 
 	// Reference to a Function in lambda to populate resourceArn.
@@ -631,6 +850,15 @@ type LambdaOutputParameters struct {
 	// Selector for a Function in lambda to populate resourceArn.
 	// +kubebuilder:validation:Optional
 	ResourceArnSelector *v1.Selector `json:"resourceArnSelector,omitempty" tf:"-"`
+}
+
+type MappingParametersCsvMappingParametersInitParameters struct {
+
+	// The column delimiter. For example, in a CSV format, a comma (,) is the typical column delimiter.
+	RecordColumnDelimiter *string `json:"recordColumnDelimiter,omitempty" tf:"record_column_delimiter,omitempty"`
+
+	// The row delimiter. For example, in a CSV format, \n is the typical row delimiter.
+	RecordRowDelimiter *string `json:"recordRowDelimiter,omitempty" tf:"record_row_delimiter,omitempty"`
 }
 
 type MappingParametersCsvMappingParametersObservation struct {
@@ -645,12 +873,25 @@ type MappingParametersCsvMappingParametersObservation struct {
 type MappingParametersCsvMappingParametersParameters struct {
 
 	// The column delimiter. For example, in a CSV format, a comma (,) is the typical column delimiter.
-	// +kubebuilder:validation:Required
-	RecordColumnDelimiter *string `json:"recordColumnDelimiter" tf:"record_column_delimiter,omitempty"`
+	RecordColumnDelimiter *string `json:"recordColumnDelimiter,omitempty" tf:"record_column_delimiter,omitempty"`
 
 	// The row delimiter. For example, in a CSV format, \n is the typical row delimiter.
-	// +kubebuilder:validation:Required
-	RecordRowDelimiter *string `json:"recordRowDelimiter" tf:"record_row_delimiter,omitempty"`
+	RecordRowDelimiter *string `json:"recordRowDelimiter,omitempty" tf:"record_row_delimiter,omitempty"`
+}
+
+type MappingParametersInitParameters struct {
+
+	// Provides additional mapping information when the record format uses delimiters (for example, CSV).
+	CsvMappingParameters []CsvMappingParametersInitParameters `json:"csvMappingParameters,omitempty" tf:"csv_mapping_parameters,omitempty"`
+
+	// Provides additional mapping information when JSON is the record format on the streaming source.
+	JSONMappingParameters []JSONMappingParametersInitParameters `json:"jsonMappingParameters,omitempty" tf:"json_mapping_parameters,omitempty"`
+}
+
+type MappingParametersJSONMappingParametersInitParameters struct {
+
+	// The path to the top-level parent that contains the records.
+	RecordRowPath *string `json:"recordRowPath,omitempty" tf:"record_row_path,omitempty"`
 }
 
 type MappingParametersJSONMappingParametersObservation struct {
@@ -662,8 +903,7 @@ type MappingParametersJSONMappingParametersObservation struct {
 type MappingParametersJSONMappingParametersParameters struct {
 
 	// The path to the top-level parent that contains the records.
-	// +kubebuilder:validation:Required
-	RecordRowPath *string `json:"recordRowPath" tf:"record_row_path,omitempty"`
+	RecordRowPath *string `json:"recordRowPath,omitempty" tf:"record_row_path,omitempty"`
 }
 
 type MappingParametersObservation struct {
@@ -678,12 +918,22 @@ type MappingParametersObservation struct {
 type MappingParametersParameters struct {
 
 	// Provides additional mapping information when the record format uses delimiters (for example, CSV).
-	// +kubebuilder:validation:Optional
 	CsvMappingParameters []CsvMappingParametersParameters `json:"csvMappingParameters,omitempty" tf:"csv_mapping_parameters,omitempty"`
 
 	// Provides additional mapping information when JSON is the record format on the streaming source.
-	// +kubebuilder:validation:Optional
 	JSONMappingParameters []JSONMappingParametersParameters `json:"jsonMappingParameters,omitempty" tf:"json_mapping_parameters,omitempty"`
+}
+
+type MonitoringConfigurationInitParameters struct {
+
+	// Describes whether the application uses Kinesis Data Analytics' default checkpointing behavior. Valid values: CUSTOM, DEFAULT. Set this attribute to CUSTOM in order for any specified checkpointing_enabled, checkpoint_interval, or min_pause_between_checkpoints attribute values to be effective. If this attribute is set to DEFAULT, the application will always use the following values:
+	ConfigurationType *string `json:"configurationType,omitempty" tf:"configuration_type,omitempty"`
+
+	// Describes the verbosity of the CloudWatch Logs for an application. Valid values: DEBUG, ERROR, INFO, WARN.
+	LogLevel *string `json:"logLevel,omitempty" tf:"log_level,omitempty"`
+
+	// Describes the granularity of the CloudWatch Logs for an application. Valid values: APPLICATION, OPERATOR, PARALLELISM, TASK.
+	MetricsLevel *string `json:"metricsLevel,omitempty" tf:"metrics_level,omitempty"`
 }
 
 type MonitoringConfigurationObservation struct {
@@ -701,16 +951,31 @@ type MonitoringConfigurationObservation struct {
 type MonitoringConfigurationParameters struct {
 
 	// Describes whether the application uses Kinesis Data Analytics' default checkpointing behavior. Valid values: CUSTOM, DEFAULT. Set this attribute to CUSTOM in order for any specified checkpointing_enabled, checkpoint_interval, or min_pause_between_checkpoints attribute values to be effective. If this attribute is set to DEFAULT, the application will always use the following values:
-	// +kubebuilder:validation:Required
-	ConfigurationType *string `json:"configurationType" tf:"configuration_type,omitempty"`
+	ConfigurationType *string `json:"configurationType,omitempty" tf:"configuration_type,omitempty"`
 
 	// Describes the verbosity of the CloudWatch Logs for an application. Valid values: DEBUG, ERROR, INFO, WARN.
-	// +kubebuilder:validation:Optional
 	LogLevel *string `json:"logLevel,omitempty" tf:"log_level,omitempty"`
 
 	// Describes the granularity of the CloudWatch Logs for an application. Valid values: APPLICATION, OPERATOR, PARALLELISM, TASK.
-	// +kubebuilder:validation:Optional
 	MetricsLevel *string `json:"metricsLevel,omitempty" tf:"metrics_level,omitempty"`
+}
+
+type OutputInitParameters struct {
+
+	// Describes the data format when records are written to the destination.
+	DestinationSchema []DestinationSchemaInitParameters `json:"destinationSchema,omitempty" tf:"destination_schema,omitempty"`
+
+	// Identifies a Kinesis Data Firehose delivery stream as the destination.
+	KinesisFirehoseOutput []KinesisFirehoseOutputInitParameters `json:"kinesisFirehoseOutput,omitempty" tf:"kinesis_firehose_output,omitempty"`
+
+	// Identifies a Kinesis data stream as the destination.
+	KinesisStreamsOutput []KinesisStreamsOutputInitParameters `json:"kinesisStreamsOutput,omitempty" tf:"kinesis_streams_output,omitempty"`
+
+	// Identifies a Lambda function as the destination.
+	LambdaOutput []LambdaOutputInitParameters `json:"lambdaOutput,omitempty" tf:"lambda_output,omitempty"`
+
+	// The name of the application.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 }
 
 type OutputObservation struct {
@@ -737,24 +1002,34 @@ type OutputObservation struct {
 type OutputParameters struct {
 
 	// Describes the data format when records are written to the destination.
-	// +kubebuilder:validation:Required
-	DestinationSchema []DestinationSchemaParameters `json:"destinationSchema" tf:"destination_schema,omitempty"`
+	DestinationSchema []DestinationSchemaParameters `json:"destinationSchema,omitempty" tf:"destination_schema,omitempty"`
 
 	// Identifies a Kinesis Data Firehose delivery stream as the destination.
-	// +kubebuilder:validation:Optional
 	KinesisFirehoseOutput []KinesisFirehoseOutputParameters `json:"kinesisFirehoseOutput,omitempty" tf:"kinesis_firehose_output,omitempty"`
 
 	// Identifies a Kinesis data stream as the destination.
-	// +kubebuilder:validation:Optional
 	KinesisStreamsOutput []KinesisStreamsOutputParameters `json:"kinesisStreamsOutput,omitempty" tf:"kinesis_streams_output,omitempty"`
 
 	// Identifies a Lambda function as the destination.
-	// +kubebuilder:validation:Optional
 	LambdaOutput []LambdaOutputParameters `json:"lambdaOutput,omitempty" tf:"lambda_output,omitempty"`
 
 	// The name of the application.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+}
+
+type ParallelismConfigurationInitParameters struct {
+
+	// Describes whether the Kinesis Data Analytics service can increase the parallelism of the application in response to increased throughput.
+	AutoScalingEnabled *bool `json:"autoScalingEnabled,omitempty" tf:"auto_scaling_enabled,omitempty"`
+
+	// Describes whether the application uses Kinesis Data Analytics' default checkpointing behavior. Valid values: CUSTOM, DEFAULT. Set this attribute to CUSTOM in order for any specified checkpointing_enabled, checkpoint_interval, or min_pause_between_checkpoints attribute values to be effective. If this attribute is set to DEFAULT, the application will always use the following values:
+	ConfigurationType *string `json:"configurationType,omitempty" tf:"configuration_type,omitempty"`
+
+	// Describes the initial number of parallel tasks that a Flink-based Kinesis Data Analytics application can perform.
+	Parallelism *float64 `json:"parallelism,omitempty" tf:"parallelism,omitempty"`
+
+	// Describes the number of parallel tasks that a Flink-based Kinesis Data Analytics application can perform per Kinesis Processing Unit (KPU) used by the application.
+	ParallelismPerKpu *float64 `json:"parallelismPerKpu,omitempty" tf:"parallelism_per_kpu,omitempty"`
 }
 
 type ParallelismConfigurationObservation struct {
@@ -775,20 +1050,25 @@ type ParallelismConfigurationObservation struct {
 type ParallelismConfigurationParameters struct {
 
 	// Describes whether the Kinesis Data Analytics service can increase the parallelism of the application in response to increased throughput.
-	// +kubebuilder:validation:Optional
 	AutoScalingEnabled *bool `json:"autoScalingEnabled,omitempty" tf:"auto_scaling_enabled,omitempty"`
 
 	// Describes whether the application uses Kinesis Data Analytics' default checkpointing behavior. Valid values: CUSTOM, DEFAULT. Set this attribute to CUSTOM in order for any specified checkpointing_enabled, checkpoint_interval, or min_pause_between_checkpoints attribute values to be effective. If this attribute is set to DEFAULT, the application will always use the following values:
-	// +kubebuilder:validation:Required
-	ConfigurationType *string `json:"configurationType" tf:"configuration_type,omitempty"`
+	ConfigurationType *string `json:"configurationType,omitempty" tf:"configuration_type,omitempty"`
 
 	// Describes the initial number of parallel tasks that a Flink-based Kinesis Data Analytics application can perform.
-	// +kubebuilder:validation:Optional
 	Parallelism *float64 `json:"parallelism,omitempty" tf:"parallelism,omitempty"`
 
 	// Describes the number of parallel tasks that a Flink-based Kinesis Data Analytics application can perform per Kinesis Processing Unit (KPU) used by the application.
-	// +kubebuilder:validation:Optional
 	ParallelismPerKpu *float64 `json:"parallelismPerKpu,omitempty" tf:"parallelism_per_kpu,omitempty"`
+}
+
+type PropertyGroupInitParameters struct {
+
+	// The key of the application execution property key-value map.
+	PropertyGroupID *string `json:"propertyGroupId,omitempty" tf:"property_group_id,omitempty"`
+
+	// Application execution property key-value map.
+	PropertyMap map[string]*string `json:"propertyMap,omitempty" tf:"property_map,omitempty"`
 }
 
 type PropertyGroupObservation struct {
@@ -803,12 +1083,22 @@ type PropertyGroupObservation struct {
 type PropertyGroupParameters struct {
 
 	// The key of the application execution property key-value map.
-	// +kubebuilder:validation:Required
-	PropertyGroupID *string `json:"propertyGroupId" tf:"property_group_id,omitempty"`
+	PropertyGroupID *string `json:"propertyGroupId,omitempty" tf:"property_group_id,omitempty"`
 
 	// Application execution property key-value map.
-	// +kubebuilder:validation:Required
-	PropertyMap map[string]*string `json:"propertyMap" tf:"property_map,omitempty"`
+	PropertyMap map[string]*string `json:"propertyMap,omitempty" tf:"property_map,omitempty"`
+}
+
+type RecordColumnInitParameters struct {
+
+	// A reference to the data element in the streaming input or the reference data source.
+	Mapping *string `json:"mapping,omitempty" tf:"mapping,omitempty"`
+
+	// The name of the application.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The type of column created in the in-application input stream or reference table.
+	SQLType *string `json:"sqlType,omitempty" tf:"sql_type,omitempty"`
 }
 
 type RecordColumnObservation struct {
@@ -826,16 +1116,31 @@ type RecordColumnObservation struct {
 type RecordColumnParameters struct {
 
 	// A reference to the data element in the streaming input or the reference data source.
-	// +kubebuilder:validation:Optional
 	Mapping *string `json:"mapping,omitempty" tf:"mapping,omitempty"`
 
 	// The name of the application.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The type of column created in the in-application input stream or reference table.
-	// +kubebuilder:validation:Required
-	SQLType *string `json:"sqlType" tf:"sql_type,omitempty"`
+	SQLType *string `json:"sqlType,omitempty" tf:"sql_type,omitempty"`
+}
+
+type RecordFormatInitParameters struct {
+
+	// Provides additional mapping information specific to the record format (such as JSON, CSV, or record fields delimited by some delimiter) on the streaming source.
+	MappingParameters []MappingParametersInitParameters `json:"mappingParameters,omitempty" tf:"mapping_parameters,omitempty"`
+
+	// The type of record format. Valid values: CSV, JSON.
+	RecordFormatType *string `json:"recordFormatType,omitempty" tf:"record_format_type,omitempty"`
+}
+
+type RecordFormatMappingParametersInitParameters struct {
+
+	// Provides additional mapping information when the record format uses delimiters (for example, CSV).
+	CsvMappingParameters []MappingParametersCsvMappingParametersInitParameters `json:"csvMappingParameters,omitempty" tf:"csv_mapping_parameters,omitempty"`
+
+	// Provides additional mapping information when JSON is the record format on the streaming source.
+	JSONMappingParameters []MappingParametersJSONMappingParametersInitParameters `json:"jsonMappingParameters,omitempty" tf:"json_mapping_parameters,omitempty"`
 }
 
 type RecordFormatMappingParametersObservation struct {
@@ -850,11 +1155,9 @@ type RecordFormatMappingParametersObservation struct {
 type RecordFormatMappingParametersParameters struct {
 
 	// Provides additional mapping information when the record format uses delimiters (for example, CSV).
-	// +kubebuilder:validation:Optional
 	CsvMappingParameters []MappingParametersCsvMappingParametersParameters `json:"csvMappingParameters,omitempty" tf:"csv_mapping_parameters,omitempty"`
 
 	// Provides additional mapping information when JSON is the record format on the streaming source.
-	// +kubebuilder:validation:Optional
 	JSONMappingParameters []MappingParametersJSONMappingParametersParameters `json:"jsonMappingParameters,omitempty" tf:"json_mapping_parameters,omitempty"`
 }
 
@@ -870,12 +1173,22 @@ type RecordFormatObservation struct {
 type RecordFormatParameters struct {
 
 	// Provides additional mapping information specific to the record format (such as JSON, CSV, or record fields delimited by some delimiter) on the streaming source.
-	// +kubebuilder:validation:Required
-	MappingParameters []MappingParametersParameters `json:"mappingParameters" tf:"mapping_parameters,omitempty"`
+	MappingParameters []MappingParametersParameters `json:"mappingParameters,omitempty" tf:"mapping_parameters,omitempty"`
 
 	// The type of record format. Valid values: CSV, JSON.
-	// +kubebuilder:validation:Required
-	RecordFormatType *string `json:"recordFormatType" tf:"record_format_type,omitempty"`
+	RecordFormatType *string `json:"recordFormatType,omitempty" tf:"record_format_type,omitempty"`
+}
+
+type ReferenceDataSourceInitParameters struct {
+
+	// Describes the format of the data in the streaming source, and how each data element maps to corresponding columns created in the in-application stream.
+	ReferenceSchema []ReferenceSchemaInitParameters `json:"referenceSchema,omitempty" tf:"reference_schema,omitempty"`
+
+	// Identifies the S3 bucket and object that contains the reference data.
+	S3ReferenceDataSource []S3ReferenceDataSourceInitParameters `json:"s3ReferenceDataSource,omitempty" tf:"s3_reference_data_source,omitempty"`
+
+	// The name of the in-application table to create.
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
 }
 
 type ReferenceDataSourceObservation struct {
@@ -896,16 +1209,25 @@ type ReferenceDataSourceObservation struct {
 type ReferenceDataSourceParameters struct {
 
 	// Describes the format of the data in the streaming source, and how each data element maps to corresponding columns created in the in-application stream.
-	// +kubebuilder:validation:Required
-	ReferenceSchema []ReferenceSchemaParameters `json:"referenceSchema" tf:"reference_schema,omitempty"`
+	ReferenceSchema []ReferenceSchemaParameters `json:"referenceSchema,omitempty" tf:"reference_schema,omitempty"`
 
 	// Identifies the S3 bucket and object that contains the reference data.
-	// +kubebuilder:validation:Required
-	S3ReferenceDataSource []S3ReferenceDataSourceParameters `json:"s3ReferenceDataSource" tf:"s3_reference_data_source,omitempty"`
+	S3ReferenceDataSource []S3ReferenceDataSourceParameters `json:"s3ReferenceDataSource,omitempty" tf:"s3_reference_data_source,omitempty"`
 
 	// The name of the in-application table to create.
-	// +kubebuilder:validation:Required
-	TableName *string `json:"tableName" tf:"table_name,omitempty"`
+	TableName *string `json:"tableName,omitempty" tf:"table_name,omitempty"`
+}
+
+type ReferenceSchemaInitParameters struct {
+
+	// Describes the mapping of each data element in the streaming source to the corresponding column in the in-application stream.
+	RecordColumn []ReferenceSchemaRecordColumnInitParameters `json:"recordColumn,omitempty" tf:"record_column,omitempty"`
+
+	// Specifies the encoding of the records in the streaming source. For example, UTF-8.
+	RecordEncoding *string `json:"recordEncoding,omitempty" tf:"record_encoding,omitempty"`
+
+	// Specifies the format of the records on the streaming source.
+	RecordFormat []ReferenceSchemaRecordFormatInitParameters `json:"recordFormat,omitempty" tf:"record_format,omitempty"`
 }
 
 type ReferenceSchemaObservation struct {
@@ -923,16 +1245,25 @@ type ReferenceSchemaObservation struct {
 type ReferenceSchemaParameters struct {
 
 	// Describes the mapping of each data element in the streaming source to the corresponding column in the in-application stream.
-	// +kubebuilder:validation:Required
-	RecordColumn []ReferenceSchemaRecordColumnParameters `json:"recordColumn" tf:"record_column,omitempty"`
+	RecordColumn []ReferenceSchemaRecordColumnParameters `json:"recordColumn,omitempty" tf:"record_column,omitempty"`
 
 	// Specifies the encoding of the records in the streaming source. For example, UTF-8.
-	// +kubebuilder:validation:Optional
 	RecordEncoding *string `json:"recordEncoding,omitempty" tf:"record_encoding,omitempty"`
 
 	// Specifies the format of the records on the streaming source.
-	// +kubebuilder:validation:Required
-	RecordFormat []ReferenceSchemaRecordFormatParameters `json:"recordFormat" tf:"record_format,omitempty"`
+	RecordFormat []ReferenceSchemaRecordFormatParameters `json:"recordFormat,omitempty" tf:"record_format,omitempty"`
+}
+
+type ReferenceSchemaRecordColumnInitParameters struct {
+
+	// A reference to the data element in the streaming input or the reference data source.
+	Mapping *string `json:"mapping,omitempty" tf:"mapping,omitempty"`
+
+	// The name of the application.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The type of column created in the in-application input stream or reference table.
+	SQLType *string `json:"sqlType,omitempty" tf:"sql_type,omitempty"`
 }
 
 type ReferenceSchemaRecordColumnObservation struct {
@@ -950,16 +1281,22 @@ type ReferenceSchemaRecordColumnObservation struct {
 type ReferenceSchemaRecordColumnParameters struct {
 
 	// A reference to the data element in the streaming input or the reference data source.
-	// +kubebuilder:validation:Optional
 	Mapping *string `json:"mapping,omitempty" tf:"mapping,omitempty"`
 
 	// The name of the application.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The type of column created in the in-application input stream or reference table.
-	// +kubebuilder:validation:Required
-	SQLType *string `json:"sqlType" tf:"sql_type,omitempty"`
+	SQLType *string `json:"sqlType,omitempty" tf:"sql_type,omitempty"`
+}
+
+type ReferenceSchemaRecordFormatInitParameters struct {
+
+	// Provides additional mapping information specific to the record format (such as JSON, CSV, or record fields delimited by some delimiter) on the streaming source.
+	MappingParameters []RecordFormatMappingParametersInitParameters `json:"mappingParameters,omitempty" tf:"mapping_parameters,omitempty"`
+
+	// The type of record format. Valid values: CSV, JSON.
+	RecordFormatType *string `json:"recordFormatType,omitempty" tf:"record_format_type,omitempty"`
 }
 
 type ReferenceSchemaRecordFormatObservation struct {
@@ -974,12 +1311,19 @@ type ReferenceSchemaRecordFormatObservation struct {
 type ReferenceSchemaRecordFormatParameters struct {
 
 	// Provides additional mapping information specific to the record format (such as JSON, CSV, or record fields delimited by some delimiter) on the streaming source.
-	// +kubebuilder:validation:Required
-	MappingParameters []RecordFormatMappingParametersParameters `json:"mappingParameters" tf:"mapping_parameters,omitempty"`
+	MappingParameters []RecordFormatMappingParametersParameters `json:"mappingParameters,omitempty" tf:"mapping_parameters,omitempty"`
 
 	// The type of record format. Valid values: CSV, JSON.
-	// +kubebuilder:validation:Required
-	RecordFormatType *string `json:"recordFormatType" tf:"record_format_type,omitempty"`
+	RecordFormatType *string `json:"recordFormatType,omitempty" tf:"record_format_type,omitempty"`
+}
+
+type RunConfigurationInitParameters struct {
+
+	// The restore behavior of a restarting application.
+	ApplicationRestoreConfiguration []ApplicationRestoreConfigurationInitParameters `json:"applicationRestoreConfiguration,omitempty" tf:"application_restore_configuration,omitempty"`
+
+	// The starting parameters for a Flink-based Kinesis Data Analytics application.
+	FlinkRunConfiguration []FlinkRunConfigurationInitParameters `json:"flinkRunConfiguration,omitempty" tf:"flink_run_configuration,omitempty"`
 }
 
 type RunConfigurationObservation struct {
@@ -994,12 +1338,34 @@ type RunConfigurationObservation struct {
 type RunConfigurationParameters struct {
 
 	// The restore behavior of a restarting application.
-	// +kubebuilder:validation:Optional
 	ApplicationRestoreConfiguration []ApplicationRestoreConfigurationParameters `json:"applicationRestoreConfiguration,omitempty" tf:"application_restore_configuration,omitempty"`
 
 	// The starting parameters for a Flink-based Kinesis Data Analytics application.
-	// +kubebuilder:validation:Optional
 	FlinkRunConfiguration []FlinkRunConfigurationParameters `json:"flinkRunConfiguration,omitempty" tf:"flink_run_configuration,omitempty"`
+}
+
+type S3ContentLocationInitParameters struct {
+
+	// The ARN for the S3 bucket containing the application code.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
+	BucketArn *string `json:"bucketArn,omitempty" tf:"bucket_arn,omitempty"`
+
+	BucketArnRef *v1.Reference `json:"bucketArnRef,omitempty" tf:"-"`
+
+	BucketArnSelector *v1.Selector `json:"bucketArnSelector,omitempty" tf:"-"`
+
+	// The file key for the object containing the application code.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Object
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("key",false)
+	FileKey *string `json:"fileKey,omitempty" tf:"file_key,omitempty"`
+
+	FileKeyRef *v1.Reference `json:"fileKeyRef,omitempty" tf:"-"`
+
+	FileKeySelector *v1.Selector `json:"fileKeySelector,omitempty" tf:"-"`
+
+	// The version of the object containing the application code.
+	ObjectVersion *string `json:"objectVersion,omitempty" tf:"object_version,omitempty"`
 }
 
 type S3ContentLocationObservation struct {
@@ -1019,7 +1385,6 @@ type S3ContentLocationParameters struct {
 	// The ARN for the S3 bucket containing the application code.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/provider-aws/config/common.ARNExtractor()
-	// +kubebuilder:validation:Optional
 	BucketArn *string `json:"bucketArn,omitempty" tf:"bucket_arn,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucketArn.
@@ -1033,7 +1398,6 @@ type S3ContentLocationParameters struct {
 	// The file key for the object containing the application code.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Object
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("key",false)
-	// +kubebuilder:validation:Optional
 	FileKey *string `json:"fileKey,omitempty" tf:"file_key,omitempty"`
 
 	// Reference to a Object in s3 to populate fileKey.
@@ -1045,8 +1409,22 @@ type S3ContentLocationParameters struct {
 	FileKeySelector *v1.Selector `json:"fileKeySelector,omitempty" tf:"-"`
 
 	// The version of the object containing the application code.
-	// +kubebuilder:validation:Optional
 	ObjectVersion *string `json:"objectVersion,omitempty" tf:"object_version,omitempty"`
+}
+
+type S3ReferenceDataSourceInitParameters struct {
+
+	// The ARN for the S3 bucket containing the application code.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	BucketArn *string `json:"bucketArn,omitempty" tf:"bucket_arn,omitempty"`
+
+	BucketArnRef *v1.Reference `json:"bucketArnRef,omitempty" tf:"-"`
+
+	BucketArnSelector *v1.Selector `json:"bucketArnSelector,omitempty" tf:"-"`
+
+	// The file key for the object containing the application code.
+	FileKey *string `json:"fileKey,omitempty" tf:"file_key,omitempty"`
 }
 
 type S3ReferenceDataSourceObservation struct {
@@ -1063,7 +1441,6 @@ type S3ReferenceDataSourceParameters struct {
 	// The ARN for the S3 bucket containing the application code.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	BucketArn *string `json:"bucketArn,omitempty" tf:"bucket_arn,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucketArn.
@@ -1075,8 +1452,19 @@ type S3ReferenceDataSourceParameters struct {
 	BucketArnSelector *v1.Selector `json:"bucketArnSelector,omitempty" tf:"-"`
 
 	// The file key for the object containing the application code.
-	// +kubebuilder:validation:Required
-	FileKey *string `json:"fileKey" tf:"file_key,omitempty"`
+	FileKey *string `json:"fileKey,omitempty" tf:"file_key,omitempty"`
+}
+
+type SQLApplicationConfigurationInitParameters struct {
+
+	// The input stream used by the application.
+	Input []InputInitParameters `json:"input,omitempty" tf:"input,omitempty"`
+
+	// The destination streams used by the application.
+	Output []OutputInitParameters `json:"output,omitempty" tf:"output,omitempty"`
+
+	// The reference data source used by the application.
+	ReferenceDataSource []ReferenceDataSourceInitParameters `json:"referenceDataSource,omitempty" tf:"reference_data_source,omitempty"`
 }
 
 type SQLApplicationConfigurationObservation struct {
@@ -1094,16 +1482,22 @@ type SQLApplicationConfigurationObservation struct {
 type SQLApplicationConfigurationParameters struct {
 
 	// The input stream used by the application.
-	// +kubebuilder:validation:Optional
 	Input []InputParameters `json:"input,omitempty" tf:"input,omitempty"`
 
 	// The destination streams used by the application.
-	// +kubebuilder:validation:Optional
 	Output []OutputParameters `json:"output,omitempty" tf:"output,omitempty"`
 
 	// The reference data source used by the application.
-	// +kubebuilder:validation:Optional
 	ReferenceDataSource []ReferenceDataSourceParameters `json:"referenceDataSource,omitempty" tf:"reference_data_source,omitempty"`
+}
+
+type VPCConfigurationInitParameters struct {
+
+	// The Security Group IDs used by the VPC configuration.
+	SecurityGroupIds []*string `json:"securityGroupIds,omitempty" tf:"security_group_ids,omitempty"`
+
+	// The Subnet IDs used by the VPC configuration.
+	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
 }
 
 type VPCConfigurationObservation struct {
@@ -1124,18 +1518,20 @@ type VPCConfigurationObservation struct {
 type VPCConfigurationParameters struct {
 
 	// The Security Group IDs used by the VPC configuration.
-	// +kubebuilder:validation:Required
-	SecurityGroupIds []*string `json:"securityGroupIds" tf:"security_group_ids,omitempty"`
+	SecurityGroupIds []*string `json:"securityGroupIds,omitempty" tf:"security_group_ids,omitempty"`
 
 	// The Subnet IDs used by the VPC configuration.
-	// +kubebuilder:validation:Required
-	SubnetIds []*string `json:"subnetIds" tf:"subnet_ids,omitempty"`
+	SubnetIds []*string `json:"subnetIds,omitempty" tf:"subnet_ids,omitempty"`
 }
 
 // ApplicationSpec defines the desired state of Application
 type ApplicationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ApplicationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ApplicationInitParameters `json:"initProvider,omitempty"`
 }
 
 // ApplicationStatus defines the observed state of Application.
@@ -1156,7 +1552,7 @@ type ApplicationStatus struct {
 type Application struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.runtimeEnvironment)",message="runtimeEnvironment is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.runtimeEnvironment) || has(self.initProvider.runtimeEnvironment)",message="%!s(MISSING) is a required parameter"
 	Spec   ApplicationSpec   `json:"spec"`
 	Status ApplicationStatus `json:"status,omitempty"`
 }

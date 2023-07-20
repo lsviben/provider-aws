@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SpecListenerPortMappingInitParameters struct {
+
+	// Port used for the port mapping.
+	Port *float64 `json:"port,omitempty" tf:"port,omitempty"`
+
+	// Protocol used for the port mapping. Valid values are http,http2, tcp and grpc.
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
+}
+
 type SpecListenerPortMappingObservation struct {
 
 	// Port used for the port mapping.
@@ -25,12 +34,38 @@ type SpecListenerPortMappingObservation struct {
 type SpecListenerPortMappingParameters struct {
 
 	// Port used for the port mapping.
-	// +kubebuilder:validation:Required
-	Port *float64 `json:"port" tf:"port,omitempty"`
+	Port *float64 `json:"port,omitempty" tf:"port,omitempty"`
 
 	// Protocol used for the port mapping. Valid values are http,http2, tcp and grpc.
-	// +kubebuilder:validation:Required
-	Protocol *string `json:"protocol" tf:"protocol,omitempty"`
+	Protocol *string `json:"protocol,omitempty" tf:"protocol,omitempty"`
+}
+
+type VirtualRouterInitParameters struct {
+
+	// Name of the service mesh in which to create the virtual router. Must be between 1 and 255 characters in length.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appmesh/v1beta1.Mesh
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	MeshName *string `json:"meshName,omitempty" tf:"mesh_name,omitempty"`
+
+	MeshNameRef *v1.Reference `json:"meshNameRef,omitempty" tf:"-"`
+
+	MeshNameSelector *v1.Selector `json:"meshNameSelector,omitempty" tf:"-"`
+
+	// AWS account ID of the service mesh's owner. Defaults to the account ID the AWS provider is currently connected to.
+	MeshOwner *string `json:"meshOwner,omitempty" tf:"mesh_owner,omitempty"`
+
+	// Name to use for the virtual router. Must be between 1 and 255 characters in length.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Virtual router specification to apply.
+	Spec []VirtualRouterSpecInitParameters `json:"spec,omitempty" tf:"spec,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type VirtualRouterObservation struct {
@@ -74,7 +109,6 @@ type VirtualRouterParameters struct {
 	// Name of the service mesh in which to create the virtual router. Must be between 1 and 255 characters in length.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/appmesh/v1beta1.Mesh
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	MeshName *string `json:"meshName,omitempty" tf:"mesh_name,omitempty"`
 
 	// Reference to a Mesh in appmesh to populate meshName.
@@ -86,25 +120,32 @@ type VirtualRouterParameters struct {
 	MeshNameSelector *v1.Selector `json:"meshNameSelector,omitempty" tf:"-"`
 
 	// AWS account ID of the service mesh's owner. Defaults to the account ID the AWS provider is currently connected to.
-	// +kubebuilder:validation:Optional
 	MeshOwner *string `json:"meshOwner,omitempty" tf:"mesh_owner,omitempty"`
 
 	// Name to use for the virtual router. Must be between 1 and 255 characters in length.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Virtual router specification to apply.
-	// +kubebuilder:validation:Optional
 	Spec []VirtualRouterSpecParameters `json:"spec,omitempty" tf:"spec,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type VirtualRouterSpecInitParameters struct {
+
+	// configuration block to the spec argument.
+	Listener []VirtualRouterSpecListenerInitParameters `json:"listener,omitempty" tf:"listener,omitempty"`
+}
+
+type VirtualRouterSpecListenerInitParameters struct {
+
+	// Port mapping information for the listener.
+	PortMapping []SpecListenerPortMappingInitParameters `json:"portMapping,omitempty" tf:"port_mapping,omitempty"`
 }
 
 type VirtualRouterSpecListenerObservation struct {
@@ -116,8 +157,7 @@ type VirtualRouterSpecListenerObservation struct {
 type VirtualRouterSpecListenerParameters struct {
 
 	// Port mapping information for the listener.
-	// +kubebuilder:validation:Required
-	PortMapping []SpecListenerPortMappingParameters `json:"portMapping" tf:"port_mapping,omitempty"`
+	PortMapping []SpecListenerPortMappingParameters `json:"portMapping,omitempty" tf:"port_mapping,omitempty"`
 }
 
 type VirtualRouterSpecObservation struct {
@@ -129,14 +169,17 @@ type VirtualRouterSpecObservation struct {
 type VirtualRouterSpecParameters struct {
 
 	// configuration block to the spec argument.
-	// +kubebuilder:validation:Required
-	Listener []VirtualRouterSpecListenerParameters `json:"listener" tf:"listener,omitempty"`
+	Listener []VirtualRouterSpecListenerParameters `json:"listener,omitempty" tf:"listener,omitempty"`
 }
 
 // VirtualRouterSpec defines the desired state of VirtualRouter
 type VirtualRouterSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     VirtualRouterParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider VirtualRouterInitParameters `json:"initProvider,omitempty"`
 }
 
 // VirtualRouterStatus defines the observed state of VirtualRouter.
@@ -157,8 +200,8 @@ type VirtualRouterStatus struct {
 type VirtualRouter struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.spec)",message="spec is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.spec) || has(self.initProvider.spec)",message="%!s(MISSING) is a required parameter"
 	Spec   VirtualRouterSpec   `json:"spec"`
 	Status VirtualRouterStatus `json:"status,omitempty"`
 }

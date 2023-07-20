@@ -13,6 +13,27 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type PredicatesInitParameters struct {
+
+	// A unique identifier for a predicate in the rule, such as Byte Match Set ID or IPSet ID.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/waf/v1beta1.IPSet
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DataID *string `json:"dataId,omitempty" tf:"data_id,omitempty"`
+
+	DataIDRef *v1.Reference `json:"dataIdRef,omitempty" tf:"-"`
+
+	DataIDSelector *v1.Selector `json:"dataIdSelector,omitempty" tf:"-"`
+
+	// Set this to false if you want to allow, block, or count requests
+	// based on the settings in the specified ByteMatchSet, IPSet, SqlInjectionMatchSet, XssMatchSet, or SizeConstraintSet.
+	// For example, if an IPSet includes the IP address 192.0.2.44, AWS WAF will allow or block requests based on that IP address.
+	// If set to true, AWS WAF will allow, block, or count requests based on all IP addresses except 192.0.2.44.
+	Negated *bool `json:"negated,omitempty" tf:"negated,omitempty"`
+
+	// The type of predicate in a rule. Valid values: ByteMatch, GeoMatch, IPMatch, RegexMatch, SizeConstraint, SqlInjectionMatch, or XssMatch.
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
 type PredicatesObservation struct {
 
 	// A unique identifier for a predicate in the rule, such as Byte Match Set ID or IPSet ID.
@@ -33,7 +54,6 @@ type PredicatesParameters struct {
 	// A unique identifier for a predicate in the rule, such as Byte Match Set ID or IPSet ID.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/waf/v1beta1.IPSet
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DataID *string `json:"dataId,omitempty" tf:"data_id,omitempty"`
 
 	// Reference to a IPSet in waf to populate dataId.
@@ -48,12 +68,35 @@ type PredicatesParameters struct {
 	// based on the settings in the specified ByteMatchSet, IPSet, SqlInjectionMatchSet, XssMatchSet, or SizeConstraintSet.
 	// For example, if an IPSet includes the IP address 192.0.2.44, AWS WAF will allow or block requests based on that IP address.
 	// If set to true, AWS WAF will allow, block, or count requests based on all IP addresses except 192.0.2.44.
-	// +kubebuilder:validation:Required
-	Negated *bool `json:"negated" tf:"negated,omitempty"`
+	Negated *bool `json:"negated,omitempty" tf:"negated,omitempty"`
 
 	// The type of predicate in a rule. Valid values: ByteMatch, GeoMatch, IPMatch, RegexMatch, SizeConstraint, SqlInjectionMatch, or XssMatch.
-	// +kubebuilder:validation:Required
-	Type *string `json:"type" tf:"type,omitempty"`
+	Type *string `json:"type,omitempty" tf:"type,omitempty"`
+}
+
+type RateBasedRuleInitParameters struct {
+
+	// The name or description for the Amazon CloudWatch metric of this rule.
+	MetricName *string `json:"metricName,omitempty" tf:"metric_name,omitempty"`
+
+	// The name or description of the rule.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// The objects to include in a rule (documented below).
+	Predicates []PredicatesInitParameters `json:"predicates,omitempty" tf:"predicates,omitempty"`
+
+	// Valid value is IP.
+	RateKey *string `json:"rateKey,omitempty" tf:"rate_key,omitempty"`
+
+	// The maximum number of requests, which have an identical value in the field specified by the RateKey, allowed in a five-minute period. Minimum value is 100.
+	RateLimit *float64 `json:"rateLimit,omitempty" tf:"rate_limit,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
 type RateBasedRuleObservation struct {
@@ -89,32 +132,25 @@ type RateBasedRuleObservation struct {
 type RateBasedRuleParameters struct {
 
 	// The name or description for the Amazon CloudWatch metric of this rule.
-	// +kubebuilder:validation:Optional
 	MetricName *string `json:"metricName,omitempty" tf:"metric_name,omitempty"`
 
 	// The name or description of the rule.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// The objects to include in a rule (documented below).
-	// +kubebuilder:validation:Optional
 	Predicates []PredicatesParameters `json:"predicates,omitempty" tf:"predicates,omitempty"`
 
 	// Valid value is IP.
-	// +kubebuilder:validation:Optional
 	RateKey *string `json:"rateKey,omitempty" tf:"rate_key,omitempty"`
 
 	// The maximum number of requests, which have an identical value in the field specified by the RateKey, allowed in a five-minute period. Minimum value is 100.
-	// +kubebuilder:validation:Optional
 	RateLimit *float64 `json:"rateLimit,omitempty" tf:"rate_limit,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -122,6 +158,10 @@ type RateBasedRuleParameters struct {
 type RateBasedRuleSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RateBasedRuleParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RateBasedRuleInitParameters `json:"initProvider,omitempty"`
 }
 
 // RateBasedRuleStatus defines the observed state of RateBasedRule.
@@ -142,10 +182,10 @@ type RateBasedRuleStatus struct {
 type RateBasedRule struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.metricName)",message="metricName is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rateKey)",message="rateKey is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rateLimit)",message="rateLimit is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.metricName) || has(self.initProvider.metricName)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rateKey) || has(self.initProvider.rateKey)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.rateLimit) || has(self.initProvider.rateLimit)",message="%!s(MISSING) is a required parameter"
 	Spec   RateBasedRuleSpec   `json:"spec"`
 	Status RateBasedRuleStatus `json:"status,omitempty"`
 }

@@ -80,8 +80,24 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  bucket:
+                    description: The Amazon S3 bucket in which to store the Spot instance
+                      data feed.
+                    type: string
+                  prefix:
+                    description: Path of folder inside bucket to place spot pricing
+                      data.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -281,9 +297,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: bucket is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.bucket)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.bucket)
+                || has(self.initProvider.bucket)'
           status:
             description: SpotDatafeedSubscriptionStatus defines the observed state
               of SpotDatafeedSubscription.

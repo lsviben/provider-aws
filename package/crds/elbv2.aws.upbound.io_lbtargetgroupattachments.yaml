@@ -165,8 +165,108 @@ spec:
                       is lambda, specify the arn of lambda. If the target type is
                       alb, specify the arn of alb.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  availabilityZone:
+                    description: The Availability Zone where the IP address of the
+                      target is to be registered. If the private ip address is outside
+                      of the VPC scope, this value must be set to 'all'.
+                    type: string
+                  port:
+                    description: The port on which targets receive traffic.
+                    type: number
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  targetGroupArn:
+                    description: The ARN of the target group with which to register
+                      targets
+                    type: string
+                  targetGroupArnRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  targetGroupArnSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  targetId:
+                    description: The ID of the target. This is the Instance ID for
+                      an instance, or the container ID for an ECS container. If the
+                      target type is ip, specify an IP address. If the target type
+                      is lambda, specify the arn of lambda. If the target type is
+                      alb, specify the arn of alb.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -366,9 +466,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: targetId is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.targetId)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.targetId)
+                || has(self.initProvider.targetId)'
           status:
             description: LBTargetGroupAttachmentStatus defines the observed state
               of LBTargetGroupAttachment.

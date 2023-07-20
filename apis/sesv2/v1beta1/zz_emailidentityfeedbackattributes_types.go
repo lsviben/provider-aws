@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type EmailIdentityFeedbackAttributesInitParameters struct {
+
+	// Sets the feedback forwarding configuration for the identity.
+	EmailForwardingEnabled *bool `json:"emailForwardingEnabled,omitempty" tf:"email_forwarding_enabled,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type EmailIdentityFeedbackAttributesObservation struct {
 
 	// Sets the feedback forwarding configuration for the identity.
@@ -24,19 +34,21 @@ type EmailIdentityFeedbackAttributesObservation struct {
 type EmailIdentityFeedbackAttributesParameters struct {
 
 	// Sets the feedback forwarding configuration for the identity.
-	// +kubebuilder:validation:Optional
 	EmailForwardingEnabled *bool `json:"emailForwardingEnabled,omitempty" tf:"email_forwarding_enabled,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // EmailIdentityFeedbackAttributesSpec defines the desired state of EmailIdentityFeedbackAttributes
 type EmailIdentityFeedbackAttributesSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     EmailIdentityFeedbackAttributesParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider EmailIdentityFeedbackAttributesInitParameters `json:"initProvider,omitempty"`
 }
 
 // EmailIdentityFeedbackAttributesStatus defines the observed state of EmailIdentityFeedbackAttributes.

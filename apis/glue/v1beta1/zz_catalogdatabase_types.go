@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CatalogDatabaseInitParameters struct {
+
+	// ID of the Glue Catalog to create the database in. If omitted, this defaults to the AWS Account ID.
+	CatalogID *string `json:"catalogId,omitempty" tf:"catalog_id,omitempty"`
+
+	// Creates a set of default permissions on the table for principals. See create_table_default_permission below.
+	CreateTableDefaultPermission []CreateTableDefaultPermissionInitParameters `json:"createTableDefaultPermission,omitempty" tf:"create_table_default_permission,omitempty"`
+
+	// Description of the database.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Location of the database (for example, an HDFS path).
+	LocationURI *string `json:"locationUri,omitempty" tf:"location_uri,omitempty"`
+
+	// List of key-value pairs that define parameters and properties of the database.
+	Parameters map[string]*string `json:"parameters,omitempty" tf:"parameters,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Configuration block for a target database for resource linking. See target_database below.
+	TargetDatabase []TargetDatabaseInitParameters `json:"targetDatabase,omitempty" tf:"target_database,omitempty"`
+}
+
 type CatalogDatabaseObservation struct {
 
 	// ARN of the Glue Catalog Database.
@@ -43,33 +68,35 @@ type CatalogDatabaseObservation struct {
 type CatalogDatabaseParameters struct {
 
 	// ID of the Glue Catalog to create the database in. If omitted, this defaults to the AWS Account ID.
-	// +kubebuilder:validation:Required
-	CatalogID *string `json:"catalogId" tf:"catalog_id,omitempty"`
+	CatalogID *string `json:"catalogId,omitempty" tf:"catalog_id,omitempty"`
 
 	// Creates a set of default permissions on the table for principals. See create_table_default_permission below.
-	// +kubebuilder:validation:Optional
 	CreateTableDefaultPermission []CreateTableDefaultPermissionParameters `json:"createTableDefaultPermission,omitempty" tf:"create_table_default_permission,omitempty"`
 
 	// Description of the database.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Location of the database (for example, an HDFS path).
-	// +kubebuilder:validation:Optional
 	LocationURI *string `json:"locationUri,omitempty" tf:"location_uri,omitempty"`
 
 	// List of key-value pairs that define parameters and properties of the database.
-	// +kubebuilder:validation:Optional
 	Parameters map[string]*string `json:"parameters,omitempty" tf:"parameters,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Configuration block for a target database for resource linking. See target_database below.
-	// +kubebuilder:validation:Optional
 	TargetDatabase []TargetDatabaseParameters `json:"targetDatabase,omitempty" tf:"target_database,omitempty"`
+}
+
+type CreateTableDefaultPermissionInitParameters struct {
+
+	// The permissions that are granted to the principal.
+	Permissions []*string `json:"permissions,omitempty" tf:"permissions,omitempty"`
+
+	// The principal who is granted permissions.. See principal below.
+	Principal []PrincipalInitParameters `json:"principal,omitempty" tf:"principal,omitempty"`
 }
 
 type CreateTableDefaultPermissionObservation struct {
@@ -84,12 +111,16 @@ type CreateTableDefaultPermissionObservation struct {
 type CreateTableDefaultPermissionParameters struct {
 
 	// The permissions that are granted to the principal.
-	// +kubebuilder:validation:Optional
 	Permissions []*string `json:"permissions,omitempty" tf:"permissions,omitempty"`
 
 	// The principal who is granted permissions.. See principal below.
-	// +kubebuilder:validation:Optional
 	Principal []PrincipalParameters `json:"principal,omitempty" tf:"principal,omitempty"`
+}
+
+type PrincipalInitParameters struct {
+
+	// An identifier for the Lake Formation principal.
+	DataLakePrincipalIdentifier *string `json:"dataLakePrincipalIdentifier,omitempty" tf:"data_lake_principal_identifier,omitempty"`
 }
 
 type PrincipalObservation struct {
@@ -101,8 +132,16 @@ type PrincipalObservation struct {
 type PrincipalParameters struct {
 
 	// An identifier for the Lake Formation principal.
-	// +kubebuilder:validation:Optional
 	DataLakePrincipalIdentifier *string `json:"dataLakePrincipalIdentifier,omitempty" tf:"data_lake_principal_identifier,omitempty"`
+}
+
+type TargetDatabaseInitParameters struct {
+
+	// ID of the Data Catalog in which the database resides.
+	CatalogID *string `json:"catalogId,omitempty" tf:"catalog_id,omitempty"`
+
+	// Name of the catalog database.
+	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
 }
 
 type TargetDatabaseObservation struct {
@@ -117,18 +156,20 @@ type TargetDatabaseObservation struct {
 type TargetDatabaseParameters struct {
 
 	// ID of the Data Catalog in which the database resides.
-	// +kubebuilder:validation:Required
-	CatalogID *string `json:"catalogId" tf:"catalog_id,omitempty"`
+	CatalogID *string `json:"catalogId,omitempty" tf:"catalog_id,omitempty"`
 
 	// Name of the catalog database.
-	// +kubebuilder:validation:Required
-	DatabaseName *string `json:"databaseName" tf:"database_name,omitempty"`
+	DatabaseName *string `json:"databaseName,omitempty" tf:"database_name,omitempty"`
 }
 
 // CatalogDatabaseSpec defines the desired state of CatalogDatabase
 type CatalogDatabaseSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     CatalogDatabaseParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider CatalogDatabaseInitParameters `json:"initProvider,omitempty"`
 }
 
 // CatalogDatabaseStatus defines the observed state of CatalogDatabase.

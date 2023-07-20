@@ -13,6 +13,19 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RegexPatternSetInitParameters struct {
+
+	// The name or description of the Regex Pattern Set.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// A list of regular expression (regex) patterns that you want AWS WAF to search for, such as B[a@]dB[o0]t.
+	RegexPatternStrings []*string `json:"regexPatternStrings,omitempty" tf:"regex_pattern_strings,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type RegexPatternSetObservation struct {
 
 	// The ID of the WAF Regional Regex Pattern Set.
@@ -28,23 +41,24 @@ type RegexPatternSetObservation struct {
 type RegexPatternSetParameters struct {
 
 	// The name or description of the Regex Pattern Set.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// A list of regular expression (regex) patterns that you want AWS WAF to search for, such as B[a@]dB[o0]t.
-	// +kubebuilder:validation:Optional
 	RegexPatternStrings []*string `json:"regexPatternStrings,omitempty" tf:"regex_pattern_strings,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // RegexPatternSetSpec defines the desired state of RegexPatternSet
 type RegexPatternSetSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RegexPatternSetParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RegexPatternSetInitParameters `json:"initProvider,omitempty"`
 }
 
 // RegexPatternSetStatus defines the observed state of RegexPatternSet.
@@ -65,7 +79,7 @@ type RegexPatternSetStatus struct {
 type RegexPatternSet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   RegexPatternSetSpec   `json:"spec"`
 	Status RegexPatternSetStatus `json:"status,omitempty"`
 }

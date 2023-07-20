@@ -81,8 +81,26 @@ spec:
                     description: Region is the region you'd like your resource to
                       be created in.
                     type: string
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  accountId:
+                    description: The ID of the member AWS account.
+                    type: string
+                  email:
+                    description: The email of the member AWS account.
+                    type: string
+                  invite:
+                    description: Boolean whether to invite the account to Security
+                      Hub as a member. Defaults to false.
+                    type: boolean
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
                 type: object
               managementPolicies:
                 default:
@@ -282,12 +300,14 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: accountId is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.accountId)'
-            - message: email is a required parameter
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.accountId)
+                || has(self.initProvider.accountId)'
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.email)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.email)
+                || has(self.initProvider.email)'
           status:
             description: MemberStatus defines the observed state of Member.
             properties:

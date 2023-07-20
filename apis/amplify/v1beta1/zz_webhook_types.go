@@ -13,6 +13,33 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type WebhookInitParameters struct {
+
+	// Unique ID for an Amplify app.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/amplify/v1beta1.App
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	AppID *string `json:"appId,omitempty" tf:"app_id,omitempty"`
+
+	AppIDRef *v1.Reference `json:"appIdRef,omitempty" tf:"-"`
+
+	AppIDSelector *v1.Selector `json:"appIdSelector,omitempty" tf:"-"`
+
+	// Name for a branch that is part of the Amplify app.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/amplify/v1beta1.Branch
+	BranchName *string `json:"branchName,omitempty" tf:"branch_name,omitempty"`
+
+	BranchNameRef *v1.Reference `json:"branchNameRef,omitempty" tf:"-"`
+
+	BranchNameSelector *v1.Selector `json:"branchNameSelector,omitempty" tf:"-"`
+
+	// Description for a webhook.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type WebhookObservation struct {
 
 	// Unique ID for an Amplify app.
@@ -38,7 +65,6 @@ type WebhookParameters struct {
 	// Unique ID for an Amplify app.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/amplify/v1beta1.App
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	AppID *string `json:"appId,omitempty" tf:"app_id,omitempty"`
 
 	// Reference to a App in amplify to populate appId.
@@ -51,7 +77,6 @@ type WebhookParameters struct {
 
 	// Name for a branch that is part of the Amplify app.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/amplify/v1beta1.Branch
-	// +kubebuilder:validation:Optional
 	BranchName *string `json:"branchName,omitempty" tf:"branch_name,omitempty"`
 
 	// Reference to a Branch in amplify to populate branchName.
@@ -63,19 +88,21 @@ type WebhookParameters struct {
 	BranchNameSelector *v1.Selector `json:"branchNameSelector,omitempty" tf:"-"`
 
 	// Description for a webhook.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // WebhookSpec defines the desired state of Webhook
 type WebhookSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     WebhookParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider WebhookInitParameters `json:"initProvider,omitempty"`
 }
 
 // WebhookStatus defines the observed state of Webhook.

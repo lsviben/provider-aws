@@ -13,6 +13,34 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type LicenseConfigurationInitParameters struct {
+
+	// Description of the license configuration.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Number of licenses managed by the license configuration.
+	LicenseCount *float64 `json:"licenseCount,omitempty" tf:"license_count,omitempty"`
+
+	// Sets the number of available licenses as a hard limit.
+	LicenseCountHardLimit *bool `json:"licenseCountHardLimit,omitempty" tf:"license_count_hard_limit,omitempty"`
+
+	// Dimension to use to track license inventory. Specify either vCPU, Instance, Core or Socket.
+	LicenseCountingType *string `json:"licenseCountingType,omitempty" tf:"license_counting_type,omitempty"`
+
+	// Array of configured License Manager rules.
+	LicenseRules []*string `json:"licenseRules,omitempty" tf:"license_rules,omitempty"`
+
+	// Name of the license configuration.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type LicenseConfigurationObservation struct {
 
 	// The license configuration ARN.
@@ -52,36 +80,28 @@ type LicenseConfigurationObservation struct {
 type LicenseConfigurationParameters struct {
 
 	// Description of the license configuration.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Number of licenses managed by the license configuration.
-	// +kubebuilder:validation:Optional
 	LicenseCount *float64 `json:"licenseCount,omitempty" tf:"license_count,omitempty"`
 
 	// Sets the number of available licenses as a hard limit.
-	// +kubebuilder:validation:Optional
 	LicenseCountHardLimit *bool `json:"licenseCountHardLimit,omitempty" tf:"license_count_hard_limit,omitempty"`
 
 	// Dimension to use to track license inventory. Specify either vCPU, Instance, Core or Socket.
-	// +kubebuilder:validation:Optional
 	LicenseCountingType *string `json:"licenseCountingType,omitempty" tf:"license_counting_type,omitempty"`
 
 	// Array of configured License Manager rules.
-	// +kubebuilder:validation:Optional
 	LicenseRules []*string `json:"licenseRules,omitempty" tf:"license_rules,omitempty"`
 
 	// Name of the license configuration.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -89,6 +109,10 @@ type LicenseConfigurationParameters struct {
 type LicenseConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     LicenseConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider LicenseConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // LicenseConfigurationStatus defines the observed state of LicenseConfiguration.
@@ -109,8 +133,8 @@ type LicenseConfigurationStatus struct {
 type LicenseConfiguration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.licenseCountingType)",message="licenseCountingType is a required parameter"
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.licenseCountingType) || has(self.initProvider.licenseCountingType)",message="%!s(MISSING) is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   LicenseConfigurationSpec   `json:"spec"`
 	Status LicenseConfigurationStatus `json:"status,omitempty"`
 }

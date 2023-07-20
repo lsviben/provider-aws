@@ -13,6 +13,30 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type APIStagesInitParameters struct {
+
+	// API Id of the associated API stage in a usage plan.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
+
+	APIIDRef *v1.Reference `json:"apiIdRef,omitempty" tf:"-"`
+
+	APIIDSelector *v1.Selector `json:"apiIdSelector,omitempty" tf:"-"`
+
+	// API stage name of the associated API stage in a usage plan.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.Stage
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("stage_name",false)
+	Stage *string `json:"stage,omitempty" tf:"stage,omitempty"`
+
+	StageRef *v1.Reference `json:"stageRef,omitempty" tf:"-"`
+
+	StageSelector *v1.Selector `json:"stageSelector,omitempty" tf:"-"`
+
+	// The throttling limits of the usage plan.
+	Throttle []ThrottleInitParameters `json:"throttle,omitempty" tf:"throttle,omitempty"`
+}
+
 type APIStagesObservation struct {
 
 	// API Id of the associated API stage in a usage plan.
@@ -30,7 +54,6 @@ type APIStagesParameters struct {
 	// API Id of the associated API stage in a usage plan.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.RestAPI
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	APIID *string `json:"apiId,omitempty" tf:"api_id,omitempty"`
 
 	// Reference to a RestAPI in apigateway to populate apiId.
@@ -44,7 +67,6 @@ type APIStagesParameters struct {
 	// API stage name of the associated API stage in a usage plan.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/apigateway/v1beta1.Stage
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("stage_name",false)
-	// +kubebuilder:validation:Optional
 	Stage *string `json:"stage,omitempty" tf:"stage,omitempty"`
 
 	// Reference to a Stage in apigateway to populate stage.
@@ -56,8 +78,19 @@ type APIStagesParameters struct {
 	StageSelector *v1.Selector `json:"stageSelector,omitempty" tf:"-"`
 
 	// The throttling limits of the usage plan.
-	// +kubebuilder:validation:Optional
 	Throttle []ThrottleParameters `json:"throttle,omitempty" tf:"throttle,omitempty"`
+}
+
+type QuotaSettingsInitParameters struct {
+
+	// Maximum number of requests that can be made in a given time period.
+	Limit *float64 `json:"limit,omitempty" tf:"limit,omitempty"`
+
+	// Number of requests subtracted from the given limit in the initial time period.
+	Offset *float64 `json:"offset,omitempty" tf:"offset,omitempty"`
+
+	// Time period in which the limit applies. Valid values are "DAY", "WEEK" or "MONTH".
+	Period *string `json:"period,omitempty" tf:"period,omitempty"`
 }
 
 type QuotaSettingsObservation struct {
@@ -75,16 +108,25 @@ type QuotaSettingsObservation struct {
 type QuotaSettingsParameters struct {
 
 	// Maximum number of requests that can be made in a given time period.
-	// +kubebuilder:validation:Required
-	Limit *float64 `json:"limit" tf:"limit,omitempty"`
+	Limit *float64 `json:"limit,omitempty" tf:"limit,omitempty"`
 
 	// Number of requests subtracted from the given limit in the initial time period.
-	// +kubebuilder:validation:Optional
 	Offset *float64 `json:"offset,omitempty" tf:"offset,omitempty"`
 
 	// Time period in which the limit applies. Valid values are "DAY", "WEEK" or "MONTH".
-	// +kubebuilder:validation:Required
-	Period *string `json:"period" tf:"period,omitempty"`
+	Period *string `json:"period,omitempty" tf:"period,omitempty"`
+}
+
+type ThrottleInitParameters struct {
+
+	// The API request burst limit, the maximum rate limit over a time ranging from one to a few seconds, depending upon whether the underlying token bucket is at its full capacity.
+	BurstLimit *float64 `json:"burstLimit,omitempty" tf:"burst_limit,omitempty"`
+
+	// Method to apply the throttle settings for. Specfiy the path and method, for example /test/GET.
+	Path *string `json:"path,omitempty" tf:"path,omitempty"`
+
+	// The API request steady-state rate limit.
+	RateLimit *float64 `json:"rateLimit,omitempty" tf:"rate_limit,omitempty"`
 }
 
 type ThrottleObservation struct {
@@ -102,16 +144,41 @@ type ThrottleObservation struct {
 type ThrottleParameters struct {
 
 	// The API request burst limit, the maximum rate limit over a time ranging from one to a few seconds, depending upon whether the underlying token bucket is at its full capacity.
-	// +kubebuilder:validation:Optional
 	BurstLimit *float64 `json:"burstLimit,omitempty" tf:"burst_limit,omitempty"`
 
 	// Method to apply the throttle settings for. Specfiy the path and method, for example /test/GET.
-	// +kubebuilder:validation:Required
-	Path *string `json:"path" tf:"path,omitempty"`
+	Path *string `json:"path,omitempty" tf:"path,omitempty"`
 
 	// The API request steady-state rate limit.
-	// +kubebuilder:validation:Optional
 	RateLimit *float64 `json:"rateLimit,omitempty" tf:"rate_limit,omitempty"`
+}
+
+type UsagePlanInitParameters struct {
+
+	// Associated API stages of the usage plan.
+	APIStages []APIStagesInitParameters `json:"apiStages,omitempty" tf:"api_stages,omitempty"`
+
+	// Description of a usage plan.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Name of the usage plan.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// AWS Marketplace product identifier to associate with the usage plan as a SaaS product on AWS Marketplace.
+	ProductCode *string `json:"productCode,omitempty" tf:"product_code,omitempty"`
+
+	// The quota settings of the usage plan.
+	QuotaSettings []QuotaSettingsInitParameters `json:"quotaSettings,omitempty" tf:"quota_settings,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+
+	// The throttling limits of the usage plan.
+	ThrottleSettings []UsagePlanThrottleSettingsInitParameters `json:"throttleSettings,omitempty" tf:"throttle_settings,omitempty"`
 }
 
 type UsagePlanObservation struct {
@@ -150,37 +217,38 @@ type UsagePlanObservation struct {
 type UsagePlanParameters struct {
 
 	// Associated API stages of the usage plan.
-	// +kubebuilder:validation:Optional
 	APIStages []APIStagesParameters `json:"apiStages,omitempty" tf:"api_stages,omitempty"`
 
 	// Description of a usage plan.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Name of the usage plan.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// AWS Marketplace product identifier to associate with the usage plan as a SaaS product on AWS Marketplace.
-	// +kubebuilder:validation:Optional
 	ProductCode *string `json:"productCode,omitempty" tf:"product_code,omitempty"`
 
 	// The quota settings of the usage plan.
-	// +kubebuilder:validation:Optional
 	QuotaSettings []QuotaSettingsParameters `json:"quotaSettings,omitempty" tf:"quota_settings,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 
 	// The throttling limits of the usage plan.
-	// +kubebuilder:validation:Optional
 	ThrottleSettings []UsagePlanThrottleSettingsParameters `json:"throttleSettings,omitempty" tf:"throttle_settings,omitempty"`
+}
+
+type UsagePlanThrottleSettingsInitParameters struct {
+
+	// The API request burst limit, the maximum rate limit over a time ranging from one to a few seconds, depending upon whether the underlying token bucket is at its full capacity.
+	BurstLimit *float64 `json:"burstLimit,omitempty" tf:"burst_limit,omitempty"`
+
+	// The API request steady-state rate limit.
+	RateLimit *float64 `json:"rateLimit,omitempty" tf:"rate_limit,omitempty"`
 }
 
 type UsagePlanThrottleSettingsObservation struct {
@@ -195,11 +263,9 @@ type UsagePlanThrottleSettingsObservation struct {
 type UsagePlanThrottleSettingsParameters struct {
 
 	// The API request burst limit, the maximum rate limit over a time ranging from one to a few seconds, depending upon whether the underlying token bucket is at its full capacity.
-	// +kubebuilder:validation:Optional
 	BurstLimit *float64 `json:"burstLimit,omitempty" tf:"burst_limit,omitempty"`
 
 	// The API request steady-state rate limit.
-	// +kubebuilder:validation:Optional
 	RateLimit *float64 `json:"rateLimit,omitempty" tf:"rate_limit,omitempty"`
 }
 
@@ -207,6 +273,10 @@ type UsagePlanThrottleSettingsParameters struct {
 type UsagePlanSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     UsagePlanParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider UsagePlanInitParameters `json:"initProvider,omitempty"`
 }
 
 // UsagePlanStatus defines the observed state of UsagePlan.
@@ -227,7 +297,7 @@ type UsagePlanStatus struct {
 type UsagePlan struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   UsagePlanSpec   `json:"spec"`
 	Status UsagePlanStatus `json:"status,omitempty"`
 }

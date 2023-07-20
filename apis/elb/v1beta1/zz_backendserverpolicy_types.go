@@ -13,6 +13,27 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BackendServerPolicyInitParameters struct {
+
+	// The instance port to apply the policy to.
+	InstancePort *float64 `json:"instancePort,omitempty" tf:"instance_port,omitempty"`
+
+	// The load balancer to attach the policy to.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.ELB
+	LoadBalancerName *string `json:"loadBalancerName,omitempty" tf:"load_balancer_name,omitempty"`
+
+	LoadBalancerNameRef *v1.Reference `json:"loadBalancerNameRef,omitempty" tf:"-"`
+
+	LoadBalancerNameSelector *v1.Selector `json:"loadBalancerNameSelector,omitempty" tf:"-"`
+
+	// List of Policy Names to apply to the backend server.
+	PolicyNames []*string `json:"policyNames,omitempty" tf:"policy_names,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type BackendServerPolicyObservation struct {
 
 	// The ID of the policy.
@@ -31,12 +52,10 @@ type BackendServerPolicyObservation struct {
 type BackendServerPolicyParameters struct {
 
 	// The instance port to apply the policy to.
-	// +kubebuilder:validation:Optional
 	InstancePort *float64 `json:"instancePort,omitempty" tf:"instance_port,omitempty"`
 
 	// The load balancer to attach the policy to.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/elb/v1beta1.ELB
-	// +kubebuilder:validation:Optional
 	LoadBalancerName *string `json:"loadBalancerName,omitempty" tf:"load_balancer_name,omitempty"`
 
 	// Reference to a ELB in elb to populate loadBalancerName.
@@ -48,19 +67,21 @@ type BackendServerPolicyParameters struct {
 	LoadBalancerNameSelector *v1.Selector `json:"loadBalancerNameSelector,omitempty" tf:"-"`
 
 	// List of Policy Names to apply to the backend server.
-	// +kubebuilder:validation:Optional
 	PolicyNames []*string `json:"policyNames,omitempty" tf:"policy_names,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // BackendServerPolicySpec defines the desired state of BackendServerPolicy
 type BackendServerPolicySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BackendServerPolicyParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BackendServerPolicyInitParameters `json:"initProvider,omitempty"`
 }
 
 // BackendServerPolicyStatus defines the observed state of BackendServerPolicy.
@@ -81,7 +102,7 @@ type BackendServerPolicyStatus struct {
 type BackendServerPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.instancePort)",message="instancePort is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.instancePort) || has(self.initProvider.instancePort)",message="%!s(MISSING) is a required parameter"
 	Spec   BackendServerPolicySpec   `json:"spec"`
 	Status BackendServerPolicyStatus `json:"status,omitempty"`
 }

@@ -13,6 +13,22 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RepositoryInitParameters struct {
+
+	// The default branch of the repository. The branch specified here needs to exist.
+	DefaultBranch *string `json:"defaultBranch,omitempty" tf:"default_branch,omitempty"`
+
+	// The description of the repository. This needs to be less than 1000 characters
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type RepositoryObservation struct {
 
 	// The ARN of the repository
@@ -45,20 +61,16 @@ type RepositoryObservation struct {
 type RepositoryParameters struct {
 
 	// The default branch of the repository. The branch specified here needs to exist.
-	// +kubebuilder:validation:Optional
 	DefaultBranch *string `json:"defaultBranch,omitempty" tf:"default_branch,omitempty"`
 
 	// The description of the repository. This needs to be less than 1000 characters
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -66,6 +78,10 @@ type RepositoryParameters struct {
 type RepositorySpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RepositoryParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RepositoryInitParameters `json:"initProvider,omitempty"`
 }
 
 // RepositoryStatus defines the observed state of Repository.

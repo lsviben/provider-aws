@@ -13,6 +13,31 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SecretVersionInitParameters struct {
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Specifies binary data that you want to encrypt and store in this version of the secret. This is required if secret_string is not set. Needs to be encoded to base64.
+	SecretBinarySecretRef *v1.SecretKeySelector `json:"secretBinarySecretRef,omitempty" tf:"-"`
+
+	// Specifies the secret to which you want to add a new version. You can specify either the Amazon Resource Name (ARN) or the friendly name of the secret. The secret must already exist.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/secretsmanager/v1beta1.Secret
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	SecretID *string `json:"secretId,omitempty" tf:"secret_id,omitempty"`
+
+	SecretIDRef *v1.Reference `json:"secretIdRef,omitempty" tf:"-"`
+
+	SecretIDSelector *v1.Selector `json:"secretIdSelector,omitempty" tf:"-"`
+
+	// Specifies text data that you want to encrypt and store in this version of the secret. This is required if secret_binary is not set.
+	SecretStringSecretRef *v1.SecretKeySelector `json:"secretStringSecretRef,omitempty" tf:"-"`
+
+	// Specifies a list of staging labels that are attached to this version of the secret. A staging label must be unique to a single version of the secret. If you specify a staging label that's already associated with a different version of the same secret then that staging label is automatically removed from the other version and attached to this version. If you do not specify a value, then AWS Secrets Manager automatically moves the staging label AWSCURRENT to this new version on creation.
+	VersionStages []*string `json:"versionStages,omitempty" tf:"version_stages,omitempty"`
+}
+
 type SecretVersionObservation struct {
 
 	// The ARN of the secret.
@@ -35,17 +60,14 @@ type SecretVersionParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Specifies binary data that you want to encrypt and store in this version of the secret. This is required if secret_string is not set. Needs to be encoded to base64.
-	// +kubebuilder:validation:Optional
 	SecretBinarySecretRef *v1.SecretKeySelector `json:"secretBinarySecretRef,omitempty" tf:"-"`
 
 	// Specifies the secret to which you want to add a new version. You can specify either the Amazon Resource Name (ARN) or the friendly name of the secret. The secret must already exist.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/secretsmanager/v1beta1.Secret
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	SecretID *string `json:"secretId,omitempty" tf:"secret_id,omitempty"`
 
 	// Reference to a Secret in secretsmanager to populate secretId.
@@ -57,11 +79,9 @@ type SecretVersionParameters struct {
 	SecretIDSelector *v1.Selector `json:"secretIdSelector,omitempty" tf:"-"`
 
 	// Specifies text data that you want to encrypt and store in this version of the secret. This is required if secret_binary is not set.
-	// +kubebuilder:validation:Optional
 	SecretStringSecretRef *v1.SecretKeySelector `json:"secretStringSecretRef,omitempty" tf:"-"`
 
 	// Specifies a list of staging labels that are attached to this version of the secret. A staging label must be unique to a single version of the secret. If you specify a staging label that's already associated with a different version of the same secret then that staging label is automatically removed from the other version and attached to this version. If you do not specify a value, then AWS Secrets Manager automatically moves the staging label AWSCURRENT to this new version on creation.
-	// +kubebuilder:validation:Optional
 	VersionStages []*string `json:"versionStages,omitempty" tf:"version_stages,omitempty"`
 }
 
@@ -69,6 +89,10 @@ type SecretVersionParameters struct {
 type SecretVersionSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SecretVersionParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SecretVersionInitParameters `json:"initProvider,omitempty"`
 }
 
 // SecretVersionStatus defines the observed state of SecretVersion.

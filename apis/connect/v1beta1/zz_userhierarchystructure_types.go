@@ -13,6 +13,24 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type HierarchyStructureInitParameters struct {
+
+	// A block that defines the details of level five. The level block is documented below.
+	LevelFive []LevelFiveInitParameters `json:"levelFive,omitempty" tf:"level_five,omitempty"`
+
+	// A block that defines the details of level four. The level block is documented below.
+	LevelFour []LevelFourInitParameters `json:"levelFour,omitempty" tf:"level_four,omitempty"`
+
+	// A block that defines the details of level one. The level block is documented below.
+	LevelOne []LevelOneInitParameters `json:"levelOne,omitempty" tf:"level_one,omitempty"`
+
+	// A block that defines the details of level three. The level block is documented below.
+	LevelThree []LevelThreeInitParameters `json:"levelThree,omitempty" tf:"level_three,omitempty"`
+
+	// A block that defines the details of level two. The level block is documented below.
+	LevelTwo []LevelTwoInitParameters `json:"levelTwo,omitempty" tf:"level_two,omitempty"`
+}
+
 type HierarchyStructureObservation struct {
 
 	// A block that defines the details of level five. The level block is documented below.
@@ -34,24 +52,25 @@ type HierarchyStructureObservation struct {
 type HierarchyStructureParameters struct {
 
 	// A block that defines the details of level five. The level block is documented below.
-	// +kubebuilder:validation:Optional
 	LevelFive []LevelFiveParameters `json:"levelFive,omitempty" tf:"level_five,omitempty"`
 
 	// A block that defines the details of level four. The level block is documented below.
-	// +kubebuilder:validation:Optional
 	LevelFour []LevelFourParameters `json:"levelFour,omitempty" tf:"level_four,omitempty"`
 
 	// A block that defines the details of level one. The level block is documented below.
-	// +kubebuilder:validation:Optional
 	LevelOne []LevelOneParameters `json:"levelOne,omitempty" tf:"level_one,omitempty"`
 
 	// A block that defines the details of level three. The level block is documented below.
-	// +kubebuilder:validation:Optional
 	LevelThree []LevelThreeParameters `json:"levelThree,omitempty" tf:"level_three,omitempty"`
 
 	// A block that defines the details of level two. The level block is documented below.
-	// +kubebuilder:validation:Optional
 	LevelTwo []LevelTwoParameters `json:"levelTwo,omitempty" tf:"level_two,omitempty"`
+}
+
+type LevelFiveInitParameters struct {
+
+	// The name of the user hierarchy level. Must not be more than 50 characters.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 }
 
 type LevelFiveObservation struct {
@@ -69,8 +88,13 @@ type LevelFiveObservation struct {
 type LevelFiveParameters struct {
 
 	// The name of the user hierarchy level. Must not be more than 50 characters.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+}
+
+type LevelFourInitParameters struct {
+
+	// The name of the user hierarchy level. Must not be more than 50 characters.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 }
 
 type LevelFourObservation struct {
@@ -88,8 +112,13 @@ type LevelFourObservation struct {
 type LevelFourParameters struct {
 
 	// The name of the user hierarchy level. Must not be more than 50 characters.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+}
+
+type LevelOneInitParameters struct {
+
+	// The name of the user hierarchy level. Must not be more than 50 characters.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 }
 
 type LevelOneObservation struct {
@@ -107,8 +136,13 @@ type LevelOneObservation struct {
 type LevelOneParameters struct {
 
 	// The name of the user hierarchy level. Must not be more than 50 characters.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+}
+
+type LevelThreeInitParameters struct {
+
+	// The name of the user hierarchy level. Must not be more than 50 characters.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 }
 
 type LevelThreeObservation struct {
@@ -126,8 +160,13 @@ type LevelThreeObservation struct {
 type LevelThreeParameters struct {
 
 	// The name of the user hierarchy level. Must not be more than 50 characters.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+}
+
+type LevelTwoInitParameters struct {
+
+	// The name of the user hierarchy level. Must not be more than 50 characters.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 }
 
 type LevelTwoObservation struct {
@@ -145,8 +184,26 @@ type LevelTwoObservation struct {
 type LevelTwoParameters struct {
 
 	// The name of the user hierarchy level. Must not be more than 50 characters.
-	// +kubebuilder:validation:Required
-	Name *string `json:"name" tf:"name,omitempty"`
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+}
+
+type UserHierarchyStructureInitParameters struct {
+
+	// A block that defines the hierarchy structure's levels. The hierarchy_structure block is documented below.
+	HierarchyStructure []HierarchyStructureInitParameters `json:"hierarchyStructure,omitempty" tf:"hierarchy_structure,omitempty"`
+
+	// Specifies the identifier of the hosting Amazon Connect Instance.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
+
+	InstanceIDRef *v1.Reference `json:"instanceIdRef,omitempty" tf:"-"`
+
+	InstanceIDSelector *v1.Selector `json:"instanceIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type UserHierarchyStructureObservation struct {
@@ -164,13 +221,11 @@ type UserHierarchyStructureObservation struct {
 type UserHierarchyStructureParameters struct {
 
 	// A block that defines the hierarchy structure's levels. The hierarchy_structure block is documented below.
-	// +kubebuilder:validation:Optional
 	HierarchyStructure []HierarchyStructureParameters `json:"hierarchyStructure,omitempty" tf:"hierarchy_structure,omitempty"`
 
 	// Specifies the identifier of the hosting Amazon Connect Instance.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/connect/v1beta1.Instance
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	InstanceID *string `json:"instanceId,omitempty" tf:"instance_id,omitempty"`
 
 	// Reference to a Instance in connect to populate instanceId.
@@ -183,14 +238,17 @@ type UserHierarchyStructureParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // UserHierarchyStructureSpec defines the desired state of UserHierarchyStructure
 type UserHierarchyStructureSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     UserHierarchyStructureParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider UserHierarchyStructureInitParameters `json:"initProvider,omitempty"`
 }
 
 // UserHierarchyStructureStatus defines the observed state of UserHierarchyStructure.
@@ -211,7 +269,7 @@ type UserHierarchyStructureStatus struct {
 type UserHierarchyStructure struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hierarchyStructure)",message="hierarchyStructure is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.hierarchyStructure) || has(self.initProvider.hierarchyStructure)",message="%!s(MISSING) is a required parameter"
 	Spec   UserHierarchyStructureSpec   `json:"spec"`
 	Status UserHierarchyStructureStatus `json:"status,omitempty"`
 }

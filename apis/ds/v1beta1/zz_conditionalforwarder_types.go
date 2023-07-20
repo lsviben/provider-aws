@@ -13,6 +13,28 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ConditionalForwarderInitParameters struct {
+
+	// A list of forwarder IP addresses.
+	DNSIps []*string `json:"dnsIps,omitempty" tf:"dns_ips,omitempty"`
+
+	// ID of directory.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ds/v1beta1.Directory
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	DirectoryID *string `json:"directoryId,omitempty" tf:"directory_id,omitempty"`
+
+	DirectoryIDRef *v1.Reference `json:"directoryIdRef,omitempty" tf:"-"`
+
+	DirectoryIDSelector *v1.Selector `json:"directoryIdSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// The fully qualified domain name of the remote domain for which forwarders will be used.
+	RemoteDomainName *string `json:"remoteDomainName,omitempty" tf:"remote_domain_name,omitempty"`
+}
+
 type ConditionalForwarderObservation struct {
 
 	// A list of forwarder IP addresses.
@@ -30,13 +52,11 @@ type ConditionalForwarderObservation struct {
 type ConditionalForwarderParameters struct {
 
 	// A list of forwarder IP addresses.
-	// +kubebuilder:validation:Optional
 	DNSIps []*string `json:"dnsIps,omitempty" tf:"dns_ips,omitempty"`
 
 	// ID of directory.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/ds/v1beta1.Directory
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	DirectoryID *string `json:"directoryId,omitempty" tf:"directory_id,omitempty"`
 
 	// Reference to a Directory in ds to populate directoryId.
@@ -49,18 +69,20 @@ type ConditionalForwarderParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// The fully qualified domain name of the remote domain for which forwarders will be used.
-	// +kubebuilder:validation:Required
-	RemoteDomainName *string `json:"remoteDomainName" tf:"remote_domain_name,omitempty"`
+	RemoteDomainName *string `json:"remoteDomainName,omitempty" tf:"remote_domain_name,omitempty"`
 }
 
 // ConditionalForwarderSpec defines the desired state of ConditionalForwarder
 type ConditionalForwarderSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ConditionalForwarderParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ConditionalForwarderInitParameters `json:"initProvider,omitempty"`
 }
 
 // ConditionalForwarderStatus defines the observed state of ConditionalForwarder.
@@ -81,7 +103,7 @@ type ConditionalForwarderStatus struct {
 type ConditionalForwarder struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dnsIps)",message="dnsIps is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.dnsIps) || has(self.initProvider.dnsIps)",message="%!s(MISSING) is a required parameter"
 	Spec   ConditionalForwarderSpec   `json:"spec"`
 	Status ConditionalForwarderStatus `json:"status,omitempty"`
 }

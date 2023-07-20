@@ -458,8 +458,401 @@ spec:
                     description: The size, in GB, of the ML storage volume to attach
                       to the notebook instance. The default value is 5 GB.
                     type: number
-                required:
-                - region
+                type: object
+              initProvider:
+                description: THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice.
+                properties:
+                  acceleratorTypes:
+                    description: 'A list of Elastic Inference (EI) instance types
+                      to associate with this notebook instance. See Elastic Inference
+                      Accelerator for more details. Valid values: ml.eia1.medium,
+                      ml.eia1.large, ml.eia1.xlarge, ml.eia2.medium, ml.eia2.large,
+                      ml.eia2.xlarge.'
+                    items:
+                      type: string
+                    type: array
+                  additionalCodeRepositories:
+                    description: An array of up to three Git repositories to associate
+                      with the notebook instance. These can be either the names of
+                      Git repositories stored as resources in your account, or the
+                      URL of Git repositories in AWS CodeCommit or in any other Git
+                      repository. These repositories are cloned at the same level
+                      as the default repository of your notebook instance.
+                    items:
+                      type: string
+                    type: array
+                  defaultCodeRepository:
+                    description: The Git repository associated with the notebook instance
+                      as its default code repository. This can be either the name
+                      of a Git repository stored as a resource in your account, or
+                      the URL of a Git repository in AWS CodeCommit or in any other
+                      Git repository.
+                    type: string
+                  defaultCodeRepositoryRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  defaultCodeRepositorySelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  directInternetAccess:
+                    description: 'Set to Disabled to disable internet access to notebook.
+                      Requires security_groups and subnet_id to be set. Supported
+                      values: Enabled (Default) or Disabled. If set to Disabled, the
+                      notebook instance will be able to access resources only in your
+                      VPC, and will not be able to connect to Amazon SageMaker training
+                      and endpoint services unless your configure a NAT Gateway in
+                      your VPC.'
+                    type: string
+                  instanceMetadataServiceConfiguration:
+                    description: Information on the IMDS configuration of the notebook
+                      instance. Conflicts with instance_metadata_service_configuration.
+                      see details below.
+                    items:
+                      properties:
+                        minimumInstanceMetadataServiceVersion:
+                          description: Indicates the minimum IMDS version that the
+                            notebook instance supports. When passed "1" is passed.
+                            This means that both IMDSv1 and IMDSv2 are supported.
+                            Valid values are 1 and 2.
+                          type: string
+                      type: object
+                    type: array
+                  instanceType:
+                    description: The name of ML compute instance type.
+                    type: string
+                  kmsKeyId:
+                    description: The AWS Key Management Service (AWS KMS) key that
+                      Amazon SageMaker uses to encrypt the model artifacts at rest
+                      using Amazon S3 server-side encryption.
+                    type: string
+                  kmsKeyIdRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  kmsKeyIdSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  lifecycleConfigName:
+                    description: The name of a lifecycle configuration to associate
+                      with the notebook instance.
+                    type: string
+                  platformIdentifier:
+                    description: The platform identifier of the notebook instance
+                      runtime environment. This value can be either notebook-al1-v1,
+                      notebook-al2-v1, or  notebook-al2-v2, depending on which version
+                      of Amazon Linux you require.
+                    type: string
+                  region:
+                    description: Region is the region you'd like your resource to
+                      be created in.
+                    type: string
+                  roleArn:
+                    description: The ARN of the IAM role to be used by the notebook
+                      instance which allows SageMaker to call other services on your
+                      behalf.
+                    type: string
+                  roleArnRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  roleArnSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  rootAccess:
+                    description: Whether root access is Enabled or Disabled for users
+                      of the notebook instance. The default value is Enabled.
+                    type: string
+                  securityGroups:
+                    description: The associated security groups.
+                    items:
+                      type: string
+                    type: array
+                  subnetId:
+                    description: The VPC subnet ID.
+                    type: string
+                  subnetIdRef:
+                    description: A Reference to a named object.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  subnetIdSelector:
+                    description: A Selector selects an object.
+                    properties:
+                      matchControllerRef:
+                        description: MatchControllerRef ensures an object with the
+                          same controller reference as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Key-value map of resource tags.
+                    type: object
+                  volumeSize:
+                    description: The size, in GB, of the ML storage volume to attach
+                      to the notebook instance. The default value is 5 GB.
+                    type: number
                 type: object
               managementPolicies:
                 default:
@@ -659,9 +1052,10 @@ spec:
             - forProvider
             type: object
             x-kubernetes-validations:
-            - message: instanceType is a required parameter
+            - message: '%!s(MISSING) is a required parameter'
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.instanceType)'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.instanceType)
+                || has(self.initProvider.instanceType)'
           status:
             description: NotebookInstanceStatus defines the observed state of NotebookInstance.
             properties:

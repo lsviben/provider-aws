@@ -13,6 +13,25 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type RuleGroupNamespaceInitParameters struct {
+
+	// the rule group namespace data that you want to be applied. See more in AWS Docs.
+	Data *string `json:"data,omitempty" tf:"data,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// ID of the prometheus workspace the rule group namespace should be linked to
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/amp/v1beta1.Workspace
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	WorkspaceID *string `json:"workspaceId,omitempty" tf:"workspace_id,omitempty"`
+
+	WorkspaceIDRef *v1.Reference `json:"workspaceIdRef,omitempty" tf:"-"`
+
+	WorkspaceIDSelector *v1.Selector `json:"workspaceIdSelector,omitempty" tf:"-"`
+}
+
 type RuleGroupNamespaceObservation struct {
 
 	// the rule group namespace data that you want to be applied. See more in AWS Docs.
@@ -27,18 +46,15 @@ type RuleGroupNamespaceObservation struct {
 type RuleGroupNamespaceParameters struct {
 
 	// the rule group namespace data that you want to be applied. See more in AWS Docs.
-	// +kubebuilder:validation:Optional
 	Data *string `json:"data,omitempty" tf:"data,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// ID of the prometheus workspace the rule group namespace should be linked to
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/amp/v1beta1.Workspace
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	WorkspaceID *string `json:"workspaceId,omitempty" tf:"workspace_id,omitempty"`
 
 	// Reference to a Workspace in amp to populate workspaceId.
@@ -54,6 +70,10 @@ type RuleGroupNamespaceParameters struct {
 type RuleGroupNamespaceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     RuleGroupNamespaceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider RuleGroupNamespaceInitParameters `json:"initProvider,omitempty"`
 }
 
 // RuleGroupNamespaceStatus defines the observed state of RuleGroupNamespace.
@@ -74,7 +94,7 @@ type RuleGroupNamespaceStatus struct {
 type RuleGroupNamespace struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.data)",message="data is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.data) || has(self.initProvider.data)",message="%!s(MISSING) is a required parameter"
 	Spec   RuleGroupNamespaceSpec   `json:"spec"`
 	Status RuleGroupNamespaceStatus `json:"status,omitempty"`
 }

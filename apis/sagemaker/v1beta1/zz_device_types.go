@@ -13,6 +13,18 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DeviceDeviceInitParameters struct {
+
+	// A description for the device.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The name of the device.
+	DeviceName *string `json:"deviceName,omitempty" tf:"device_name,omitempty"`
+
+	// Amazon Web Services Internet of Things (IoT) object name.
+	IotThingName *string `json:"iotThingName,omitempty" tf:"iot_thing_name,omitempty"`
+}
+
 type DeviceDeviceObservation struct {
 
 	// A description for the device.
@@ -28,16 +40,31 @@ type DeviceDeviceObservation struct {
 type DeviceDeviceParameters struct {
 
 	// A description for the device.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The name of the device.
-	// +kubebuilder:validation:Required
-	DeviceName *string `json:"deviceName" tf:"device_name,omitempty"`
+	DeviceName *string `json:"deviceName,omitempty" tf:"device_name,omitempty"`
 
 	// Amazon Web Services Internet of Things (IoT) object name.
-	// +kubebuilder:validation:Optional
 	IotThingName *string `json:"iotThingName,omitempty" tf:"iot_thing_name,omitempty"`
+}
+
+type DeviceInitParameters struct {
+
+	// The device to register with SageMaker Edge Manager. See Device details below.
+	Device []DeviceDeviceInitParameters `json:"device,omitempty" tf:"device,omitempty"`
+
+	// The name of the Device Fleet.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.DeviceFleet
+	DeviceFleetName *string `json:"deviceFleetName,omitempty" tf:"device_fleet_name,omitempty"`
+
+	DeviceFleetNameRef *v1.Reference `json:"deviceFleetNameRef,omitempty" tf:"-"`
+
+	DeviceFleetNameSelector *v1.Selector `json:"deviceFleetNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 type DeviceObservation struct {
@@ -59,12 +86,10 @@ type DeviceObservation struct {
 type DeviceParameters struct {
 
 	// The device to register with SageMaker Edge Manager. See Device details below.
-	// +kubebuilder:validation:Optional
 	Device []DeviceDeviceParameters `json:"device,omitempty" tf:"device,omitempty"`
 
 	// The name of the Device Fleet.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/sagemaker/v1beta1.DeviceFleet
-	// +kubebuilder:validation:Optional
 	DeviceFleetName *string `json:"deviceFleetName,omitempty" tf:"device_fleet_name,omitempty"`
 
 	// Reference to a DeviceFleet in sagemaker to populate deviceFleetName.
@@ -77,14 +102,17 @@ type DeviceParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // DeviceSpec defines the desired state of Device
 type DeviceSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DeviceParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DeviceInitParameters `json:"initProvider,omitempty"`
 }
 
 // DeviceStatus defines the observed state of Device.
@@ -105,7 +133,7 @@ type DeviceStatus struct {
 type Device struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.device)",message="device is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.device) || has(self.initProvider.device)",message="%!s(MISSING) is a required parameter"
 	Spec   DeviceSpec   `json:"spec"`
 	Status DeviceStatus `json:"status,omitempty"`
 }

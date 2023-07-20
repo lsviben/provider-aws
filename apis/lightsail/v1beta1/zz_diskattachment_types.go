@@ -13,6 +13,32 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DiskAttachmentInitParameters struct {
+
+	// The name of the Lightsail Disk.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Disk
+	DiskName *string `json:"diskName,omitempty" tf:"disk_name,omitempty"`
+
+	DiskNameRef *v1.Reference `json:"diskNameRef,omitempty" tf:"-"`
+
+	DiskNameSelector *v1.Selector `json:"diskNameSelector,omitempty" tf:"-"`
+
+	// The disk path to expose to the instance.
+	DiskPath *string `json:"diskPath,omitempty" tf:"disk_path,omitempty"`
+
+	// The name of the Lightsail Instance to attach to.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Instance
+	InstanceName *string `json:"instanceName,omitempty" tf:"instance_name,omitempty"`
+
+	InstanceNameRef *v1.Reference `json:"instanceNameRef,omitempty" tf:"-"`
+
+	InstanceNameSelector *v1.Selector `json:"instanceNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type DiskAttachmentObservation struct {
 
 	// The name of the Lightsail Disk.
@@ -32,7 +58,6 @@ type DiskAttachmentParameters struct {
 
 	// The name of the Lightsail Disk.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Disk
-	// +kubebuilder:validation:Optional
 	DiskName *string `json:"diskName,omitempty" tf:"disk_name,omitempty"`
 
 	// Reference to a Disk in lightsail to populate diskName.
@@ -44,12 +69,10 @@ type DiskAttachmentParameters struct {
 	DiskNameSelector *v1.Selector `json:"diskNameSelector,omitempty" tf:"-"`
 
 	// The disk path to expose to the instance.
-	// +kubebuilder:validation:Optional
 	DiskPath *string `json:"diskPath,omitempty" tf:"disk_path,omitempty"`
 
 	// The name of the Lightsail Instance to attach to.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.Instance
-	// +kubebuilder:validation:Optional
 	InstanceName *string `json:"instanceName,omitempty" tf:"instance_name,omitempty"`
 
 	// Reference to a Instance in lightsail to populate instanceName.
@@ -62,14 +85,17 @@ type DiskAttachmentParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // DiskAttachmentSpec defines the desired state of DiskAttachment
 type DiskAttachmentSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     DiskAttachmentParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider DiskAttachmentInitParameters `json:"initProvider,omitempty"`
 }
 
 // DiskAttachmentStatus defines the observed state of DiskAttachment.
@@ -90,7 +116,7 @@ type DiskAttachmentStatus struct {
 type DiskAttachment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.diskPath)",message="diskPath is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.diskPath) || has(self.initProvider.diskPath)",message="%!s(MISSING) is a required parameter"
 	Spec   DiskAttachmentSpec   `json:"spec"`
 	Status DiskAttachmentStatus `json:"status,omitempty"`
 }

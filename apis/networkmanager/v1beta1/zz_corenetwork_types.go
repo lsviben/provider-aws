@@ -13,6 +13,37 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type CoreNetworkInitParameters struct {
+
+	// The base policy created by setting the create_base_policy argument to true requires a region to be set in the edge-locations, location key. If base_policy_region is not specified, the region used in the base policy defaults to the region specified in the provider block.
+	BasePolicyRegion *string `json:"basePolicyRegion,omitempty" tf:"base_policy_region,omitempty"`
+
+	// Specifies whether to create a base policy when a core network is created or updated. A base policy is created and set to LIVE to allow attachments to the core network (e.g. VPC Attachments) before applying a policy document provided using the aws_networkmanager_core_network_policy_attachment resource. This base policy is needed if your core network does not have any LIVE policies (e.g. a core network resource created without the policy_document argument) and your policy document has static routes pointing to VPC attachments and you want to attach your VPCs to the core network before applying the desired policy document. Valid values are true or false. Conflicts with policy_document. An example of a base policy created is shown below. The region specified in the location key can be configured using the base_policy_region argument. If base_policy_region is not specified, the region defaults to the region specified in the provider block. This base policy is overridden with the policy that you specify in the aws_networkmanager_core_network_policy_attachment resource.
+	CreateBasePolicy *bool `json:"createBasePolicy,omitempty" tf:"create_base_policy,omitempty"`
+
+	// Description of the Core Network.
+	Description *string `json:"description,omitempty" tf:"description,omitempty"`
+
+	// The ID of the global network that a core network will be a part of.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.GlobalNetwork
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	GlobalNetworkID *string `json:"globalNetworkId,omitempty" tf:"global_network_id,omitempty"`
+
+	GlobalNetworkIDRef *v1.Reference `json:"globalNetworkIdRef,omitempty" tf:"-"`
+
+	GlobalNetworkIDSelector *v1.Selector `json:"globalNetworkIdSelector,omitempty" tf:"-"`
+
+	// Policy document for creating a core network. Note that updating this argument will result in the new policy document version being set as the LATEST and LIVE policy document. Refer to the Core network policies documentation for more information. Conflicts with create_base_policy.
+	PolicyDocument *string `json:"policyDocument,omitempty" tf:"policy_document,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type CoreNetworkObservation struct {
 
 	// Core Network Amazon Resource Name (ARN).
@@ -58,21 +89,17 @@ type CoreNetworkObservation struct {
 type CoreNetworkParameters struct {
 
 	// The base policy created by setting the create_base_policy argument to true requires a region to be set in the edge-locations, location key. If base_policy_region is not specified, the region used in the base policy defaults to the region specified in the provider block.
-	// +kubebuilder:validation:Optional
 	BasePolicyRegion *string `json:"basePolicyRegion,omitempty" tf:"base_policy_region,omitempty"`
 
 	// Specifies whether to create a base policy when a core network is created or updated. A base policy is created and set to LIVE to allow attachments to the core network (e.g. VPC Attachments) before applying a policy document provided using the aws_networkmanager_core_network_policy_attachment resource. This base policy is needed if your core network does not have any LIVE policies (e.g. a core network resource created without the policy_document argument) and your policy document has static routes pointing to VPC attachments and you want to attach your VPCs to the core network before applying the desired policy document. Valid values are true or false. Conflicts with policy_document. An example of a base policy created is shown below. The region specified in the location key can be configured using the base_policy_region argument. If base_policy_region is not specified, the region defaults to the region specified in the provider block. This base policy is overridden with the policy that you specify in the aws_networkmanager_core_network_policy_attachment resource.
-	// +kubebuilder:validation:Optional
 	CreateBasePolicy *bool `json:"createBasePolicy,omitempty" tf:"create_base_policy,omitempty"`
 
 	// Description of the Core Network.
-	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty" tf:"description,omitempty"`
 
 	// The ID of the global network that a core network will be a part of.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/networkmanager/v1beta1.GlobalNetwork
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	GlobalNetworkID *string `json:"globalNetworkId,omitempty" tf:"global_network_id,omitempty"`
 
 	// Reference to a GlobalNetwork in networkmanager to populate globalNetworkId.
@@ -84,17 +111,17 @@ type CoreNetworkParameters struct {
 	GlobalNetworkIDSelector *v1.Selector `json:"globalNetworkIdSelector,omitempty" tf:"-"`
 
 	// Policy document for creating a core network. Note that updating this argument will result in the new policy document version being set as the LATEST and LIVE policy document. Refer to the Core network policies documentation for more information. Conflicts with create_base_policy.
-	// +kubebuilder:validation:Optional
 	PolicyDocument *string `json:"policyDocument,omitempty" tf:"policy_document,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type EdgesInitParameters struct {
 }
 
 type EdgesObservation struct {
@@ -110,6 +137,9 @@ type EdgesObservation struct {
 }
 
 type EdgesParameters struct {
+}
+
+type SegmentsInitParameters struct {
 }
 
 type SegmentsObservation struct {
@@ -131,6 +161,10 @@ type SegmentsParameters struct {
 type CoreNetworkSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     CoreNetworkParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider CoreNetworkInitParameters `json:"initProvider,omitempty"`
 }
 
 // CoreNetworkStatus defines the observed state of CoreNetwork.

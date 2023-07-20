@@ -13,6 +13,16 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type SerialConsoleAccessInitParameters struct {
+
+	// Whether or not serial console access is enabled. Valid values are true or false. Defaults to true.
+	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+}
+
 type SerialConsoleAccessObservation struct {
 
 	// Whether or not serial console access is enabled. Valid values are true or false. Defaults to true.
@@ -24,19 +34,21 @@ type SerialConsoleAccessObservation struct {
 type SerialConsoleAccessParameters struct {
 
 	// Whether or not serial console access is enabled. Valid values are true or false. Defaults to true.
-	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty" tf:"enabled,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 }
 
 // SerialConsoleAccessSpec defines the desired state of SerialConsoleAccess
 type SerialConsoleAccessSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     SerialConsoleAccessParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider SerialConsoleAccessInitParameters `json:"initProvider,omitempty"`
 }
 
 // SerialConsoleAccessStatus defines the observed state of SerialConsoleAccess.

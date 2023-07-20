@@ -13,6 +13,9 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type DomainValidationRecordsInitParameters struct {
+}
+
 type DomainValidationRecordsObservation struct {
 
 	// The domain name (e.g., example.com) for your SSL/TLS certificate.
@@ -27,6 +30,28 @@ type DomainValidationRecordsObservation struct {
 }
 
 type DomainValidationRecordsParameters struct {
+}
+
+type LBCertificateInitParameters struct {
+
+	// The domain name (e.g., example.com) for your SSL/TLS certificate.
+	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
+
+	// The load balancer name where you want to create the SSL/TLS certificate.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.LB
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	LBName *string `json:"lbName,omitempty" tf:"lb_name,omitempty"`
+
+	LBNameRef *v1.Reference `json:"lbNameRef,omitempty" tf:"-"`
+
+	LBNameSelector *v1.Selector `json:"lbNameSelector,omitempty" tf:"-"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Set of domains that should be SANs in the issued certificate. domain_name attribute is automatically added as a Subject Alternative Name.
+	SubjectAlternativeNames []*string `json:"subjectAlternativeNames,omitempty" tf:"subject_alternative_names,omitempty"`
 }
 
 type LBCertificateObservation struct {
@@ -57,13 +82,11 @@ type LBCertificateObservation struct {
 type LBCertificateParameters struct {
 
 	// The domain name (e.g., example.com) for your SSL/TLS certificate.
-	// +kubebuilder:validation:Optional
 	DomainName *string `json:"domainName,omitempty" tf:"domain_name,omitempty"`
 
 	// The load balancer name where you want to create the SSL/TLS certificate.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/lightsail/v1beta1.LB
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	LBName *string `json:"lbName,omitempty" tf:"lb_name,omitempty"`
 
 	// Reference to a LB in lightsail to populate lbName.
@@ -76,11 +99,9 @@ type LBCertificateParameters struct {
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Set of domains that should be SANs in the issued certificate. domain_name attribute is automatically added as a Subject Alternative Name.
-	// +kubebuilder:validation:Optional
 	SubjectAlternativeNames []*string `json:"subjectAlternativeNames,omitempty" tf:"subject_alternative_names,omitempty"`
 }
 
@@ -88,6 +109,10 @@ type LBCertificateParameters struct {
 type LBCertificateSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     LBCertificateParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider LBCertificateInitParameters `json:"initProvider,omitempty"`
 }
 
 // LBCertificateStatus defines the observed state of LBCertificate.

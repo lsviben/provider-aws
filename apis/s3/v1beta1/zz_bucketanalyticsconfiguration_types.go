@@ -13,6 +13,15 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type BucketAnalyticsConfigurationFilterInitParameters struct {
+
+	// Object prefix for filtering.
+	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type BucketAnalyticsConfigurationFilterObservation struct {
 
 	// Object prefix for filtering.
@@ -25,12 +34,35 @@ type BucketAnalyticsConfigurationFilterObservation struct {
 type BucketAnalyticsConfigurationFilterParameters struct {
 
 	// Object prefix for filtering.
-	// +kubebuilder:validation:Optional
 	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
+type BucketAnalyticsConfigurationInitParameters struct {
+
+	// Name of the bucket this analytics configuration is associated with.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
+	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
+
+	BucketRef *v1.Reference `json:"bucketRef,omitempty" tf:"-"`
+
+	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
+
+	// Object filtering that accepts a prefix, tags, or a logical AND of prefix and tags (documented below).
+	Filter []BucketAnalyticsConfigurationFilterInitParameters `json:"filter,omitempty" tf:"filter,omitempty"`
+
+	// Unique identifier of the analytics configuration for the bucket.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Configuration for the analytics data export (documented below).
+	StorageClassAnalysis []StorageClassAnalysisInitParameters `json:"storageClassAnalysis,omitempty" tf:"storage_class_analysis,omitempty"`
 }
 
 type BucketAnalyticsConfigurationObservation struct {
@@ -55,7 +87,6 @@ type BucketAnalyticsConfigurationParameters struct {
 	// Name of the bucket this analytics configuration is associated with.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractResourceID()
-	// +kubebuilder:validation:Optional
 	Bucket *string `json:"bucket,omitempty" tf:"bucket,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucket.
@@ -67,21 +98,23 @@ type BucketAnalyticsConfigurationParameters struct {
 	BucketSelector *v1.Selector `json:"bucketSelector,omitempty" tf:"-"`
 
 	// Object filtering that accepts a prefix, tags, or a logical AND of prefix and tags (documented below).
-	// +kubebuilder:validation:Optional
 	Filter []BucketAnalyticsConfigurationFilterParameters `json:"filter,omitempty" tf:"filter,omitempty"`
 
 	// Unique identifier of the analytics configuration for the bucket.
-	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Configuration for the analytics data export (documented below).
-	// +kubebuilder:validation:Optional
 	StorageClassAnalysis []StorageClassAnalysisParameters `json:"storageClassAnalysis,omitempty" tf:"storage_class_analysis,omitempty"`
+}
+
+type DataExportDestinationInitParameters struct {
+
+	// Analytics data export currently only supports an S3 bucket destination (documented below).
+	S3BucketDestination []S3BucketDestinationInitParameters `json:"s3BucketDestination,omitempty" tf:"s3_bucket_destination,omitempty"`
 }
 
 type DataExportDestinationObservation struct {
@@ -93,8 +126,16 @@ type DataExportDestinationObservation struct {
 type DataExportDestinationParameters struct {
 
 	// Analytics data export currently only supports an S3 bucket destination (documented below).
-	// +kubebuilder:validation:Required
-	S3BucketDestination []S3BucketDestinationParameters `json:"s3BucketDestination" tf:"s3_bucket_destination,omitempty"`
+	S3BucketDestination []S3BucketDestinationParameters `json:"s3BucketDestination,omitempty" tf:"s3_bucket_destination,omitempty"`
+}
+
+type DataExportInitParameters struct {
+
+	// Specifies the destination for the exported analytics data (documented below).
+	Destination []DataExportDestinationInitParameters `json:"destination,omitempty" tf:"destination,omitempty"`
+
+	// Schema version of exported analytics data. Allowed values: V_1. Default value: V_1.
+	OutputSchemaVersion *string `json:"outputSchemaVersion,omitempty" tf:"output_schema_version,omitempty"`
 }
 
 type DataExportObservation struct {
@@ -109,12 +150,31 @@ type DataExportObservation struct {
 type DataExportParameters struct {
 
 	// Specifies the destination for the exported analytics data (documented below).
-	// +kubebuilder:validation:Required
-	Destination []DataExportDestinationParameters `json:"destination" tf:"destination,omitempty"`
+	Destination []DataExportDestinationParameters `json:"destination,omitempty" tf:"destination,omitempty"`
 
 	// Schema version of exported analytics data. Allowed values: V_1. Default value: V_1.
-	// +kubebuilder:validation:Optional
 	OutputSchemaVersion *string `json:"outputSchemaVersion,omitempty" tf:"output_schema_version,omitempty"`
+}
+
+type S3BucketDestinationInitParameters struct {
+
+	// Account ID that owns the destination bucket.
+	BucketAccountID *string `json:"bucketAccountId,omitempty" tf:"bucket_account_id,omitempty"`
+
+	// ARN of the destination bucket.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
+	BucketArn *string `json:"bucketArn,omitempty" tf:"bucket_arn,omitempty"`
+
+	BucketArnRef *v1.Reference `json:"bucketArnRef,omitempty" tf:"-"`
+
+	BucketArnSelector *v1.Selector `json:"bucketArnSelector,omitempty" tf:"-"`
+
+	// Output format of exported analytics data. Allowed values: CSV. Default value: CSV.
+	Format *string `json:"format,omitempty" tf:"format,omitempty"`
+
+	// Object prefix for filtering.
+	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
 }
 
 type S3BucketDestinationObservation struct {
@@ -135,13 +195,11 @@ type S3BucketDestinationObservation struct {
 type S3BucketDestinationParameters struct {
 
 	// Account ID that owns the destination bucket.
-	// +kubebuilder:validation:Optional
 	BucketAccountID *string `json:"bucketAccountId,omitempty" tf:"bucket_account_id,omitempty"`
 
 	// ARN of the destination bucket.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("arn",true)
-	// +kubebuilder:validation:Optional
 	BucketArn *string `json:"bucketArn,omitempty" tf:"bucket_arn,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucketArn.
@@ -153,12 +211,16 @@ type S3BucketDestinationParameters struct {
 	BucketArnSelector *v1.Selector `json:"bucketArnSelector,omitempty" tf:"-"`
 
 	// Output format of exported analytics data. Allowed values: CSV. Default value: CSV.
-	// +kubebuilder:validation:Optional
 	Format *string `json:"format,omitempty" tf:"format,omitempty"`
 
 	// Object prefix for filtering.
-	// +kubebuilder:validation:Optional
 	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
+}
+
+type StorageClassAnalysisInitParameters struct {
+
+	// Data export configuration (documented below).
+	DataExport []DataExportInitParameters `json:"dataExport,omitempty" tf:"data_export,omitempty"`
 }
 
 type StorageClassAnalysisObservation struct {
@@ -170,14 +232,17 @@ type StorageClassAnalysisObservation struct {
 type StorageClassAnalysisParameters struct {
 
 	// Data export configuration (documented below).
-	// +kubebuilder:validation:Required
-	DataExport []DataExportParameters `json:"dataExport" tf:"data_export,omitempty"`
+	DataExport []DataExportParameters `json:"dataExport,omitempty" tf:"data_export,omitempty"`
 }
 
 // BucketAnalyticsConfigurationSpec defines the desired state of BucketAnalyticsConfiguration
 type BucketAnalyticsConfigurationSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     BucketAnalyticsConfigurationParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider BucketAnalyticsConfigurationInitParameters `json:"initProvider,omitempty"`
 }
 
 // BucketAnalyticsConfigurationStatus defines the observed state of BucketAnalyticsConfiguration.
@@ -198,7 +263,7 @@ type BucketAnalyticsConfigurationStatus struct {
 type BucketAnalyticsConfiguration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name)",message="name is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || has(self.initProvider.name)",message="%!s(MISSING) is a required parameter"
 	Spec   BucketAnalyticsConfigurationSpec   `json:"spec"`
 	Status BucketAnalyticsConfigurationStatus `json:"status,omitempty"`
 }

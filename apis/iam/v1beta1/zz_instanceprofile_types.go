@@ -13,6 +13,23 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type InstanceProfileInitParameters struct {
+
+	// Path to the instance profile. For more information about paths, see IAM Identifiers in the IAM User Guide. Can be a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. Can include any ASCII character from the ! (\u0021) through the DEL character (\u007F), including most punctuation characters, digits, and upper and lowercase letters.
+	Path *string `json:"path,omitempty" tf:"path,omitempty"`
+
+	// Name of the role to add to the profile.
+	// +crossplane:generate:reference:type=Role
+	Role *string `json:"role,omitempty" tf:"role,omitempty"`
+
+	RoleRef *v1.Reference `json:"roleRef,omitempty" tf:"-"`
+
+	RoleSelector *v1.Selector `json:"roleSelector,omitempty" tf:"-"`
+
+	// Key-value map of resource tags.
+	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
+}
+
 type InstanceProfileObservation struct {
 
 	// ARN assigned by AWS to the instance profile.
@@ -43,12 +60,10 @@ type InstanceProfileObservation struct {
 type InstanceProfileParameters struct {
 
 	// Path to the instance profile. For more information about paths, see IAM Identifiers in the IAM User Guide. Can be a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. Can include any ASCII character from the ! (\u0021) through the DEL character (\u007F), including most punctuation characters, digits, and upper and lowercase letters.
-	// +kubebuilder:validation:Optional
 	Path *string `json:"path,omitempty" tf:"path,omitempty"`
 
 	// Name of the role to add to the profile.
 	// +crossplane:generate:reference:type=Role
-	// +kubebuilder:validation:Optional
 	Role *string `json:"role,omitempty" tf:"role,omitempty"`
 
 	// Reference to a Role to populate role.
@@ -60,7 +75,6 @@ type InstanceProfileParameters struct {
 	RoleSelector *v1.Selector `json:"roleSelector,omitempty" tf:"-"`
 
 	// Key-value map of resource tags.
-	// +kubebuilder:validation:Optional
 	Tags map[string]*string `json:"tags,omitempty" tf:"tags,omitempty"`
 }
 
@@ -68,6 +82,10 @@ type InstanceProfileParameters struct {
 type InstanceProfileSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     InstanceProfileParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider InstanceProfileInitParameters `json:"initProvider,omitempty"`
 }
 
 // InstanceProfileStatus defines the observed state of InstanceProfile.

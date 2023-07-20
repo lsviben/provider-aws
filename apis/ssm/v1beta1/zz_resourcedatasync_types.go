@@ -13,6 +13,17 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
+type ResourceDataSyncInitParameters struct {
+
+	// Region with the bucket targeted by the Resource Data Sync.
+	// Region is the region you'd like your resource to be created in.
+	// +upjet:crd:field:TFTag=-
+	Region *string `json:"region,omitempty" tf:"-"`
+
+	// Amazon S3 configuration details for the sync.
+	S3Destination []S3DestinationInitParameters `json:"s3Destination,omitempty" tf:"s3_destination,omitempty"`
+}
+
 type ResourceDataSyncObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
@@ -25,12 +36,39 @@ type ResourceDataSyncParameters struct {
 	// Region with the bucket targeted by the Resource Data Sync.
 	// Region is the region you'd like your resource to be created in.
 	// +upjet:crd:field:TFTag=-
-	// +kubebuilder:validation:Required
-	Region *string `json:"region" tf:"-"`
+	Region *string `json:"region,omitempty" tf:"-"`
 
 	// Amazon S3 configuration details for the sync.
-	// +kubebuilder:validation:Optional
 	S3Destination []S3DestinationParameters `json:"s3Destination,omitempty" tf:"s3_destination,omitempty"`
+}
+
+type S3DestinationInitParameters struct {
+
+	// Name of S3 bucket where the aggregated data is stored.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	BucketName *string `json:"bucketName,omitempty" tf:"bucket_name,omitempty"`
+
+	BucketNameRef *v1.Reference `json:"bucketNameRef,omitempty" tf:"-"`
+
+	BucketNameSelector *v1.Selector `json:"bucketNameSelector,omitempty" tf:"-"`
+
+	// ARN of an encryption key for a destination in Amazon S3.
+	KMSKeyArn *string `json:"kmsKeyArn,omitempty" tf:"kms_key_arn,omitempty"`
+
+	// Prefix for the bucket.
+	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
+
+	// Region with the bucket targeted by the Resource Data Sync.
+	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
+	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("region",false)
+	Region *string `json:"region,omitempty" tf:"region,omitempty"`
+
+	RegionRef *v1.Reference `json:"regionRef,omitempty" tf:"-"`
+
+	RegionSelector *v1.Selector `json:"regionSelector,omitempty" tf:"-"`
+
+	// A supported sync format. Only JsonSerDe is currently supported. Defaults to JsonSerDe.
+	SyncFormat *string `json:"syncFormat,omitempty" tf:"sync_format,omitempty"`
 }
 
 type S3DestinationObservation struct {
@@ -55,7 +93,6 @@ type S3DestinationParameters struct {
 
 	// Name of S3 bucket where the aggregated data is stored.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
-	// +kubebuilder:validation:Optional
 	BucketName *string `json:"bucketName,omitempty" tf:"bucket_name,omitempty"`
 
 	// Reference to a Bucket in s3 to populate bucketName.
@@ -67,17 +104,14 @@ type S3DestinationParameters struct {
 	BucketNameSelector *v1.Selector `json:"bucketNameSelector,omitempty" tf:"-"`
 
 	// ARN of an encryption key for a destination in Amazon S3.
-	// +kubebuilder:validation:Optional
 	KMSKeyArn *string `json:"kmsKeyArn,omitempty" tf:"kms_key_arn,omitempty"`
 
 	// Prefix for the bucket.
-	// +kubebuilder:validation:Optional
 	Prefix *string `json:"prefix,omitempty" tf:"prefix,omitempty"`
 
 	// Region with the bucket targeted by the Resource Data Sync.
 	// +crossplane:generate:reference:type=github.com/upbound/provider-aws/apis/s3/v1beta1.Bucket
 	// +crossplane:generate:reference:extractor=github.com/upbound/upjet/pkg/resource.ExtractParamPath("region",false)
-	// +kubebuilder:validation:Optional
 	Region *string `json:"region,omitempty" tf:"region,omitempty"`
 
 	// Reference to a Bucket in s3 to populate region.
@@ -89,7 +123,6 @@ type S3DestinationParameters struct {
 	RegionSelector *v1.Selector `json:"regionSelector,omitempty" tf:"-"`
 
 	// A supported sync format. Only JsonSerDe is currently supported. Defaults to JsonSerDe.
-	// +kubebuilder:validation:Optional
 	SyncFormat *string `json:"syncFormat,omitempty" tf:"sync_format,omitempty"`
 }
 
@@ -97,6 +130,10 @@ type S3DestinationParameters struct {
 type ResourceDataSyncSpec struct {
 	v1.ResourceSpec `json:",inline"`
 	ForProvider     ResourceDataSyncParameters `json:"forProvider"`
+	// THIS IS AN ALPHA FIELD. Do not use it in production. It is not honored
+	// unless the relevant Crossplane feature flag is enabled, and may be
+	// changed or removed without notice.
+	InitProvider ResourceDataSyncInitParameters `json:"initProvider,omitempty"`
 }
 
 // ResourceDataSyncStatus defines the observed state of ResourceDataSync.
@@ -117,7 +154,7 @@ type ResourceDataSyncStatus struct {
 type ResourceDataSync struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.s3Destination)",message="s3Destination is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.s3Destination) || has(self.initProvider.s3Destination)",message="%!s(MISSING) is a required parameter"
 	Spec   ResourceDataSyncSpec   `json:"spec"`
 	Status ResourceDataSyncStatus `json:"status,omitempty"`
 }
